@@ -6,22 +6,22 @@ namespace Bird3DCursor
 {
     public class BirdManager : MonoBehaviour
     {
-        public static event Action<BirdCursor> OnBirdCreated;
-        public static event Action<BirdCursor> OnBirdDestroyed;
-        public static List<BirdCursor> birds = new List<BirdCursor>();
+        public static event Action<BirdProvider> OnBirdCreated;
+        public static event Action<BirdProvider> OnBirdDestroyed;
+        public static List<BirdProvider> birds = new List<BirdProvider>();
 
         // Define custom trigger events that include the Bird
-        public static event Action<BirdCursor, Collider> BirdTriggerEnter;
-        public static event Action<BirdCursor, Collider> BirdTriggerExit;
+        public static event Action<BirdProvider, Collider> BirdTriggerEnter;
+        public static event Action<BirdProvider, Collider> BirdTriggerExit;
 
-        public static void RegisterBird(BirdCursor bird)
+        public static void RegisterBird(BirdProvider bird)
         {
             OnBirdCreated?.Invoke(bird);
             birds.Add(bird);
         }
 
         // Create Bird detector for a previously registered Bird
-        public static void CreateBirdDetector(BirdCursor bird)
+        public static void CreateBirdDetector(BirdProvider bird)
         {
             // error if this bird is not already registered
             if (!birds.Contains(bird))
@@ -55,7 +55,7 @@ namespace Bird3DCursor
             triggerHandler.Initialize(bird);  // Pass the Bird to the handler
         }
 
-        public static void DestroyBirdDetector(BirdCursor bird)
+        public static void DestroyBirdDetector(BirdProvider bird)
         {
             // do nothing if there is no detector for this bird
             GameObject detector = GameObject.Find(DetectorName(bird));
@@ -65,14 +65,14 @@ namespace Bird3DCursor
             {
                 if (ReferenceEquals(BirdTriggerEnter.GetInvocationList()[i].Target, bird))
                 {
-                    BirdTriggerEnter -= (Action<BirdCursor, Collider>)BirdTriggerEnter.GetInvocationList()[i];
+                    BirdTriggerEnter -= (Action<BirdProvider, Collider>)BirdTriggerEnter.GetInvocationList()[i];
                 }
             }
             for (int i = BirdTriggerExit.GetInvocationList().Length - 1; i >= 0; i--)
             {
                 if (ReferenceEquals(BirdTriggerExit.GetInvocationList()[i].Target, bird))
                 {
-                    BirdTriggerExit -= (Action<BirdCursor, Collider>)BirdTriggerExit.GetInvocationList()[i];
+                    BirdTriggerExit -= (Action<BirdProvider, Collider>)BirdTriggerExit.GetInvocationList()[i];
                 }
             }
             Destroy(detector);
@@ -81,7 +81,7 @@ namespace Bird3DCursor
         // call this method after removing references to Birds that have been set up with bird detectors to destroy the detectors if no references remain in any methods registered with the unity actions BirdTriggerEnter or BirdTriggerExit
         public static void DestroyUnusedBirdDetectors()
         {
-            foreach (BirdCursor bird in birds)
+            foreach (BirdProvider bird in birds)
             {
                 if (bird == null) continue;
                 //filter for this bird to see if any are left
@@ -93,12 +93,12 @@ namespace Bird3DCursor
             }
         }
 
-        private static string DetectorName(BirdCursor bird)
+        private static string DetectorName(BirdProvider bird)
         {
             return $"BirdDetector_{bird.GetAssociatedUser()}_{bird.chiralityStr}";
         }
 
-        public static void UnregisterBird(BirdCursor bird)
+        public static void UnregisterBird(BirdProvider bird)
         {
             DestroyBirdDetector(bird);
             OnBirdDestroyed?.Invoke(bird);
@@ -108,13 +108,13 @@ namespace Bird3DCursor
             }
         }
 
-        public static List<BirdCursor> GetAllBirds()
+        public static List<BirdProvider> GetAllBirds()
         {
             return birds.FindAll(bird => bird != null);
         }
 
         // get the birds associated with a particular user. Likely returns two Birds, but may only return one if only one Bird script is active
-        public static List<BirdCursor> GetBirdsForUser(string userId)
+        public static List<BirdProvider> GetBirdsForUser(string userId)
         {
             return birds.FindAll(bird => bird != null && bird.GetAssociatedUser() == userId);
         }
@@ -122,9 +122,9 @@ namespace Bird3DCursor
         // Class to handle Unity's trigger events and relay them to BirdManager's custom events
         private class BirdTriggerHandler : MonoBehaviour
         {
-            private BirdCursor associatedBird;
+            private BirdProvider associatedBird;
 
-            public void Initialize(BirdCursor bird)
+            public void Initialize(BirdProvider bird)
             {
                 associatedBird = bird;
             }

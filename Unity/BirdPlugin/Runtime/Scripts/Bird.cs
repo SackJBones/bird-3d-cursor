@@ -25,14 +25,14 @@ using UnityEngine;
 namespace Bird3DCursor {
     public class Bird {
         public Vector3 birdPosition;
-        public float range;
-        public bool selected;
-        public bool down;
-        public bool up;
-        public Ray ray;
-        public float twist;
-        public bool twistReverse;
-        public Vector3 prevBirdPosition;
+        private float range;
+        private bool selected;
+        private bool down;
+        private bool up;
+        private Ray ray;
+        private float twist;
+        private bool twistReverse;
+        private Vector3 prevBirdPosition;
         private Hand hand;
         private int numFitPoints;
         private List<Vector3> fitPoints;
@@ -202,6 +202,38 @@ namespace Bird3DCursor {
             }
         } // end update
 
+        public Vector3 GetPosition() {
+            return birdPosition;
+        }
+
+        public Vector3 GetPrevPosition() {
+            return prevBirdPosition;
+        }
+
+        public float GetRange() {
+            return range;
+        }
+
+        public bool GetClickDown() {
+            return down;
+        }
+
+        public bool GetClickUp() {
+            return up;
+        }
+
+        public bool GetClick() {
+            return selected;
+        }
+
+        public Ray GetRay() {
+            return ray;
+        }
+
+        public float GetTwist() {
+            return twist;
+        }
+
         public List<Vector3> GetSphereFitPoints() {
             return fitPoints;
         }
@@ -222,8 +254,8 @@ namespace Bird3DCursor {
             return handRoot;
         }
 
-        public Vector3 Velocity() {
-            return birdPosition - prevBirdPosition;
+        public Vector3 GetVelocity() {
+            return (birdPosition - prevBirdPosition)/Time.deltaTime;
         }
 
         // THIS IS THE BIRD RANGE FUNCTION!

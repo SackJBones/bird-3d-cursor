@@ -5,10 +5,10 @@ using UnityEngine;
 namespace Bird3DCursor
 {
 
-    public class BirdCursor : MonoBehaviour
+    public class BirdProvider : MonoBehaviour
     {
         public BirdHandAPI handTrackingAPI;
-        public Bird bird;
+        private Bird bird;
         public Hand.Chirality1 chirality;
         public GameObject targetUnitSphere; // visible sphere-- good for debugging
         public GameObject debugMarker;
@@ -47,19 +47,19 @@ namespace Bird3DCursor
         void Update()
         {
             bird.Update();
-            birdMarker.transform.position = bird.birdPosition;
+            birdMarker.transform.position = bird.GetPosition();
             List<Vector3> sphereFitPoints = bird.GetSphereFitPoints();
             for (int i = 0; i < sphereFitPoints.Count; i++)
             {
                 debugMarkers[i].transform.position = sphereFitPoints[i];
                 debugMarkers[i].name = $"{chiralityStr}DebugMarker{i}";
             }
-            if (bird.down)
+            if (bird.GetClickDown())
             {
                 Material mat = birdSelectedMaterial; // will break if this material is null
                 birdMarker.GetComponent<Renderer>().material = mat;
             }
-            if (bird.up)
+            if (bird.GetClickUp())
             {
                 Material mat = birdMaterial; // will break if this material is null
                 birdMarker.GetComponent<Renderer>().material = mat;
@@ -70,8 +70,8 @@ namespace Bird3DCursor
             float sphereDiam = sphereFitRadius * 2;
             targetUnitSphere.transform.localScale = new Vector3(sphereDiam, sphereDiam, sphereDiam);
             Vector3 handRoot = bird.GetHandRoot();
-            Ray birdRay = bird.ray;
-            rayWasHit = Physics.Raycast(birdRay, out birdRayHit, bird.range);
+            Ray birdRay = bird.GetRay();
+            rayWasHit = Physics.Raycast(birdRay, out birdRayHit, bird.GetRange());
             if (showingDebug && rayWasHit)
             {
                 hitMarker.SetActive(true);
@@ -86,29 +86,17 @@ namespace Bird3DCursor
             rotation = transform.rotation * Quaternion.AngleAxis(90, Vector3.up) * Quaternion.AngleAxis(90, Vector3.forward) * Quaternion.AngleAxis(-90, Vector3.right) * Quaternion.AngleAxis(90, Vector3.up) * Quaternion.AngleAxis(30, Vector3.right);
         }
 
-        // Commonly accessed bird properties
-        public Vector3 CursorPosition()
-        {
-            return bird.birdPosition;
-        }
-
-        public float Range()
-        {
-            return bird.range;
-        }
-        // end commonly accessed bird properties
-
         public bool BirdHit(Collider coll, out RaycastHit hit)
         {
-            Vector3 vel = bird.Velocity();
-            Ray ray = new Ray(bird.prevBirdPosition, vel.normalized);
+            Vector3 vel = bird.GetVelocity();
+            Ray ray = new Ray(bird.GetPrevPosition(), vel.normalized);
             return coll.Raycast(ray, out hit, vel.magnitude);
         }
 
         public bool WentThrough(Collider coll, Vector3? direction = null)
         {
             float Dot(Vector3 a, Vector3 b) => a.x * b.x + a.y * b.y + a.z * b.z;
-            if (direction != null && Dot(bird.Velocity().normalized, direction.Value.normalized) < .7071f)
+            if (direction != null && Dot(bird.GetVelocity().normalized, direction.Value.normalized) < .7071f)
             { // root 1/2, i.e. must be less than 45 degrees from direction
                 return false;
             }
@@ -134,9 +122,63 @@ namespace Bird3DCursor
             associatedUser = user;
         }
 
+        public RaycastHit GetRayHit() {
+            return birdRayHit;
+        }
+
         void OnDestroy()
         {
             BirdManager.UnregisterBird(this);
+        }
+
+        public float GetRange()
+        {
+            return bird.GetRange();
+        }
+
+        public Vector3 GetPosition()
+        {
+            return bird.GetPosition();
+        }
+
+        public Vector3 GetVelocity()
+        {
+            return bird.GetVelocity();
+        }
+
+        public Vector3 GetPrevPosition()
+        {
+            return bird.GetPrevPosition();
+        }
+
+        public Ray GetRay()
+        {
+            return bird.GetRay();
+        }
+
+        public bool GetClick()
+        {
+            return bird.GetClick();
+        }
+
+        public bool GetClickDown()
+        {
+            return bird.GetClickDown();
+        }
+
+        public bool GetClickUp()
+        {
+            return bird.GetClickUp();
+        }
+
+        public float GetTwist()
+        {
+            return bird.GetTwist();
+        }
+
+        public Bird GetBird()
+        {
+            return bird; // may be needed for more detailed or uncommon access to bird properties like GetHandRoot(). generally avoid using this and prefer getters.
         }
     }
 }

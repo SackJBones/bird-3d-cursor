@@ -24,7 +24,7 @@ namespace Bird3DCursor {
 
     public class BirdInteractable : MonoBehaviour
     {
-        public BirdCursor birdCursor;
+        public BirdProvider bird;
         KalmanFilterVector3 filter;
         bool selectingMe;
 
@@ -165,20 +165,19 @@ namespace Bird3DCursor {
             //this bit is ugly and was not written for human eyes
             //it implements the set of behaviors from the first 100 lines of code
             bool alreadySelectingMe = selectingMe; // remember the state of selectingMe to detect selection start and stop
-            Bird bird = birdCursor.bird;
-            selectingMe = (motionType != MotionType.Offset || bird.range > offset)
-                && (( selectBehind && birdCursor.birdRayHit.collider != null && birdCursor.birdRayHit.collider == thisCollider)
-                    || (thisCollider != null && thisCollider.bounds.Contains(bird.birdPosition))
-                    || (thisCollider == null && thisRenderer != null && thisRenderer.bounds.Contains(bird.birdPosition))
+            selectingMe = (motionType != MotionType.Offset || bird.GetRange() > offset)
+                && (( selectBehind && bird.GetRayHit().collider != null && bird.GetRayHit().collider == thisCollider)
+                    || (thisCollider != null && thisCollider.bounds.Contains(bird.GetPosition()))
+                    || (thisCollider == null && thisRenderer != null && thisRenderer.bounds.Contains(bird.GetPosition()))
                     );
             if (activateType == ActivateType.Drag)
             {
-                if (bird.down && selectingMe)
+                if (bird.GetClickDown() && selectingMe)
                 {
                     following = true;
                     OnSelect.Invoke();
                 }
-                if (!bird.selected)
+                if (!bird.GetClick())
                 {
                     following = false;
                     OnDeselect.Invoke();
@@ -188,7 +187,7 @@ namespace Bird3DCursor {
             {
                 if (following)
                 {
-                    if (bird.down)
+                    if (bird.GetClickDown())
                     {
                         following = false;
                         OnDeselect.Invoke();
@@ -196,7 +195,7 @@ namespace Bird3DCursor {
                 }
                 else
                 {
-                    if (bird.down && selectingMe)
+                    if (bird.GetClickDown() && selectingMe)
                     {
                         OnSelect.Invoke();
                         following = true;
@@ -222,35 +221,35 @@ namespace Bird3DCursor {
             Vector3 targetPos;
             if (motionType == MotionType.Seek)
             {
-                targetPos = bird.birdPosition;
+                targetPos = bird.GetPosition();
             }
             else if (motionType == MotionType.Offset)
             {
-                targetPos = birdCursor.bird.ray.direction * offset + birdCursor.bird.ray.origin;
+                targetPos = bird.GetRay().direction * offset + bird.GetRay().origin;
             }
             else if (motionType == MotionType.SnapToCollider)
             {
                 targetPos = previousTargetPos; // default if there is no ray hit is to stay put
-                if (birdCursor.rayWasHit)
+                if (bird.rayWasHit)
                 {
                     if (snapColliders.Count == 0) // no specific colliders provided: snap to all colliders
                     {
-                        targetPos = birdCursor.birdRayHit.point;
+                        targetPos = bird.GetRayHit().point;
                     }
                     else
                     {
                         foreach (Collider collider in snapColliders)
                         {
-                            if (collider == birdCursor.birdRayHit.collider)
+                            if (collider == bird.GetRayHit().collider)
                             {
-                                targetPos = birdCursor.birdRayHit.point;
+                                targetPos = bird.GetRayHit().point;
                                 break;
                             }
                         }
                     }
                 } else
                 {
-                    targetPos = bird.birdPosition;
+                    targetPos = bird.GetPosition();
                 }
             }
             else
@@ -267,18 +266,18 @@ namespace Bird3DCursor {
                 Quaternion sourceRotation;
                 if (orientationSource == OrientationSource.Bird)
                 {
-                    directionVector = birdCursor.bird.ray.origin - bird.birdPosition;
-                    sourceRotation = birdCursor.rotation;
+                    directionVector = bird.GetRay().origin - bird.GetPosition();
+                    sourceRotation = bird.rotation;
                 }
                 else if (orientationSource == OrientationSource.ColliderNormal)
                 {
-                    directionVector = birdCursor.birdRayHit.normal;
-                    sourceRotation = Quaternion.AngleAxis(bird.twist, directionVector) * Quaternion.LookRotation(directionVector);
+                    directionVector = bird.GetRayHit().normal;
+                    sourceRotation = Quaternion.AngleAxis(bird.GetTwist(), directionVector) * Quaternion.LookRotation(directionVector);
                 }
                 else
                 {
-                    directionVector = birdCursor.bird.ray.origin - bird.birdPosition;
-                    sourceRotation = birdCursor.rotation;
+                    directionVector = bird.GetRay().origin - bird.GetPosition();
+                    sourceRotation = bird.rotation;
                 }
 
                 if (orientationMode == OrientationMode.KeepHeading)

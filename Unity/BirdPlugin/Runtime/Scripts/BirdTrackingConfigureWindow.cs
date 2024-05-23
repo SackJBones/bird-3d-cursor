@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
@@ -50,3 +51,4 @@ public class BirdTrackingConfigureWindow : EditorWindow
         PlayerSettings.SetScriptingDefineSymbolsForGroup(targetGroup, string.Join(";", new List<string>(allDefines)));
     }
 }
+#endif
