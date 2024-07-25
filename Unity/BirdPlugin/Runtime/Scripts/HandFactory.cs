@@ -14,7 +14,7 @@ namespace Bird3DCursor{
 
     public static class HandFactory
     {
-        public static Hand CreateHand(Hand.Chirality1 chirality, BirdHandAPI api = default(BirdHandAPI)) 
+        public static Hand CreateHand(Hand.Chirality chirality, BirdHandAPI api = default(BirdHandAPI)) 
         {
             switch (api)
             {
@@ -27,7 +27,7 @@ namespace Bird3DCursor{
                     return new OculusOVRHand(chirality);
                 #endif
                 default:
-                    return null;
+                    throw new System.Exception("You must set the BirdHandAPI (Tools > Bird3DCursor > Configure Hand Tracking).");
             }
         }
     }

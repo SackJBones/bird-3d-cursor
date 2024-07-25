@@ -47,7 +47,7 @@ namespace Bird3DCursor {
         private float[] aOnes;
         private float[] aIntermediates;
         private KalmanFilterVector3 filter;
-        private Hand.Chirality1 chirality;
+        private Hand.Chirality chirality;
 
         public Bird(Hand hand) {
             this.hand = hand;
@@ -132,7 +132,7 @@ namespace Bird3DCursor {
             // };
             // end getting position of bones
 
-            string chiralityStr = chirality == Hand.Chirality1.Left ? "Left" : "Right";
+            string chiralityStr = chirality == Hand.Chirality.Left ? "Left" : "Right";
             // string chiralityStr = chirality == Chirality.Left ? "Left" : "Right";
 
             for (int i = 0; i < fitPoints.Count; i++)

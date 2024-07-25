@@ -1,3 +1,4 @@
+#if BIRD_LEAP_ENABLED
 using UnityEngine;
 using Leap.Unity;
 using Leap;
@@ -6,7 +7,7 @@ using LeapFinger = Leap.Finger;
 using LeapChirality = Leap.Unity.Chirality;
 using System.Collections.Generic;
 
-namespace Bird3DCursor {
+namespace Bird3DCursor { 
     /// <summary>
     ///  Represents a hand for use with the Bird 3D cursor using the Ultraleap API.
     /// </summary>
@@ -18,9 +19,9 @@ namespace Bird3DCursor {
         /// Initializes a new instance of the Hand class with the specified chirality.
         /// </summary>
         /// <param name="chirality">The chirality of the hand (Chirality.Left or Chirality.Right).</param>
-        public UltraLeapHand(Hand.Chirality1 chirality) : base(chirality) 
+        public UltraLeapHand(Hand.Chirality chirality) : base(chirality) 
         {
-            leapChirality = chirality == Hand.Chirality1.Left ? LeapChirality.Left : LeapChirality.Right;
+            leapChirality = chirality == Hand.Chirality.Left ? LeapChirality.Left : LeapChirality.Right;
         }
 
         /// <summary>
@@ -106,3 +107,4 @@ namespace Bird3DCursor {
         }
     }
 }
+#endif

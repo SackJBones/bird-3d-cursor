@@ -9,7 +9,7 @@ namespace Bird3DCursor
     {
         public BirdHandAPI handTrackingAPI;
         private Bird bird;
-        public Hand.Chirality1 chirality;
+        public Hand.Chirality chirality;
         public GameObject targetUnitSphere; // visible sphere-- good for debugging
         public GameObject debugMarker;
         public GameObject birdMarker;
@@ -23,7 +23,7 @@ namespace Bird3DCursor
         public Quaternion rotation;
         private string associatedUser;
         public static string defaultUser = "DefaultUser";
-        public string chiralityStr;
+        private string chiralityStr;
 
         void Start()
         {
@@ -37,7 +37,7 @@ namespace Bird3DCursor
                 debugMarkers[i] = Instantiate(debugMarker);
             }
             hitMarker = Instantiate(debugMarker);
-            chiralityStr = chirality == Hand.Chirality1.Left ? "Left" : "Right";
+            chiralityStr = chirality == Hand.Chirality.Left ? "Left" : "Right";
             hitMarker.name = $"{chiralityStr}HitMarker";
             debugGeometryVisible(showDebug);
             BirdManager.RegisterBird(this);
@@ -116,6 +116,10 @@ namespace Bird3DCursor
 
         public string GetAssociatedUser() {
             return associatedUser;
+        }
+
+        public string GetChiralityStr() {
+            return chiralityStr;
         }
 
         public void SetAssociatedUser(string user) {

@@ -95,7 +95,7 @@ namespace Bird3DCursor
 
         private static string DetectorName(BirdProvider bird)
         {
-            return $"BirdDetector_{bird.GetAssociatedUser()}_{bird.chiralityStr}";
+            return $"BirdDetector_{bird.GetAssociatedUser()}_{bird.GetChiralityStr()}";
         }
 
         public static void UnregisterBird(BirdProvider bird)

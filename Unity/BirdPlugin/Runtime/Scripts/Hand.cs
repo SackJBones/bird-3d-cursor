@@ -15,17 +15,15 @@ namespace Bird3DCursor {
 
     public abstract class Hand
     {
-        public enum Chirality1
+        public enum Chirality
         {
             Left,
             Right
         }
 
-        
+        protected Chirality chirality;
 
-        protected Chirality1 chirality;
-
-        public Hand(Chirality1 chirality)
+        public Hand(Chirality chirality)
         {
             this.chirality = chirality;
         }
