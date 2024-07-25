@@ -1,3 +1,4 @@
+#if BIRD_OPENXR_ENABLED
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.XR.Hands;
@@ -223,3 +224,4 @@ namespace Bird3DCursor {
         }
     }
 }
+#endif

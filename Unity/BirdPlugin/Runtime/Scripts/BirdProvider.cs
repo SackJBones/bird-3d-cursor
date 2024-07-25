@@ -27,8 +27,8 @@ namespace Bird3DCursor
 
         void Start()
         {
-            Hand ultraLeapHand = HandFactory.CreateHand(chirality, handTrackingAPI);
-            bird = new Bird(ultraLeapHand);
+            Hand apiSpecificHand = HandFactory.CreateHand(chirality, handTrackingAPI);
+            bird = new Bird(apiSpecificHand);
             int numFitPoints = bird.GetNumFitPoints();
             // makes debug markers
             debugMarkers = new GameObject[numFitPoints];

@@ -10,6 +10,9 @@ namespace Bird3DCursor{
     #if BIRD_OCULUS_OVR_ENABLED
         OculusOVR,
     #endif
+    #if BIRD_OPENXR_ENABLED
+        OpenXR,
+    #endif
     }
 
     public static class HandFactory
@@ -25,6 +28,10 @@ namespace Bird3DCursor{
                 #if BIRD_OCULUS_OVR_ENABLED
                 case BirdHandAPI.OculusOVR:
                     return new OculusOVRHand(chirality);
+                #endif
+                #if BIRD_OPENXR_ENABLED
+                case BirdHandAPI.OpenXR:
+                    return new OpenXRHand(chirality);
                 #endif
                 default:
                     throw new System.Exception("You must set the BirdHandAPI (Tools > Bird3DCursor > Configure Hand Tracking).");

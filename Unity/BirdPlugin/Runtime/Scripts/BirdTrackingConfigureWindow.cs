@@ -7,7 +7,7 @@ using UnityEngine;
 
 public class BirdTrackingConfigureWindow : EditorWindow
 {
-    private string[] options = new string[] { "None", "Leap", "Oculus OVR" };
+    private string[] options = new string[] { "None", "Leap", "Oculus OVR", "OpenXR" };
     private int selectedOption = 0;
 
     [MenuItem("Tools/Bird 3D Cursor/Configure Hand Tracking")]
@@ -36,6 +36,7 @@ public class BirdTrackingConfigureWindow : EditorWindow
         // Clear previous settings
         allDefines.Remove("BIRD_LEAP_ENABLED");
         allDefines.Remove("BIRD_OCULUS_OVR_ENABLED");
+        allDefines.Remove("BIRD_OPENXR_ENABLED");
 
         // Set new settings based on selection
         switch (options[selectedOption])
@@ -45,6 +46,9 @@ public class BirdTrackingConfigureWindow : EditorWindow
                 break;
             case "Oculus OVR":
                 allDefines.Add("BIRD_OCULUS_OVR_ENABLED");
+                break;
+            case "OpenXR":
+                allDefines.Add("BIRD_OPENXR_ENABLED");
                 break;
         }
 
