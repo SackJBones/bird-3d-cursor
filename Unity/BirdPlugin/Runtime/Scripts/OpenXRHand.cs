@@ -98,19 +98,19 @@ namespace Bird3DCursor {
             switch (finger)
             {
                 case Finger.Thumb:
-                    jointId = XRHandJointID.ThumbMetacarpal;
+                    jointId = XRHandJointID.ThumbProximal;
                     break;
                 case Finger.Index:
-                    jointId = XRHandJointID.IndexMetacarpal;
+                    jointId = XRHandJointID.IndexProximal;
                     break;
                 case Finger.Middle:
-                    jointId = XRHandJointID.MiddleMetacarpal;
+                    jointId = XRHandJointID.MiddleProximal;
                     break;
                 case Finger.Ring:
-                    jointId = XRHandJointID.RingMetacarpal;
+                    jointId = XRHandJointID.RingProximal;
                     break;
                 case Finger.Pinky:
-                    jointId = XRHandJointID.LittleMetacarpal;
+                    jointId = XRHandJointID.LittleProximal;
                     break;
                 default:
                     return Vector3.zero;
@@ -132,19 +132,19 @@ namespace Bird3DCursor {
             switch (finger)
             {
                 case Finger.Thumb:
-                    jointId = XRHandJointID.ThumbProximal;
+                    jointId = XRHandJointID.ThumbIntermediate;
                     break;
                 case Finger.Index:
-                    jointId = XRHandJointID.IndexProximal;
+                    jointId = XRHandJointID.IndexIntermediate;
                     break;
                 case Finger.Middle:
-                    jointId = XRHandJointID.MiddleProximal;
+                    jointId = XRHandJointID.MiddleIntermediate;
                     break;
                 case Finger.Ring:
-                    jointId = XRHandJointID.RingProximal;
+                    jointId = XRHandJointID.RingIntermediate;
                     break;
                 case Finger.Pinky:
-                    jointId = XRHandJointID.LittleProximal;
+                    jointId = XRHandJointID.LittleIntermediate;
                     break;
                 default:
                     return Vector3.zero;
