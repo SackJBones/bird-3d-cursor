@@ -98,7 +98,7 @@ namespace Bird3DCursor {
             switch (finger)
             {
                 case Finger.Thumb:
-                    jointId = XRHandJointID.ThumbProximal;
+                    jointId = XRHandJointID.ThumbMetacarpal;
                     break;
                 case Finger.Index:
                     jointId = XRHandJointID.IndexProximal;
@@ -132,7 +132,7 @@ namespace Bird3DCursor {
             switch (finger)
             {
                 case Finger.Thumb:
-                    jointId = XRHandJointID.ThumbIntermediate;
+                    jointId = XRHandJointID.ThumbProximal;
                     break;
                 case Finger.Index:
                     jointId = XRHandJointID.IndexIntermediate;
