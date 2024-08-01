@@ -27,6 +27,8 @@ namespace Bird3DCursor
 
         void Start()
         {
+            birdMarker = Instantiate(birdMarker);
+            targetUnitSphere = Instantiate(targetUnitSphere);
             Hand apiSpecificHand = HandFactory.CreateHand(chirality, handTrackingAPI);
             bird = new Bird(apiSpecificHand);
             int numFitPoints = bird.GetNumFitPoints();
