@@ -33,8 +33,8 @@ namespace Bird3DCursor {
 
         // Abstract methods for getting joint positions
         public abstract Vector3 GetBasePosition(Finger finger);
-        public abstract Vector3 GetMiddleProximal(Finger finger);
-        public abstract Vector3 GetMiddleDistal(Finger finger);
+        public abstract Vector3 GetIntermediatePosition(Finger finger);
+        public abstract Vector3 GetDistalPosition(Finger finger);
         public abstract Vector3 GetTipPosition(Finger finger);
 
         // Default implementation using the above specific methods
@@ -43,8 +43,8 @@ namespace Bird3DCursor {
             return new List<Vector3>
             {
                 GetBasePosition(finger),
-                GetMiddleProximal(finger),
-                GetMiddleDistal(finger),
+                GetIntermediatePosition(finger),
+                GetDistalPosition(finger),
                 GetTipPosition(finger)
             };
         }

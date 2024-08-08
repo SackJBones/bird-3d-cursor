@@ -126,7 +126,7 @@ namespace Bird3DCursor {
         /// </summary>
         /// <param name="finger"></param>
         /// <returns>Middle proximal position of the finger (Vector3)</returns>
-        public override Vector3 GetMiddleProximal(Finger finger)
+        public override Vector3 GetIntermediatePosition(Finger finger)
         {
             XRHandJointID jointId;
             switch (finger)
@@ -160,7 +160,7 @@ namespace Bird3DCursor {
         /// </summary>
         /// <param name="finger"></param>
         /// <returns>Middle distal position of the finger (Vector3)</returns>
-        public override Vector3 GetMiddleDistal(Finger finger)
+        public override Vector3 GetDistalPosition(Finger finger)
         {
             XRHandJointID jointId;
             switch (finger)

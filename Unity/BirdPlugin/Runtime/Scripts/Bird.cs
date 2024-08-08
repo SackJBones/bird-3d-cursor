@@ -88,26 +88,26 @@ namespace Bird3DCursor {
             {
                 // leave out thumb base; including it in the sphere fit tends to pin it to the wrist,
                 // making it difficult to expand beyond a certain size
-                hand.GetMiddleProximal(Finger.Thumb),
-                hand.GetMiddleDistal(Finger.Thumb),
+                hand.GetIntermediatePosition(Finger.Thumb),
+                hand.GetDistalPosition(Finger.Thumb),
                 hand.GetTipPosition(Finger.Thumb),
 
                 // leave out index finger joints, but include knuckle
                 indexRoot,
 
                 hand.GetBasePosition(Finger.Middle),
-                hand.GetMiddleProximal(Finger.Middle),
-                hand.GetMiddleDistal(Finger.Middle),
+                hand.GetIntermediatePosition(Finger.Middle),
+                hand.GetDistalPosition(Finger.Middle),
                 hand.GetTipPosition(Finger.Middle),
 
                 hand.GetBasePosition(Finger.Ring),
-                hand.GetMiddleProximal(Finger.Ring),
-                hand.GetMiddleDistal(Finger.Ring),
+                hand.GetIntermediatePosition(Finger.Ring),
+                hand.GetDistalPosition(Finger.Ring),
                 hand.GetTipPosition(Finger.Ring),
 
                 hand.GetBasePosition(Finger.Pinky),
-                hand.GetMiddleProximal(Finger.Pinky),
-                hand.GetMiddleDistal(Finger.Pinky),
+                hand.GetIntermediatePosition(Finger.Pinky),
+                hand.GetDistalPosition(Finger.Pinky),
                 hand.GetTipPosition(Finger.Pinky),
             };
 

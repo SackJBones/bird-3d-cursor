@@ -164,7 +164,7 @@ namespace Bird3DCursor
             }
         }//end get base position
 
-        public override Vector3 GetMiddleProximal(Finger finger)
+        public override Vector3 GetIntermediatePosition(Finger finger)
         {
             switch (finger)
             {
@@ -183,7 +183,7 @@ namespace Bird3DCursor
             }
         }//end get middle proximal
 
-        public override Vector3 GetMiddleDistal(Finger finger)
+        public override Vector3 GetDistalPosition(Finger finger)
         {
             switch (finger)
             {

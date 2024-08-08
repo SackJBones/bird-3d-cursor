@@ -74,22 +74,22 @@ namespace Bird3DCursor {
         }
 
         /// <summary>
-        /// Gets the position of the joint at the proximal end of the middle bone of the specified finger.
+        /// Gets the position of the joint at the proximal end of the intermediate bone of the specified finger.
         /// </summary>
         /// <param name="finger"></param>
         /// <returns>Middle proximal position of the finger (Vector3)</returns>
-        public override Vector3 GetMiddleProximal(Finger finger)
+        public override Vector3 GetIntermediatePosition(Finger finger)
         {
             var leapFinger = GetLeapFinger(finger);
             return leapFinger?.Bone(Bone.BoneType.TYPE_INTERMEDIATE)?.PrevJoint ?? Vector3.zero;
         }
 
         /// <summary>
-        /// Gets the position of the joint at the distal end of the middle bone of the specified finger.
+        /// Gets the position of the joint at the distal end of the intermediate bone of the specified finger.
         /// </summary>
         /// <param name="finger"></param>
         /// <returns>Middle distal position of the finger (Vector3)</returns>
-        public override Vector3 GetMiddleDistal(Finger finger)
+        public override Vector3 GetDistalPosition(Finger finger)
         {
             var leapFinger = GetLeapFinger(finger);
             return leapFinger?.Bone(Bone.BoneType.TYPE_DISTAL)?.PrevJoint ?? Vector3.zero;
