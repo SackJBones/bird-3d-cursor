@@ -2,9 +2,6 @@
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.XR.Hands;
-using UnityEditor.Experimental.GraphView;
-using UnityEngine.XR.OpenXR.Input;
-//using Pose = UnityEngine.XR.OpenXR.Input.Pose;
 
 namespace Bird3DCursor { 
     /// <summary>
