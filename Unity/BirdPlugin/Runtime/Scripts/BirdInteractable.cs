@@ -105,6 +105,7 @@ namespace Bird3DCursor {
         bool following;//is the object actively on its way to a point
         Collider thisCollider;//collider component of the object this script is on
         Renderer thisRenderer;//same but renderer
+        Rigidbody thisRigidbody;//same but rigidbody
 
         //these are the objects that we snap to if we are using snap to collider motion type
         //Note: they must have colliders
@@ -115,6 +116,8 @@ namespace Bird3DCursor {
         [SerializeField] UnityEvent OnDeselect;
 
         private Vector3 previousTargetPos;//where the object currently is. Used for staying in the same place if there is no ray hit.
+
+        private bool resettingVelocity = false;
 
         // Start is called before the first frame update
         void Start()
@@ -151,6 +154,7 @@ namespace Bird3DCursor {
             following = false;//when we start the scene, we are not yet going to a target position
             thisCollider = GetComponent<Collider>();
             thisRenderer = GetComponent<Renderer>();
+            thisRigidbody = GetComponent<Rigidbody>();
             previousTargetPos = transform.position;
             snapColliders = new List<Collider>();
             foreach (GameObject snapObject in snapObjects)
@@ -160,8 +164,24 @@ namespace Bird3DCursor {
             selectingMe = false;
         }//end start
 
+        private void Select()
+        {
+            filter.Reset(transform.position);
+            OnSelect.Invoke();
+        }
+
+        private void Deselect()
+        {
+            resettingVelocity = true;
+            OnDeselect.Invoke();
+        }
+
         void Update()
         {
+            if (bird == null || bird.GetBird() == null)
+            {
+                return;
+            }
             //this bit is ugly and was not written for human eyes
             //it implements the set of behaviors from the first 100 lines of code
             bool alreadySelectingMe = selectingMe; // remember the state of selectingMe to detect selection start and stop
@@ -175,12 +195,12 @@ namespace Bird3DCursor {
                 if (bird.GetClickDown() && selectingMe)
                 {
                     following = true;
-                    OnSelect.Invoke();
+                    Select();
                 }
                 if (!bird.GetClick())
                 {
                     following = false;
-                    OnDeselect.Invoke();
+                    Deselect();
                 }
             }
             else if (activateType == ActivateType.Toggle)
@@ -190,15 +210,15 @@ namespace Bird3DCursor {
                     if (bird.GetClickDown())
                     {
                         following = false;
-                        OnDeselect.Invoke();
+                        Deselect();
                     }
                 }
                 else
                 {
                     if (bird.GetClickDown() && selectingMe)
                     {
-                        OnSelect.Invoke();
                         following = true;
+                        Select();
                     }
                 }
             }
@@ -209,13 +229,13 @@ namespace Bird3DCursor {
                 {
                     following = true;
                     if (!alreadySelectingMe)
-                        OnSelect.Invoke();
+                        Select();
                 }
                 else
                 {
                     following = false;
                     if (alreadySelectingMe)
-                        OnDeselect.Invoke();
+                        Deselect();
                 }
             }
             Vector3 targetPos;
@@ -325,6 +345,7 @@ namespace Bird3DCursor {
                 {
                     //Don't change the rotation by default
                 }
+                resettingVelocity = true;
             }
             previousTargetPos = targetPos;
             if (motionType == MotionType.SnapToCollider)
@@ -340,5 +361,12 @@ namespace Bird3DCursor {
                 // yes I suppose I know it could just be thisCollider.enabled = !following, but this is more clear
             }
         }//end update
+
+        void FixedUpdate() {
+            if (resettingVelocity) {
+                if (thisRigidbody != null) thisRigidbody.velocity = Vector3.zero;
+                resettingVelocity = false;
+            }
+        }
     }
 }
