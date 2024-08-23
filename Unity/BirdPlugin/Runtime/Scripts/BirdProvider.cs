@@ -157,6 +157,11 @@ namespace Bird3DCursor
             return bird.GetPrevPosition();
         }
 
+        public Vector3 GetCursorVector()
+        {
+            return bird.GetCursorVector();
+        }
+
         public Ray GetRay()
         {
             return bird.GetRay();
