@@ -78,10 +78,7 @@ namespace Bird3DCursor {
             }
 
             Vector3 indexRoot = hand.GetBasePosition(Finger.Index);
-            handRoot = 0.6f * indexRoot + 0.4f * hand.GetBasePosition(Finger.Thumb);
-            // Vector3 handRoot = 
-            // (0.3f * hand.GetIndex().Bone(Bone.BoneType.TYPE_PROXIMAL).PrevJoint) + 
-            // (0.3f * hand.GetIndex().Bone(Bone.BoneType.TYPE_PROXIMAL).PrevJoint) + (0.4f * hand.GetThumb().Bone(Bone.BoneType.TYPE_PROXIMAL).PrevJoint);
+            handRoot = 0.6f * indexRoot + 0.4f * hand.GetBasePosition(Finger.Thumb); // weighted average of thumb base and index knuckle
             Vector3 indexTip = hand.GetTipPosition(Finger.Index);
 
             fitPoints = new List<Vector3>()
@@ -110,26 +107,6 @@ namespace Bird3DCursor {
                 hand.GetDistalPosition(Finger.Pinky),
                 hand.GetTipPosition(Finger.Pinky),
             };
-
-            // List<Vector3> points = new List<Vector3>()
-            // {
-            //     hand.GetThumb().Bone(Bone.BoneType.TYPE_INTERMEDIATE).PrevJoint,
-            //     hand.GetThumb().Bone(Bone.BoneType.TYPE_DISTAL).PrevJoint,
-            //     hand.GetIndex().Bone(Bone.BoneType.TYPE_PROXIMAL).PrevJoint,
-            //     hand.GetMiddle().Bone(Bone.BoneType.TYPE_PROXIMAL).PrevJoint,
-            //     hand.GetMiddle().Bone(Bone.BoneType.TYPE_INTERMEDIATE).PrevJoint,
-            //     hand.GetMiddle().Bone(Bone.BoneType.TYPE_DISTAL).PrevJoint,
-            //     hand.GetRing().Bone(Bone.BoneType.TYPE_PROXIMAL).PrevJoint,
-            //     hand.GetRing().Bone(Bone.BoneType.TYPE_INTERMEDIATE).PrevJoint,
-            //     hand.GetRing().Bone(Bone.BoneType.TYPE_DISTAL).PrevJoint,
-            //     hand.GetPinky().Bone(Bone.BoneType.TYPE_PROXIMAL).PrevJoint,
-            //     hand.GetPinky().Bone(Bone.BoneType.TYPE_INTERMEDIATE).PrevJoint,
-            //     hand.GetPinky().Bone(Bone.BoneType.TYPE_DISTAL).PrevJoint,
-            //     hand.GetThumb().TipPosition,
-            //     hand.GetMiddle().TipPosition,
-            //     hand.GetRing().TipPosition,
-            //     hand.GetPinky().TipPosition
-            // };
             // end getting position of bones
 
             string chiralityStr = chirality == Hand.Chirality.Left ? "Left" : "Right";
