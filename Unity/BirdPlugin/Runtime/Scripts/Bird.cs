@@ -1,8 +1,8 @@
-﻿///PART OF SPHERE FIT BIRD
-///Sphere Fit Bird is a collaboration between Dana Gretton (good at math) and
-///Aubrey Simonson (his boyfriend, inventor) based on Aubrey's 2021 MIT Media Lab Thesis project, Bird.
-///For more information on Bird, see: https://drive.google.com/file/d/1p6IUu9QIzWNBERz3IW_yVcojQjVz06rl/view?usp=sharing
-///This project works with the OVR Toolkit, and once OpenXR is more stable, someone should probably make an OpenXR version.
+﻿/// PART OF SPHERE FIT BIRD
+/// Sphere Fit Bird is a collaboration between Dana Gretton (good at math) and
+/// Aubrey Simonson (his boyfriend, inventor) based on Aubrey's 2021 MIT Media Lab Thesis project, Bird.
+/// For more information on Bird, see: https://drive.google.com/file/d/1p6IUu9QIzWNBERz3IW_yVcojQjVz06rl/view?usp=sharing
+/// This project works with the OpenXR, Ultraleap, and/or OVR Toolkit hand tracking APIs.
 /// 
 /// Bird.cs handles all of the crazy linear algebra for converting the hand skeleton points to 
 /// an individual point in space which moves smoothly in an easy to control way. 
@@ -11,9 +11,8 @@
 /// For how on Earth one does sphere fit code, we are grateful for this useful article:
 /// https://jekel.me/2015/Least-Squares-Sphere-Fit/
 /// 
-/// Doesn't strictly require other scripts (that's on purpose!)
-/// Remember to give it materials for birdSelectedMaterial and birdMaterial in the inspector
-/// Put this script on the hand! Specifically, it should go an OVRHandPrefab with an OVRSkeleton component
+/// The simplest way to start is to place a BirdProvider component on a tracked hand object in a VR
+/// interaction rig in the Unity editor. This Bird class may also be used on its own for custom applications.
 /// 
 ///???---> asimonso@mit.edu/followspotfour@gmail.com // dgretton@mit.edu/dana.gretton@gmail.com
 ///Last edited February 2022
