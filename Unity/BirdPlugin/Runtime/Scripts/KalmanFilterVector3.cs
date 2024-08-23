@@ -101,4 +101,11 @@ public class KalmanFilterVector3
         x = Vector3.zero;
         k = 0;
     }
+
+    public void Reset(Vector3 pos)
+    {
+        p = 1;
+        x = pos;
+        k = 0;
+    }
 }
