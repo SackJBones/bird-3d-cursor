@@ -20,7 +20,7 @@ The Bird can be sent farther away or brought closer by extending and closing the
 It's called the Bird because it's a mouse that flies.
 
 <p align="center">
-  <img src="docs/Images/all-steps.gif" alt="Bird Movement Demo">
+  <img src="docs/Images/all-steps.jpg" alt="Bird Movement Demo">
 </p>
 
 ## Applications
@@ -77,7 +77,7 @@ The implementation includes:
 
 For more information, check out:
 - [CHI 2025 Paper](https://doi.org/10.1145/3706599.3720045)
-- [Quick Start Guide]((https://docs.google.com/document/d/1sneDWHFeR6_jMXwIwmY0Md-P3t-EXAoqKmOlfDvMss8/)
+- [Quick Start Guide](https://docs.google.com/document/d/1sneDWHFeR6_jMXwIwmY0Md-P3t-EXAoqKmOlfDvMss8/)
 - [Original Thesis](https://dspace.mit.edu/handle/1721.1/142815)
 
 ## Beyond Unity
