@@ -3,9 +3,9 @@ using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.XR.Hands;
 
-namespace Bird3DCursor { 
+namespace Bird3DCursor {
     /// <summary>
-    ///  Represents a hand for use with the Bird 3D cursor using the Ultraleap API.
+    ///  Represents a hand for use with the Bird 3D cursor using Unity XR Hands.
     /// </summary>
     public class OpenXRHand : Hand
     {
@@ -13,13 +13,13 @@ namespace Bird3DCursor {
         /// Initializes a new instance of the Hand class with the specified chirality.
         /// </summary>
         /// <param name="chirality">The chirality of the hand (Chirality.Left or Chirality.Right).</param>
-        /// 
+        ///
         private Handedness handedness;
         private XRHandSubsystem m_Subsystem;
         static readonly List<XRHandSubsystem> s_SubsystemsReuse = new List<XRHandSubsystem>();
 
         //this is an initializer
-        public OpenXRHand(Hand.Chirality chirality) : base(chirality) 
+        public OpenXRHand(Hand.Chirality chirality) : base(chirality)
         {
             //documentation of mysterious incantation save for posterity
             //handedness = chirality == Hand.Chirality.Left ? LeapChirality.Left : LeapChirality.Right;
@@ -44,7 +44,7 @@ namespace Bird3DCursor {
             if (handedness == Handedness.Left)
             {
                 return m_Subsystem.leftHand;
-            } 
+            }
             else{
                 return m_Subsystem.rightHand;
             }
@@ -55,6 +55,7 @@ namespace Bird3DCursor {
             if (m_Subsystem != null && m_Subsystem.running)
                 return;
 
+            m_Subsystem = null;
             SubsystemManager.GetSubsystems(s_SubsystemsReuse);
             var foundRunningHandSubsystem = false;
             for (var i = 0; i < s_SubsystemsReuse.Count; ++i)
@@ -74,7 +75,7 @@ namespace Bird3DCursor {
 
 
         /// <summary>
-        /// Determines whether the hand is currently being tracked by a Leap-compatible device and has data available. 
+        /// Determines whether the hand is currently being tracked by a running XR Hands subsystem and has data available.
         /// </summary>
         /// <returns>True if the hand is being tracked and has data available; otherwise, false.</returns>
         public override bool IsTracking()
@@ -113,8 +114,8 @@ namespace Bird3DCursor {
                     return Vector3.zero;
             }
             UnityEngine.Pose pose;
-            GetSubsystemHand().GetJoint(jointId).TryGetPose(out pose);
-            if (pose == null) return Vector3.zero;
+            if (!IsTracking() || !GetSubsystemHand().GetJoint(jointId).TryGetPose(out pose))
+                return Vector3.zero;
             return pose.position;
         }
 
@@ -147,8 +148,8 @@ namespace Bird3DCursor {
                     return Vector3.zero;
             }
             UnityEngine.Pose pose;
-            GetSubsystemHand().GetJoint(jointId).TryGetPose(out pose);
-            if (pose == null) return Vector3.zero;
+            if (!IsTracking() || !GetSubsystemHand().GetJoint(jointId).TryGetPose(out pose))
+                return Vector3.zero;
             return pose.position;
         }
 
@@ -181,8 +182,8 @@ namespace Bird3DCursor {
                     return Vector3.zero;
             }
             UnityEngine.Pose pose;
-            GetSubsystemHand().GetJoint(jointId).TryGetPose(out pose);
-            if (pose == null) return Vector3.zero;
+            if (!IsTracking() || !GetSubsystemHand().GetJoint(jointId).TryGetPose(out pose))
+                return Vector3.zero;
             return pose.position;
         }
 
@@ -215,8 +216,8 @@ namespace Bird3DCursor {
                     return Vector3.zero;
             }
             UnityEngine.Pose pose;
-            GetSubsystemHand().GetJoint(jointId).TryGetPose(out pose);
-            if (pose == null) return Vector3.zero;
+            if (!IsTracking() || !GetSubsystemHand().GetJoint(jointId).TryGetPose(out pose))
+                return Vector3.zero;
             return pose.position;
         }
     }
