@@ -38,7 +38,7 @@ if ($Package) {
 Set-Content -LiteralPath (Join-Path $project 'Packages/manifest.json') -Value $manifest
 $sourceNames = if ($Package) { @() } elseif ($AllSources) {
     Get-ChildItem -LiteralPath (Join-Path $repo 'Unity/BirdPlugin/Runtime/Scripts') -Filter '*.cs' | ForEach-Object { $_.Name }
-} else { @('Hand.cs', 'Bird.cs', 'KalmanFilterVector3.cs') }
+} else { @('Hand.cs', 'HandFactory.cs', 'Bird.cs', 'KalmanFilterVector3.cs') }
 foreach ($source in $sourceNames) {
     Copy-Item -LiteralPath (Join-Path $repo "Unity/BirdPlugin/Runtime/Scripts/$source") -Destination (Join-Path $project "Assets/BirdCore/$source")
 }

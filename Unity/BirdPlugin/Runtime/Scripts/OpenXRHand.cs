@@ -9,6 +9,13 @@ namespace Bird3DCursor {
     /// </summary>
     public class OpenXRHand : Hand
     {
+        // Public for explicit registration by edit-mode tools. Runtime registration precedes scene Awake.
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        public static void RegisterBackend()
+        {
+            HandFactory.RegisterBackend(BirdHandAPI.OpenXR, chirality => new OpenXRHand(chirality));
+        }
+
         /// <summary>
         /// Initializes a new instance of the Hand class with the specified chirality.
         /// </summary>

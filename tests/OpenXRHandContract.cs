@@ -7,6 +7,11 @@ using UnityEngine.XR.Hands;
 
 namespace UnityEngine
 {
+    public enum RuntimeInitializeLoadType { SubsystemRegistration, BeforeSceneLoad }
+    public sealed class RuntimeInitializeOnLoadMethodAttribute : Attribute
+    {
+        public RuntimeInitializeOnLoadMethodAttribute(RuntimeInitializeLoadType type) { }
+    }
     public struct Vector3
     {
         public float x, y, z;
@@ -60,10 +65,11 @@ public static class OpenXRHandContract
     public static string Run()
     {
         checks = 0;
+        OpenXRHand.RegisterBackend();
         foreach (Hand.Chirality side in Enum.GetValues(typeof(Hand.Chirality)))
         {
             SubsystemManager.Available.Clear();
-            var hand = new OpenXRHand(side);
+            var hand = HandFactory.CreateHand(side, BirdHandAPI.OpenXR);
             Check(!hand.IsTracking(), "No subsystem must mean no tracking");
             Check(hand.GetTipPosition(Finger.Index).x == 0, "Reading before subsystem startup must be safe");
             var sample = new XRHand { isTracked = true, joint = new XRHandJoint

@@ -12,6 +12,14 @@ Only the built-in physics and IMGUI modules are required by the base package. Cr
 
 Leap, Oculus OVR and XR Hands source remains guarded by its existing BIRD scripting symbols. Enabling a symbol requires the corresponding SDK **and explicit SDK assembly references in Bird3D.Runtime**; optional backend assembly separation and tested installation instructions are not finished. The configuration menu sets symbols only; it does not install SDKs or add those references. Do not treat this base-package test as proof that enabling any of these adapters compiles or runs. Ultraleap is no longer downloaded unconditionally for every user.
 
+## Hand factory registration
+
+`HandFactory` now accepts backend constructors through `RegisterBackend(api, chirality => new YourHand(chirality))`; it no longer references concrete SDK adapter types. `IsBackendRegistered` reports constructor availability, not live tracking. Re-registering replaces a constructor for future hands; existing hands are unchanged. `UnregisterBackend` removes a registration. Calls belong on Unity's main thread. Missing registrations and constructors returning null produce explicit errors.
+
+The guarded built-in adapters register at `BeforeSceneLoad`, before scene Awake/Start. Registration is cleared at `SubsystemRegistration` on each Play Mode entry, including when domain reload is disabled. Custom runtime adapters should register at `BeforeSceneLoad` too, and consumers should create hands in Awake/Start or later; order between callbacks in the same initialization phase is unspecified. Edit-mode tools must explicitly call the enabled adapter's public `RegisterBackend()` before using the factory, or construct a Hand directly. Static constructors are not a substitute for per-play-session registration.
+
+This prepares optional assembly separation; it does not complete it. The conditionally compiled `BirdHandAPI` enum is unchanged, so its existing dependence on enabled symbols still requires a serialization migration before changing enum values or backend selection. Do not persist arbitrary custom integer identifiers as a stable public backend scheme yet.
+
 ## Existing projects
 
 Try this development package in a separate project first. Do not install it alongside the legacy Assets copy, which would duplicate types. Source script GUIDs were not previously tracked in this repository; this branch establishes stable metadata for subsequent versions, but has not proven a serialized-reference migration from the old unitypackage. Keep existing project backups and validate scene/prefab references as part of migration.

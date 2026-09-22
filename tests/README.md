@@ -2,7 +2,7 @@
 
 Run `pwsh -NoProfile -File tests/Test-OpenXRHand.ps1` from the repo root in a fresh PowerShell process.
 
-This compiles the actual Hand and OpenXRHand source with BIRD_OPENXR_ENABLED against deliberately small API doubles. It checks both hands, startup without a subsystem, valid/failed pose reads, shutdown, restart and tracking loss. Pose is a value type, so the original null comparison fails compilation. A failing TryGetPose deliberately returns nonzero data to detect incorrectly consuming its output.
+This compiles the actual Hand, HandFactory and OpenXRHand source with BIRD_OPENXR_ENABLED against deliberately small API doubles. It checks both hands, startup without a subsystem, valid/failed pose reads, shutdown, restart and tracking loss. Pose is a value type, so the original null comparison fails compilation. A failing TryGetPose deliberately returns nonzero data to detect incorrectly consuming its output.
 
 These tests do not validate Unity package resolution, real XR Hands API compatibility, joint mappings, coordinate transformations, Udon, or device behavior. Full Unity compilation and headset checks remain required. No binaries or generated test projects are committed.
 
@@ -14,7 +14,7 @@ Run the following in PowerShell, adjusting the editor path/version as needed:
 ./tests/Invoke-UnityCoreChecks.ps1 -UnityEditor 'C:/Program Files/Unity/Hub/Editor/2020.3.33f1/Editor/Unity.exe' -UnityVersion '2020.3.33f1' -ProjectPath '../bird-3d-cursor-projects/Validation/Core2020'
 ```
 
-The runner generates a disposable project in the demo repository, copies the current production Hand/Bird/Kalman sources and the editor checks, and launches Unity in batch mode. It refuses existing directories without its marker and requires both a successful exit and a fresh PASS result. Logs and results remain inside that generated project; do not commit its source copies or Library.
+The runner generates a disposable project in the demo repository, copies the current production Hand/HandFactory/Bird/Kalman sources and the editor checks, and launches Unity in batch mode. It refuses existing directories without its marker and requires both a successful exit and a fresh PASS result. Logs and results remain inside that generated project; do not commit its source copies or Library.
 
 These checks use actual Unity math and production solver code with synthetic input: known sphere center/radius, index-finger clicking, lost tracking during press/release, continued loss and recovery. They establish core editor compilation/execution, not full package import, XR Hands API compatibility, rendering, Udon or device fidelity. A tracking-loss release follows the existing click-up API; consumers requiring explicit cancellation should not interpret it as a confirmed user action.
 
@@ -36,4 +36,8 @@ Use `-Package` instead of `-AllSources`, with a new project directory such as `.
 
 Use `-Package -BuildPlayer` with a separate directory, for example `../bird-3d-cursor-projects/Validation/PackagePlayer2020`, and the same editor/version parameters. This builds a Windows x64 Mono player with a generated smoke-test scene, checks that Bird3D.Runtime.dll is included and Bird3D.Editor.dll is excluded, then runs the player headlessly. The player instantiates Bird with untracked synthetic input and checks idle state and runtime assembly loading without UnityEditor assemblies.
 
-Both build and player must exit successfully and write fresh PASS results. Build/import has a three-minute timeout and the player a thirty-second timeout. Artifacts and logs remain in the generated project; this is local validation output, not a release build. This mode does not rerun the 63 editor checks, exercise rendering or provider/interactable scene behavior, or validate IL2CPP, Android, XR hardware or VRChat.
+Both build and player must exit successfully and write fresh PASS results. Build/import has a three-minute timeout and the player a thirty-second timeout. Artifacts and logs remain in the generated project; this is local validation output, not a release build. This mode does not rerun the editor checks, exercise rendering or provider/interactable scene behavior, or validate IL2CPP, Android, XR hardware or VRChat.
+
+## Backend registration checks
+
+The editor suite also covers missing constructors, availability, both chiralities, replacement, null constructor/output rejection and removal. The OpenXR API-double suite explicitly registers its adapter and creates both hands through the factory; doubles do not execute Unity initialization callbacks. The standalone player instead uses a synthetic backend registered by a real `BeforeSceneLoad` callback, then creates its Bird through the factory in Start. This validates initialization in a fresh player; repeated Play Mode entry with domain reload disabled and actual SDK adapter loading remain untested.

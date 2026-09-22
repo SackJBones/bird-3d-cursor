@@ -6,6 +6,13 @@ namespace Bird3DCursor
 
     public class OculusOVRHand : Hand
     {
+        // Public for explicit registration by edit-mode tools. Runtime registration precedes scene Awake.
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        public static void RegisterBackend()
+        {
+            HandFactory.RegisterBackend(BirdHandAPI.OculusOVR, chirality => new OculusOVRHand(chirality));
+        }
+
         private OVRHand ovrHand;
         private OVRSkeleton skeleton;
         private OVRBone index1;

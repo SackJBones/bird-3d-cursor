@@ -23,6 +23,7 @@ public static class UnityCoreChecks
             CheckTrackingLoss();
             CheckBatchFiltering();
             CheckInvalidPoses();
+            CheckHandFactory();
             File.WriteAllText("core-checks-result.txt", "PASS: " + checks + " core checks; Unity " + Application.unityVersion);
             Debug.Log("BIRD_CORE_CHECKS_PASS: " + checks);
             EditorApplication.Exit(0);
@@ -79,6 +80,44 @@ public static class UnityCoreChecks
         hand.tracked = false;
         bird.Update();
         Check(!bird.GetClickUp(), "Tracking loss must clear the prior release edge");
+    }
+
+    private static void CheckHandFactory()
+    {
+        // Outside the built-in enum range, without changing any installed adapter's registration.
+        const BirdHandAPI api = (BirdHandAPI)123456;
+        var first = new SyntheticHand();
+        var second = new SyntheticHand();
+        Hand.Chirality received = Hand.Chirality.Right;
+        try
+        {
+            Check(!HandFactory.IsBackendRegistered(api), "Unregistered backend must report unavailable");
+            bool missingRejected = false;
+            try { HandFactory.CreateHand(Hand.Chirality.Left, api); }
+            catch (InvalidOperationException e) { missingRejected = e.Message.Contains("not registered"); }
+            Check(missingRejected, "Missing backend must give a configuration error");
+            HandFactory.RegisterBackend(api, side => { received = side; return first; });
+            Check(HandFactory.IsBackendRegistered(api), "Registered backend must report available");
+            Check(ReferenceEquals(first, HandFactory.CreateHand(Hand.Chirality.Left, api)), "Factory must return backend hand");
+            Check(received == Hand.Chirality.Left, "Factory must forward left chirality");
+            HandFactory.CreateHand(Hand.Chirality.Right, api);
+            Check(received == Hand.Chirality.Right, "Factory must forward right chirality");
+            bool nullRejected = false;
+            try { HandFactory.RegisterBackend(api, null); }
+            catch (ArgumentNullException) { nullRejected = true; }
+            Check(nullRejected, "Null constructor must be rejected");
+            Check(ReferenceEquals(first, HandFactory.CreateHand(Hand.Chirality.Left, api)), "Rejected registration must preserve previous backend");
+            HandFactory.RegisterBackend(api, side => second);
+            Check(ReferenceEquals(second, HandFactory.CreateHand(Hand.Chirality.Left, api)), "Registration must support replacement");
+            HandFactory.RegisterBackend(api, side => null);
+            bool nullHandRejected = false;
+            try { HandFactory.CreateHand(Hand.Chirality.Left, api); }
+            catch (InvalidOperationException e) { nullHandRejected = e.Message.Contains("returned null"); }
+            Check(nullHandRejected, "Null backend hand must give a useful error");
+            Check(HandFactory.UnregisterBackend(api) && !HandFactory.IsBackendRegistered(api), "Unregister must remove backend");
+            Check(!HandFactory.UnregisterBackend(api), "Unregister of absent backend must report false");
+        }
+        finally { HandFactory.UnregisterBackend(api); }
     }
 
     private static void CheckBatchFiltering()
