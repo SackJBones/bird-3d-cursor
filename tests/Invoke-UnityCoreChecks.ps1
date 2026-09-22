@@ -3,14 +3,16 @@ param(
     [Parameter(Mandatory = $true)][string]$ProjectPath,
     [Parameter(Mandatory = $true)][string]$UnityVersion,
     [switch]$AllSources,
-    [switch]$Package
+    [switch]$Package,
+    [switch]$BuildPlayer
 )
 $ErrorActionPreference = 'Stop'
 $repo = Split-Path $PSScriptRoot -Parent
 $project = [IO.Path]::GetFullPath($ProjectPath)
 $marker = Join-Path $project '.bird-generated-validation'
 if ($AllSources -and $Package) { throw 'Choose either AllSources or Package.' }
-$mode = if ($Package) { 'package' } elseif ($AllSources) { 'all-sources' } else { 'core' }
+if ($BuildPlayer -and !$Package) { throw 'BuildPlayer requires Package mode.' }
+$mode = if ($BuildPlayer) { 'package-player' } elseif ($Package) { 'package' } elseif ($AllSources) { 'all-sources' } else { 'core' }
 if ((Test-Path $project) -and !(Test-Path $marker)) {
     throw 'Refusing to modify an existing project without the Bird validation marker.'
 }
@@ -47,11 +49,16 @@ if ($AllSources) {
     if (Test-Path $oldEditorCopy) { Remove-Item -LiteralPath $oldEditorCopy }
 }
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityCoreChecks.cs') -Destination (Join-Path $project 'Assets/Editor/UnityCoreChecks.cs')
+if ($BuildPlayer) {
+    Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityPlayerBuild.cs') -Destination (Join-Path $project 'Assets/Editor/UnityPlayerBuild.cs')
+    Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityPlayerSmoke.cs') -Destination (Join-Path $project 'Assets/UnityPlayerSmoke.cs')
+}
 $result = Join-Path $project 'core-checks-result.txt'
 # Replace any previous result so an import/license failure cannot appear to pass.
 Set-Content -LiteralPath $result -Value 'PENDING: Unity has not completed this run.'
 $log = Join-Path $project 'core-checks.log'
-$arguments = @('-batchmode', '-nographics', '-projectPath', ('"' + $project + '"'), '-executeMethod', 'UnityCoreChecks.Run', '-logFile', ('"' + $log + '"'))
+$method = if ($BuildPlayer) { 'UnityPlayerBuild.Run' } else { 'UnityCoreChecks.Run' }
+$arguments = @('-batchmode', '-nographics', '-projectPath', ('"' + $project + '"'), '-executeMethod', $method, '-logFile', ('"' + $log + '"'))
 $process = Start-Process -FilePath $UnityEditor -ArgumentList $arguments -WindowStyle Hidden -PassThru
 if (!$process.WaitForExit(180000)) {
     $process.Kill()
@@ -63,4 +70,16 @@ Write-Output $summary
 Write-Output "Compilation mode: $mode ($($sourceNames.Count) production source files)."
 if ($process.ExitCode -ne 0 -or !$summary.StartsWith('PASS:')) {
     throw "Unity core checks failed (exit $($process.ExitCode)). See $log"
+}
+if ($BuildPlayer) {
+    $playerResult = Join-Path $project 'player-smoke-result.txt'
+    Set-Content -LiteralPath $playerResult -Value 'PENDING: player has not completed this run.'
+    $playerLog = Join-Path $project 'player-smoke.log'
+    $playerArgs = @('-batchmode', '-nographics', '-birdSmokeResult', ('"' + $playerResult + '"'), '-logFile', ('"' + $playerLog + '"'))
+    $player = Start-Process -FilePath (Join-Path $project 'Build/BirdPlayerSmoke.exe') -ArgumentList $playerArgs -WindowStyle Hidden -PassThru
+    if (!$player.WaitForExit(30000)) { $player.Kill(); throw "Player timed out. See $playerLog" }
+    $player.Refresh()
+    $playerSummary = Get-Content -Raw -LiteralPath $playerResult
+    Write-Output $playerSummary
+    if ($player.ExitCode -ne 0 -or !$playerSummary.StartsWith('PASS:')) { throw "Player smoke test failed. See $playerLog" }
 }

@@ -31,3 +31,9 @@ Tracking defines are absent in a fresh generated project, so optional Leap/OVR/X
 ## UPM installation
 
 Use `-Package` instead of `-AllSources`, with a new project directory such as `../bird-3d-cursor-projects/Validation/Package2020`. The generated manifest references Unity/BirdPlugin via a local file dependency, and no production scripts are copied into Assets. Core tests run against Bird3D.Runtime and assert that Bird3D.Editor is separately loaded. The base package supplies physics and IMGUI dependencies; no hand SDK or tracking symbols are required. This validates UPM import and editor compilation, not player builds or enabled hardware adapters. See Unity/BirdPlugin/README.md for the current migration limits.
+
+## Standalone player build and startup
+
+Use `-Package -BuildPlayer` with a separate directory, for example `../bird-3d-cursor-projects/Validation/PackagePlayer2020`, and the same editor/version parameters. This builds a Windows x64 Mono player with a generated smoke-test scene, checks that Bird3D.Runtime.dll is included and Bird3D.Editor.dll is excluded, then runs the player headlessly. The player instantiates Bird with untracked synthetic input and checks idle state and runtime assembly loading without UnityEditor assemblies.
+
+Both build and player must exit successfully and write fresh PASS results. Build/import has a three-minute timeout and the player a thirty-second timeout. Artifacts and logs remain in the generated project; this is local validation output, not a release build. This mode does not rerun the 63 editor checks, exercise rendering or provider/interactable scene behavior, or validate IL2CPP, Android, XR hardware or VRChat.

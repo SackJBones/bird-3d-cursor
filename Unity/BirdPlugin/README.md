@@ -18,4 +18,4 @@ Try this development package in a separate project first. Do not install it alon
 
 ## Validation
 
-The repository's `tests/Invoke-UnityCoreChecks.ps1 -Package` creates a disposable project outside this package and uses a local UPM dependency, rather than copying runtime scripts into Assets. It checks the runtime/editor assembly identities and exercises core behavior with synthetic poses. Full player builds, enabled tracking backends, modern editor compatibility and VRChat remain separate validation gates.
+The repository's `tests/Invoke-UnityCoreChecks.ps1 -Package` creates a disposable project outside this package and uses a local UPM dependency, rather than copying runtime scripts into Assets. It checks the runtime/editor assembly identities and exercises core behavior with synthetic poses. The separate `-Package -BuildPlayer` mode has also built and run a Windows x64 Mono smoke-test player in Unity 2020.3.33f1, confirming runtime inclusion and editor exclusion. Enabled tracking backends, IL2CPP/Android, rendering, modern editor compatibility and VRChat remain separate validation gates.
