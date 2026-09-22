@@ -47,7 +47,7 @@ Record separately: source/contract checks; actual Unity compilation; EditMode/Pl
 
 ## Next pass
 
-The scheduler smoke check passed. Core solver compilation and 15 synthetic-pose checks now pass inside Unity 2020.3.33f1; see tests/README.md for the repeatable runner. Next, extend core validation to degenerate/nonfinite poses and recovery motion, and establish a real Unity/XR Hands package compile harness. Inspect full demo source/history for the UI/color picker without moving bulky assets into the package repo. Resolve missing modern editor setup as needed. Current adapter contract command: `pwsh -NoProfile -File tests/Test-OpenXRHand.ps1`.
+The scheduler smoke check passed. Core compilation and 33 synthetic-pose/filter checks now pass inside Unity 2020.3.33f1; see tests/README.md for the repeatable runner. Next, extend core validation to degenerate/nonfinite poses and recovery motion, and establish a real Unity/XR Hands package compile harness. Inspect full demo source/history for the UI/color picker without moving bulky assets into the package repo. Resolve missing modern editor setup as needed. Current adapter contract command: `pwsh -NoProfile -File tests/Test-OpenXRHand.ps1`.
 
 ## Headset deferred by user — 2026-09-22
 

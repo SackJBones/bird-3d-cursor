@@ -78,6 +78,8 @@ public class KalmanFilterVector3
 
         while (i < measurements.Count && i >= 0)
         {
+            // Consume the current sample before advancing to the next one.
+            result = Update(measurements[i], newQ, newR);
 
             // decrement or increment the counter.
             if (areMeasurementsNewestFirst)
@@ -89,7 +91,6 @@ public class KalmanFilterVector3
                 ++i;
             }
 
-            result = Update(measurements[i], newQ, newR);
         }
 
         return result;

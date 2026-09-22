@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Bird3DCursor;
 using UnityEditor;
@@ -14,6 +15,7 @@ public static class UnityCoreChecks
         try
         {
             CheckTrackingLoss();
+            CheckBatchFiltering();
             File.WriteAllText("core-checks-result.txt", "PASS: " + checks + " core checks; Unity " + Application.unityVersion);
             Debug.Log("BIRD_CORE_CHECKS_PASS: " + checks);
             EditorApplication.Exit(0);
@@ -70,6 +72,45 @@ public static class UnityCoreChecks
         hand.tracked = false;
         bird.Update();
         Check(!bird.GetClickUp(), "Tracking loss must clear the prior release edge");
+    }
+
+    private static void CheckBatchFiltering()
+    {
+        var chronological = new List<Vector3> {
+            new Vector3(1, -2, 3), new Vector3(-4, 5, 0.5f),
+            new Vector3(0.2f, -0.7f, 8), new Vector3(2, 3, -1)
+        };
+        foreach (int count in new[] { 1, chronological.Count })
+        foreach (bool newestFirst in new[] { false, true })
+        foreach (bool overrideNoise in new[] { false, true })
+        {
+            var expected = new KalmanFilterVector3();
+            var actual = new KalmanFilterVector3();
+            var initial = new Vector3(-2, 1, 0.5f);
+            expected.Reset(initial);
+            actual.Reset(initial);
+            float? q = overrideNoise ? (float?)0.02f : null;
+            float? r = overrideNoise ? (float?)0.07f : null;
+            Vector3 expectedResult = Vector3.zero;
+            for (int i = 0; i < count; i++) expectedResult = expected.Update(chronological[i], q, r);
+            var batch = chronological.GetRange(0, count);
+            if (newestFirst) batch.Reverse();
+            Vector3 actualResult = actual.Update(batch, newestFirst, q, r);
+            Check(Vector3.Distance(expectedResult, actualResult) < 0.000001f,
+                "Batch must match chronological single updates: count=" + count + ", newestFirst=" + newestFirst + ", overrideNoise=" + overrideNoise);
+            Vector3 next = new Vector3(9, -3, 2);
+            Check(Vector3.Distance(expected.Update(next), actual.Update(next)) < 0.000001f,
+                "Batch must leave the same filter state for the next measurement");
+        }
+
+        var emptyFilter = new KalmanFilterVector3();
+        var control = new KalmanFilterVector3();
+        emptyFilter.Update(chronological[0]);
+        control.Update(chronological[0]);
+        Check(emptyFilter.Update(new List<Vector3>()) == Vector3.zero,
+            "Empty batch preserves the existing zero-result contract");
+        Check(emptyFilter.Update(chronological[1]) == control.Update(chronological[1]),
+            "Empty batch must not change filter state");
     }
 
     private sealed class SyntheticHand : Hand
