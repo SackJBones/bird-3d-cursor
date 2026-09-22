@@ -28,3 +28,7 @@ This scheduled run received `danger-full-access` filesystem/network access and a
 - Scheduler smoke test: passed. The normal two-hour cadence is restored and active.
 
 Computer must remain on with the app running for local scheduled work. The initial smoke test is a one-time step; subsequent scheduled runs should follow PLAN.md rather than repeat a checkpoint-only test.
+
+## User steering — 2026-09-22
+
+Headset setup is explicitly deferred until the user says it is ready. Do not poll the device or repeat setup requests. Continue all independent implementation and desktop/editor validation. Keep real tracking, usability and device performance testing deferred and clearly labeled; the headset must not block progress on the rest of the project. The recurring prompt and plan reflect this priority.

@@ -47,4 +47,10 @@ Record separately: source/contract checks; actual Unity compilation; EditMode/Pl
 
 ## Next pass
 
-Run the scheduler smoke check, then prioritize a real Unity/XR Hands compile harness and independent core pose tests. Inspect full demo source/history for the UI/color picker without moving bulky assets into the package repo. Resolve missing editor and headset setup as needed. Current contract command: `pwsh -NoProfile -File tests/Test-OpenXRHand.ps1`.
+The scheduler smoke check passed. Prioritize a real Unity/XR Hands compile harness and independent core pose tests. Inspect full demo source/history for the UI/color picker without moving bulky assets into the package repo. Resolve missing editor setup as needed. Current contract command: `pwsh -NoProfile -File tests/Test-OpenXRHand.ps1`.
+
+## Headset deferred by user — 2026-09-22
+
+The USB headset was an experiment; the user will set it up later. Do not poll ADB, troubleshoot it, or request USB-debugging approval until the user says it is ready. Hardware availability must not hold up the development schedule. Continue core math and synthetic/recorded pose tests, package modernization, real Unity editor compilation and automated tests, Udon/ClientSim checks, demo construction, UI, trails and documentation.
+
+Physical tracking fidelity, comfort/usability and real-device performance remain deferred validation gates, not prerequisites for independent implementation or polish. The earlier stage ordering is a risk-management guide, not a requirement to stop all work before hardware validation. Record unvalidated assumptions clearly and never report device tests as passed without evidence.
