@@ -24,6 +24,7 @@ This scheduled run received `danger-full-access` filesystem/network access and a
 
 - Repository read/write: passed; initial working tree was clean on feature/vrchat-modernization.
 - Test execution: passed, 36 OpenXR contract checks using API doubles. No Unity, Udon, or headset validation is implied.
-- Commit/push: this checkpoint is the scheduled-run probe; remote result is recorded after execution.
+- Commit/push: passed without approval prompts. Commit `68d4bcd` was pushed successfully to origin/feature/vrchat-modernization by this scheduled run.
+- Scheduler smoke test: passed. The normal two-hour cadence is restored and active.
 
 Computer must remain on with the app running for local scheduled work. The initial smoke test is a one-time step; subsequent scheduled runs should follow PLAN.md rather than repeat a checkpoint-only test.
