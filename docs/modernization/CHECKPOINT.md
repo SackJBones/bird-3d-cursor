@@ -16,4 +16,14 @@ App automation ID: `develop-bird-for-vrchat`. Heartbeat targets this existing co
 
 For the initial scheduler test, temporarily use a two-minute interval. The first triggered pass MUST restore the normal two-hour cadence through automation_update before doing any work, retaining the existing name, destination, target, status and normal prompt. The normal prompt is stored in `RECURRING-PROMPT.txt`. Then verify repo read/write, execute the contract checks, update this checkpoint with actual scheduled-run evidence, commit and push. Do not claim the scheduler test passed based only on the manual initial pass. If unable to restore cadence, pause the automation and report the failure instead of running development every two minutes.
 
-Current scheduler test status: pending actual app-triggered run. Manual workspace/test/GitHub push preflight succeeded. Computer must remain on with the app running for local scheduled work.
+## Actual scheduled smoke test — 2026-09-22
+
+The app triggered this conversation at 06:45:33 UTC. Before testing, automation_update restored the normal prompt and two-hour cadence. The saved configuration confirms ACTIVE, heartbeat, and the same target conversation.
+
+This scheduled run received `danger-full-access` filesystem/network access and approval policy `never`, matching the current conversation environment. This is broader than the restricted environment used during the initial manual preflight; no permission settings were changed by the agent. The automation API has no separate permission-profile field.
+
+- Repository read/write: passed; initial working tree was clean on feature/vrchat-modernization.
+- Test execution: passed, 36 OpenXR contract checks using API doubles. No Unity, Udon, or headset validation is implied.
+- Commit/push: this checkpoint is the scheduled-run probe; remote result is recorded after execution.
+
+Computer must remain on with the app running for local scheduled work. The initial smoke test is a one-time step; subsequent scheduled runs should follow PLAN.md rather than repeat a checkpoint-only test.
