@@ -21,3 +21,9 @@ These checks use actual Unity math and production solver code with synthetic inp
 Batch Kalman-filter checks compare list input against chronological single-measurement updates, including one/multiple samples, oldest/newest-first ordering, noise overrides and the next measurement's result. Empty batches preserve the existing zero return value and leave filter state unchanged.
 
 Invalid-pose checks inject NaN into a fitting joint, positive infinity into the index tip, negative infinity into the thumb base, and an all-zero hand. Each must hold the last valid cursor/geometry, release selection once, clear stale motion and recover without contaminating filter state. These do not yet establish conditioning thresholds for coplanar or nearly singular point sets, or track individual joint validity when an adapter substitutes finite zero coordinates.
+
+## All-source compilation
+
+Add `-AllSources` and use a separate generated project path (for example `../bird-3d-cursor-projects/Validation/AllSources2020`) to compile every production script, including BirdProvider, BirdManager, BirdInteractable and the editor configuration window, then execute the core checks. The runner includes Unity's physics and IMGUI modules. A mode marker prevents accidentally mixing core-only and all-source runs in one project.
+
+Tracking defines are absent in a fresh generated project, so optional Leap/OVR/XR Hands adapter bodies remain excluded. This mode copies scripts into Assets: it is **not** a UPM installation test, player build, enabled tracking-adapter compile or live behavior test for provider/interactable components. Keep the generated project dedicated to this runner rather than changing defines or copying unrelated scripts into it.

@@ -51,6 +51,8 @@ The scheduler smoke check passed. Core compilation and 61 synthetic-pose/filter 
 
 ## Headset deferred by user — 2026-09-22
 
+Editor setup note: the 14:47 UTC pass attempted Unity 2022.3.22f1 installation through Hub, but its elevation request was declined/dismissed and installation cancelled. Do not automatically repeat that prompt. Continue package structure and source-import validation on installed Unity 2020.3.33f1; modern editor/VRChat checks remain pending. All-source compilation now passes with adapters disabled; see the checkpoint and tests/README.md. Next focus is proper UPM runtime/editor/optional-backend boundaries, not more isolated core test expansion.
+
 The USB headset was an experiment; the user will set it up later. Do not poll ADB, troubleshoot it, or request USB-debugging approval until the user says it is ready. Hardware availability must not hold up the development schedule. Continue core math and synthetic/recorded pose tests, package modernization, real Unity editor compilation and automated tests, Udon/ClientSim checks, demo construction, UI, trails and documentation.
 
 Physical tracking fidelity, comfort/usability and real-device performance remain deferred validation gates, not prerequisites for independent implementation or polish. The earlier stage ordering is a risk-management guide, not a requirement to stop all work before hardware validation. Record unvalidated assumptions clearly and never report device tests as passed without evidence.
