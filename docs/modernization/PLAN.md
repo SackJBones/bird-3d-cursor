@@ -30,7 +30,7 @@ Checked against official pages on 2026-09-18/19; revisit before implementation i
 ## Stages and acceptance criteria
 
 - [x] Discover repositories, preserve transcript, establish feature branches and initial code checkpoint.
-- [ ] Establish recurring app task; verify a real scheduled pass can read/write, run tests and push. Record its run evidence separately from manual testing.
+- [x] Establish recurring app task; verify a real scheduled pass can read/write, run tests and push. Record its run evidence separately from manual testing.
 - [ ] Audit math, click hysteresis, invalid/degenerate poses, tracking loss/recovery, coordinate spaces and allocation behavior. Add deterministic recorded/synthetic pose tests, preserving reference behavior unless an intentional change is documented.
 - [ ] Modernize packaging: isolated core, optional tracking adapters, correct runtime/editor assembly boundaries, stable GUIDs, minimal dependencies, clear installation and migration instructions. Fresh-project import and player build must pass. Replace DOTween dependency with small owned state-transition tools where relevant, not copied third-party internals.
 - [ ] Install VRChat-supported editor/Creator Companion SDK and create a minimal hand-data feasibility world. Prove two-hand cursor/click behavior with real hardware before making a polished world. Provide a clearly labeled controller/desktop fallback where true joint input is unavailable.
@@ -47,7 +47,7 @@ Record separately: source/contract checks; actual Unity compilation; EditMode/Pl
 
 ## Next pass
 
-The scheduler smoke check passed. Prioritize a real Unity/XR Hands compile harness and independent core pose tests. Inspect full demo source/history for the UI/color picker without moving bulky assets into the package repo. Resolve missing editor setup as needed. Current contract command: `pwsh -NoProfile -File tests/Test-OpenXRHand.ps1`.
+The scheduler smoke check passed. Core solver compilation and 15 synthetic-pose checks now pass inside Unity 2020.3.33f1; see tests/README.md for the repeatable runner. Next, extend core validation to degenerate/nonfinite poses and recovery motion, and establish a real Unity/XR Hands package compile harness. Inspect full demo source/history for the UI/color picker without moving bulky assets into the package repo. Resolve missing modern editor setup as needed. Current adapter contract command: `pwsh -NoProfile -File tests/Test-OpenXRHand.ps1`.
 
 ## Headset deferred by user — 2026-09-22
 

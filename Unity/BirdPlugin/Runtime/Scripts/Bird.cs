@@ -72,7 +72,13 @@ namespace Bird3DCursor {
 
         public void Update() {
 
+            // Edges belong to this update, even when no new pose is available.
+            down = false;
+            up = false;
             if (!hand.IsTracking()) {
+                up = selected;
+                selected = false;
+                prevBirdPosition = birdPosition;
                 return;
             }
 
@@ -164,8 +170,6 @@ namespace Bird3DCursor {
             }
 
             float indexDepth = sphereFitRadius - (indexTip - selectCenter).magnitude; // depth into sphere centered at selectCenter to which index tip is penetrating
-            down = false;
-            up = false;
             if(!selected && indexDepth > selectDepth)
             {
                 selected = true;
