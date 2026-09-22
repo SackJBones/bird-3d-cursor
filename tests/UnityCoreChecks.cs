@@ -16,6 +16,7 @@ public static class UnityCoreChecks
         {
             CheckTrackingLoss();
             CheckBatchFiltering();
+            CheckInvalidPoses();
             File.WriteAllText("core-checks-result.txt", "PASS: " + checks + " core checks; Unity " + Application.unityVersion);
             Debug.Log("BIRD_CORE_CHECKS_PASS: " + checks);
             EditorApplication.Exit(0);
@@ -111,6 +112,57 @@ public static class UnityCoreChecks
             "Empty batch preserves the existing zero-result contract");
         Check(emptyFilter.Update(chronological[1]) == control.Update(chronological[1]),
             "Empty batch must not change filter state");
+    }
+
+    private static void CheckInvalidPoses()
+    {
+        for (int mode = 0; mode < 4; mode++)
+        {
+            var hand = new FaultHand();
+            var bird = new Bird(hand);
+            var reference = new Bird(new SyntheticHand { tracked = true, pressed = true });
+            bird.Update();
+            reference.Update();
+            Vector3 position = bird.GetPosition();
+            Vector3 center = bird.GetSphereFitCenter();
+            Vector3 root = bird.GetHandRoot();
+            hand.mode = mode;
+            bird.Update();
+            Check(bird.GetPosition() == position, "Invalid pose must hold cursor position; mode=" + mode);
+            Check(bird.GetSphereFitCenter() == center && bird.GetHandRoot() == root,
+                "Invalid pose must preserve last valid geometry; mode=" + mode);
+            Check(!bird.GetClick() && !bird.GetClickDown() && bird.GetClickUp(),
+                "Invalid pose must release the selection once; mode=" + mode);
+            Check(bird.GetPrevPosition() == position, "Invalid pose must clear stale motion");
+            bird.Update();
+            Check(!bird.GetClickUp(), "Repeated invalid poses must not repeat release");
+            hand.mode = -1;
+            bird.Update();
+            reference.Update();
+            Check(Vector3.Distance(bird.GetPosition(), reference.GetPosition()) < 0.000001f,
+                "Valid pose must recover without poisoning the filter; mode=" + mode);
+            Check(bird.GetClick() && bird.GetClickDown(), "Valid pose must resume index selection");
+        }
+    }
+
+    private sealed class FaultHand : Hand
+    {
+        private readonly SyntheticHand source = new SyntheticHand { tracked = true, pressed = true };
+        public int mode = -1;
+        public FaultHand() : base(Chirality.Right) { }
+        public override bool IsTracking() { return true; }
+        private Vector3 Sample(Vector3 point, Finger finger, int joint)
+        {
+            if (mode == 0 && finger == Finger.Middle && joint == 1) point.x = float.NaN;
+            if (mode == 1 && finger == Finger.Index && joint == 3) point.y = float.PositiveInfinity;
+            if (mode == 2 && finger == Finger.Thumb && joint == 0) point.z = float.NegativeInfinity;
+            if (mode == 3) return Vector3.zero;
+            return point;
+        }
+        public override Vector3 GetBasePosition(Finger finger) { return Sample(source.GetBasePosition(finger), finger, 0); }
+        public override Vector3 GetIntermediatePosition(Finger finger) { return Sample(source.GetIntermediatePosition(finger), finger, 1); }
+        public override Vector3 GetDistalPosition(Finger finger) { return Sample(source.GetDistalPosition(finger), finger, 2); }
+        public override Vector3 GetTipPosition(Finger finger) { return Sample(source.GetTipPosition(finger), finger, 3); }
     }
 
     private sealed class SyntheticHand : Hand

@@ -76,17 +76,19 @@ namespace Bird3DCursor {
             down = false;
             up = false;
             if (!hand.IsTracking()) {
-                up = selected;
-                selected = false;
-                prevBirdPosition = birdPosition;
+                RejectPose();
                 return;
             }
 
             Vector3 indexRoot = hand.GetBasePosition(Finger.Index);
-            handRoot = 0.6f * indexRoot + 0.4f * hand.GetBasePosition(Finger.Thumb); // weighted average of thumb base and index knuckle
+            Vector3 nextHandRoot = 0.6f * indexRoot + 0.4f * hand.GetBasePosition(Finger.Thumb); // weighted average of thumb base and index knuckle
             Vector3 indexTip = hand.GetTipPosition(Finger.Index);
+            if (!IsFinite(nextHandRoot) || !IsFinite(indexTip)) {
+                RejectPose();
+                return;
+            }
 
-            fitPoints = new List<Vector3>()
+            var nextFitPoints = new List<Vector3>()
             {
                 // leave out thumb base; including it in the sphere fit tends to pin it to the wrist,
                 // making it difficult to expand beyond a certain size
@@ -117,27 +119,47 @@ namespace Bird3DCursor {
             string chiralityStr = chirality == Hand.Chirality.Left ? "Left" : "Right";
             // string chiralityStr = chirality == Chirality.Left ? "Left" : "Right";
 
-            for (int i = 0; i < fitPoints.Count; i++)
+            for (int i = 0; i < nextFitPoints.Count; i++)
             {
-                pointPoss[i] = fitPoints[i];
+                if (!IsFinite(nextFitPoints[i])) {
+                    RejectPose();
+                    return;
+                }
+                pointPoss[i] = nextFitPoints[i];
             }
 
             Vector4 fitVector = LeastSqSphere(pointPoss); // calls linear algebra from later in this script
             float sphereFitCenterX = fitVector[0];
             float sphereFitCenterY = fitVector[1];
             float sphereFitCenterZ = fitVector[2];
-            sphereFitRadius = fitVector[3];
+            float nextRadius = fitVector[3];
 
-            sphereFitCenter = new Vector3(sphereFitCenterX, sphereFitCenterY, sphereFitCenterZ);
-            Vector3 pointing = sphereFitCenter - handRoot; // direction that the bird goes out from the hand-- the pointing vector
+            Vector3 nextCenter = new Vector3(sphereFitCenterX, sphereFitCenterY, sphereFitCenterZ);
+            Vector3 pointing = nextCenter - nextHandRoot; // direction that the bird goes out from the hand-- the pointing vector
             float m = pointing.magnitude; // distance from hand root to center of sphere
+            if (!IsFinite(nextCenter) || !IsFinite(nextRadius) || nextRadius <= 0f || !IsFinite(m) || m <= 0f) {
+                RejectPose();
+                return;
+            }
 
+            Vector3 measurement = pointing/m*birdRangeFunc(m) + nextHandRoot;
+            float noise = m*m*m*270f;
+            if (!IsFinite(measurement) || !IsFinite(noise)) {
+                RejectPose();
+                return;
+            }
+
+            // Commit only a validated pose, keeping invalid samples out of the filter.
+            handRoot = nextHandRoot;
+            sphereFitCenter = nextCenter;
+            sphereFitRadius = nextRadius;
+            fitPoints = nextFitPoints;
             prevBirdPosition = birdPosition;
 
             // this line determines the position of the bird based on pointing and bird range function--
             // bird range function can be whatever you want. We define it later in this script.
             // this smooths using a Kalman filter.
-            birdPosition = filter.Update(pointing/m*birdRangeFunc(m) + handRoot, null, m*m*m*270f); // m^3 * 270 is R
+            birdPosition = filter.Update(measurement, null, noise); // m^3 * 270 is R
             range = (birdPosition - handRoot).magnitude; // figure out far away bird is
 
             ray = new Ray(handRoot, (birdPosition - handRoot).normalized);
@@ -181,6 +203,20 @@ namespace Bird3DCursor {
                 up = true;
             }
         } // end update
+
+        private void RejectPose() {
+            up = selected;
+            selected = false;
+            prevBirdPosition = birdPosition;
+        }
+
+        private static bool IsFinite(float value) {
+            return !float.IsNaN(value) && !float.IsInfinity(value);
+        }
+
+        private static bool IsFinite(Vector3 value) {
+            return IsFinite(value.x) && IsFinite(value.y) && IsFinite(value.z);
+        }
 
         public Vector3 GetPosition() {
             return birdPosition;
