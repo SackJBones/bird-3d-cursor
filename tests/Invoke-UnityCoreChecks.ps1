@@ -2,21 +2,23 @@ param(
     [Parameter(Mandatory = $true)][string]$UnityEditor,
     [Parameter(Mandatory = $true)][string]$ProjectPath,
     [Parameter(Mandatory = $true)][string]$UnityVersion,
-    [switch]$AllSources
+    [switch]$AllSources,
+    [switch]$Package
 )
 $ErrorActionPreference = 'Stop'
 $repo = Split-Path $PSScriptRoot -Parent
 $project = [IO.Path]::GetFullPath($ProjectPath)
 $marker = Join-Path $project '.bird-generated-validation'
-$mode = if ($AllSources) { 'all-sources' } else { 'core' }
+if ($AllSources -and $Package) { throw 'Choose either AllSources or Package.' }
+$mode = if ($Package) { 'package' } elseif ($AllSources) { 'all-sources' } else { 'core' }
 if ((Test-Path $project) -and !(Test-Path $marker)) {
     throw 'Refusing to modify an existing project without the Bird validation marker.'
 }
 $modeFile = Join-Path $project '.bird-validation-mode'
 if ((Test-Path $marker) -and (Test-Path $modeFile)) {
     if ((Get-Content -Raw $modeFile).Trim() -ne $mode) { throw 'Use a separate project directory for each validation mode.' }
-} elseif ((Test-Path $marker) -and $AllSources) {
-    throw 'Use a new project directory for all-source validation, not an existing core project.'
+} elseif ((Test-Path $marker) -and ($AllSources -or $Package)) {
+    throw 'Use a new project directory for integration validation, not an existing core project.'
 }
 if (!(Test-Path -LiteralPath $UnityEditor)) { throw 'Unity editor executable not found.' }
 New-Item -ItemType Directory -Force $project | Out-Null
@@ -27,12 +29,22 @@ foreach ($folder in @('Assets/Editor', 'Assets/BirdCore', 'Packages', 'ProjectSe
 }
 Set-Content -LiteralPath (Join-Path $project 'ProjectSettings/ProjectVersion.txt') -Value "m_EditorVersion: $UnityVersion"
 $manifest = if ($AllSources) { '{"dependencies":{"com.unity.modules.physics":"1.0.0","com.unity.modules.imgui":"1.0.0"}}' } else { '{"dependencies":{}}' }
+if ($Package) {
+    $packagePath = (Join-Path $repo 'Unity/BirdPlugin').Replace('\', '/')
+    $manifest = @{ dependencies = @{ 'com.bird3d.cursor' = "file:$packagePath" } } | ConvertTo-Json -Depth 3
+}
 Set-Content -LiteralPath (Join-Path $project 'Packages/manifest.json') -Value $manifest
-$sourceNames = if ($AllSources) {
+$sourceNames = if ($Package) { @() } elseif ($AllSources) {
     Get-ChildItem -LiteralPath (Join-Path $repo 'Unity/BirdPlugin/Runtime/Scripts') -Filter '*.cs' | ForEach-Object { $_.Name }
 } else { @('Hand.cs', 'Bird.cs', 'KalmanFilterVector3.cs') }
 foreach ($source in $sourceNames) {
     Copy-Item -LiteralPath (Join-Path $repo "Unity/BirdPlugin/Runtime/Scripts/$source") -Destination (Join-Path $project "Assets/BirdCore/$source")
+}
+if ($AllSources) {
+    Copy-Item -LiteralPath (Join-Path $repo 'Unity/BirdPlugin/Editor/BirdTrackingConfigureWindow.cs') -Destination (Join-Path $project 'Assets/Editor/BirdTrackingConfigureWindow.cs')
+    # Earlier harness versions copied this editor file beside the runtime sources.
+    $oldEditorCopy = Join-Path $project 'Assets/BirdCore/BirdTrackingConfigureWindow.cs'
+    if (Test-Path $oldEditorCopy) { Remove-Item -LiteralPath $oldEditorCopy }
 }
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityCoreChecks.cs') -Destination (Join-Path $project 'Assets/Editor/UnityCoreChecks.cs')
 $result = Join-Path $project 'core-checks-result.txt'

@@ -14,6 +14,12 @@ public static class UnityCoreChecks
     {
         try
         {
+            if (File.ReadAllText(".bird-validation-mode").Trim() == "package")
+            {
+                Check(typeof(Bird).Assembly.GetName().Name == "Bird3D.Runtime", "Bird must compile from the UPM runtime assembly");
+                Check(Array.Exists(AppDomain.CurrentDomain.GetAssemblies(), assembly => assembly.GetName().Name == "Bird3D.Editor"),
+                    "UPM editor assembly must compile separately");
+            }
             CheckTrackingLoss();
             CheckBatchFiltering();
             CheckInvalidPoses();

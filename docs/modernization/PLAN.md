@@ -47,6 +47,8 @@ Record separately: source/contract checks; actual Unity compilation; EditMode/Pl
 
 ## Next pass
 
+Latest integration checkpoint: a fresh local UPM installation now passes 63 checks in Unity 2020.3.33f1, with separate runtime/editor assemblies and no mandatory hand SDK. Prioritize a player build to verify editor exclusion, then optional adapter assembly boundaries/registration. See the package README for unvalidated backend and legacy-GUID migration limits. This supersedes the earlier inventory's missing-asmdef/mandatory-Ultraleap findings.
+
 The scheduler smoke check passed. Core compilation and 61 synthetic-pose/filter checks now pass inside Unity 2020.3.33f1, including nonfinite/all-zero input and recovery; see tests/README.md for the repeatable runner. Next prioritize modern editor setup and a real Unity/XR Hands package compile harness so progress reaches the integration stage. Remaining numerical work includes nearly singular/coplanar fits, finite missing-joint sentinels, and recovery motion after a changed pose; do not treat these as already validated. Inspect full demo source/history for the UI/color picker without moving bulky assets into the package repo. Current adapter contract command: `pwsh -NoProfile -File tests/Test-OpenXRHand.ps1`.
 
 ## Headset deferred by user — 2026-09-22

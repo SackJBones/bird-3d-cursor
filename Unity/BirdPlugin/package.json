@@ -20,6 +20,7 @@
       "email": "asimonso@mit.edu"
     },
     "dependencies": {
-      "com.ultraleap.tracking": "6.8.1"
+      "com.unity.modules.physics": "1.0.0",
+      "com.unity.modules.imgui": "1.0.0"
     }
   }
