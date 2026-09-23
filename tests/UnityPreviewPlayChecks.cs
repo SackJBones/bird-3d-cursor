@@ -154,14 +154,11 @@ public sealed class UnityPreviewPlayChecks : MonoBehaviour
         interactable.selectBehind = false;
         interactable.motionType = BirdInteractable.MotionType.None;
         interactable.activateType = BirdInteractable.ActivateType.Drag;
-        interactable.snapObjects = new GameObject[0];
+        // Legacy scenes may deserialize a null optional list.
+        interactable.snapObjects = null;
         int selections = 0, deselections = 0;
-        var onSelect = new UnityEvent();
-        var onDeselect = new UnityEvent();
-        onSelect.AddListener(() => selections++);
-        onDeselect.AddListener(() => deselections++);
-        typeof(BirdInteractable).GetField("OnSelect", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(interactable, onSelect);
-        typeof(BirdInteractable).GetField("OnDeselect", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(interactable, onDeselect);
+        interactable.Selected.AddListener(() => selections++);
+        interactable.Deselected.AddListener(() => deselections++);
         var visualObject = GameObject.CreatePrimitive(PrimitiveType.Cube);
         visualObject.transform.SetParent(target.transform, false);
         visualObject.transform.localPosition = new Vector3(-0.2f, 0.22f, 0.1f);
@@ -258,6 +255,38 @@ public sealed class UnityPreviewPlayChecks : MonoBehaviour
         visualRenderer.GetPropertyBlock(feedbackBlock);
         Check(visualObject.transform.localScale == Vector3.one * 0.1f && feedbackBlock.GetColor("_Color") == Color.green,
             "Disabling feedback must restore original scale and property block");
+        // A runtime-created target must also work with no listeners or snap configuration.
+        var plainTarget = new GameObject("Default interaction setup check");
+        plainTarget.SetActive(false);
+        var plain = plainTarget.AddComponent<BirdInteractable>();
+        plain.bird = provider;
+        plain.selectBehind = false;
+        plain.activateType = BirdInteractable.ActivateType.Touch;
+        plainTarget.AddComponent<BoxCollider>().size = Vector3.one * 5;
+        Check(plain.snapObjects != null && plain.snapObjects.Length == 0, "New interactables must start with an empty optional snap list");
+        Check(plain.Selected != null && plain.Deselected != null, "Runtime event access must require no reflection or Inspector setup");
+        plainTarget.SetActive(true);
+        Physics.SyncTransforms();
+        for (int i = 0; i < 3; i++) yield return null;
+        Check(plain.IsSelected, "Touch target must select with no event listeners configured");
+        plain.enabled = false;
+        Check(!plain.IsSelected && !plain.IsHovered, "Unwired target must release safely on disable");
+        Destroy(plainTarget);
+        // A snap-mode object may use renderer bounds and have no collider of its own.
+        var snapTarget = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        snapTarget.SetActive(false);
+        Destroy(snapTarget.GetComponent<Collider>());
+        for (int i = 0; i < 2; i++) yield return null;
+        var snap = snapTarget.AddComponent<BirdInteractable>();
+        snap.bird = provider;
+        snap.motionType = BirdInteractable.MotionType.SnapToCollider;
+        snap.snapObjects = new[] { (GameObject)null, providerObject };
+        snapTarget.SetActive(true);
+        for (int i = 0; i < 3; i++) yield return null;
+        var snapList = (System.Collections.ICollection)typeof(BirdInteractable).GetField("snapColliders", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(snap);
+        Check(snapList.Count == 0, "Null entries and objects without colliders must not enter the snap cache");
+        Check(snap.GetComponent<Collider>() == null, "Snap mode must tolerate a renderer-only target without adding a collider");
+        Destroy(snapTarget);
         provider.SetAssociatedUser("ManagerLifecycleCheck");
         var detector = new GameObject("BirdDetector_ManagerLifecycleCheck_");
         detector.transform.SetParent(provider.transform);

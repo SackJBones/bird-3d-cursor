@@ -111,11 +111,15 @@ namespace Bird3DCursor {
 
         //these are the objects that we snap to if we are using snap to collider motion type
         //Note: they must have colliders
-        public GameObject[] snapObjects;
+        public GameObject[] snapObjects = new GameObject[0];
         private List<Collider> snapColliders;
 
-        [SerializeField] UnityEvent OnSelect;
-        [SerializeField] UnityEvent OnDeselect;
+        [SerializeField] UnityEvent OnSelect = new UnityEvent();
+        [SerializeField] UnityEvent OnDeselect = new UnityEvent();
+
+        // Keep serialized field names for existing scenes; expose listener wiring to runtime callers.
+        public UnityEvent Selected { get { return OnSelect ?? (OnSelect = new UnityEvent()); } }
+        public UnityEvent Deselected { get { return OnDeselect ?? (OnDeselect = new UnityEvent()); } }
 
         private Vector3 previousTargetPos;//where the object currently is. Used for staying in the same place if there is no ray hit.
 
@@ -159,9 +163,11 @@ namespace Bird3DCursor {
             thisRigidbody = GetComponent<Rigidbody>();
             previousTargetPos = transform.position;
             snapColliders = new List<Collider>();
-            foreach (GameObject snapObject in snapObjects)
+            if (snapObjects != null) foreach (GameObject snapObject in snapObjects)
             {
-                snapColliders.Add(snapObject.GetComponent<Collider>());
+                if (snapObject == null) continue;
+                var snapCollider = snapObject.GetComponent<Collider>();
+                if (snapCollider != null) snapColliders.Add(snapCollider);
             }
             selectingMe = false;
         }//end start
@@ -169,13 +175,13 @@ namespace Bird3DCursor {
         private void Select()
         {
             filter.Reset(transform.position);
-            OnSelect.Invoke();
+            Selected.Invoke();
         }
 
         private void Deselect()
         {
             resettingVelocity = true;
-            OnDeselect.Invoke();
+            Deselected.Invoke();
         }
 
         private void EndSelection()
@@ -365,7 +371,7 @@ namespace Bird3DCursor {
                 resettingVelocity = true;
             }
             previousTargetPos = targetPos;
-            if (motionType == MotionType.SnapToCollider)
+            if (motionType == MotionType.SnapToCollider && thisCollider != null)
             {
                 if (following)
                 {
