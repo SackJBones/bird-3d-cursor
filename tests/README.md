@@ -45,3 +45,9 @@ The editor suite also covers missing constructors, availability, both chiralitie
 ## Interactive desktop preview
 
 Use `-Package -Preview` with a separate generated directory, such as `../bird-3d-cursor-projects/Validation/Preview2020`. This imports the UPM package, copies only its optional DesktopPreview sample into Assets, and compiles/generates `Assets/BirdDesktopPreview.unity`. The runner's PASS means compilation and scene generation only. Open that project in Unity 2020.3.33f1, open the scene, and enter Play Mode to inspect the visual controls. This mode neither builds a player nor reruns the editor assertions. All generated scene data remains in the demo repository's ignored Validation folder.
+
+### Preview Play Mode integration checks
+
+Add `-PlayMode` to `-Package -Preview` to generate a separate check scene and enter Unity Play Mode. A generated-project-only runtime checker drives the same private controls used by the sample GUI and observes actual solver state, cursor/ray transforms, marker visibility and resource cleanup across frames. It catches runtime errors and writes a fresh result before exiting Unity. The interactive preview scene is saved before adding the checker, so opening `BirdDesktopPreview.unity` does not automatically run tests or quit the editor.
+
+Checks cover two distinct cursors, known fitted radii, increased range on opening, selection sizing, single press/release edges, loss/recovery visibility, held position and removal of generated camera/geometry/materials while preserving unrelated children. The run uses `-nographics`: it does not test shader output, GUI layout/input events, or hardware. It does not rerun the 75 core/package checks. The runner retains its three-minute outer timeout for startup/import/play failures that never reach the checker.

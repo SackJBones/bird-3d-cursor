@@ -47,7 +47,7 @@ Record separately: source/contract checks; actual Unity compilation; EditMode/Pl
 
 ## Next pass
 
-A Desktop Preview sample now compiles and generates a two-cursor scene without a headset. GUI inspection was blocked by the computer-use helper exposing no Unity window; Play Mode and visual checks are pending. Next pass can validate that sample before extending visual features. See tests/README.md for `-Package -Preview`.
+The Desktop Preview sample now passes 58 automated headless Play Mode checks in Unity 2020.3.33f1, including cursor/radius/selection behavior, tracking-loss recovery and cleanup. GUI inspection was blocked by the computer-use helper exposing no Unity window; rendered appearance and GUI input checks remain pending. See tests/README.md for `-Package -Preview -PlayMode`. Next prioritize visual review or optional adapter assembly separation rather than repeating passed core checks.
 
 Latest integration checkpoint: local UPM installation passes 75 checks in Unity 2020.3.33f1, with separate runtime/editor assemblies and no mandatory hand SDK. HandFactory now uses registered constructors, and the guarded adapters register before scene startup. A Windows x64 Mono player builds and runs a synthetic backend registration/startup smoke test with the runtime assembly included and editor assembly excluded. Next: optional adapter assembly boundaries, with explicit treatment of the conditionally compiled backend enum and SDK-enabled integration tests. See the package README for unvalidated backend and legacy-GUID migration limits. This supersedes the earlier inventory's missing-asmdef/mandatory-Ultraleap findings.
 

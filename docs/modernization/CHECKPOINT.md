@@ -107,3 +107,13 @@ Added `-Package -Preview` to the runner. Actual Unity 2020.3.33f1 imported the p
 Attempted GUI inspection using the computer-use skill. Unity loaded the generated project, but no targetable Unity window appeared in the desktop helper's window list; the helper's explicit launch attempt returned `launched app did not expose a targetable window`. No GUI clicks or Play Mode inspection occurred. Closed only the background Unity process created for this attempt. Do not call this preview visually or interactively validated. No headset access, SDK install or elevation retry.
 
 Next bounded checkpoint: get the generated preview into Play Mode and verify visuals, radius changes, selection and one-time release on lost pose. Optional backend assembly separation and SDK-enabled compilation remain pending. Existing core tests were not repeated because production solver/factory code did not change.
+
+## Scheduled development pass — 2026-09-23, 02:48 UTC
+
+Added automated Play Mode integration checks for the Desktop Preview, invoked with `-Package -Preview -PlayMode`. The generator saves the interactive scene first, then creates a separate check scene. A generated-project-only runtime component drives the sample's controls and observes real Bird solvers and Unity objects across frames. Fresh result/exit verification and the runner's three-minute timeout remain in force. These tests are not shipped inside the package sample.
+
+The first actual Unity 2020.3.33f1 run verified cursor/radius/selection/loss/recovery behavior but failed cleanup: removing the component left its camera and marker geometry alive. Fixed ownership by placing generated objects beneath a dedicated root and destroying only that root plus the owned materials. Unrelated authored children are preserved.
+
+After the fix, all 58 Play Mode checks passed (exit 0): known sphere fitting, two separate cursors, cursor/ray synchronization, opening-induced range increase, selection size and single press edges, held positions and exactly one release per hand on pose loss, input-marker visibility, unpressed recovery, collider removal, and cleanup of camera/geometry/materials without deleting unrelated children. Whitespace check passed. Production solver/factory code was unchanged; the separate 75 editor assertions were not rerun.
+
+Limits: headless Play Mode, not rendered visual review or actual GUI input events. No SDK-enabled tracking, VRChat or physical-device validation. No headset access, GUI launch retry or editor-install attempt. Next: visual review or optional backend assembly separation, with platform and modern-editor gates still explicit.

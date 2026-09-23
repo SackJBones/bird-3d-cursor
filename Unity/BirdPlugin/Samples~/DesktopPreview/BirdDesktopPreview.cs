@@ -12,14 +12,17 @@ public sealed class BirdDesktopPreview : MonoBehaviour
     private readonly LineRenderer[] rays = new LineRenderer[2];
     private readonly Material[] materials = new Material[2];
     private Material jointMaterial;
+    private Transform visualRoot;
     private bool animate = true, tracking = true, pressed;
     private float radius = 0.035f, phase;
     private int presses, releases;
 
     private void Awake()
     {
+        visualRoot = new GameObject("Generated preview visuals").transform;
+        visualRoot.SetParent(transform, false);
         var camera = new GameObject("Preview camera").AddComponent<Camera>();
-        camera.transform.SetParent(transform, false);
+        camera.transform.SetParent(visualRoot, false);
         camera.transform.position = new Vector3(0.9f, 0.65f, -1.1f);
         camera.transform.LookAt(new Vector3(0, 0, 0.25f));
         camera.clearFlags = CameraClearFlags.SolidColor;
@@ -36,7 +39,7 @@ public sealed class BirdDesktopPreview : MonoBehaviour
             tips[h] = Sphere("Index tip " + h, 0.008f, materials[h]);
             for (int j = 0; j < 16; j++) joints[h, j] = Sphere("Fit point " + h + ":" + j, 0.006f, jointMaterial);
             var lineObject = new GameObject("Root to cursor " + h);
-            lineObject.transform.SetParent(transform, false);
+            lineObject.transform.SetParent(visualRoot, false);
             rays[h] = lineObject.AddComponent<LineRenderer>();
             rays[h].sharedMaterial = materials[h];
             rays[h].positionCount = 2;
@@ -53,7 +56,7 @@ public sealed class BirdDesktopPreview : MonoBehaviour
     {
         var sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         sphere.name = label;
-        sphere.transform.SetParent(transform, false);
+        sphere.transform.SetParent(visualRoot, false);
         sphere.transform.localScale = Vector3.one * size;
         sphere.GetComponent<Renderer>().sharedMaterial = material;
         Destroy(sphere.GetComponent<Collider>());
@@ -112,6 +115,7 @@ public sealed class BirdDesktopPreview : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (visualRoot != null) Destroy(visualRoot.gameObject);
         foreach (var material in materials) if (material != null) Destroy(material);
         if (jointMaterial != null) Destroy(jointMaterial);
     }
