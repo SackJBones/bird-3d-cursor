@@ -31,3 +31,11 @@ Try this development package in a separate project first. Do not install it alon
 ## Validation
 
 The repository's `tests/Invoke-UnityCoreChecks.ps1 -Package` creates a disposable project outside this package and uses a local UPM dependency, rather than copying runtime scripts into Assets. It checks the runtime/editor assembly identities and exercises core behavior with synthetic poses. The separate `-Package -BuildPlayer` mode has also built and run a Windows x64 Mono smoke-test player in Unity 2020.3.33f1, confirming runtime inclusion and editor exclusion. Enabled tracking backends, IL2CPP/Android, rendering, modern editor compatibility and VRChat remain separate validation gates.
+
+## Bounded cursor trails
+
+`Bird3DCursor.BirdTrail` drives a caller-owned LineRenderer in world space. Construct it with that renderer and a tint, then call `Update(cursorPosition, poseAvailable, Time.time)` every frame, including when stationary or untracked. Defaults retain at most 128 points for 2.5 seconds, sampling no more often than 20 ms and after at least 3 mm of movement. Capacity is fixed at construction and limited to 2–4096. It uses fixed managed arrays; per-frame renderer work is bounded by capacity. Profiling on target devices remains pending.
+
+Use a transparent material that respects vertex colors/alpha; the built-in-pipeline preview supplies Sprites/Default and a 4 mm width. The caller owns renderer/material lifetime and appearance. Endpoint alpha fades with sample age and is interpolated along the line, so this is an approximate visual fade rather than exact per-vertex age shading. Expired points are evicted, and stationary input leaves at most an invisible single anchor after expiry.
+
+Tracking loss, nonfinite input, and clock rewind clear the trail immediately. `Clear()` also breaks the stroke for user clearing, teleports, or changed coordinate spaces. Recovery starts a fresh stroke; old and new positions are never joined across a reported tracking loss. The preview includes a Clear trails button. This is a Unity helper, not an Udon implementation or networked trail protocol.

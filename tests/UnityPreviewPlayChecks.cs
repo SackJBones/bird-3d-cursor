@@ -113,8 +113,24 @@ public sealed class UnityPreviewPlayChecks : MonoBehaviour
         for (int i = 0; i < 4; i++) yield return null;
         Check(Read<int>("presses") == 2 && Read<int>("releases") == 2, "Unpressed recovery must not add click edges");
         Check(rays[0].enabled && tips[0].gameObject.activeSelf && joints[1, 15].gameObject.activeSelf, "Recovery must restore input visuals");
+        CheckTrailBudget();
+        var trails = Read<BirdTrail[]>("trails");
+        if (renderPreview)
+        {
+            for (int i = 0; i < 80; i++)
+            {
+                Set("phase", i * 0.045f);
+                yield return new WaitForSeconds(0.025f);
+            }
+            Check(trails[0].Count > 4 && trails[1].Count > 4, "Animated preview must accumulate trails for both hands");
+            CaptureCamera(camera, cursors, "preview-trails.png");
+        }
+        Set("tracking", false);
+        for (int i = 0; i < 3; i++) yield return null;
+        Check(trails[0].Count == 0 && trails[1].Count == 0, "Preview tracking loss must clear both trails");
         var materials = Read<Material[]>("materials");
         var jointMaterial = Read<Material>("jointMaterial");
+        var trailMaterial = Read<Material>("trailMaterial");
         var owner = preview.gameObject;
         var authoredChild = new GameObject("Unrelated authored child");
         authoredChild.transform.SetParent(owner.transform);
@@ -123,7 +139,46 @@ public sealed class UnityPreviewPlayChecks : MonoBehaviour
         Check(camera == null && owner.GetComponentsInChildren<Renderer>().Length == 0,
             "Removing the preview component must remove its generated camera and visuals");
         Check(materials[0] == null && materials[1] == null && jointMaterial == null, "Removing preview must release generated materials");
+        Check(trailMaterial == null, "Removing preview must release trail material");
         Check(authoredChild != null && owner.transform.childCount == 1, "Cleanup must preserve unrelated authored children");
+    }
+
+    private void CheckTrailBudget()
+    {
+        var owner = new GameObject("Trail budget check");
+        var line = owner.AddComponent<LineRenderer>();
+        try
+        {
+            var trail = new BirdTrail(line, Color.cyan, 3, 2, 0, 0.01f);
+            for (int i = 0; i <= 10; i++) trail.Update(Vector3.right * i, true, i * 0.1f);
+            Check(trail.Count == 3 && line.positionCount == 3, "Trail must obey point budget after ring wrap");
+            Check(line.GetPosition(0).x == 8 && line.GetPosition(2).x == 10, "Budget eviction must preserve chronological newest points");
+            trail.Update(Vector3.right * 10, true, 1.4f);
+            Check(trail.Count == 3, "Stationary samples must not grow the trail");
+            Check(line.startColor.a < line.endColor.a && line.endColor.a < 1, "Stationary trail must fade with age");
+            trail.Update(Vector3.right * 10, true, 4);
+            Check(trail.Count == 1, "Expired trail must leave only one fresh, non-drawing anchor");
+            trail.Update(Vector3.one, false, 4.1f);
+            Check(trail.Count == 0 && line.positionCount == 0, "Tracking loss must clear trail geometry");
+            trail.Update(Vector3.one * 20, true, 4.2f);
+            Check(trail.Count == 1 && line.GetPosition(0) == Vector3.one * 20, "Recovery must not connect to pre-loss position");
+            trail.Update(new Vector3(float.NaN, 0, 0), true, 4.3f);
+            Check(trail.Count == 0, "Nonfinite positions must break the trail");
+            trail.Update(Vector3.one, true, 5);
+            trail.Update(Vector3.zero, true, 0);
+            Check(trail.Count == 1 && line.GetPosition(0) == Vector3.zero, "Clock rewind must start a fresh trail");
+            trail.Clear();
+            Check(trail.Count == 0 && line.positionCount == 0, "Explicit clear must remove geometry");
+            trail = new BirdTrail(line, Color.white, 8, 2, 0.2f, 0.1f);
+            trail.Update(Vector3.zero, true, 0);
+            trail.Update(Vector3.right, true, 0.1f);
+            Check(trail.Count == 1, "Sample interval must reject too-frequent points");
+            trail.Update(Vector3.right * 0.01f, true, 0.3f);
+            Check(trail.Count == 1, "Distance threshold must reject tiny movements");
+            trail.Update(Vector3.right, true, 0.4f);
+            Check(trail.Count == 2, "Valid motion after thresholds must produce a segment");
+        }
+        finally { Destroy(owner); }
     }
 
     private void CaptureCamera(Camera camera, Transform[] cursors, string fileName)
