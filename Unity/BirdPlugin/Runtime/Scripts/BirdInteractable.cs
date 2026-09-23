@@ -27,6 +27,8 @@ namespace Bird3DCursor {
         public BirdProvider bird;
         KalmanFilterVector3 filter;
         bool selectingMe;
+        public bool IsSelected { get { return following; } }
+        public bool IsHovered { get { return selectingMe; } }
 
         //Activate Types are about when to select objects
         //Drag is like get key-- it's true while the pointer finger is inside of the selection zone
