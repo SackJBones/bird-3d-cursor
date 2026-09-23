@@ -1,0 +1,6 @@
+{
+    "name": "Bird3D.XRHands",
+    "references": ["Bird3D.Runtime", "Unity.XR.Hands"],
+    "autoReferenced": true,
+    "defineConstraints": ["BIRD_OPENXR_ENABLED"]
+}

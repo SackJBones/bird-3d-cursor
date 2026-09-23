@@ -167,3 +167,10 @@ Actual Unity 2020.3.33f1 Play Mode plus Direct3D 11 rendering passed 146 asserti
 Recorded the user's successful Quest 3 USB-debugging authorization (ADB device state, model and Android 14; no serial identifiers recorded). Updated the existing ACTIVE heartbeat prompt and its repo mirror to allow relevant device checks; the two-hour cadence is unchanged. No headset app was installed or launched during this cycle. Modern editor installation still requires resolving the previously declined elevation separately.
 
 Limits: feedback currently expects `_Color` shader support and exclusive ownership of its renderer property block/visual scale. GUI input/layout, alternative render pipelines and full interaction-scene composition are unverified. Next prioritize SDK packaging or scene integration rather than expanding this validation harness indefinitely.
+
+
+## XR Hands assembly boundary - 2026-09-23
+
+Moved OpenXRHand.cs and its existing GUID into Runtime/XRHands with a separate Bird3D.XRHands assembly. BIRD_OPENXR_ENABLED gates compilation; references are Bird3D.Runtime and Unity.XR.Hands. Confirmed the SDK assembly name from Unity's registry archive for com.unity.xr.hands 1.3.0, which requires Unity 2021.3. No SDK was installed in the validation projects. Leap and Oculus remain guarded in the core assembly; conditional enum serialization is unchanged.
+
+Validation on installed Unity 2020.3.33f1: 75 package checks, 73 all-source checks, successful Windows x64 Mono build and backend-registration/startup smoke run. The relocated adapter passes 36 API-double checks. Existing script GUID preserved. These verify the SDK-absent configuration and adapter contracts, not real SDK assembly linking or tracking. No headset polling or installer elevation attempted. Next: supported-editor SDK-enabled compilation, remaining adapter boundaries, or richer desktop interaction integration while modern-editor setup remains unavailable.

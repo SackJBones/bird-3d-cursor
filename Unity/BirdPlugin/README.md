@@ -14,7 +14,9 @@ The Package Manager Samples section offers **Desktop Preview**, a small syntheti
 
 ## Tracking backends are still being migrated
 
-Leap, Oculus OVR and XR Hands source remains guarded by its existing BIRD scripting symbols. Enabling a symbol requires the corresponding SDK **and explicit SDK assembly references in Bird3D.Runtime**; optional backend assembly separation and tested installation instructions are not finished. The configuration menu sets symbols only; it does not install SDKs or add those references. Do not treat this base-package test as proof that enabling any of these adapters compiles or runs. Ultraleap is no longer downloaded unconditionally for every user.
+XR Hands now lives in the optional `Bird3D.XRHands` assembly, which references `Bird3D.Runtime` and `Unity.XR.Hands` and compiles only with the project scripting symbol `BIRD_OPENXR_ENABLED`. Install a compatible Unity XR Hands package and configure its tracking provider before enabling that symbol. No SDK reference needs to be added to Bird3D.Runtime for XR Hands. The assembly name was checked against Unity registry package com.unity.xr.hands 1.3.0 (minimum Unity 2021.3); an actual SDK-enabled compile remains pending on a supported editor. The base package still imports without that SDK in Unity 2020.3.33f1.
+
+Leap and Oculus OVR remain in the core assembly behind their existing symbols and still require explicit SDK assembly references there. The configuration menu sets symbols only; it does not install SDKs or configure providers. Do not treat base-package or API-double tests as proof that an enabled adapter compiles or tracks hands. Ultraleap is no longer downloaded unconditionally for every user.
 
 ## Hand factory registration
 
@@ -22,7 +24,7 @@ Leap, Oculus OVR and XR Hands source remains guarded by its existing BIRD script
 
 The guarded built-in adapters register at `BeforeSceneLoad`, before scene Awake/Start. Registration is cleared at `SubsystemRegistration` on each Play Mode entry, including when domain reload is disabled. Custom runtime adapters should register at `BeforeSceneLoad` too, and consumers should create hands in Awake/Start or later; order between callbacks in the same initialization phase is unspecified. Edit-mode tools must explicitly call the enabled adapter's public `RegisterBackend()` before using the factory, or construct a Hand directly. Static constructors are not a substitute for per-play-session registration.
 
-This prepares optional assembly separation; it does not complete it. The conditionally compiled `BirdHandAPI` enum is unchanged, so its existing dependence on enabled symbols still requires a serialization migration before changing enum values or backend selection. Do not persist arbitrary custom integer identifiers as a stable public backend scheme yet.
+XR Hands uses this registration across its optional assembly boundary; Leap and Oculus assembly separation remains pending. The conditionally compiled `BirdHandAPI` enum is unchanged, so its existing dependence on enabled symbols still requires a serialization migration before changing enum values or backend selection. Do not persist arbitrary custom integer identifiers as a stable public backend scheme yet.
 
 ## Existing projects
 

@@ -55,6 +55,8 @@ foreach ($source in $sourceNames) {
     Copy-Item -LiteralPath (Join-Path $repo "Unity/BirdPlugin/Runtime/Scripts/$source") -Destination (Join-Path $project "Assets/BirdCore/$source")
 }
 if ($AllSources) {
+    # Include optional adapters outside the core folder; guards keep SDKs optional.
+    Copy-Item -LiteralPath (Join-Path $repo 'Unity/BirdPlugin/Runtime/XRHands/OpenXRHand.cs') -Destination (Join-Path $project 'Assets/BirdCore/OpenXRHand.cs')
     Copy-Item -LiteralPath (Join-Path $repo 'Unity/BirdPlugin/Editor/BirdTrackingConfigureWindow.cs') -Destination (Join-Path $project 'Assets/Editor/BirdTrackingConfigureWindow.cs')
     # Earlier harness versions copied this editor file beside the runtime sources.
     $oldEditorCopy = Join-Path $project 'Assets/BirdCore/BirdTrackingConfigureWindow.cs'
@@ -91,7 +93,8 @@ if (!$process.WaitForExit(180000)) {
 $process.Refresh()
 $summary = Get-Content -Raw -LiteralPath $result
 Write-Output $summary
-Write-Output "Compilation mode: $mode ($($sourceNames.Count) production source files)."
+$productionSourceCount = $sourceNames.Count + $(if ($AllSources) { 1 } else { 0 })
+Write-Output "Compilation mode: $mode ($productionSourceCount production source files)."
 if ($process.ExitCode -ne 0 -or !$summary.StartsWith('PASS:')) {
     throw "Unity core checks failed (exit $($process.ExitCode)). See $log"
 }
