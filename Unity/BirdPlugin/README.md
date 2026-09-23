@@ -10,7 +10,7 @@ Only the built-in physics and IMGUI modules are required by the base package. Cr
 
 ## Desktop preview
 
-The Package Manager Samples section offers **Desktop Preview**, a small synthetic two-cursor scene component with orientation, radius, selection and tracking-loss controls. Import it and follow its README in a separate empty scene. It requires no headset or SDK. Compilation, scene generation and automated headless Play Mode behavior are verified on Unity 2020.3.33f1; GUI input and visual review are still pending.
+The Package Manager Samples section offers **Desktop Preview**, a small synthetic two-cursor scene component with orientation, radius, selection and tracking-loss controls. Import it and follow its README in a separate empty scene. It requires no headset or SDK. Compilation, automated Play Mode behavior and 16:9 camera renders are verified on Unity 2020.3.33f1 with Direct3D 11. GUI input/layout, other render pipelines and standalone rendering remain pending.
 
 ## Tracking backends are still being migrated
 

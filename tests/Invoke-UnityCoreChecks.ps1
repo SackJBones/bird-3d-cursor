@@ -6,7 +6,8 @@ param(
     [switch]$Package,
     [switch]$BuildPlayer,
     [switch]$Preview,
-    [switch]$PlayMode
+    [switch]$PlayMode,
+    [switch]$RenderPreview
 )
 $ErrorActionPreference = 'Stop'
 $repo = Split-Path $PSScriptRoot -Parent
@@ -16,6 +17,7 @@ if ($AllSources -and $Package) { throw 'Choose either AllSources or Package.' }
 if ($BuildPlayer -and !$Package) { throw 'BuildPlayer requires Package mode.' }
 if ($Preview -and (!$Package -or $BuildPlayer)) { throw 'Preview requires Package and cannot be combined with BuildPlayer.' }
 if ($PlayMode -and !$Preview) { throw 'PlayMode requires Preview.' }
+if ($RenderPreview -and !$PlayMode) { throw 'RenderPreview requires PlayMode.' }
 $mode = if ($Preview) { 'preview' } elseif ($BuildPlayer) { 'package-player' } elseif ($Package) { 'package' } elseif ($AllSources) { 'all-sources' } else { 'core' }
 if ((Test-Path $project) -and !(Test-Path $marker)) {
     throw 'Refusing to modify an existing project without the Bird validation marker.'
@@ -38,6 +40,12 @@ $manifest = if ($AllSources) { '{"dependencies":{"com.unity.modules.physics":"1.
 if ($Package) {
     $packagePath = (Join-Path $repo 'Unity/BirdPlugin').Replace('\', '/')
     $manifest = @{ dependencies = @{ 'com.bird3d.cursor' = "file:$packagePath" } } | ConvertTo-Json -Depth 3
+}
+if ($Preview) {
+    # PNG capture belongs to the validation project, not the distributed package.
+    $previewManifest = $manifest | ConvertFrom-Json -AsHashtable
+    $previewManifest.dependencies['com.unity.modules.imageconversion'] = '1.0.0'
+    $manifest = $previewManifest | ConvertTo-Json -Depth 3
 }
 Set-Content -LiteralPath (Join-Path $project 'Packages/manifest.json') -Value $manifest
 $sourceNames = if ($Package) { @() } elseif ($AllSources) {
@@ -68,6 +76,13 @@ Set-Content -LiteralPath $result -Value 'PENDING: Unity has not completed this r
 $log = Join-Path $project 'core-checks.log'
 $method = if ($PlayMode) { 'UnityPreviewScene.RunPlayChecks' } elseif ($Preview) { 'UnityPreviewScene.Create' } elseif ($BuildPlayer) { 'UnityPlayerBuild.Run' } else { 'UnityCoreChecks.Run' }
 $arguments = @('-batchmode', '-nographics', '-projectPath', ('"' + $project + '"'), '-executeMethod', $method, '-logFile', ('"' + $log + '"'))
+if ($RenderPreview) {
+    $arguments = @($arguments | Where-Object { $_ -ne '-nographics' }) + '-birdRenderPreview'
+    foreach ($capture in @('preview-idle.png', 'preview-selected.png', 'preview-lost-pose.png')) {
+        $capturePath = Join-Path $project $capture
+        if (Test-Path -LiteralPath $capturePath) { Remove-Item -LiteralPath $capturePath }
+    }
+}
 $process = Start-Process -FilePath $UnityEditor -ArgumentList $arguments -WindowStyle Hidden -PassThru
 if (!$process.WaitForExit(180000)) {
     $process.Kill()

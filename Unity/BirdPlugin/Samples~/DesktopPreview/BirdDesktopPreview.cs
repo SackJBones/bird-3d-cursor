@@ -27,6 +27,7 @@ public sealed class BirdDesktopPreview : MonoBehaviour
         camera.transform.LookAt(new Vector3(0, 0, 0.25f));
         camera.clearFlags = CameraClearFlags.SolidColor;
         camera.backgroundColor = new Color(0.035f, 0.045f, 0.075f);
+        camera.fieldOfView = 30;
         camera.nearClipPlane = 0.01f;
         camera.farClipPlane = 10;
         jointMaterial = MakeMaterial(new Color(0.55f, 0.62f, 0.73f));

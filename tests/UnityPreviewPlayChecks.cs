@@ -12,6 +12,7 @@ public sealed class UnityPreviewPlayChecks : MonoBehaviour
     private int checks;
     private string runtimeError;
     private BirdDesktopPreview preview;
+    private bool renderPreview;
 
     private void OnEnable() { Application.logMessageReceived += CaptureError; }
     private void OnDisable() { Application.logMessageReceived -= CaptureError; }
@@ -23,6 +24,7 @@ public sealed class UnityPreviewPlayChecks : MonoBehaviour
 
     private IEnumerator Start()
     {
+        renderPreview = Array.IndexOf(Environment.GetCommandLineArgs(), "-birdRenderPreview") >= 0;
         var run = RunChecks();
         while (true)
         {
@@ -42,7 +44,8 @@ public sealed class UnityPreviewPlayChecks : MonoBehaviour
             yield return run.Current;
         }
         File.WriteAllText("core-checks-result.txt", "PASS: " + checks +
-            " desktop preview Play Mode checks; Unity " + Application.unityVersion + "; no rendering or hardware validation");
+            " desktop preview Play Mode checks; Unity " + Application.unityVersion +
+            (renderPreview ? "; camera rendering checked; no GUI input or hardware validation" : "; no rendering or hardware validation"));
         EditorApplication.Exit(0);
     }
 
@@ -83,6 +86,7 @@ public sealed class UnityPreviewPlayChecks : MonoBehaviour
             Check(Vector3.Distance(rays[h].GetPosition(1), cursors[h].position) < 0.00001f, "Ray must end at visual cursor");
         }
         Check(Vector3.Distance(cursors[0].position, cursors[1].position) > 0.1f, "Two hands must produce distinct positions");
+        if (renderPreview) CaptureCamera(camera, cursors, "preview-idle.png");
         Set("radius", 0.045f);
         for (int i = 0; i < 120; i++) yield return null;
         Check(birds[0].GetRange() > nearRange + 0.08f, "Opening synthetic hand must extend cursor range");
@@ -91,12 +95,14 @@ public sealed class UnityPreviewPlayChecks : MonoBehaviour
         Check(birds[0].GetClick() && birds[1].GetClick(), "Index penetration must select both cursors");
         Check(Read<int>("presses") == 2, "Held selection must produce only one press per hand");
         Check(cursors[0].localScale.x > 0.02f, "Selected cursor must enlarge");
+        if (renderPreview) CaptureCamera(camera, cursors, "preview-selected.png");
         Vector3 leftPosition = cursors[0].position, rightPosition = cursors[1].position;
         Set("tracking", false);
         for (int i = 0; i < 4; i++) yield return null;
         Check(!birds[0].GetClick() && !birds[1].GetClick(), "Pose loss must release both hands");
         Check(Read<int>("releases") == 2, "Continued pose loss must release exactly once per hand");
         Check(cursors[0].position == leftPosition && cursors[1].position == rightPosition, "Pose loss must hold both visual cursors");
+        if (renderPreview) CaptureCamera(camera, cursors, "preview-lost-pose.png");
         for (int h = 0; h < 2; h++)
         {
             Check(!rays[h].enabled && !tips[h].gameObject.activeSelf, "Pose loss must hide ray and index marker");
@@ -118,5 +124,52 @@ public sealed class UnityPreviewPlayChecks : MonoBehaviour
             "Removing the preview component must remove its generated camera and visuals");
         Check(materials[0] == null && materials[1] == null && jointMaterial == null, "Removing preview must release generated materials");
         Check(authoredChild != null && owner.transform.childCount == 1, "Cleanup must preserve unrelated authored children");
+    }
+
+    private void CaptureCamera(Camera camera, Transform[] cursors, string fileName)
+    {
+        Check(SystemInfo.graphicsDeviceType != UnityEngine.Rendering.GraphicsDeviceType.Null,
+            "Render validation requires a real graphics device");
+        var target = new RenderTexture(1280, 720, 24);
+        var pixels = new Texture2D(1280, 720, TextureFormat.RGB24, false);
+        var previousTarget = camera.targetTexture;
+        var previousActive = RenderTexture.active;
+        float previousAspect = camera.aspect;
+        try
+        {
+            camera.targetTexture = target;
+            camera.aspect = 1280f / 720f;
+            camera.Render();
+            RenderTexture.active = target;
+            pixels.ReadPixels(new Rect(0, 0, 1280, 720), 0, 0);
+            pixels.Apply();
+            File.WriteAllBytes(fileName, pixels.EncodeToPNG());
+            for (int h = 0; h < 2; h++)
+            {
+                Vector3 position = camera.WorldToViewportPoint(cursors[h].position);
+                Check(position.z > 0 && position.x > 0.02f && position.x < 0.98f &&
+                    position.y > 0.02f && position.y < 0.98f, "Cursor must be inside the camera frame: " + fileName);
+                int count = 0;
+                int cx = Mathf.RoundToInt(position.x * 1280), cy = Mathf.RoundToInt(position.y * 720);
+                for (int y = cy - 4; y <= cy + 4; y++)
+                    for (int x = cx - 4; x <= cx + 4; x++)
+                    {
+                        Color color = pixels.GetPixel(x, y);
+                        bool expected = h == 0 ? color.r < 0.2f && color.g > 0.7f && color.b > 0.7f :
+                            color.r > 0.7f && color.g > 0.2f && color.g < 0.7f && color.b > 0.4f;
+                        if (expected) count++;
+                    }
+                Check(count >= 3, "Expected cursor color must render near its projected position: " + fileName + " hand=" + h);
+            }
+        }
+        finally
+        {
+            camera.targetTexture = previousTarget;
+            camera.aspect = previousAspect;
+            RenderTexture.active = previousActive;
+            target.Release();
+            Destroy(target);
+            Destroy(pixels);
+        }
     }
 }
