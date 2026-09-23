@@ -11,7 +11,8 @@ public sealed class BirdDesktopPreview : MonoBehaviour
     private readonly Transform[] tips = new Transform[2];
     private readonly LineRenderer[] rays = new LineRenderer[2];
     private readonly Material[] materials = new Material[2];
-    private readonly BirdTrail[] trails = new BirdTrail[2];
+    private readonly BirdRadialTrail[] trails = new BirdRadialTrail[2];
+    private int trailCopies = 1;
     private Material trailMaterial;
     private Material jointMaterial;
     private Transform visualRoot;
@@ -48,12 +49,17 @@ public sealed class BirdDesktopPreview : MonoBehaviour
             rays[h].sharedMaterial = materials[h];
             rays[h].positionCount = 2;
             rays[h].startWidth = rays[h].endWidth = 0.002f;
-            var trailObject = new GameObject("Cursor trail " + h);
-            trailObject.transform.SetParent(visualRoot, false);
-            var trailRenderer = trailObject.AddComponent<LineRenderer>();
-            trailRenderer.sharedMaterial = trailMaterial;
-            trailRenderer.startWidth = trailRenderer.endWidth = 0.004f;
-            trails[h] = new BirdTrail(trailRenderer, materials[h].color);
+            var trailRenderers = new LineRenderer[8];
+            for (int copy = 0; copy < trailRenderers.Length; copy++)
+            {
+                var trailObject = new GameObject("Cursor trail " + h + " copy " + copy);
+                trailObject.transform.SetParent(visualRoot, false);
+                trailRenderers[copy] = trailObject.AddComponent<LineRenderer>();
+                trailRenderers[copy].sharedMaterial = trailMaterial;
+                trailRenderers[copy].startWidth = trailRenderers[copy].endWidth = 0.004f;
+            }
+            trails[h] = new BirdRadialTrail(trailRenderers, materials[h].color,
+                new Vector3(0, 0, 0.05f), Vector3.forward);
         }
     }
 
@@ -99,13 +105,14 @@ public sealed class BirdDesktopPreview : MonoBehaviour
             rays[h].SetPosition(0, birds[h].GetHandRoot());
             rays[h].SetPosition(1, birds[h].GetPosition());
             rays[h].enabled = tracking;
+            trails[h].SetCopies(trailCopies);
             trails[h].Update(birds[h].GetPosition(), tracking, Time.time);
         }
     }
 
     private void OnGUI()
     {
-        GUILayout.BeginArea(new Rect(16, 16, 330, 315), GUI.skin.box);
+        GUILayout.BeginArea(new Rect(16, 16, 330, 365), GUI.skin.box);
         GUILayout.Label("BIRD / DESKTOP PREVIEW");
         GUILayout.Label("Synthetic sphere points — no hand tracking");
         animate = GUILayout.Toggle(animate, "Animate orientation");
@@ -121,6 +128,8 @@ public sealed class BirdDesktopPreview : MonoBehaviour
             GUILayout.Label("Press edges: " + presses + " / Release edges: " + releases);
         }
         GUILayout.Label("Hide the pose while selected to test release.");
+        GUILayout.Label("Mandala copies: " + trailCopies + " (changes clear strokes)");
+        trailCopies = Mathf.RoundToInt(GUILayout.HorizontalSlider(trailCopies, 1, 8));
         if (GUILayout.Button("Clear trails")) foreach (var trail in trails) trail.Clear();
         GUILayout.EndArea();
     }

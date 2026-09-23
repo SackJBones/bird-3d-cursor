@@ -80,7 +80,7 @@ $method = if ($PlayMode) { 'UnityPreviewScene.RunPlayChecks' } elseif ($Preview)
 $arguments = @('-batchmode', '-nographics', '-projectPath', ('"' + $project + '"'), '-executeMethod', $method, '-logFile', ('"' + $log + '"'))
 if ($RenderPreview) {
     $arguments = @($arguments | Where-Object { $_ -ne '-nographics' }) + '-birdRenderPreview'
-    foreach ($capture in @('preview-idle.png', 'preview-selected.png', 'preview-lost-pose.png', 'preview-trails.png', 'preview-feedback.png')) {
+    foreach ($capture in @('preview-idle.png', 'preview-selected.png', 'preview-lost-pose.png', 'preview-trails.png', 'preview-feedback.png', 'preview-mandala.png')) {
         $capturePath = Join-Path $project $capture
         if (Test-Path -LiteralPath $capturePath) { Remove-Item -LiteralPath $capturePath }
     }

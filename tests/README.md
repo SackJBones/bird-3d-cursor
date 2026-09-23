@@ -74,3 +74,6 @@ Feedback coverage drives BirdInteractableVisual from the real interactable: hove
 ### Optional XR Hands assembly
 
 The XR Hands adapter source is now Runtime/XRHands/OpenXRHand.cs. Its asmdef is constrained by BIRD_OPENXR_ENABLED and references Unity.XR.Hands outside the SDK-free core. Test-OpenXRHand.ps1 still uses API doubles; it does not validate assembly linking against the real SDK. Package import and Windows player checks exercise the symbol-disabled, SDK-absent configuration. AllSources includes the moved source with its guard disabled. Real SDK-enabled compilation and device tracking remain pending.
+
+
+The latest preview rendering run passes 163 checks, including radial rotation about a translated origin, per-copy point budgets, unchanged/changed multiplicity, inactive copies, tracking loss, invalid input, clear, duplicate-renderer rejection and live six-copy preview integration. RenderPreview also produces preview-mandala.png. Camera rendering does not exercise IMGUI controls. Real hardware performance remains unmeasured.

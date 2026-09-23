@@ -115,7 +115,8 @@ public sealed class UnityPreviewPlayChecks : MonoBehaviour
         Check(Read<int>("presses") == 2 && Read<int>("releases") == 2, "Unpressed recovery must not add click edges");
         Check(rays[0].enabled && tips[0].gameObject.activeSelf && joints[1, 15].gameObject.activeSelf, "Recovery must restore input visuals");
         CheckTrailBudget();
-        var trails = Read<BirdTrail[]>("trails");
+        CheckRadialTrail();
+        var trails = Read<BirdRadialTrail[]>("trails");
         if (renderPreview)
         {
             for (int i = 0; i < 80; i++)
@@ -125,6 +126,14 @@ public sealed class UnityPreviewPlayChecks : MonoBehaviour
             }
             Check(trails[0].Count > 4 && trails[1].Count > 4, "Animated preview must accumulate trails for both hands");
             CaptureCamera(camera, cursors, "preview-trails.png");
+            Set("trailCopies", 6);
+            for (int i = 0; i < 80; i++)
+            {
+                Set("phase", i * 0.07f);
+                yield return new WaitForSeconds(0.025f);
+            }
+            Check(trails[0].Copies == 6 && trails[1].Copies == 6, "Preview must apply live multiplicity to both hands");
+            CaptureCamera(camera, cursors, "preview-mandala.png");
         }
         Set("tracking", false);
         for (int i = 0; i < 3; i++) yield return null;
@@ -416,6 +425,54 @@ public sealed class UnityPreviewPlayChecks : MonoBehaviour
             Check(trail.Count == 1, "Distance threshold must reject tiny movements");
             trail.Update(Vector3.right, true, 0.4f);
             Check(trail.Count == 2, "Valid motion after thresholds must produce a segment");
+        }
+        finally { Destroy(owner); }
+    }
+
+    private void CheckRadialTrail()
+    {
+        var owner = new GameObject("Radial trail check");
+        var lines = new LineRenderer[4];
+        try
+        {
+            for (int i = 0; i < lines.Length; i++)
+            {
+                var child = new GameObject("Copy " + i);
+                child.transform.SetParent(owner.transform);
+                lines[i] = child.AddComponent<LineRenderer>();
+            }
+            var origin = new Vector3(2, 3, 4);
+            var trail = new BirdRadialTrail(lines, Color.cyan, origin, Vector3.forward, 3, 2);
+            trail.SetCopies(4);
+            trail.Update(origin + Vector3.right, true, 0);
+            Check(Vector3.Distance(lines[1].GetPosition(0), origin + Vector3.up) < 0.00001f,
+                "Radial duplication must rotate around the supplied world origin");
+            Check(Vector3.Distance(lines[2].GetPosition(0), origin + Vector3.left) < 0.00001f,
+                "Opposite copy must preserve radius");
+            for (int i = 1; i < 10; i++) trail.Update(origin + Vector3.right * (1 + i * 0.1f), true, i * 0.1f);
+            Check(Array.TrueForAll(lines, line => line.positionCount == 3), "Every copy must obey its point budget");
+            trail.SetCopies(4);
+            Check(trail.Count == 3, "Unchanged multiplicity must preserve history");
+            trail.SetCopies(2);
+            Check(Array.TrueForAll(lines, line => line.positionCount == 0), "Changed multiplicity must clear every old stroke");
+            trail.Update(origin + Vector3.right, true, 1);
+            Check(lines[0].positionCount == 1 && lines[1].positionCount == 1 && lines[2].positionCount == 0 && lines[3].positionCount == 0,
+                "Inactive copies must remain empty");
+            trail.Update(origin, false, 1.1f);
+            Check(Array.TrueForAll(lines, line => line.positionCount == 0), "Tracking loss must clear all radial strokes");
+            trail.Update(origin + Vector3.right, true, 2);
+            trail.Update(new Vector3(float.NaN, 0, 0), true, 2.1f);
+            Check(Array.TrueForAll(lines, line => line.positionCount == 0), "Invalid positions must clear radial strokes");
+            trail.Update(origin + Vector3.right, true, 3);
+            trail.Clear();
+            Check(Array.TrueForAll(lines, line => line.positionCount == 0), "Explicit clear must clear every copy");
+            bool rejected = false;
+            try { trail.SetCopies(5); } catch (ArgumentOutOfRangeException) { rejected = true; }
+            Check(rejected && trail.Copies == 2, "Invalid multiplicity must leave configuration unchanged");
+            rejected = false;
+            try { new BirdRadialTrail(new[] { lines[0], lines[0] }, Color.white, origin, Vector3.forward); }
+            catch (ArgumentException) { rejected = true; }
+            Check(rejected, "Copies must not share a renderer");
         }
         finally { Destroy(owner); }
     }
