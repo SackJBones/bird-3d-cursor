@@ -41,3 +41,7 @@ Both build and player must exit successfully and write fresh PASS results. Build
 ## Backend registration checks
 
 The editor suite also covers missing constructors, availability, both chiralities, replacement, null constructor/output rejection and removal. The OpenXR API-double suite explicitly registers its adapter and creates both hands through the factory; doubles do not execute Unity initialization callbacks. The standalone player instead uses a synthetic backend registered by a real `BeforeSceneLoad` callback, then creates its Bird through the factory in Start. This validates initialization in a fresh player; repeated Play Mode entry with domain reload disabled and actual SDK adapter loading remain untested.
+
+## Interactive desktop preview
+
+Use `-Package -Preview` with a separate generated directory, such as `../bird-3d-cursor-projects/Validation/Preview2020`. This imports the UPM package, copies only its optional DesktopPreview sample into Assets, and compiles/generates `Assets/BirdDesktopPreview.unity`. The runner's PASS means compilation and scene generation only. Open that project in Unity 2020.3.33f1, open the scene, and enter Play Mode to inspect the visual controls. This mode neither builds a player nor reruns the editor assertions. All generated scene data remains in the demo repository's ignored Validation folder.

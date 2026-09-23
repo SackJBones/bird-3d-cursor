@@ -4,7 +4,8 @@ param(
     [Parameter(Mandatory = $true)][string]$UnityVersion,
     [switch]$AllSources,
     [switch]$Package,
-    [switch]$BuildPlayer
+    [switch]$BuildPlayer,
+    [switch]$Preview
 )
 $ErrorActionPreference = 'Stop'
 $repo = Split-Path $PSScriptRoot -Parent
@@ -12,7 +13,8 @@ $project = [IO.Path]::GetFullPath($ProjectPath)
 $marker = Join-Path $project '.bird-generated-validation'
 if ($AllSources -and $Package) { throw 'Choose either AllSources or Package.' }
 if ($BuildPlayer -and !$Package) { throw 'BuildPlayer requires Package mode.' }
-$mode = if ($BuildPlayer) { 'package-player' } elseif ($Package) { 'package' } elseif ($AllSources) { 'all-sources' } else { 'core' }
+if ($Preview -and (!$Package -or $BuildPlayer)) { throw 'Preview requires Package and cannot be combined with BuildPlayer.' }
+$mode = if ($Preview) { 'preview' } elseif ($BuildPlayer) { 'package-player' } elseif ($Package) { 'package' } elseif ($AllSources) { 'all-sources' } else { 'core' }
 if ((Test-Path $project) -and !(Test-Path $marker)) {
     throw 'Refusing to modify an existing project without the Bird validation marker.'
 }
@@ -53,11 +55,15 @@ if ($BuildPlayer) {
     Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityPlayerBuild.cs') -Destination (Join-Path $project 'Assets/Editor/UnityPlayerBuild.cs')
     Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityPlayerSmoke.cs') -Destination (Join-Path $project 'Assets/UnityPlayerSmoke.cs')
 }
+if ($Preview) {
+    Copy-Item -LiteralPath (Join-Path $repo 'Unity/BirdPlugin/Samples~/DesktopPreview/BirdDesktopPreview.cs') -Destination (Join-Path $project 'Assets/BirdDesktopPreview.cs')
+    Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityPreviewScene.cs') -Destination (Join-Path $project 'Assets/Editor/UnityPreviewScene.cs')
+}
 $result = Join-Path $project 'core-checks-result.txt'
 # Replace any previous result so an import/license failure cannot appear to pass.
 Set-Content -LiteralPath $result -Value 'PENDING: Unity has not completed this run.'
 $log = Join-Path $project 'core-checks.log'
-$method = if ($BuildPlayer) { 'UnityPlayerBuild.Run' } else { 'UnityCoreChecks.Run' }
+$method = if ($Preview) { 'UnityPreviewScene.Create' } elseif ($BuildPlayer) { 'UnityPlayerBuild.Run' } else { 'UnityCoreChecks.Run' }
 $arguments = @('-batchmode', '-nographics', '-projectPath', ('"' + $project + '"'), '-executeMethod', $method, '-logFile', ('"' + $log + '"'))
 $process = Start-Process -FilePath $UnityEditor -ArgumentList $arguments -WindowStyle Hidden -PassThru
 if (!$process.WaitForExit(180000)) {

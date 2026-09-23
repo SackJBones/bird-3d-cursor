@@ -8,6 +8,10 @@ In Unity Package Manager, choose **Add package from disk** and select this folde
 
 Only the built-in physics and IMGUI modules are required by the base package. Create a custom `Bird3DCursor.Hand` implementation to supply poses directly to `Bird3DCursor.Bird`, or use synthetic input for evaluation. No hardware adapter is automatically enabled, and a BirdProvider needs a configured backend and its scene references before it can run.
 
+## Desktop preview
+
+The Package Manager Samples section offers **Desktop Preview**, a small synthetic two-cursor scene component with orientation, radius, selection and tracking-loss controls. Import it and follow its README in a separate empty scene. It requires no headset or SDK. Compilation and scene generation are verified; interactive runtime and visual review are still pending.
+
 ## Tracking backends are still being migrated
 
 Leap, Oculus OVR and XR Hands source remains guarded by its existing BIRD scripting symbols. Enabling a symbol requires the corresponding SDK **and explicit SDK assembly references in Bird3D.Runtime**; optional backend assembly separation and tested installation instructions are not finished. The configuration menu sets symbols only; it does not install SDKs or add those references. Do not treat this base-package test as proof that enabling any of these adapters compiles or runs. Ultraleap is no longer downloaded unconditionally for every user.

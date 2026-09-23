@@ -19,6 +19,13 @@
       "name": "Aubrey Simonson",
       "email": "asimonso@mit.edu"
     },
+    "samples": [
+      {
+        "displayName": "Desktop Preview",
+        "description": "Two synthetic Bird cursors with pose, radius and selection controls. No tracking SDK or headset required.",
+        "path": "Samples~/DesktopPreview"
+      }
+    ],
     "dependencies": {
       "com.unity.modules.physics": "1.0.0",
       "com.unity.modules.imgui": "1.0.0"
