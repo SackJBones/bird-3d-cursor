@@ -90,3 +90,6 @@ Runtime interaction setup checkpoint: 137 headless Play Mode checks pass on Unit
 
 
 Unity 2022.3.22f1 validation: the unchanged -Package runner passes all 75 core/factory/assembly checks in a fresh Package2022 project. This is SDK-free package import and execution in the VRChat-supported editor; it does not establish Udon compatibility or SDK-enabled hand tracking. UnityVRChatWorldChecks.cs is a separate one-time scaffold generator for a dedicated Worlds SDK project; it refuses to replace an existing feasibility scene. It checks actual Worlds/UdonSharp C# assembly references and scene construction, not Udon bytecode or a client build.
+
+
+VRChat hand-data diagnostic: UnityVRChatProbeChecks.Run explicitly creates its UdonSharp program asset and uses the SDK synchronous compiler before serializing a backing behaviour. The compiler exposed unsupported HumanBodyBones array indexing and TextMesh.text; the probe uses integer bone IDs and UnityEngine.UI.Text instead. ValidateSaved is a separate read-only scene-reopen check. These are real SDK compiler/serialization checks, not ClientSim runtime tests. See Integrations/VRChat/README.md for source/meta restoration.
