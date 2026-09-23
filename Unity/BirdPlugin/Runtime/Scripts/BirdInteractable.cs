@@ -176,10 +176,26 @@ namespace Bird3DCursor {
             OnDeselect.Invoke();
         }
 
+        private void EndSelection()
+        {
+            if (!following) return;
+            following = false;
+            if (motionType == MotionType.SnapToCollider && thisCollider != null) thisCollider.enabled = true;
+            Deselect();
+        }
+
+        private void OnDisable()
+        {
+            selectingMe = false;
+            EndSelection();
+        }
+
         void Update()
         {
             if (bird == null || bird.GetBird() == null)
             {
+                selectingMe = false;
+                EndSelection();
                 return;
             }
             //this bit is ugly and was not written for human eyes
@@ -197,7 +213,7 @@ namespace Bird3DCursor {
                     following = true;
                     Select();
                 }
-                if (!bird.GetClick())
+                if (following && !bird.GetClick())
                 {
                     following = false;
                     Deselect();
@@ -274,8 +290,7 @@ namespace Bird3DCursor {
             }
             else
             {
-                //if motion type is none, this should happen.
-                following = false;
+                // Event-only targets still retain selection until their activation rule ends it.
                 return;
             }
             if (following)
