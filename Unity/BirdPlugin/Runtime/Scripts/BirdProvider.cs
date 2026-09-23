@@ -24,13 +24,18 @@ namespace Bird3DCursor
         private string associatedUser;
         public static string defaultUser = "DefaultUser";
         private string chiralityStr;
+        private GameObject ownedBirdMarker, ownedTargetSphere;
 
         void Start()
         {
-            birdMarker = Instantiate(birdMarker);
-            targetUnitSphere = Instantiate(targetUnitSphere);
+            if (associatedUser == null) associatedUser = defaultUser;
+            chiralityStr = chirality == Hand.Chirality.Left ? "Left" : "Right";
             Hand apiSpecificHand = HandFactory.CreateHand(chirality, handTrackingAPI);
             bird = new Bird(apiSpecificHand);
+            ownedBirdMarker = Instantiate(birdMarker);
+            birdMarker = ownedBirdMarker;
+            ownedTargetSphere = Instantiate(targetUnitSphere);
+            targetUnitSphere = ownedTargetSphere;
             int numFitPoints = bird.GetNumFitPoints();
             // makes debug markers
             debugMarkers = new GameObject[numFitPoints];
@@ -39,11 +44,9 @@ namespace Bird3DCursor
                 debugMarkers[i] = Instantiate(debugMarker);
             }
             hitMarker = Instantiate(debugMarker);
-            chiralityStr = chirality == Hand.Chirality.Left ? "Left" : "Right";
             hitMarker.name = $"{chiralityStr}HitMarker";
             debugGeometryVisible(showDebug);
             BirdManager.RegisterBird(this);
-            associatedUser = defaultUser;
         }
 
         void Update()
@@ -134,7 +137,20 @@ namespace Bird3DCursor
 
         void OnDestroy()
         {
-            BirdManager.UnregisterBird(this);
+            try
+            {
+                BirdManager.UnregisterBird(this);
+            }
+            finally
+            {
+                // These references track only clones created by this component. Public fields may
+                // have been reassigned, and source prefabs/materials remain owned by the caller.
+                if (ownedBirdMarker != null) Destroy(ownedBirdMarker);
+                if (ownedTargetSphere != null) Destroy(ownedTargetSphere);
+                if (hitMarker != null) Destroy(hitMarker);
+                if (debugMarkers != null)
+                    foreach (var marker in debugMarkers) if (marker != null) Destroy(marker);
+            }
         }
 
         public float GetRange()

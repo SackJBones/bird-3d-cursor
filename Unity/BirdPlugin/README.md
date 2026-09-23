@@ -51,3 +51,9 @@ OnDeselect is a cleanup/release signal and can result from lost tracking or disa
 RegisterBird adds each provider once before notifying OnBirdCreated; UnregisterBird removes it before OnBirdDestroyed and ignores repeated removal. List queries inside those callbacks therefore observe the changed membership. Null registration/creation arguments are rejected; null cleanup arguments are ignored. Use these methods instead of mutating the legacy public birds list directly.
 
 Detector cleanup tolerates empty trigger subscriber lists. DestroyUnusedBirdDetectors conservatively retains all detectors while either global trigger event has listeners: a delegate target cannot tell which providers a listener uses. Once both events have no listeners it can remove the registered providers' detectors. Explicit unregister/destroy still removes that provider's detector. Missing BirdDetectorLayer now leaves no partial object behind. Detector name collisions, physics placement/sizing and static-state reset across play sessions remain separate audit items.
+
+## Provider startup and owned visuals
+
+Before Start, configure the tracking backend, chirality, marker/debug/sphere prefabs and materials. `SetAssociatedUser` can set an identity before startup; otherwise the provider uses defaultUser. Identity, chirality and the solver are initialized before OnBirdCreated, so callbacks can query the registered provider by user immediately. Pose processing begins in Update.
+
+Destroying the provider component unregisters it and removes its generated cursor, sphere, fitting-point and hit markers. Cleanup tracks the original clones separately from public fields, so replacing those fields cannot cause the source prefab to be destroyed or the original clones to be forgotten. Source objects and materials remain caller-owned. Disabling alone is not destruction; disable/re-enable behavior, invalid prefab configuration and SDK-backed startup remain separate validation work.

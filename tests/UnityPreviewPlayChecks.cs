@@ -271,6 +271,68 @@ public sealed class UnityPreviewPlayChecks : MonoBehaviour
         BirdManager.OnBirdDestroyed -= removedHandler;
         Destroy(target);
         Destroy(providerObject);
+        // Exercise actual Start/Update/OnDestroy, with a registered synthetic backend and real prefab clones.
+        const BirdHandAPI startupBackend = (BirdHandAPI)123457;
+        var syntheticHands = Read<Hand[]>("hands");
+        Hand.Chirality requestedSide = Hand.Chirality.Right;
+        HandFactory.RegisterBackend(startupBackend, side => {
+            requestedSide = side;
+            return syntheticHands[side == Hand.Chirality.Left ? 0 : 1];
+        });
+        Set("tracking", true);
+        Set("pressed", false);
+        var template = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        template.name = "Provider marker template";
+        template.transform.position = Vector3.one * 100;
+        template.transform.localScale = Vector3.one * 0.01f;
+        template.GetComponent<Collider>().enabled = false;
+        for (int h = 0; h < 2; h++)
+        {
+            var startupOwner = new GameObject("Full provider startup " + h);
+            startupOwner.SetActive(false);
+            var startup = startupOwner.AddComponent<BirdProvider>();
+            startup.handTrackingAPI = startupBackend;
+            startup.chirality = h == 0 ? Hand.Chirality.Left : Hand.Chirality.Right;
+            startup.birdMarker = startup.targetUnitSphere = startup.debugMarker = template;
+            startup.birdMaterial = Read<Material[]>("materials")[0];
+            startup.birdSelectedMaterial = Read<Material[]>("materials")[1];
+            string expectedUser = h == 0 ? BirdProvider.defaultUser : "CustomStartupUser";
+            if (h == 1) startup.SetAssociatedUser(expectedUser);
+            bool callbackReady = false;
+            Action<BirdProvider> startupHandler = value => {
+                if (value == startup) callbackReady = value.GetAssociatedUser() == expectedUser &&
+                    value.GetChiralityStr() == (h == 0 ? "Left" : "Right") && value.GetBird() != null &&
+                    BirdManager.GetBirdsForUser(expectedUser).Contains(value);
+            };
+            BirdManager.OnBirdCreated += startupHandler;
+            startupOwner.SetActive(true);
+            for (int i = 0; i < 4; i++) yield return null;
+            BirdManager.OnBirdCreated -= startupHandler;
+            Check(callbackReady, "Provider registration callback must see initialized identity and solver; hand=" + h);
+            Check(startup.GetAssociatedUser() == expectedUser, "Startup must preserve a caller-supplied user ID");
+            Check(requestedSide == startup.chirality, "Provider startup must request the correct backend hand");
+            Check(startup.GetBird() != null && startup.birdMarker != template, "Provider must construct its solver and clone markers");
+            Check(Vector3.Distance(startup.birdMarker.transform.position, startup.GetPosition()) < 0.00001f,
+                "Provider Update must move its visible marker to the solver position");
+            var marker = startup.birdMarker;
+            var sphere = startup.targetUnitSphere;
+            var debug = (GameObject[])typeof(BirdProvider).GetField("debugMarkers", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(startup);
+            var hit = (GameObject)typeof(BirdProvider).GetField("hitMarker", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(startup);
+            Check(debug.Length == 16 && !sphere.activeSelf && !debug[0].activeSelf, "Provider must create and initially hide debug geometry");
+            startup.enabled = false;
+            // Cleanup must use ownership, not public references which a caller can replace.
+            startup.birdMarker = startup.targetUnitSphere = template;
+            Destroy(startup);
+            for (int i = 0; i < 4; i++) yield return null;
+            Check(marker == null && sphere == null && hit == null && Array.TrueForAll(debug, value => value == null),
+                "Destroying a provider component must remove every generated marker");
+            Check(template != null && startupOwner != null, "Provider cleanup must preserve caller-owned objects");
+            Check(!BirdManager.GetBirdsForUser(expectedUser).Exists(value => value != null && value.gameObject == startupOwner),
+                "Destroyed provider must leave the manager registry");
+            Destroy(startupOwner);
+        }
+        HandFactory.UnregisterBackend(startupBackend);
+        Destroy(template);
         var materials = Read<Material[]>("materials");
         var jointMaterial = Read<Material>("jointMaterial");
         var trailMaterial = Read<Material>("trailMaterial");
