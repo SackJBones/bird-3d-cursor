@@ -87,3 +87,6 @@ The app identifier is org.bird3d.questsmoke and the display name is Bird Quest S
 
 
 Runtime interaction setup checkpoint: 137 headless Play Mode checks pass on Unity 2020.3.33f1. The fixture now wires Selected/Deselected through the public API and exercises legacy null snap lists, fresh no-listener targets, ignored invalid snap entries and collider-free snap mode. This run does not rerun the earlier 163-check camera-render suite or update the installed Quest APK.
+
+
+Unity 2022.3.22f1 validation: the unchanged -Package runner passes all 75 core/factory/assembly checks in a fresh Package2022 project. This is SDK-free package import and execution in the VRChat-supported editor; it does not establish Udon compatibility or SDK-enabled hand tracking. UnityVRChatWorldChecks.cs is a separate one-time scaffold generator for a dedicated Worlds SDK project; it refuses to replace an existing feasibility scene. It checks actual Worlds/UdonSharp C# assembly references and scene construction, not Udon bytecode or a client build.

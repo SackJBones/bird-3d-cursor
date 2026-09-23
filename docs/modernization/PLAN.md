@@ -33,7 +33,10 @@ Checked against official pages on 2026-09-18/19; revisit before implementation i
 - [x] Establish recurring app task; verify a real scheduled pass can read/write, run tests and push. Record its run evidence separately from manual testing.
 - [ ] Audit math, click hysteresis, invalid/degenerate poses, tracking loss/recovery, coordinate spaces and allocation behavior. Add deterministic recorded/synthetic pose tests, preserving reference behavior unless an intentional change is documented.
 - [ ] Modernize packaging: isolated core, optional tracking adapters, correct runtime/editor assembly boundaries, stable GUIDs, minimal dependencies, clear installation and migration instructions. Fresh-project import and player build must pass. Replace DOTween dependency with small owned state-transition tools where relevant, not copied third-party internals.
-- [ ] Install VRChat-supported editor/Creator Companion SDK and create a minimal hand-data feasibility world. Prove two-hand cursor/click behavior with real hardware before making a polished world. Provide a clearly labeled controller/desktop fallback where true joint input is unavailable.
+- [x] Install VRChat-supported Unity 2022.3.22f1 editor and Creator Companion (verified 2026-09-23).
+- [x] Configure Worlds SDK 3.10.5 and validate its C# assembly import in Unity 2022.3.22f1.
+- [x] Create the BirdWorld project and save its initial floor/spawn/world-descriptor scaffold in the heavy repository.
+- [ ] Add the hand-data probe and validate a minimal hand-data feasibility world under Udon/ClientSim. Prove two-hand cursor/click behavior with real hardware before making a polished world. Provide a clearly labeled controller/desktop fallback where true joint input is unavailable.
 - [ ] Bird World: automatic or single-action activation, good defaults, two cursors, visible trails, a few delightful interactions and accessible conventional configuration. Test remote visibility, late join, ownership, rejoin, tracking loss and avatar changes on PC and Android/Quest.
 - [ ] Expression: bounded fading trails, mandala duplication with live multiplicity/clear controls, fireball and recovered dodecahedral color picker. Profile memory/render cost and prevent unbounded allocations, geometry and network traffic.
 - [ ] Rich UI: composable interaction/state styling, hover/point-through/plunge/click events, tweened affordances, nested menus and Bird-driven settings alongside conventional settings. Prefer composition unless inheritance provides concrete value.
@@ -96,3 +99,19 @@ Did not launch the installed app, honoring the user's test-later choice. Actual 
 Made BirdInteractable usable through ordinary runtime setup: initialized optional snap arrays/events, added Selected and Deselected listener properties backed by existing serialized fields, tolerated legacy null lists and ignored null/non-collider entries, guarded SnapToCollider's own-collider toggle for renderer-only targets. Existing Inspector event names and empty-cache/all-surfaces behavior are preserved. Documented listener lifecycle, cancellation semantics and Start-time cache behavior.
 
 Validation: 137 actual Unity 2020.3.33f1 headless Play Mode checks passed, including six new runtime-setup checks and existing lifecycle/feedback/trail coverage. Existing interaction tests now use the public event API rather than reflection. No rendering rerun, headset polling, app launch or replacement of the installed Quest smoke APK. User chose visual testing later; that remains pending. Next integrate Bird-driven controls into the preview or continue optional adapter packaging; the installed headset smoke build remains available for the user's physical test.
+
+
+## Modern editor gate cleared - 2026-09-23
+
+User-provided installation update verified: Unity 2022.3.22f1 is installed under Program Files/Unity/Hub/Editor with AndroidPlayer and Windows standalone support; Creator Companion is installed under LocalAppData/Programs/VRChat Creator Companion. This supersedes the earlier unavailable-editor gate. Android SDK/NDK/OpenJDK submodules are still absent according to the installation handoff, so new-editor Quest builds may need those modules. Proceed with PC Worlds SDK work now. The feasibility world and physical two-hand validation remain separate unchecked criteria.
+
+
+## VRChat project foundation - 2026-09-23, 20:55 UTC cycle
+
+Verified the user-installed Unity 2022.3.22f1 and Creator Companion; editor installation gate is complete. Bird's existing SDK-free local UPM package passes all 75 checks in a fresh Unity 2022.3.22f1 project. Installed .NET SDK 8.0.425 under LocalAppData/BirdTools/dotnet8 and official vrchat.vpm.cli 0.1.28 under BirdTools/vpm (no PATH or system SDK replacement). Set DOTNET_ROOT to that local runtime when invoking this vpm.exe.
+
+Created heavy-repository BirdWorld using official VPM World template, then updated Worlds/Base to 3.10.5 and locked them in vpm-manifest.json. VPM emitted a failed-removal message for absent standalone com.vrchat.clientsim but reported successful resolution. Unity actually imported the Worlds/UdonSharp C# assemblies and ran the new lightweight tests/UnityVRChatWorldChecks.cs generator successfully, saving Assets/BirdWorld/Scenes/BirdFeasibility.unity with floor, spawn, descriptor, light and landmark. Scene overwrite is refused. SDK packages restore with VPM; generated caches/utility copies/builds/logs are ignored. The standard VPM resolver stays included with its license.
+
+This completes editor/tooling, SDK-import and initial scene-scaffold substeps only. No Bird Udon program was compiled, no ClientSim behavior or VRChat client build was tested, and no world upload/authentication occurred. Existing standalone Quest smoke install was not polled, launched or changed. Next: add a small UdonSharp avatar hand-bone diagnostic, compile it with the real SDK, inspect missing-bone/scale behavior in ClientSim, then proceed toward a two-hand solver port and physical feasibility checks. Android SDK/NDK/JDK for the new editor remain a separate setup item.
+
+Official setup references: https://vcc.docs.vrchat.com/vpm/cli/ and https://creators.vrchat.com/sdk/upgrade/current-unity-version/ (checked this pass).
