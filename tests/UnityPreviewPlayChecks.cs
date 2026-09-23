@@ -215,6 +215,60 @@ public sealed class UnityPreviewPlayChecks : MonoBehaviour
         Physics.SyncTransforms();
         for (int i = 0; i < 3; i++) yield return null;
         Check(selections == 7 && deselections == 7, "Touch exit must deselect once");
+        provider.SetAssociatedUser("ManagerLifecycleCheck");
+        var detector = new GameObject("BirdDetector_ManagerLifecycleCheck_");
+        detector.transform.SetParent(provider.transform);
+        // Reproduce cleanup with neither trigger event subscribed.
+        BirdManager.DestroyBirdDetector(provider);
+        for (int i = 0; i < 3; i++) yield return null;
+        Check(detector == null, "Detector cleanup must work without trigger subscribers");
+        int created = 0, removed = 0;
+        bool visibleOnCreate = false, absentOnRemove = false;
+        Action<BirdProvider> createdHandler = bird => {
+            if (bird != provider) return;
+            created++;
+            visibleOnCreate = BirdManager.GetAllBirds().Contains(bird);
+        };
+        Action<BirdProvider> removedHandler = bird => {
+            if (bird != provider) return;
+            removed++;
+            absentOnRemove = !BirdManager.GetAllBirds().Contains(bird);
+        };
+        BirdManager.OnBirdCreated += createdHandler;
+        BirdManager.OnBirdDestroyed += removedHandler;
+        BirdManager.RegisterBird(provider);
+        BirdManager.RegisterBird(provider);
+        Check(created == 1 && BirdManager.GetBirdsForUser("ManagerLifecycleCheck").Count == 1,
+            "Duplicate registration must not duplicate entries or events");
+        Check(visibleOnCreate, "Created event must observe the registered Bird");
+        if (LayerMask.NameToLayer("BirdDetectorLayer") == -1)
+        {
+            BirdManager.CreateBirdDetector(provider);
+            Check(GameObject.Find("BirdDetector_ManagerLifecycleCheck_") == null,
+                "Missing detector layer must not leave a partial object");
+        }
+        detector = new GameObject("BirdDetector_ManagerLifecycleCheck_");
+        detector.transform.SetParent(provider.transform);
+        Action<BirdProvider, Collider> triggerHandler = (bird, collider) => { };
+        BirdManager.BirdTriggerEnter += triggerHandler;
+        BirdManager.DestroyUnusedBirdDetectors();
+        for (int i = 0; i < 3; i++) yield return null;
+        Check(detector != null, "An enter-only global subscriber must retain detectors");
+        BirdManager.BirdTriggerEnter -= triggerHandler;
+        BirdManager.BirdTriggerExit += triggerHandler;
+        BirdManager.DestroyUnusedBirdDetectors();
+        for (int i = 0; i < 3; i++) yield return null;
+        Check(detector != null, "An exit-only global subscriber must retain detectors");
+        BirdManager.BirdTriggerExit -= triggerHandler;
+        BirdManager.DestroyUnusedBirdDetectors();
+        for (int i = 0; i < 3; i++) yield return null;
+        Check(detector == null, "Unused detector cleanup must work with empty event lists");
+        BirdManager.UnregisterBird(provider);
+        BirdManager.UnregisterBird(provider);
+        Check(removed == 1 && !BirdManager.GetAllBirds().Contains(provider), "Unregister must remove and notify only once");
+        Check(absentOnRemove, "Destroyed event must observe the Bird already removed");
+        BirdManager.OnBirdCreated -= createdHandler;
+        BirdManager.OnBirdDestroyed -= removedHandler;
         Destroy(target);
         Destroy(providerObject);
         var materials = Read<Material[]>("materials");

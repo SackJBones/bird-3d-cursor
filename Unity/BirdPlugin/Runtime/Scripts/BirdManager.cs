@@ -16,13 +16,16 @@ namespace Bird3DCursor
 
         public static void RegisterBird(BirdProvider bird)
         {
-            OnBirdCreated?.Invoke(bird);
+            if (bird == null) throw new ArgumentNullException(nameof(bird));
+            if (birds.Contains(bird)) return;
             birds.Add(bird);
+            OnBirdCreated?.Invoke(bird);
         }
 
         // Create Bird detector for a previously registered Bird
         public static void CreateBirdDetector(BirdProvider bird)
         {
+            if (bird == null) throw new ArgumentNullException(nameof(bird));
             // error if this bird is not already registered
             if (!birds.Contains(bird))
             {
@@ -31,16 +34,16 @@ namespace Bird3DCursor
             }
             // do nothing if there is already a detector for this bird
             if (GameObject.Find(DetectorName(bird)) != null) return;
-            GameObject birdDetector = new GameObject(DetectorName(bird));
-            birdDetector.transform.SetParent(bird.transform);
-            birdDetector.transform.localPosition = Vector3.zero;
-
             int birdDetectorLayer = LayerMask.NameToLayer("BirdDetectorLayer");
             if (birdDetectorLayer == -1)
             {
                 Debug.LogWarning("The BirdDetectorLayer has not been set up in the Unity editor. Please add a new layer called BirdDetectorLayer.");
                 return;
             }
+
+            GameObject birdDetector = new GameObject(DetectorName(bird));
+            birdDetector.transform.SetParent(bird.transform);
+            birdDetector.transform.localPosition = Vector3.zero;
 
             birdDetector.layer = birdDetectorLayer;
 
@@ -57,39 +60,37 @@ namespace Bird3DCursor
 
         public static void DestroyBirdDetector(BirdProvider bird)
         {
+            if (bird == null) return;
             // do nothing if there is no detector for this bird
             GameObject detector = GameObject.Find(DetectorName(bird));
             if (detector == null) return;
             // clear out registered unity actions
-            for (int i = BirdTriggerEnter.GetInvocationList().Length - 1; i >= 0; i--)
+            foreach (var action in BirdTriggerEnter?.GetInvocationList() ?? Array.Empty<Delegate>())
             {
-                if (ReferenceEquals(BirdTriggerEnter.GetInvocationList()[i].Target, bird))
+                if (ReferenceEquals(action.Target, bird))
                 {
-                    BirdTriggerEnter -= (Action<BirdProvider, Collider>)BirdTriggerEnter.GetInvocationList()[i];
+                    BirdTriggerEnter -= (Action<BirdProvider, Collider>)action;
                 }
             }
-            for (int i = BirdTriggerExit.GetInvocationList().Length - 1; i >= 0; i--)
+            foreach (var action in BirdTriggerExit?.GetInvocationList() ?? Array.Empty<Delegate>())
             {
-                if (ReferenceEquals(BirdTriggerExit.GetInvocationList()[i].Target, bird))
+                if (ReferenceEquals(action.Target, bird))
                 {
-                    BirdTriggerExit -= (Action<BirdProvider, Collider>)BirdTriggerExit.GetInvocationList()[i];
+                    BirdTriggerExit -= (Action<BirdProvider, Collider>)action;
                 }
             }
             Destroy(detector);
         }
 
-        // call this method after removing references to Birds that have been set up with bird detectors to destroy the detectors if no references remain in any methods registered with the unity actions BirdTriggerEnter or BirdTriggerExit
+        // Global subscribers may inspect any Bird. Their delegate Target does not establish ownership.
+        // Conservatively retain detectors until both global trigger events have no subscribers.
         public static void DestroyUnusedBirdDetectors()
         {
+            if (BirdTriggerEnter != null || BirdTriggerExit != null) return;
             foreach (BirdProvider bird in birds)
             {
                 if (bird == null) continue;
-                //filter for this bird to see if any are left
-                if (Array.FindAll(BirdTriggerExit.GetInvocationList(), action => ReferenceEquals(action.Target, bird)).Length == 0
-                    && Array.FindAll(BirdTriggerExit.GetInvocationList(), action => ReferenceEquals(action.Target, bird)).Length == 0)
-                {
-                    DestroyBirdDetector(bird);
-                }
+                DestroyBirdDetector(bird);
             }
         }
 
@@ -100,12 +101,9 @@ namespace Bird3DCursor
 
         public static void UnregisterBird(BirdProvider bird)
         {
+            if (bird == null || !birds.Remove(bird)) return;
             DestroyBirdDetector(bird);
             OnBirdDestroyed?.Invoke(bird);
-            if (birds.Contains(bird))
-            {
-                birds.Remove(bird);
-            }
         }
 
         public static List<BirdProvider> GetAllBirds()
