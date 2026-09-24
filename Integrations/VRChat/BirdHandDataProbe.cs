@@ -12,6 +12,7 @@ public class BirdHandDataProbe : UdonSharpBehaviour
     [HideInInspector] public int leftAvailable;
     [HideInInspector] public int rightAvailable;
     private float nextSample;
+    private bool paused;
     private int[] bones = new int[] {
         (int)HumanBodyBones.LeftHand,
         (int)HumanBodyBones.LeftThumbProximal,
@@ -49,6 +50,7 @@ public class BirdHandDataProbe : UdonSharpBehaviour
 
     private void Update()
     {
+        if (paused) return;
         if (Time.time < nextSample) return;
         nextSample = Time.time + 0.1f;
         leftAvailable = 0;
@@ -80,9 +82,27 @@ public class BirdHandDataProbe : UdonSharpBehaviour
 
     private void OnDisable()
     {
+        ClearDisplay();
+        if (status != null) status.text = "BIRD / HAND DATA PROBE\nDisabled";
+    }
+
+    public void PauseProbe()
+    {
+        paused = true;
+        ClearDisplay();
+        if (status != null) status.text = "BIRD / HAND DATA PROBE\nPaused";
+    }
+
+    public void ResumeProbe()
+    {
+        paused = false;
+        nextSample = 0;
+    }
+
+    private void ClearDisplay()
+    {
         leftAvailable = rightAvailable = 0;
         if (markers != null) for (int i = 0; i < markers.Length; i++)
             if (markers[i] != null) markers[i].gameObject.SetActive(false);
-        if (status != null) status.text = "BIRD / HAND DATA PROBE\nDisabled";
     }
 }

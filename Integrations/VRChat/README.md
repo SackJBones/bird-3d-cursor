@@ -13,3 +13,8 @@ Restore the heavy repository's BirdWorld VPM packages (Worlds/Base 3.10.5), then
 The generator creates the program asset explicitly, invokes the real UdonSharp compiler, checks for compilation errors and retrievable program data, wires 32 collider-free markers, and saves a separate `BirdHandProbe.unity` scene. It refuses to overwrite that scene. The generator and runtime source remain authoritative here; the heavy project tracks scene/program assets and ignores the generated source copies. On a fresh checkout, restore the source/meta before opening the scene, then compile UdonSharp to regenerate serialized bytecode.
 
 Compiler success alone does not prove execution in ClientSim, VRChat or a headset. Those are subsequent checks.
+
+
+## Explicit pause and resume
+
+Call the Udon custom events PauseProbe and ResumeProbe while the probe object remains active. Pause stops sampling and clears all marker flags/counters; resume requests a fresh sample. Actual ClientSim execution verified pause/hold/resume with the default desktop avatar (16/16 bones per hand). Automatic GameObject-disable cleanup remains under investigation: the handler compiles and works when dispatched directly, but the lifecycle test does not reliably receive it. Do not depend on deactivation alone to clear the independent status label; use PauseProbe before deactivating, and ResumeProbe after reactivating a paused probe. This is an explicit command path, not a claim that native lifecycle delivery is fixed.
