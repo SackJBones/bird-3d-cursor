@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Globalization;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -21,9 +22,22 @@ public class UnityAvatarInputChecks : MonoBehaviour
     private static FieldInfo field;
     private static Animator animator;
     private static string observed;
+    private static float originalHeight;
+    private static float[] baselineSpans = new float[2];
+    private static float[] baselineDistances = new float[2];
+    private static float[] baselineRadii = new float[2];
+    private static bool Calibration { get { return SessionState.GetBool("Bird.AvatarInput.Calibration", false); } }
+    private static string ResultPath { get { return Calibration ? "udon-avatar-calibration-result.txt" : "udon-avatar-result.txt"; } }
     public static void Run()
     {
-        File.WriteAllText("udon-avatar-result.txt", "PENDING");
+        Begin(false);
+    }
+    public static void RunScaleCalibration() { Begin(true); }
+    private static void Begin(bool calibration)
+    {
+        SessionState.SetBool("Bird.AvatarInput.Calibration", calibration);
+        File.WriteAllText(ResultPath, "PENDING");
+        if (calibration) File.WriteAllText("udon-avatar-calibration.csv", "hand,scale,eye_height_m,span_m,fit_radius_m,center_distance_m,distance_over_span,rms_residual_over_span,raw_range_m,baseline_normalized_range_m\n");
         if (!ClientSimSettings.Instance.enableClientSim || !ClientSimSettings.Instance.spawnPlayer) throw new Exception("ClientSim required");
         const string path = "Assets/BirdGenerated/BirdAvatarInput.asset";
         var program = AssetDatabase.LoadAssetAtPath<UdonSharpProgramAsset>(path);
@@ -72,7 +86,7 @@ public class UnityAvatarInputChecks : MonoBehaviour
                 var cursor = UdonSharpEditorUtility.GetBackingUdonBehaviour(proxy.cursor);
                 bool ready = (bool)vm.GetProgramVariable("dataReady");
                 if ((bool)cursor.GetProgramVariable("clicksAllowed") || (bool)cursor.GetProgramVariable("selected") || (bool)cursor.GetProgramVariable("down")) throw new Exception("Avatar approximation enabled clicks");
-                if (stage == 1)
+                if (!Calibration && stage == 1)
                 {
                     if (ready || (int)vm.GetProgramVariable("available") != 0 || (bool)cursor.GetProgramVariable("poseValid") || ((Transform)cursor.GetProgramVariable("cursorVisual")).gameObject.activeSelf)
                         throw new Exception("Missing avatar did not cancel input/cursor");
@@ -98,6 +112,17 @@ public class UnityAvatarInputChecks : MonoBehaviour
                 float range = ((Vector3)cursor.GetProgramVariable("position") - root).magnitude;
                 if (valid && (float.IsNaN(range) || float.IsInfinity(range))) throw new Exception("Nonfinite accepted cursor");
                 observed += prefix + " available=14 cursorValid=" + valid + " rangeRejected=" + rangeRejected + " measuredRange=" + measured + "; ";
+                if (Calibration) RecordCalibration(proxy, points, root, measured);
+            }
+            if (Calibration)
+            {
+                if (stage == 0) originalHeight = Networking.LocalPlayer.GetAvatarEyeHeightAsMeters();
+                if (originalHeight < 0.2f || originalHeight > 60 || float.IsNaN(originalHeight)) throw new Exception("Baseline height outside unclamped scale test");
+                if (stage == 3) { Finish(true, "Both hands at 1x, 0.5x, 1.5x and restored scale: normalized hand geometry and baseline-normalized range checked. Metrics in udon-avatar-calibration.csv. Baseline normalization is a diagnostic, not a calibrated control mapping."); return; }
+                stage++;
+                Networking.LocalPlayer.SetAvatarEyeHeightByMeters(originalHeight * (stage == 1 ? 0.5f : stage == 2 ? 1.5f : 1f));
+                next = Time.time + 0.5f;
+                return;
             }
             if (stage == 0)
             {
@@ -119,10 +144,69 @@ public class UnityAvatarInputChecks : MonoBehaviour
         if (manager != null && field != null && animator != null) field.SetValue(manager, animator);
         manager = null; field = null; animator = null;
     }
+    private static void RecordCalibration(BirdAvatarInput proxy, Vector3[] points, Vector3 root, float rawRange)
+    {
+        var fit = UdonSharpEditorUtility.GetBackingUdonBehaviour(proxy.cursor.fitter);
+        if (!(bool)fit.GetProgramVariable("fitValid")) throw new Exception("Calibration fixture requires accepted sphere fit");
+        Vector3 center = (Vector3)fit.GetProgramVariable("center");
+        float radius = (float)fit.GetProgramVariable("radius");
+        Vector4 reference = ReferenceFit(points);
+        if (Vector3.Distance(center, new Vector3(reference.x, reference.y, reference.z)) > 0.0002f || Mathf.Abs(radius - reference.w) > 0.0002f)
+            throw new Exception("Avatar fit differs from original centered 4x4 equations");
+        float span = Vector3.Distance(points[3], points[5]); // middle proximal to distal, not tip
+        float distance = Vector3.Distance(center, root);
+        if (span <= 0.001f || !Finite(span) || !Finite(distance) || !Finite(radius)) throw new Exception("Unusable metric");
+        int hand = proxy.rightHand ? 1 : 0;
+        if (stage == 0) { baselineSpans[hand] = span; baselineDistances[hand] = distance; baselineRadii[hand] = radius; }
+        float factor = stage == 1 ? 0.5f : stage == 2 ? 1.5f : 1f;
+        if (Mathf.Abs(span / baselineSpans[hand] - factor) > 0.002f ||
+            Mathf.Abs(distance / baselineDistances[hand] - factor) > 0.002f ||
+            Mathf.Abs(radius / baselineRadii[hand] - factor) > 0.002f) throw new Exception("Geometry did not scale proportionally");
+        float normalizedDistance = distance * baselineSpans[hand] / span;
+        float normalizedRange = Range(normalizedDistance);
+        float baselineRange = Range(baselineDistances[hand]);
+        if (Mathf.Abs(normalizedRange / baselineRange - 1) > 0.01f) throw new Exception("Baseline normalization did not stabilize range");
+        if (Mathf.Abs(rawRange / Range(distance) - 1) > 0.01f) throw new Exception("Observed range differs from original range law");
+        float residual = 0;
+        foreach (var p in points) { float error = Vector3.Distance(p, center) - radius; residual += error * error; }
+        residual = Mathf.Sqrt(residual / points.Length) / span;
+        float[] metrics = { factor, Networking.LocalPlayer.GetAvatarEyeHeightAsMeters(), span, radius, distance, distance / span, residual, rawRange, normalizedRange };
+        string row = proxy.rightHand ? "right" : "left";
+        foreach (float value in metrics) { if (!Finite(value)) throw new Exception("Nonfinite metric"); row += "," + value.ToString("R", CultureInfo.InvariantCulture); }
+        File.AppendAllText("udon-avatar-calibration.csv", row + "\n");
+    }
+    private static bool Finite(float value) { return !float.IsNaN(value) && !float.IsInfinity(value); }
+    private static Vector4 ReferenceFit(Vector3[] points)
+    {
+        // Independent ordinary C# form of Bird.cs's original centered normal equations.
+        Vector3 mean = Vector3.zero;
+        foreach (var point in points) mean += point;
+        mean /= points.Length;
+        Matrix4x4 normal = new Matrix4x4();
+        Vector4 rhs = Vector4.zero;
+        foreach (var point in points)
+        {
+            Vector3 p = point - mean;
+            Vector4 row = new Vector4(2 * p.x, 2 * p.y, 2 * p.z, 1);
+            for (int r = 0; r < 4; r++)
+            {
+                rhs[r] += row[r] * p.sqrMagnitude;
+                for (int c = 0; c < 4; c++) normal[r, c] += row[r] * row[c];
+            }
+        }
+        Vector4 solution = normal.inverse * rhs;
+        Vector3 offset = new Vector3(solution.x, solution.y, solution.z);
+        Vector3 center = mean + offset;
+        float radius = Mathf.Sqrt(solution.w + offset.sqrMagnitude);
+        if (!Finite(center.x) || !Finite(center.y) || !Finite(center.z) || !Finite(radius)) throw new Exception("Nonfinite reference fit");
+        return new Vector4(center.x, center.y, center.z, radius);
+    }
+    private static float Range(float distance) { return distance + distance * distance / 0.02f + 0.02f * Mathf.Pow(distance / 0.03f, 6); }
     private static void Finish(bool success, string text)
     {
         Restore(); SessionState.SetBool(Active, false);
-        File.WriteAllText("udon-avatar-result.txt", (success ? "PASS: " : "FAIL: ") + text);
+        if (originalHeight > 0 && Utilities.IsValid(Networking.LocalPlayer)) Networking.LocalPlayer.SetAvatarEyeHeightByMeters(originalHeight);
+        File.WriteAllText(ResultPath, (success ? "PASS: " : "FAIL: ") + text);
         EditorApplication.Exit(success ? 0 : 1);
     }
 }

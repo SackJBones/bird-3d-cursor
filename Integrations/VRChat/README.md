@@ -79,3 +79,6 @@ Restore BirdAvatarInput source/meta and tests/UnityAvatarInputChecks.cs into the
 
 
 Observed limitation: the default desktop ClientSim avatar produces accepted 12-point fits but about 1,250 m cursor ranges under the unchanged Bird range law. The experimental adapter therefore rejects ranges above maximumPreviewRange (default 3 m), cancels/hides the cursor and exposes rangeRejected/measuredRange plus a calibration label. This is an adapter-only preview guard, not final range calibration or a restriction on ordinary Bird/synthetic cursor range. Never interpret bone availability or a finite fit as a usable pointing mode. The adapter is intentionally not enabled in the authored demo.
+
+
+Scale diagnosis: RunScaleCalibration verifies both hands at 0.5x/1x/1.5x and restored size. Default-avatar raw ranges are about 20 m / 1250 m / 14220 m; hand-span normalization stabilizes the baseline but leaves it unusable. Compiled fits agree with the original 4x4 equations within 0.2 mm. See ../../docs/modernization/AVATAR-CALIBRATION.md and its CSV for measured geometry, range-law analysis and the next calibration gate. No production normalization was selected from this one pose.
