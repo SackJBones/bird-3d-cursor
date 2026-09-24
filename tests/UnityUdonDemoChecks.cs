@@ -17,6 +17,23 @@ public class UnityUdonDemoChecks : MonoBehaviour
     private static double deadline;
     private static int stage;
     private static float resumeAt;
+    public static void EnableSmoothing()
+    {
+        var scene = EditorSceneManager.OpenScene(ScenePath);
+        UdonSharp.Compiler.UdonSharpCompilerV1.CompileSync();
+        if (UdonSharpProgramAsset.AnyUdonSharpScriptHasError()) throw new Exception("Udon compile error");
+        var cursors = FindObjectsOfType<BirdCursorState>();
+        if (cursors.Length != 2) throw new Exception("Expected two cursors");
+        foreach (var cursor in cursors)
+        {
+            cursor.smoothing = true;
+            UdonSharpEditorUtility.CopyProxyToUdon(cursor);
+        }
+        if (!EditorSceneManager.SaveScene(scene, ScenePath)) throw new Exception("Scene save failed");
+        AssetDatabase.SaveAssets();
+        File.WriteAllText("udon-smoothing-scene-result.txt", "PASS: smoothing enabled on both scene cursors; runtime check separate.");
+        EditorApplication.Exit(0);
+    }
     public static void AddControls()
     {
         var scene = EditorSceneManager.OpenScene(ScenePath);

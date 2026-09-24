@@ -88,7 +88,8 @@ public class UnityUdonCursorChecks : MonoBehaviour
             left.SetProgramVariable("indexTip", (Vector3)left.GetProgramVariable("position") + Vector3.right * 0.022f);
             left.SendCustomEvent("Step"); State(left, true, true, true, false); // cursor-centered selection sphere
             State(right, true, false, false, false);
-            Finish(true, checks + " compiled-Udon cursor assertions passed: fitter calls, range, hysteresis, both selection centers, per-sample pulses, two-instance independence, invalid/lost input, cancellation and recovery. Unsmoothed synthetic data; no avatar/hardware/render validation.");
+            CheckSmoothing(left, root);
+            Finish(true, checks + " compiled-Udon cursor assertions passed: range/click/loss/recovery plus smoothing agreement with original KalmanFilterVector3, jitter attenuation, movement and recovery reseeding. Synthetic data; no avatar/hardware validation.");
         }
         catch (Exception e) { Finish(false, e.ToString()); }
     }
@@ -101,6 +102,45 @@ public class UnityUdonCursorChecks : MonoBehaviour
         vm.SetProgramVariable("indexTip", center + Vector3.right * (0.03f - depth));
         vm.SetProgramVariable("tracking", true);
         vm.SendCustomEvent("Step");
+    }
+    private static void CheckSmoothing(UdonBehaviour vm, Vector3 root)
+    {
+        vm.SendCustomEvent("Cancel");
+        vm.SetProgramVariable("smoothing", true);
+        Sample(vm, root, 0.02f, 0.004f);
+        Vector3 raw = (Vector3)vm.GetProgramVariable("rawPosition");
+        Assert(Vector3.Distance(raw, (Vector3)vm.GetProgramVariable("position")) < 0.000001f, "First sample seeds at measurement");
+        var reference = new KalmanFilterVector3(0.001f);
+        reference.Reset(raw);
+        float rawMotion = 0, filteredMotion = 0;
+        Vector3 previousRaw = raw, previousFiltered = raw;
+        for (int i = 0; i < 40; i++)
+        {
+            Vector3 movedRoot = root + Vector3.right * (i % 2 == 0 ? 0.01f : -0.01f);
+            float distance = i < 20 ? 0.02f : 0.04f;
+            Sample(vm, movedRoot, distance, 0.004f);
+            raw = (Vector3)vm.GetProgramVariable("rawPosition");
+            Vector3 filtered = (Vector3)vm.GetProgramVariable("position");
+            Vector3 expected = reference.Update(raw, null, 270f * distance * distance * distance);
+            Assert(Vector3.Distance(expected, filtered) < 0.0001f, "Original Kalman reference sample " + i);
+            if (i > 25) { rawMotion += Mathf.Abs(raw.x - previousRaw.x); filteredMotion += Mathf.Abs(filtered.x - previousFiltered.x); }
+            previousRaw = raw; previousFiltered = filtered;
+        }
+        Assert(filteredMotion < rawMotion * 0.7f, "Alternating jitter attenuated");
+        Vector3 beforeMove = (Vector3)vm.GetProgramVariable("position");
+        Sample(vm, root + Vector3.right * 0.3f, 0.04f, 0.004f);
+        Vector3 afterMove = (Vector3)vm.GetProgramVariable("position");
+        raw = (Vector3)vm.GetProgramVariable("rawPosition");
+        Assert(afterMove.x > beforeMove.x && afterMove.x < raw.x, "Movement follows without overshoot");
+        vm.SetProgramVariable("tracking", false); vm.SendCustomEvent("Step");
+        Sample(vm, root + Vector3.right * 2, 0.02f, 0.004f);
+        Assert(Vector3.Distance((Vector3)vm.GetProgramVariable("position"), (Vector3)vm.GetProgramVariable("rawPosition")) < 0.000001f, "Loss recovery reseeds instead of dragging stale position");
+        vm.SetProgramVariable("smoothing", false);
+        Sample(vm, root, 0.02f, 0.004f);
+        Assert(Vector3.Distance((Vector3)vm.GetProgramVariable("position"), (Vector3)vm.GetProgramVariable("rawPosition")) < 0.000001f, "Smoothing bypass");
+        vm.SetProgramVariable("smoothing", true);
+        Sample(vm, root + Vector3.right, 0.02f, 0.004f);
+        Assert(Vector3.Distance((Vector3)vm.GetProgramVariable("position"), (Vector3)vm.GetProgramVariable("rawPosition")) < 0.000001f, "Smoothing reenable reseeds");
     }
     private static void State(UdonBehaviour vm, bool valid, bool selected, bool down, bool up)
     {
