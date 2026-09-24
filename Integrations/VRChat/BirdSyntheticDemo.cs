@@ -54,9 +54,13 @@ public class BirdSyntheticDemo : UdonSharpBehaviour
     {
         paused = true;
         if (cursor != null) cursor.Cancel();
+        ClearTrail();
+        if (label != null) label.text = handLabel + " / SYNTHETIC\nPaused";
+    }
+    public void ClearTrail()
+    {
         count = 0;
         if (trail != null) trail.positionCount = 0;
-        if (label != null) label.text = handLabel + " / SYNTHETIC\nPaused";
     }
     public void ResumeDemo() { paused = false; nextSample = 0; }
 }

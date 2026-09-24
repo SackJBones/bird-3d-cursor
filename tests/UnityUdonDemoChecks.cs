@@ -17,6 +17,51 @@ public class UnityUdonDemoChecks : MonoBehaviour
     private static double deadline;
     private static int stage;
     private static float resumeAt;
+    public static void AddControls()
+    {
+        var scene = EditorSceneManager.OpenScene(ScenePath);
+        if (FindObjectsOfType<BirdDemoControl>().Length != 0) throw new Exception("Controls already exist; refusing duplicate upgrade");
+        const string path = "Assets/BirdWorld/Programs/BirdDemoControl.asset";
+        var source = AssetDatabase.LoadAssetAtPath<MonoScript>("Assets/BirdGenerated/Runtime/BirdDemoControl.cs");
+        if (source == null) throw new Exception("Restore control source/meta first");
+        var program = AssetDatabase.LoadAssetAtPath<UdonSharpProgramAsset>(path);
+        if (program == null)
+        {
+            program = ScriptableObject.CreateInstance<UdonSharpProgramAsset>();
+            program.sourceCsScript = source;
+            AssetDatabase.CreateAsset(program, path);
+        }
+        else if (program.sourceCsScript != source) throw new Exception("Existing control program references another source");
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+        UdonSharp.Compiler.UdonSharpCompilerV1.CompileSync();
+        if (UdonSharpProgramAsset.AnyUdonSharpScriptHasError()) throw new Exception("Udon compile error");
+        var left = GameObject.Find("Left synthetic").GetComponent<BirdSyntheticDemo>();
+        var right = GameObject.Find("Right synthetic").GetComponent<BirdSyntheticDemo>();
+        var material = AssetDatabase.LoadAssetAtPath<Material>("Assets/BirdWorld/Materials/SyntheticControl.mat");
+        if (material == null) material = Material("Control", new Color(0.08f, 0.15f, 0.2f));
+        for (int i = 0; i < 2; i++)
+        {
+            string name = i == 0 ? "Pause control" : "Clear control";
+            var button = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            button.name = name;
+            button.transform.position = new Vector3(i == 0 ? -0.27f : 0.27f, 0.57f, 0.1f);
+            button.transform.localScale = new Vector3(0.45f, 0.16f, 0.08f);
+            button.GetComponent<Renderer>().sharedMaterial = material;
+            var control = button.AddUdonSharpComponent<BirdDemoControl>();
+            control.left = left; control.right = right; control.clearOnly = i == 1;
+            control.label = Label(name + " label", button.transform.position - Vector3.forward * 0.045f, 220, 65);
+            control.label.text = i == 0 ? "PAUSE" : "CLEAR TRAILS";
+            UdonSharpEditorUtility.CopyProxyToUdon(control);
+            var backing = UdonSharpEditorUtility.GetBackingUdonBehaviour(control);
+            backing.interactText = i == 0 ? "Pause / resume demo" : "Clear trails";
+            backing.proximity = 3;
+        }
+        if (!EditorSceneManager.SaveScene(scene, ScenePath)) throw new Exception("Scene save failed");
+        AssetDatabase.SaveAssets();
+        File.WriteAllText("udon-demo-controls-result.txt", "PASS: local interaction controls saved; runtime check separate.");
+        EditorApplication.Exit(0);
+    }
     public static void Generate()
     {
         if (File.Exists(ScenePath)) throw new Exception("Refusing to overwrite demo scene");
@@ -121,6 +166,12 @@ public class UnityUdonDemoChecks : MonoBehaviour
             if (!Utilities.IsValid(Networking.LocalPlayer) || Time.timeSinceLevelLoad < 5 || Time.time < resumeAt) return;
             var demos = FindObjectsOfType<BirdSyntheticDemo>();
             if (demos.Length != 2) throw new Exception("Expected two demo instances");
+            var pauseProxy = GameObject.Find("Pause control").GetComponent<BirdDemoControl>();
+            var clearProxy = GameObject.Find("Clear control").GetComponent<BirdDemoControl>();
+            var pause = UdonSharpEditorUtility.GetBackingUdonBehaviour(pauseProxy);
+            var clear = UdonSharpEditorUtility.GetBackingUdonBehaviour(clearProxy);
+            if (!pauseProxy.GetComponent<Collider>().enabled || !clearProxy.GetComponent<Collider>().enabled)
+                throw new Exception("Interaction collider disabled");
             foreach (var proxy in demos)
             {
                 var vm = UdonSharpEditorUtility.GetBackingUdonBehaviour(proxy);
@@ -129,20 +180,35 @@ public class UnityUdonDemoChecks : MonoBehaviour
                 if (stage == 1)
                 {
                     if (trail.positionCount != 0 || !label.text.Contains("Paused")) throw new Exception("Pause did not clear trail/label");
-                    vm.SendCustomEvent("ResumeDemo");
                 }
                 else
                 {
                     if ((int)vm.GetProgramVariable("clicks") < 1 || trail.positionCount < 2 || trail.positionCount > 64 || !label.text.Contains("SYNTHETIC"))
                         throw new Exception("Missing click, bounded trail or synthetic label");
-                    if (stage == 0) vm.SendCustomEvent("PauseDemo");
                 }
             }
-            if (stage < 2) { stage++; resumeAt = Time.time + (stage == 2 ? 2.2f : 0.5f); return; }
+            if (stage < 2)
+            {
+                if (!pause.RunEvent("_interact")) throw new Exception("Pause/resume Interact event missing");
+                if (((Text)pause.GetProgramVariable("label")).text != (stage == 0 ? "RESUME" : "PAUSE")) throw new Exception("Control label mismatch");
+                stage++; resumeAt = Time.time + (stage == 2 ? 2.2f : 0.5f); return;
+            }
+            if (stage == 2)
+            {
+                int leftClicks = (int)UdonSharpEditorUtility.GetBackingUdonBehaviour(demos[0]).GetProgramVariable("clicks");
+                if (!clear.RunEvent("_interact")) throw new Exception("Clear Interact event missing");
+                foreach (var proxy in demos)
+                {
+                    var vm = UdonSharpEditorUtility.GetBackingUdonBehaviour(proxy);
+                    if (((LineRenderer)vm.GetProgramVariable("trail")).positionCount != 0) throw new Exception("Clear left trail points");
+                }
+                if ((int)UdonSharpEditorUtility.GetBackingUdonBehaviour(demos[0]).GetProgramVariable("clicks") != leftClicks) throw new Exception("Clear reset click count");
+                stage++; resumeAt = Time.time + 2.2f; return;
+            }
             // Isolate authored demo visuals from the simulator avatar and introductory UI.
             // These runtime layer changes are restored after capture and never saved.
             var layers = new System.Collections.Generic.Dictionary<Transform, int>();
-            foreach (string name in new[] { "Feasibility floor", "Title", "LEFT cursor", "RIGHT cursor", "LEFT bounded trail", "RIGHT bounded trail", "LEFT label", "RIGHT label" })
+            foreach (string name in new[] { "Feasibility floor", "Title", "LEFT cursor", "RIGHT cursor", "LEFT bounded trail", "RIGHT bounded trail", "LEFT label", "RIGHT label", "Pause control", "Clear control", "Pause control label", "Clear control label" })
                 foreach (Transform item in GameObject.Find(name).GetComponentsInChildren<Transform>(true))
                 { layers[item] = item.gameObject.layer; item.gameObject.layer = 30; }
             var camera = new GameObject("Validation capture").AddComponent<Camera>();
@@ -162,7 +228,7 @@ public class UnityUdonDemoChecks : MonoBehaviour
             RenderTexture.active = null; camera.targetTexture = null;
             Destroy(image); target.Release(); Destroy(target);
             foreach (var item in layers) item.Key.gameObject.layer = item.Value;
-            Finish(true, "Saved scene reopened; two live Udon demos produced clicks and bounded trails, paused/cleared and resumed. Camera capture saved for separate visual inspection. Synthetic input only.");
+            Finish(true, "Saved scene reopened; compiled Interact handlers paused/resumed both demos and cleared trails without resetting clicks; trails rebuilt. Labels/colliders checked and camera capture saved. Event dispatch is not a physical pointer/controller test. Synthetic input only.");
         }
         catch (Exception e) { Finish(false, e.ToString()); }
     }

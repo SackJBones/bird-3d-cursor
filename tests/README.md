@@ -118,3 +118,6 @@ UnityUdonCursorChecks.Run exercises the composed BirdCursorState/BirdSphereFit t
 
 
 UnityUdonDemoChecks.Generate creates the saved synthetic world scene, production program assets and simple materials in BirdWorld; it refuses existing scene/program assets. It removes only prior ignored validation program assets for the same three sources to avoid duplicate Udon programs. Restore all three integration sources/metas before generation. Validate reopens the scene and checks live ClientSim click counters, 2-64 trail points per cursor, labels and explicit pause/clear/resume. Run Validate with rendering enabled (omit -nographics); inspect Validation/UdonDemo/synthetic.png separately. Earlier cursor/sphere fixtures reuse the authored program assets when present. Rendering evidence is separate from physical tracking, VRChat client and multiplayer behavior.
+
+
+Demo controls upgrade: restore BirdDemoControl source/meta alongside the other three integration sources, then run UnityUdonDemoChecks.AddControls once after Generate (or on the earlier scene). Validate now requires controls and dispatches their compiled _interact handlers to pause/resume both demos and clear/rebuild trails without resetting clicks. It also checks collider availability and toggle labels. Physical ray/pointer/controller activation remains untested.
