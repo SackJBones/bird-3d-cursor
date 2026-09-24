@@ -124,3 +124,6 @@ Demo controls upgrade: restore BirdDemoControl source/meta alongside the other t
 
 
 Cursor smoothing checks additionally require a generated copy of Unity/BirdPlugin/Runtime/Scripts/KalmanFilterVector3.cs, the original ordinary C# reference. The compiled Udon filter is compared across 40 translated synthetic samples and two distance/noise levels against that reference after explicit seeding. Checks also cover jitter attenuation, movement without overshoot, tracking-loss reseeding, bypass and reenable. Existing raw range/click checks keep smoothing disabled. The production Udon implementation does not invoke or depend on the C# reference class.
+
+
+UnityAvatarInputChecks.Run checks experimental BirdAvatarInput in actual ClientSim. Restore its source/meta and helper into the generated runtime folder alongside cursor/fitter sources and authored programs. The fixture independently checks the 12 expected bone names per hand, weighted root, index-distal placeholder, disabled clicks, fit/marker agreement and controlled whole-avatar loss/recovery. It uses the same SDK-private animator fixture as missing-bone checks and restores it on completion/failure. No authored scene is changed. Cursor checks also exercise disabling clicks while selected, a single release pulse, suppressed repeat clicks and reenable.

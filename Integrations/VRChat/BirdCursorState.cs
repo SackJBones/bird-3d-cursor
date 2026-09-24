@@ -11,6 +11,7 @@ public class BirdCursorState : UdonSharpBehaviour
     public Vector3 indexTip;
     public bool tracking;
     public bool smoothing;
+    public bool clicksAllowed = true;
     public Transform cursorVisual;
     [HideInInspector] public Vector3 position;
     [HideInInspector] public Vector3 rawPosition;
@@ -60,8 +61,12 @@ public class BirdCursorState : UdonSharpBehaviour
         variance = nextVariance;
         filterReady = smoothing;
         poseValid = true;
-        if (!selected && depth > 0.007f) { selected = true; down = true; }
-        if (selected && depth < 0.005f) { selected = false; up = true; }
+        if (!clicksAllowed) { up = selected; selected = false; }
+        else
+        {
+            if (!selected && depth > 0.007f) { selected = true; down = true; }
+            if (selected && depth < 0.005f) { selected = false; up = true; }
+        }
         if (cursorVisual != null)
         {
             cursorVisual.position = position;

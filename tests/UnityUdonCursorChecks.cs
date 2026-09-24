@@ -88,6 +88,11 @@ public class UnityUdonCursorChecks : MonoBehaviour
             left.SetProgramVariable("indexTip", (Vector3)left.GetProgramVariable("position") + Vector3.right * 0.022f);
             left.SendCustomEvent("Step"); State(left, true, true, true, false); // cursor-centered selection sphere
             State(right, true, false, false, false);
+            left.SetProgramVariable("clicksAllowed", false);
+            left.SendCustomEvent("Step"); State(left, true, false, false, true);
+            left.SendCustomEvent("Step"); State(left, true, false, false, false);
+            left.SetProgramVariable("clicksAllowed", true);
+            left.SendCustomEvent("Step"); State(left, true, true, true, false);
             CheckSmoothing(left, root);
             Finish(true, checks + " compiled-Udon cursor assertions passed: range/click/loss/recovery plus smoothing agreement with original KalmanFilterVector3, jitter attenuation, movement and recovery reseeding. Synthetic data; no avatar/hardware validation.");
         }
