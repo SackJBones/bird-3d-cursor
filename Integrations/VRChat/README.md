@@ -24,3 +24,12 @@ Controlled missing-avatar recovery also passes in ClientSim: UnityClientSimProbe
 
 
 ClientSim scaling also passes via UnityClientSimProbeChecks.RunScale: runtime eye height 1.9 -> 0.95 -> 2.85 -> 1.9 m, all 32 Udon markers matching SDK bone positions within 2 mm, wrist-relative lengths scaling/recovering, and counts remaining 16/16 per hand. This proves probe following on the simulator avatar; it does not establish solver calibration, real avatar changes or hardware tracking. Original eye height is restored and no scene/global preferences are saved.
+
+
+## Udon sphere fitter
+
+BirdSphereFit.cs is a separate local-only UdonSharp algebraic least-squares sphere fitter. Set points (4-32 Vector3 values), send the Fit custom event, and read fitValid, center and radius. Every rejected fit clears outputs; callers must check fitValid before using them. Zero is a legitimate geometric point here: callers must remove/reject missing avatar-bone sentinels before fitting. Input selection is deliberately separate from the diagnostic's 32 bone origins, which are not the original Bird hand adapter's 16 fit points or true fingertip endpoints.
+
+The fitter centers/scales the data, solves the symmetric 3x3 covariance system, and recovers radius from mean squared distance. This is the same algebraic objective as the original centered 4x4 fit, with an intentional normalized determinant guard (<= 1e-6) rejecting underdetermined/near-planar sets. The threshold is provisional; validation on realistic open-hand poses is still required. It uses bounded loops and no per-fit collections. Udon performance has not been profiled. No cursor range mapping, filtering, click hysteresis, avatar calibration or scene integration is included yet.
+
+Copy the source and stable meta to Assets/BirdGenerated/Runtime in BirdWorld. Copy tests/UnityUdonSphereFitChecks.cs to the same runtime directory (it is editor-only), then run Unity 2022.3.22f1 with -batchmode -nographics -executeMethod UnityUdonSphereFitChecks.Run. The helper creates an ignored program asset, compiles real Udon, adds a temporary unsaved test object to BirdFeasibility, enters ClientSim, and sets input/reads output through the Udon heap and SendCustomEvent. Result: udon-sphere-result.txt. It does not call the C# proxy Fit method.
