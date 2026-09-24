@@ -22,7 +22,8 @@ public class UnityUdonSphereFitChecks : MonoBehaviour
         File.WriteAllText("udon-sphere-result.txt", "PENDING");
         if (!ClientSimSettings.Instance.enableClientSim || !ClientSimSettings.Instance.spawnPlayer)
             throw new Exception("ClientSim and spawnPlayer must already be enabled");
-        const string path = "Assets/BirdGenerated/BirdSphereFit.asset";
+        string path = File.Exists("Assets/BirdWorld/Programs/BirdSphereFit.asset")
+            ? "Assets/BirdWorld/Programs/BirdSphereFit.asset" : "Assets/BirdGenerated/BirdSphereFit.asset";
         var program = AssetDatabase.LoadAssetAtPath<UdonSharpProgramAsset>(path);
         if (program == null)
         {

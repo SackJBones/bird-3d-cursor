@@ -36,6 +36,7 @@ public class UnityUdonCursorChecks : MonoBehaviour
     }
     private static void Program(string name)
     {
+        if (AssetDatabase.LoadAssetAtPath<UdonSharpProgramAsset>("Assets/BirdWorld/Programs/" + name + ".asset") != null) return;
         string path = "Assets/BirdGenerated/" + name + ".asset";
         if (AssetDatabase.LoadAssetAtPath<UdonSharpProgramAsset>(path) != null) return;
         var program = ScriptableObject.CreateInstance<UdonSharpProgramAsset>();
