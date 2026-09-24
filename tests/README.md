@@ -93,3 +93,10 @@ Unity 2022.3.22f1 validation: the unchanged -Package runner passes all 75 core/f
 
 
 VRChat hand-data diagnostic: UnityVRChatProbeChecks.Run explicitly creates its UdonSharp program asset and uses the SDK synchronous compiler before serializing a backing behaviour. The compiler exposed unsupported HumanBodyBones array indexing and TextMesh.text; the probe uses integer bone IDs and UnityEngine.UI.Text instead. ValidateSaved is a separate read-only scene-reopen check. These are real SDK compiler/serialization checks, not ClientSim runtime tests. See Integrations/VRChat/README.md for source/meta restoration.
+
+
+### ClientSim probe runtime check (known failing lifecycle assertion)
+
+Copy UnityClientSimProbeChecks.cs to BirdWorld/Assets/BirdGenerated/Editor and run Unity 2022.3.22f1 with -batchmode -nographics -executeMethod UnityClientSimProbeChecks.Run. Restore the integration source/meta first as described in Integrations/VRChat/README.md. ClientSim/spawnPlayer must already be enabled; the harness does not change global preferences. It enters Play Mode without saving scene edits and reads the live Udon heap, not the C# proxy Update.
+
+Observed baseline PASS: the SDK default desktop avatar supplied 16/16 bones per hand, and live counts/label/marker visibility agreed. Full lifecycle result currently FAILS: deactivation left stale marker flags and counters. Direct diagnostic Udon dispatch of _onDisable cleared them, so callback delivery/test timing remains under investigation. Direct dispatch is not treated as a pass for automatic cleanup. Re-enable recovery, missing bones, scale changes, visuals and physical tracking remain unverified. Separate fresh baseline/full result files prevent conflating these levels.
