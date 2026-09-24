@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 using System;
 using System.IO;
+using System.Reflection;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -17,6 +18,10 @@ public static class UnityClientSimProbeChecks
     private static double nextCheck;
     private static int stage;
     private static string observed;
+    private static ClientSimPlayerAvatarManager fixtureManager;
+    private static FieldInfo animatorField;
+    private static Animator savedAnimator;
+    private static int baselineLeft, baselineRight;
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void StartFrameDriver()
     {
@@ -34,12 +39,21 @@ public static class UnityClientSimProbeChecks
         Begin(false);
     }
 
-    private static bool Automatic { get { return SessionState.GetBool("Bird.ClientSim.Automatic", true); } }
-    private static string ResultPath { get { return Automatic ? "clientsim-probe-result.txt" : "clientsim-probe-explicit-result.txt"; } }
+    public static void RunMissingBones()
+    {
+        Begin(false, true);
+    }
 
-    private static void Begin(bool automatic)
+    private static bool Automatic { get { return SessionState.GetBool("Bird.ClientSim.Automatic", true); } }
+    private static bool MissingBones { get { return SessionState.GetBool("Bird.ClientSim.MissingBones", false); } }
+    private static string ResultPath { get { return MissingBones ? "clientsim-probe-missing-result.txt" : Automatic ? "clientsim-probe-result.txt" : "clientsim-probe-explicit-result.txt"; } }
+
+    private static void Begin(bool automatic, bool missingBones = false)
     {
         SessionState.SetBool("Bird.ClientSim.Automatic", automatic);
+        SessionState.SetBool("Bird.ClientSim.MissingBones", missingBones);
+        deadline = nextCheck = 0;
+        stage = 0;
         File.WriteAllText(ResultPath, "PENDING");
         File.WriteAllText("clientsim-probe-baseline-result.txt", "PENDING");
         if (!ClientSimSettings.Instance.enableClientSim || !ClientSimSettings.Instance.spawnPlayer)
@@ -66,6 +80,23 @@ public static class UnityClientSimProbeChecks
             var label = (UnityEngine.UI.Text)backing.GetProgramVariable("status");
             var markers = (Transform[])backing.GetProgramVariable("markers");
             if (label == null || markers == null) return;
+            if (markers.Length != 32) throw new Exception("Expected exactly 32 probe markers");
+            if (MissingBones && stage == 1)
+            {
+                var bones = (int[])backing.GetProgramVariable("bones");
+                foreach (int bone in bones)
+                    if (Networking.LocalPlayer.GetBonePosition((HumanBodyBones)bone) != Vector3.zero)
+                        throw new Exception("Missing-avatar fixture did not return the SDK zero sentinel");
+                foreach (var marker in markers)
+                    if (marker.gameObject.activeSelf) throw new Exception("Missing bones left stale active markers");
+                if ((int)backing.GetProgramVariable("leftAvailable") != 0 || (int)backing.GetProgramVariable("rightAvailable") != 0 ||
+                    !label.text.Contains("Left 0/16  Right 0/16"))
+                    throw new Exception("Missing bones left stale counts or label");
+                RestoreAvatar();
+                stage = 2;
+                nextCheck = EditorApplication.timeSinceStartup + 0.5;
+                return;
+            }
             if (stage == 0 || stage == 2)
             {
                 if (!label.text.Contains("AVATAR BONE PROBE")) return;
@@ -83,7 +114,31 @@ public static class UnityClientSimProbeChecks
                 if (left != visibleLeft || right != visibleRight || left < 0 || left > 16 || right < 0 || right > 16)
                     throw new Exception("Live Udon counts disagree with visible markers");
                 observed = "left=" + left + "/16 right=" + right + "/16 VR=" + Networking.LocalPlayer.IsUserInVR();
-                if (stage == 0) File.WriteAllText("clientsim-probe-baseline-result.txt", "PASS: live ClientSim/Udon label and marker-count agreement; " + observed + ". Lifecycle check is separate.");
+                if (stage == 0) File.WriteAllText("clientsim-probe-baseline-result.txt", "PASS: live ClientSim/Udon label and marker-count agreement; " + observed + ". Lifecycle and missing-bone checks are separate.");
+                if (MissingBones)
+                {
+                    if (stage == 2)
+                    {
+                        if (left != baselineLeft || right != baselineRight)
+                            throw new Exception("Restored avatar did not recover baseline availability");
+                        Finish(true, observed + "; controlled missing-avatar fixture returned zero for all 32 bones, cleared markers/counts/label, and recovered baseline. No avatar-switch, hardware or scale validation.");
+                        return;
+                    }
+                    if (left == 0 || right == 0) throw new Exception("Missing-bone test requires a nonempty baseline on both hands");
+                    baselineLeft = left; baselineRight = right;
+                    // SDK 3.10.5 returns zero when this runtime-only animator reference is absent.
+                    // No SDK source/asset edits and no calls to the probe's C# Update.
+                    fixtureManager = Networking.LocalPlayer.GetClientSimPlayer().GetAvatarDataProvider() as ClientSimPlayerAvatarManager;
+                    if (fixtureManager == null) throw new Exception("Unexpected local avatar provider");
+                    animatorField = typeof(ClientSimPlayerAvatarManager).GetField("avatarAnimator", BindingFlags.Instance | BindingFlags.NonPublic);
+                    if (animatorField == null) throw new Exception("SDK fixture field changed");
+                    savedAnimator = animatorField.GetValue(fixtureManager) as Animator;
+                    if (savedAnimator == null) throw new Exception("Fixture has no animator to restore");
+                    animatorField.SetValue(fixtureManager, null);
+                    stage = 1;
+                    nextCheck = EditorApplication.timeSinceStartup + 0.5;
+                    return;
+                }
                 if (stage == 2) { Finish(true, observed + (Automatic ? "; automatic disable/re-enable" : "; explicit Udon PauseProbe/ResumeProbe") + " clearing and recovery checked. No hardware or scale validation."); return; }
                 // Disable the object: the UdonSharp editor synchronizes component enabled state
                 // with its proxy, so toggling only the backing component is not a stable test.
@@ -118,9 +173,19 @@ public static class UnityClientSimProbeChecks
 
     private static void Finish(bool success, string detail)
     {
+        RestoreAvatar();
         SessionState.SetBool(Active, false);
         File.WriteAllText(ResultPath, (success ? "PASS: " : "FAIL: ") + detail + (success ? "" : " Observed: " + observed));
         EditorApplication.Exit(success ? 0 : 1);
+    }
+
+    private static void RestoreAvatar()
+    {
+        if (fixtureManager != null && animatorField != null && savedAnimator != null)
+            animatorField.SetValue(fixtureManager, savedAnimator);
+        fixtureManager = null;
+        animatorField = null;
+        savedAnimator = null;
     }
 }
 #endif
