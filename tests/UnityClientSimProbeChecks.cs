@@ -22,6 +22,9 @@ public static class UnityClientSimProbeChecks
     private static FieldInfo animatorField;
     private static Animator savedAnimator;
     private static int baselineLeft, baselineRight;
+    private static float originalHeight;
+    private static Vector3[] baselineBones;
+    private static string scaleEvidence;
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void StartFrameDriver()
     {
@@ -44,14 +47,21 @@ public static class UnityClientSimProbeChecks
         Begin(false, true);
     }
 
+    public static void RunScale()
+    {
+        Begin(false, false, true);
+    }
+
     private static bool Automatic { get { return SessionState.GetBool("Bird.ClientSim.Automatic", true); } }
     private static bool MissingBones { get { return SessionState.GetBool("Bird.ClientSim.MissingBones", false); } }
-    private static string ResultPath { get { return MissingBones ? "clientsim-probe-missing-result.txt" : Automatic ? "clientsim-probe-result.txt" : "clientsim-probe-explicit-result.txt"; } }
+    private static bool Scale { get { return SessionState.GetBool("Bird.ClientSim.Scale", false); } }
+    private static string ResultPath { get { return Scale ? "clientsim-probe-scale-result.txt" : MissingBones ? "clientsim-probe-missing-result.txt" : Automatic ? "clientsim-probe-result.txt" : "clientsim-probe-explicit-result.txt"; } }
 
-    private static void Begin(bool automatic, bool missingBones = false)
+    private static void Begin(bool automatic, bool missingBones = false, bool scale = false)
     {
         SessionState.SetBool("Bird.ClientSim.Automatic", automatic);
         SessionState.SetBool("Bird.ClientSim.MissingBones", missingBones);
+        SessionState.SetBool("Bird.ClientSim.Scale", scale);
         deadline = nextCheck = 0;
         stage = 0;
         File.WriteAllText(ResultPath, "PENDING");
@@ -81,6 +91,11 @@ public static class UnityClientSimProbeChecks
             var markers = (Transform[])backing.GetProgramVariable("markers");
             if (label == null || markers == null) return;
             if (markers.Length != 32) throw new Exception("Expected exactly 32 probe markers");
+            if (Scale)
+            {
+                CheckScale(backing, markers, label);
+                return;
+            }
             if (MissingBones && stage == 1)
             {
                 var bones = (int[])backing.GetProgramVariable("bones");
@@ -174,9 +189,75 @@ public static class UnityClientSimProbeChecks
     private static void Finish(bool success, string detail)
     {
         RestoreAvatar();
+        if (originalHeight > 0 && Utilities.IsValid(Networking.LocalPlayer))
+        {
+            Networking.LocalPlayer.SetAvatarEyeHeightByMeters(originalHeight);
+            originalHeight = 0;
+        }
         SessionState.SetBool(Active, false);
         File.WriteAllText(ResultPath, (success ? "PASS: " : "FAIL: ") + detail + (success ? "" : " Observed: " + observed));
         EditorApplication.Exit(success ? 0 : 1);
+    }
+
+    private static void CheckScale(UdonBehaviour backing, Transform[] markers, UnityEngine.UI.Text label)
+    {
+        if (!label.text.Contains("AVATAR BONE PROBE")) return;
+        if (!ClientSimMain.HasInstance()) throw new Exception("ClientSim instance missing");
+        var player = Networking.LocalPlayer;
+        var bones = (int[])backing.GetProgramVariable("bones");
+        if (bones == null || bones.Length != 32) throw new Exception("Expected 32 bone IDs");
+        var positions = new Vector3[32];
+        for (int i = 0; i < positions.Length; i++)
+        {
+            positions[i] = player.GetBonePosition((HumanBodyBones)bones[i]);
+            if (positions[i] == Vector3.zero || !Finite(positions[i])) throw new Exception("Scale fixture requires all bones, finite and nonzero");
+            if (markers[i] == null || !markers[i].gameObject.activeSelf || !Finite(markers[i].position) ||
+                Vector3.Distance(markers[i].position, positions[i]) > 0.002f)
+                throw new Exception("Udon marker did not follow scaled SDK bone " + i + " at stage " + stage);
+        }
+        if ((int)backing.GetProgramVariable("leftAvailable") != 16 || (int)backing.GetProgramVariable("rightAvailable") != 16 ||
+            !label.text.Contains("Left 16/16  Right 16/16")) throw new Exception("Scaling changed availability counts/label");
+        float height = player.GetAvatarEyeHeightAsMeters();
+        float factor = stage == 1 ? 0.5f : stage == 2 ? 1.5f : 1f;
+        if (stage == 0)
+        {
+            if (float.IsNaN(height) || float.IsInfinity(height) || height < 0.2f || height > 60f)
+                throw new Exception("Baseline height cannot exercise unclamped test scales");
+            if (Vector3.Distance(positions[0], positions[9]) < 0.01f || Vector3.Distance(positions[16], positions[25]) < 0.01f)
+                throw new Exception("Scale fixture requires measurable hands");
+            originalHeight = height;
+            baselineBones = positions;
+            scaleEvidence = "";
+            File.WriteAllText("clientsim-probe-baseline-result.txt", "PASS: all 32 live Udon markers match SDK bone positions within 2 mm; counts and label agree.");
+        }
+        else
+        {
+            if (Mathf.Abs(height - originalHeight * factor) > 0.001f) throw new Exception("Eye height did not reach requested scale");
+            // Compare wrist-relative lengths: player translation does not imply hand scaling.
+            for (int i = 0; i < positions.Length; i++)
+            {
+                int wrist = i < 16 ? 0 : 16;
+                float expected = Vector3.Distance(baselineBones[wrist], baselineBones[i]) * factor;
+                if (Mathf.Abs(Vector3.Distance(positions[wrist], positions[i]) - expected) > 0.002f)
+                    throw new Exception("Bone length did not scale/recover at index " + i);
+            }
+        }
+        scaleEvidence += " factor=" + factor + " height=" + height + " leftHandSpan=" + Vector3.Distance(positions[0], positions[9]);
+        if (stage == 3)
+        {
+            Finish(true, "ClientSim scale 1 -> 0.5 -> 1.5 -> 1; all 32 live Udon markers follow SDK positions, wrist-relative lengths scale/recover within 2 mm, counts remain 16/16." + scaleEvidence + ". No physical tracking, avatar-switch or solver calibration validation.");
+            return;
+        }
+        stage++;
+        player.SetAvatarEyeHeightByMeters(originalHeight * (stage == 1 ? 0.5f : stage == 2 ? 1.5f : 1f));
+        nextCheck = EditorApplication.timeSinceStartup + 0.5;
+    }
+
+    private static bool Finite(Vector3 value)
+    {
+        return !float.IsNaN(value.x) && !float.IsInfinity(value.x) &&
+            !float.IsNaN(value.y) && !float.IsInfinity(value.y) &&
+            !float.IsNaN(value.z) && !float.IsInfinity(value.z);
     }
 
     private static void RestoreAvatar()
