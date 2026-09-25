@@ -16,6 +16,7 @@ public sealed class UnityDepthMotionChecks : MonoBehaviour
     static readonly CultureInfo Invariant = CultureInfo.InvariantCulture;
     int frames, mixedFrames, checks, captures;
     float maxNearDiameter, maxNearTrailWidth, maxRenderRadius;
+    float minLagDiameter = float.PositiveInfinity, maxLagDiameter;
 
     public static void Run()
     {
@@ -38,6 +39,7 @@ public sealed class UnityDepthMotionChecks : MonoBehaviour
         try
         {
             Directory.CreateDirectory(Folder);
+            string mathResult = UnityDepthVisualChecks.CheckMath();
             var camera = new GameObject("Motion camera").AddComponent<Camera>();
             camera.nearClipPlane = .005f;
             camera.farClipPlane = 1000;
@@ -64,6 +66,11 @@ public sealed class UnityDepthMotionChecks : MonoBehaviour
                     Vector3 logical = camera.transform.position + direction * distance;
                     bool selected = (frame / 7) % 2 == 0;
                     visual.Draw(logical, camera, selected, time, 1f / fps);
+                    if (mode == BirdDepthVisual.SizeMode.InflationWithLag && frame * 2 == fps)
+                    {
+                        minLagDiameter = Mathf.Min(minLagDiameter, visual.CurrentDiameter);
+                        maxLagDiameter = Mathf.Max(maxLagDiameter, visual.CurrentDiameter);
+                    }
                     Transform core = visual.transform.Find("Sphere");
                     Require(core != null, "Missing real cursor mesh");
                     float physicalDiameter = core.lossyScale.x;
@@ -124,10 +131,12 @@ public sealed class UnityDepthMotionChecks : MonoBehaviour
             }
             Require(mixedFrames > 0, "Fixture did not exercise mixed-depth history");
             File.WriteAllText(Folder + "/motion.csv", csv.ToString());
+            float lagSpread = (maxLagDiameter-minLagDiameter)/minLagDiameter;
+            Require(lagSpread < .02f, "Outward lag varies by " + (lagSpread*100).ToString("F3",Invariant) + "% across rates at the same stroke time");
             string result = string.Format(Invariant,
-                "PASS: {0} real renderer updates at simulated 30/72/120Hz across 3 modes; {1} assertions; {2} mixed near/far trail updates; max near diameter={3:F6}m, near trail width={4:F6}m, render radius={5:F3}m; {6} Unity captures; recovery/selection checked. No hardware frame-pacing, subjective perception or stereo claim.",
-                frames, checks, mixedFrames, maxNearDiameter, maxNearTrailWidth, maxRenderRadius, captures);
-            File.WriteAllText("depth-motion-result.txt", result);
+                "PASS: {0} real renderer updates at simulated 30/72/120Hz across 3 modes; {1} assertions; {2} mixed near/far trail updates; max near diameter={3:F6}m, near trail width={4:F6}m, render radius={5:F3}m; {6} Unity captures; recovery/selection checked; outbound diameter spread={7:F3}%. No hardware frame-pacing, subjective perception or stereo claim.",
+                frames, checks, mixedFrames, maxNearDiameter, maxNearTrailWidth, maxRenderRadius, captures, lagSpread*100);
+            File.WriteAllText("depth-motion-result.txt", result + "\n" + mathResult);
             Debug.Log(result);
             SessionState.SetBool(Active, false);
             EditorApplication.Exit(0);

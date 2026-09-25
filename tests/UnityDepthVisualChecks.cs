@@ -44,7 +44,54 @@ public sealed class UnityDepthVisualChecks : MonoBehaviour
         float angle20=BirdDepthVisual.TargetDiameter(20,BirdDepthVisual.SizeMode.Inflation)/20;
         float angle200=BirdDepthVisual.TargetDiameter(200,BirdDepthVisual.SizeMode.Inflation)/200;
         Require(angle200<angle20*.4f,"Far core became constant angular size"); checks++;
-        return "PASS: "+checks+" depth visual checks; constant 32mm/2mm cursor/trail through 4m, immediate far-to-near shrink, outward growth lag, shrinking far core, finite monotonic direction-preserving render proxy to 1e12m";
+        // Closed-form response to T(t)=initial*exp(rate*t), checked across
+        // uniform and irregular partitions. This reference does not step the
+        // implementation's recurrence or approximate its interpolation.
+        const float initial=.032f, duration=.5f, tau=.22f;
+        foreach (float rate in new[] { 0f, 2f, 18f })
+        foreach (int fps in new[] { 30, 72, 120, 240 })
+        {
+            float current=initial, prior=initial;
+            for(int frame=1;frame<=fps/2;frame++)
+            {
+                float target=initial*Mathf.Exp(rate*frame/fps);
+                current=BirdDepthVisual.AdvanceDiameter(current,target,1000,1f/fps,BirdDepthVisual.SizeMode.InflationWithLag,null,prior);
+                prior=target;
+            }
+            double expected=initial*(Math.Exp(rate*duration)+rate*tau*Math.Exp(-duration/tau))/(1+rate*tau);
+            Require(Math.Abs(current-expected)/expected<.00002,"Growth integral disagrees with analytic exponential target"); checks++;
+        }
+        float irregular=initial, previous=initial, elapsed=0;
+        foreach(float dt in new[]{.003f,.097f,.011f,.039f,.2f,.15f})
+        {
+            elapsed+=dt;
+            float target=initial*Mathf.Exp(18*elapsed);
+            irregular=BirdDepthVisual.AdvanceDiameter(irregular,target,1000,dt,BirdDepthVisual.SizeMode.InflationWithLag,null,previous);
+            previous=target;
+        }
+        double irregularExpected=initial*(Math.Exp(18*duration)+18*tau*Math.Exp(-duration/tau))/(1+18*tau);
+        Require(Math.Abs(irregular-irregularExpected)/irregularExpected<.00002,"Irregular timing changed growth response"); checks++;
+        foreach(int fps in new[]{30,72,120,240})
+        {
+            float held=initial, ramp=initial, prior=initial;
+            for(int frame=1;frame<=fps/2;frame++)
+            {
+                held=BirdDepthVisual.AdvanceDiameter(held,1,1000,1f/fps,BirdDepthVisual.SizeMode.InflationWithLag,null,1);
+                float target=initial+2f*frame/fps;
+                ramp=BirdDepthVisual.AdvanceDiameter(ramp,target,1000,1f/fps,BirdDepthVisual.SizeMode.InflationWithLag,null,prior);
+                prior=target;
+            }
+            double heldExpected=1+(initial-1)*Math.Exp(-duration/tau);
+            double rampExpected=initial+2*(duration-tau+tau*Math.Exp(-duration/tau));
+            Require(Math.Abs(held-heldExpected)/heldExpected<.00002,"Held target response changed with update rate"); checks++;
+            // Log-linear interpolation approximates a linear ramp: bound its
+            // error against the independent continuous linear-target solution.
+            Require(Math.Abs(ramp-rampExpected)/rampExpected<.002,"Linear target approximation error exceeded 0.2%"); checks++;
+        }
+        Require(BirdDepthVisual.AdvanceDiameter(.2f,1,100,1f/72,BirdDepthVisual.SizeMode.InflationWithLag,null,2)==.2f,"Catch-up growth on return"); checks++;
+        Require(BirdDepthVisual.AdvanceDiameter(2,1,100,1f/72,BirdDepthVisual.SizeMode.InflationWithLag,null,3)==1,"Inward shrink lagged"); checks++;
+        Require(BirdDepthVisual.AdvanceDiameter(.2f,1,100,0,BirdDepthVisual.SizeMode.InflationWithLag,null,.3f)==.2f,"Zero time advanced growth"); checks++;
+        return "PASS: "+checks+" depth visual checks; constant 32mm/2mm cursor/trail through 4m, immediate return shrink, analytic constant/exponential growth and bounded linear-ramp error, irregular timing, shrinking far core, finite monotonic direction-preserving render proxy to 1e12m";
     }
 
     public static void Render()

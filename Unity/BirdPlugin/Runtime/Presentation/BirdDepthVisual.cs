@@ -39,6 +39,9 @@ namespace Bird3DCursor.Presentation
         int count;
         float lastSampleTime;
         float diameter = NearDiameter;
+        float previousTarget;
+        SizeMode previousMode;
+        bool sizeHistoryValid;
         bool ready;
         Transform core;
         LineRenderer halo;
@@ -98,14 +101,27 @@ namespace Bird3DCursor.Presentation
             return s.nearDiameter*inflation*farGrowth;
         }
 
-        public static float AdvanceDiameter(float current, float target, float distance, float dt, SizeMode mode, BirdDepthStyle settings = null)
+        public static float AdvanceDiameter(float current, float target, float distance, float dt, SizeMode mode, BirdDepthStyle settings = null, float previousTarget = -1)
         {
             // Inward resize is immediate. No stale giant visual can enter the
             // working volume, including on a one-frame far-to-palm return.
             var s = settings ?? DefaultStyle;
             if (distance <= s.workingDistance) return s.nearDiameter;
             if (mode != SizeMode.InflationWithLag || target <= current) return target;
-            return Mathf.Lerp(current, target, 1-Mathf.Exp(-Mathf.Max(0, dt)/Mathf.Max(.001f,s.growthLagSeconds)));
+            // Without a prior sample, treat the target as a step, preserving
+            // the original helper's behavior. Otherwise integrate a log-linear
+            // target exactly through the one-pole growth filter. This matches
+            // exponential reach changes without rate-dependent right-end bias.
+            if (previousTarget <= 0) previousTarget = target;
+            if (target < previousTarget) return current; // no catch-up growth on return
+            float h = Mathf.Max(0, dt)/Mathf.Max(.001f,s.growthLagSeconds);
+            if (h <= 0) return current;
+            float growth = Mathf.Log(target/previousTarget);
+            float x = h+growth;
+            // Avoid cancellation for almost unchanged targets/tiny time steps.
+            float response = x < .001f ? x*(1-x*.5f+x*x/6) : 1-Mathf.Exp(-x);
+            float result = current*Mathf.Exp(-h) + target*response*h/x;
+            return Mathf.Clamp(result, current, target);
         }
 
         public static float RenderDistance(float distance)
@@ -143,7 +159,11 @@ namespace Bird3DCursor.Presentation
             float renderD = RenderDistance(d);
             Vector3 projected = Project(logical, eye);
             float target = TargetDiameter(d, sizeMode, style);
-            diameter = AdvanceDiameter(diameter, target, d, dt, sizeMode, style);
+            diameter = AdvanceDiameter(diameter, target, d, dt, sizeMode, style,
+                sizeHistoryValid && previousMode == sizeMode ? previousTarget : target);
+            previousTarget = target;
+            previousMode = sizeMode;
+            sizeHistoryValid = true;
             core.position = projected;
             core.localScale = Vector3.one*(diameter*renderD/d);
             coreMaterial.color = selected ? Color.Lerp(tint, Color.white, .65f) : tint;
@@ -205,7 +225,7 @@ namespace Bird3DCursor.Presentation
         }
 
         void RemoveOldest() { count--; for (int i=0;i<count;i++) { history[i]=history[i+1]; times[i]=times[i+1]; } }
-        public void Clear() { count=0; lastSampleTime=0; diameter=style != null ? style.nearDiameter : NearDiameter; if (ready) { ribbonRenderer.enabled=false; halo.enabled=false; } }
+        public void Clear() { count=0; lastSampleTime=0; sizeHistoryValid=false; diameter=style != null ? style.nearDiameter : NearDiameter; if (ready) { ribbonRenderer.enabled=false; halo.enabled=false; } }
         void OnDestroy() { if (ribbon!=null) Destroy(ribbon); if(coreMaterial!=null)Destroy(coreMaterial); if(lineMaterial!=null)Destroy(lineMaterial); }
     }
 }

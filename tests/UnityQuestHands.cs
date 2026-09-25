@@ -106,7 +106,7 @@ public sealed class UnityQuestHands : MonoBehaviour
             CreateSide(Hand.Chirality.Right, new Color(1, .25f, .65f)) };
         CreateModeControls();
         Application.onBeforeRender += UpdateHead;
-        Debug.Log("BIRD_HANDS_START: v0.3 palm continuation + attached depth trail; original Bird.cs reference; real XR Hands; 32mm cursor through 4m; Q=.001 R=270*d^3");
+        Debug.Log("BIRD_HANDS_START: v0.4 palm continuation + integrated visual growth; original Bird.cs reference; real XR Hands; 32mm cursor through 4m; Q=.001 R=270*d^3");
     }
 
     Side CreateSide(Hand.Chirality chirality, Color color)

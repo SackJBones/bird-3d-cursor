@@ -119,12 +119,12 @@ new history continues to accumulate. A regression checks endpoint attachment
 and continued bounded history at every tested rate. Stereo, occlusion and
 actual perceived depth remain the next experiments.
 
-The growth filter still samples its target once per update. On the deliberately
-extreme outbound sweep at t=0.5 s, the lagged diameter is 0.95148 m at 30 Hz,
-0.81119 m at 72 Hz and 0.77278 m at 120 Hz for the same 3988.16 m logical
-distance. Safety/size bounds pass at all rates, but this experiment does not
-establish equal lag feel across rates. A subsequent cycle should examine
-growth integration across samples before treating the lag mode as a final default.
+The previous growth filter showed 23.124% diameter spread across update rates
+on the extreme outward sweep. Integrating the changing target between samples
+reduces that measured spread to 0.074%, while preserving immediate return
+sizing. See [the growth experiment](DEPTH-GROWTH.md) for the model, rate
+comparison and analytic checks. This improves numerical consistency; equal
+perceived feel across rates is still not established.
 
 [LenSelect](https://www.frontiersin.org/journals/virtual-reality/articles/10.3389/frvir.2021.684677/full)
 studies dynamically scaling selectable objects to improve acquisition. It is
