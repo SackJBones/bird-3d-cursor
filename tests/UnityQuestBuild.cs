@@ -5,6 +5,8 @@ using UnityEditor.Build.Reporting;
 using UnityEditor.SceneManagement;
 using UnityEditor.XR.Management;
 using UnityEditor.XR.Management.Metadata;
+using UnityEditor.Android;
+using System.Xml;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.XR.Management;
@@ -45,7 +47,7 @@ public static class UnityQuestBuild
             AssetDatabase.SaveAssets();
             PlayerSettings.companyName = "Bird3D";
             PlayerSettings.productName = "Bird Quest Smoke";
-            PlayerSettings.bundleVersion = Application.unityVersion.StartsWith("2022.") ? "1.1" : "1.0";
+            PlayerSettings.bundleVersion = Application.unityVersion.StartsWith("2022.") ? "1.2" : "1.0";
             PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.Android, "org.bird3d.questsmoke");
             PlayerSettings.SetScriptingBackend(BuildTargetGroup.Android, ScriptingImplementation.IL2CPP);
             PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
@@ -88,5 +90,39 @@ public static class UnityQuestBuild
             EditorApplication.Exit(0);
         }
         catch (Exception e) { File.WriteAllText("quest-build-result.txt", "FAIL: " + e); Debug.LogException(e); EditorApplication.Exit(1); }
+    }
+}
+
+// This auto-playing smoke scene needs no controller actions. Permit launching
+// while Quest is in hands mode; this declaration does not implement Bird input.
+public sealed class UnityQuestSmokeManifest : IPostGenerateGradleAndroidProject
+{
+    public int callbackOrder { get { return 10000; } }
+    public void OnPostGenerateGradleAndroidProject(string path)
+    {
+        string manifest = Path.Combine(path, "src/main/AndroidManifest.xml");
+        var xml = new XmlDocument();
+        xml.Load(manifest);
+        const string android = "http://schemas.android.com/apk/res/android";
+        var ns = new XmlNamespaceManager(xml.NameTable);
+        ns.AddNamespace("android", android);
+        var root = xml.DocumentElement;
+        var permission = xml.SelectSingleNode("/manifest/uses-permission[@android:name='com.oculus.permission.HAND_TRACKING']", ns) as XmlElement;
+        if (permission == null)
+        {
+            permission = xml.CreateElement("uses-permission");
+            permission.SetAttribute("name", android, "com.oculus.permission.HAND_TRACKING");
+            root.AppendChild(permission);
+        }
+        var feature = xml.SelectSingleNode("/manifest/uses-feature[@android:name='oculus.software.handtracking']", ns) as XmlElement;
+        if (feature == null)
+        {
+            feature = xml.CreateElement("uses-feature");
+            feature.SetAttribute("name", android, "oculus.software.handtracking");
+            root.AppendChild(feature);
+        }
+        feature.SetAttribute("required", android, "false");
+        xml.Save(manifest);
+        Debug.Log("BIRD_QUEST_MANIFEST: optional hands-mode launch enabled; Bird poses remain synthetic.");
     }
 }
