@@ -139,3 +139,6 @@ Avatar checks now also require UnityAvatarPoseFixture.cs beside UnityAvatarInput
 
 
 UnityAvatarSceneChecks.Generate/Validate builds and checks the separate BirdAvatarPreview scene. Restore avatar input/control, cursor and fitter sources/metas first; copy the editor-only helper into the generated runtime folder. Generate refuses scene overwrite and reuses/promotes matching program assets. Validate checks required calibration, hidden startup, compiled Interact calibration to 0.3 m, reset remaining hidden after sampling, recalibration, disabled clicks and collider-free cursor markers. It saves a rendered capture when graphics are enabled. These checks do not constitute physical controller/pointer activation, a VRChat client build or a world upload. AvatarInputChecks now reuses the authored adapter program when available.
+
+
+Local SDK world bundle: see ../docs/modernization/WORLD-BUILD.md for UnityWorldSdkSetup and UnityWorldBundleChecks. The helper belongs in Assets/BirdGenerated/Editor, uses the public Windows build-only API, and reports validation issues without bypassing them. Build artifacts remain ignored; success does not establish VRChat client, upload or headset behavior.
