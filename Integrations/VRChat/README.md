@@ -96,3 +96,12 @@ Run UnityAvatarInputChecks.RunNeutralPreview to test the 0.3 m raw target across
 
 
 Controlled articulation fixture: copy both UnityAvatarInputChecks.cs and UnityAvatarPoseFixture.cs into the generated runtime folder. RunPoseVariation exercises neutral, +/-15 degree local-Z proximal finger rotations and restored neutral via actual ClientSim bone APIs and compiled Udon. The fixture saves/restores runtime joint rotations and Animator enable state without modifying SDK assets. Passing these limited perturbations does not establish human open/close gesture semantics, avatar-swap fidelity or hand tracking.
+
+
+## Separate avatar-preview scene
+
+The heavy BirdWorld project now has an experimental BirdAvatarPreview scene with two bone-input/cursor/fitter chains, per-hand status labels, and conventional CALIBRATE/RESET controls. This is separate from BirdSyntheticDemo. Preview inputs set requireCalibration=true so their markers remain hidden before calibration and after reset, even if an uncalibrated avatar would otherwise fit within the preview range guard. Defaults for existing standalone adapter fixtures remain unchanged. Both cursor components are serialized with clicks disabled.
+
+BirdAvatarControl dispatches CalibrateNeutral or ResetCalibration to both inputs and reports success/incomplete calibration. Controls are local, use ordinary collider-based Interact at 3 m proximity, and require no Bird clicking. The original synthetic materials are reused. Physical activation and actual avatar fidelity remain unvalidated; this scene is a diagnostic preview, not a complete Bird World release.
+
+Restore BirdSphereFit, BirdCursorState, BirdAvatarInput and BirdAvatarControl source/meta pairs into Assets/BirdGenerated/Runtime before opening a fresh checkout of this scene. Other authored scenes need their own sources too. UnityAvatarSceneChecks.Generate creates the scene and promotes the ignored adapter program asset into the tracked Programs directory, preserving its GUID. It refuses to overwrite an existing scene and checks program source references. Validate separately reopens it, compiles Udon and exercises calibration/reset/recalibration through compiled Interact dispatch. Run Validate without -nographics for the camera capture under Validation/AvatarPreview. The capture isolates authored visuals from simulator avatar/UI without changing global preferences.

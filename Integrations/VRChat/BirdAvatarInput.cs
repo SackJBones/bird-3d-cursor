@@ -12,6 +12,7 @@ public class BirdAvatarInput : UdonSharpBehaviour
     public Text label;
     public float maximumPreviewRange = 3;
     public float neutralPreviewRange = 0.3f;
+    public bool requireCalibration;
     [HideInInspector] public bool calibrated;
     [HideInInspector] public bool dataReady;
     [HideInInspector] public int available;
@@ -87,9 +88,10 @@ public class BirdAvatarInput : UdonSharpBehaviour
                     float.IsNaN(measuredRange) || float.IsInfinity(measuredRange) || measuredRange > maximumPreviewRange)
                 { rangeRejected = true; cursor.Cancel(); }
             }
+            if (requireCalibration && !calibrated) cursor.Cancel();
         }
         if (label != null) label.text = "EXPERIMENTAL AVATAR BONES\n" + (rightHand ? "Right " : "Left ") + available +
-            "/14  " + (rangeRejected ? "Range rejected: calibrate avatar" : cursor.poseValid ? "Fit accepted" : "No valid fit") + "\nClicks disabled / no tracked fingertips";
+            "/14  " + (requireCalibration && !calibrated ? "Calibrate to start" : rangeRejected ? "Range rejected: calibrate avatar" : cursor.poseValid ? "Fit accepted" : "No valid fit") + "\nClicks disabled / no tracked fingertips";
     }
     // Explicitly anchor this pose; never silently calibrate the first observed avatar pose.
     public void CalibrateNeutral()

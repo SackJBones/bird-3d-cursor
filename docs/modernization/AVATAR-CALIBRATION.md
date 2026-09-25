@@ -55,3 +55,8 @@ With the simulator Animator temporarily disabled, the fixture rotated middle/rin
 All samples retained calibration and kept clicks disabled. Marker visibility matched validity. The fixture restored joint rotations and the Animator's original enabled state without saving SDK/scene edits. [Full measurements](data/clientsim-avatar-pose-2026-09-25.csv) preserve both hands and fit/range-guard flags. This establishes response to these simulator articulations and reversible neutral recovery, not anatomical gesture fidelity, tracking quality, transient filtered response or comfort. The first helper import logged transient missing-helper C# errors before Unity rebuilt successfully and ran the passing test.
 
 Reproduce with both UnityAvatarInputChecks.cs and UnityAvatarPoseFixture.cs in the ignored generated runtime folder, then run UnityAvatarInputChecks.RunPoseVariation. The same fixture is now a compile-time dependency of the other avatar-check entry points.
+
+
+## Separate diagnostic scene, 2026-09-25 05:13 UTC
+
+BirdAvatarPreview.unity now exposes conventional calibrate/reset controls around this experimental adapter, separate from the synthetic demo. Inputs require calibration, so resetting keeps markers hidden through subsequent samples. The scene labels the approximation and disabled clicks. Its purpose is diagnostic inspection; actual pointer activation, avatar swaps, physical tracking and comfort remain validation gates. See the project README and UnityAvatarSceneChecks for source restoration and reproduction.

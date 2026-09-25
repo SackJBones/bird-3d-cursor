@@ -45,7 +45,8 @@ public class UnityAvatarInputChecks : MonoBehaviour
         File.WriteAllText(ResultPath, "PENDING");
         if (calibration) File.WriteAllText("udon-avatar-calibration.csv", "hand,scale,eye_height_m,span_m,fit_radius_m,center_distance_m,distance_over_span,rms_residual_over_span,raw_range_m,baseline_normalized_range_m\n");
         if (!ClientSimSettings.Instance.enableClientSim || !ClientSimSettings.Instance.spawnPlayer) throw new Exception("ClientSim required");
-        const string path = "Assets/BirdGenerated/BirdAvatarInput.asset";
+        string path = File.Exists("Assets/BirdWorld/Programs/BirdAvatarInput.asset")
+            ? "Assets/BirdWorld/Programs/BirdAvatarInput.asset" : "Assets/BirdGenerated/BirdAvatarInput.asset";
         var program = AssetDatabase.LoadAssetAtPath<UdonSharpProgramAsset>(path);
         if (program == null)
         {
