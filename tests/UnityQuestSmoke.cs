@@ -12,7 +12,7 @@ public sealed class UnityQuestSmoke : MonoBehaviour
     {
         view = FindObjectOfType<Camera>();
         var label = new GameObject("Smoke test label").AddComponent<TextMesh>();
-        label.text = "BIRD / QUEST TEST\nSynthetic trails - no hand tracking";
+        label.text = "BIRD / QUEST TEST\nSynthetic trails - no hand tracking\nUnity " + Application.unityVersion;
         label.fontSize = 48;
         label.characterSize = 0.003f;
         label.anchor = TextAnchor.MiddleCenter;
@@ -27,7 +27,7 @@ public sealed class UnityQuestSmoke : MonoBehaviour
         view.transform.rotation = InputTracking.GetLocalRotation(XRNode.Head);
         if (Time.unscaledTime >= nextLog)
         {
-            Debug.Log("BIRD_QUEST_SMOKE: xr=" + XRSettings.isDeviceActive + " device=" + XRSettings.loadedDeviceName);
+            Debug.Log("BIRD_QUEST_SMOKE: unity=" + Application.unityVersion + " xr=" + XRSettings.isDeviceActive + " device=" + XRSettings.loadedDeviceName);
             nextLog = Time.unscaledTime + 10;
         }
     }

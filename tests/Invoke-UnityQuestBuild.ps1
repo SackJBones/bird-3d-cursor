@@ -1,7 +1,8 @@
 param(
     [Parameter(Mandatory = $true)][string]$UnityEditor,
     [Parameter(Mandatory = $true)][string]$ProjectPath,
-    [string]$UnityVersion = '2020.3.33f1'
+    [string]$UnityVersion = '2020.3.33f1',
+    [string]$OculusPackageVersion = ''
 )
 $ErrorActionPreference = 'Stop'
 $repo = Split-Path $PSScriptRoot -Parent
@@ -15,10 +16,14 @@ foreach ($folder in @('Assets/Editor', 'Packages', 'ProjectSettings')) {
 }
 Set-Content $marker 'Bird Quest deployment smoke project'
 Set-Content (Join-Path $project 'ProjectSettings/ProjectVersion.txt') "m_EditorVersion: $UnityVersion"
+if (!$OculusPackageVersion) {
+    $OculusPackageVersion = if ($UnityVersion.StartsWith('2022.3.')) { '4.2.0' } else { '1.11.2' }
+}
 $manifest = @{dependencies = @{
     'com.bird3d.cursor' = 'file:' + (Join-Path $repo 'Unity/BirdPlugin').Replace('\', '/')
-    'com.unity.xr.oculus' = '1.11.2'
+    'com.unity.xr.oculus' = $OculusPackageVersion
     'com.unity.modules.xr' = '1.0.0'
+    'com.unity.modules.androidjni' = '1.0.0'
 }}
 $manifest | ConvertTo-Json -Depth 3 | Set-Content (Join-Path $project 'Packages/manifest.json')
 Copy-Item (Join-Path $repo 'Unity/BirdPlugin/Samples~/DesktopPreview/BirdDesktopPreview.cs') (Join-Path $project 'Assets/BirdDesktopPreview.cs')
