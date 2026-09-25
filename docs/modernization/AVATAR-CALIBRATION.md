@@ -60,3 +60,11 @@ Reproduce with both UnityAvatarInputChecks.cs and UnityAvatarPoseFixture.cs in t
 ## Separate diagnostic scene, 2026-09-25 05:13 UTC
 
 BirdAvatarPreview.unity now exposes conventional calibrate/reset controls around this experimental adapter, separate from the synthetic demo. Inputs require calibration, so resetting keeps markers hidden through subsequent samples. The scene labels the approximation and disabled clicks. Its purpose is diagnostic inspection; actual pointer activation, avatar swaps, physical tracking and comfort remain validation gates. See the project README and UnityAvatarSceneChecks for source restoration and reproduction.
+
+## Selective SDK data-loss check, 2026-09-25 11:15 UTC
+
+Actual Unity 2022.3.22f1/SDK 3.10.5 ClientSim and compiled Udon passed 31 controlled scenarios: zero returned for each of 14 required bones on each hand, one NaN component, one infinity component, and zero for an unused index-intermediate bone. Only the selected local-player bone query is injected; all others use ClientSim's original SDK provider. This is a return-value fault fixture, not a modified real avatar or physical tracking loss.
+
+With requireCalibration enabled, each required-bone fault yields exactly 13/14 availability, cancels/hides the affected cursor, clears calibration and refuses recalibration while data is missing. The other hand remains calibrated at its expected range. Restoring valid data leaves the affected cursor hidden until explicit recalibration returns its raw target to 0.3 m within 2 mm. Clicks remain disabled throughout. Missing the unused joint leaves both hands working. The runtime SDK delegate is restored afterward; no production adapter changes were needed.
+
+Reproduce with UnityAvatarInputChecks.RunSelectiveLoss and both UnityAvatarPoseFixture.cs and UnityAvatarSelectiveLossFixture.cs in the generated runtime folder. Actual avatar replacement/event delivery, automatic-disable lifecycle and hardware fidelity remain separate open checks.

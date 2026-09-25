@@ -29,7 +29,8 @@ public class UnityAvatarInputChecks : MonoBehaviour
     private static bool Calibration { get { return SessionState.GetBool("Bird.AvatarInput.Calibration", false); } }
     private static bool Neutral { get { return SessionState.GetBool("Bird.AvatarInput.Neutral", false); } }
     private static bool PoseVariation { get { return SessionState.GetBool("Bird.AvatarInput.Pose", false); } }
-    private static string ResultPath { get { return PoseVariation ? "udon-avatar-pose-result.txt" : Neutral ? "udon-avatar-neutral-result.txt" : Calibration ? "udon-avatar-calibration-result.txt" : "udon-avatar-result.txt"; } }
+    private static bool SelectiveLoss { get { return SessionState.GetBool("Bird.AvatarInput.SelectiveLoss", false); } }
+    private static string ResultPath { get { return SelectiveLoss ? "udon-avatar-selective-result.txt" : PoseVariation ? "udon-avatar-pose-result.txt" : Neutral ? "udon-avatar-neutral-result.txt" : Calibration ? "udon-avatar-calibration-result.txt" : "udon-avatar-result.txt"; } }
     public static void Run()
     {
         Begin(false);
@@ -37,11 +38,13 @@ public class UnityAvatarInputChecks : MonoBehaviour
     public static void RunScaleCalibration() { Begin(true); }
     public static void RunNeutralPreview() { Begin(false, true); }
     public static void RunPoseVariation() { Begin(false, false, true); }
-    private static void Begin(bool calibration, bool neutral = false, bool pose = false)
+    public static void RunSelectiveLoss() { Begin(false, false, false, true); }
+    private static void Begin(bool calibration, bool neutral = false, bool pose = false, bool selective = false)
     {
         SessionState.SetBool("Bird.AvatarInput.Calibration", calibration);
         SessionState.SetBool("Bird.AvatarInput.Neutral", neutral);
         SessionState.SetBool("Bird.AvatarInput.Pose", pose);
+        SessionState.SetBool("Bird.AvatarInput.SelectiveLoss", selective);
         File.WriteAllText(ResultPath, "PENDING");
         if (calibration) File.WriteAllText("udon-avatar-calibration.csv", "hand,scale,eye_height_m,span_m,fit_radius_m,center_distance_m,distance_over_span,rms_residual_over_span,raw_range_m,baseline_normalized_range_m\n");
         if (!ClientSimSettings.Instance.enableClientSim || !ClientSimSettings.Instance.spawnPlayer) throw new Exception("ClientSim required");
@@ -62,6 +65,7 @@ public class UnityAvatarInputChecks : MonoBehaviour
         {
             var input = new GameObject("Avatar input " + i).AddUdonSharpComponent<BirdAvatarInput>();
             input.rightHand = i == 1;
+            input.requireCalibration = selective;
             input.cursor = new GameObject("Avatar cursor " + i).AddUdonSharpComponent<BirdCursorState>();
             input.cursor.fitter = new GameObject("Avatar fit " + i).AddUdonSharpComponent<BirdSphereFit>();
             input.cursor.cursorVisual = new GameObject("Avatar marker " + i).transform;
@@ -87,6 +91,11 @@ public class UnityAvatarInputChecks : MonoBehaviour
             observed = "";
             var inputs = FindObjectsOfType<BirdAvatarInput>();
             if (inputs.Length != 2) throw new Exception("Expected two inputs");
+            if (SelectiveLoss)
+            {
+                if (UnityAvatarSelectiveLossFixture.Tick(inputs)) Finish(true, "Compiled Udon in ClientSim: 28 required-bone zero-return cases, NaN and infinity cases, and unused-joint control passed. Loss cancels only the affected hand, rejects calibration while missing, and requires explicit recalibration after recovery. SDK return-value fault injection, not actual avatar replacement or physical tracking loss.");
+                return;
+            }
             if (PoseVariation)
             {
                 if (UnityAvatarPoseFixture.Tick(inputs)) Finish(true, "Compiled adapter consumed controlled +/-15 degree local-Z finger bends; chain lengths preserved, fit/range response recorded and neutral target recovered. CSV in Validation/AvatarPose. This is synthetic articulation, not physical gesture fidelity.");
@@ -273,6 +282,7 @@ public class UnityAvatarInputChecks : MonoBehaviour
     private static float Range(float distance) { return distance + distance * distance / 0.02f + 0.02f * Mathf.Pow(distance / 0.03f, 6); }
     private static void Finish(bool success, string text)
     {
+        UnityAvatarSelectiveLossFixture.Restore();
         UnityAvatarPoseFixture.Restore();
         Restore(); SessionState.SetBool(Active, false);
         if (originalHeight > 0 && Utilities.IsValid(Networking.LocalPlayer)) Networking.LocalPlayer.SetAvatarEyeHeightByMeters(originalHeight);
