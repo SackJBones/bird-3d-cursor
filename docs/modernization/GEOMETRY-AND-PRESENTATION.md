@@ -102,8 +102,29 @@ outward lag and direction-preserving finite projection through 1e12 m.
 `UnityDepthVisualChecks.Render` captures all three modes at seven distances from
 0.4 m to one million meters. Static images establish visibility and clipping
 behavior; they cannot establish perceived depth, comfort or the feel of motion.
-Next compare timed outward/return trajectories, mixed near/far trails, stereo
-views and occlusion, then ask Dana to judge these choices after returning.
+The motion fixture below extends this to timed geometry; stereo views,
+occlusion and Dana's assessment after returning are still needed.
+
+The motion fixture now exercises the real renderer over 1341 updates with
+simulated 30/72/120 Hz timestamps. A 0.12 s return from one million meters and
+a one-update return from a billion meters retain the 32 mm near cursor and
+at most 2 mm near trail width. Selection and clear/recovery are included;
+18 snapshots expose the actual mesh. This is deterministic time stepping,
+not a measurement of hardware frame pacing or a perceptual motion study.
+
+That fixture exposed a detached trail tip at 72 Hz: history sampling occurred
+every 14 ms, so some cursor updates had no matching trail endpoint. The latest
+sample now follows the point every update, using a separate sampling clock so
+new history continues to accumulate. A regression checks endpoint attachment
+and continued bounded history at every tested rate. Stereo, occlusion and
+actual perceived depth remain the next experiments.
+
+The growth filter still samples its target once per update. On the deliberately
+extreme outbound sweep at t=0.5 s, the lagged diameter is 0.95148 m at 30 Hz,
+0.81119 m at 72 Hz and 0.77278 m at 120 Hz for the same 3988.16 m logical
+distance. Safety/size bounds pass at all rates, but this experiment does not
+establish equal lag feel across rates. A subsequent cycle should examine
+growth integration across samples before treating the lag mode as a final default.
 
 [LenSelect](https://www.frontiersin.org/journals/virtual-reality/articles/10.3389/frvir.2021.684677/full)
 studies dynamically scaling selectable objects to improve acquisition. It is

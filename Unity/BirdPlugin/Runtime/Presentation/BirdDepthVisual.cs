@@ -37,6 +37,7 @@ namespace Bird3DCursor.Presentation
         readonly Vector3[] vertices = new Vector3[Capacity*2];
         readonly Color[] colors = new Color[Capacity*2];
         int count;
+        float lastSampleTime;
         float diameter = NearDiameter;
         bool ready;
         Transform core;
@@ -162,10 +163,22 @@ namespace Bird3DCursor.Presentation
             }
 
             while (count > 0 && time-times[0] > .7f) RemoveOldest();
-            if (showTrail && (count == 0 || time-times[count-1] >= .014f))
+            if (showTrail)
             {
-                if (count == Capacity) RemoveOldest();
-                history[count] = logical; times[count++] = time;
+                if (count == 0 || time-lastSampleTime >= .014f)
+                {
+                    if (count == Capacity) RemoveOldest();
+                    history[count] = logical; times[count++] = time;
+                    lastSampleTime = time;
+                }
+                else
+                {
+                    // Keep the live tip attached between stored samples. Use
+                    // a separate sampling clock so this does not postpone the
+                    // next sample indefinitely at high update rates.
+                    history[count-1] = logical;
+                    times[count-1] = time;
+                }
             }
             ribbonRenderer.enabled = showTrail && count > 1;
             for (int i = 0; i < Capacity; i++)
@@ -192,7 +205,7 @@ namespace Bird3DCursor.Presentation
         }
 
         void RemoveOldest() { count--; for (int i=0;i<count;i++) { history[i]=history[i+1]; times[i]=times[i+1]; } }
-        public void Clear() { count=0; diameter=style != null ? style.nearDiameter : NearDiameter; if (ready) { ribbonRenderer.enabled=false; halo.enabled=false; } }
+        public void Clear() { count=0; lastSampleTime=0; diameter=style != null ? style.nearDiameter : NearDiameter; if (ready) { ribbonRenderer.enabled=false; halo.enabled=false; } }
         void OnDestroy() { if (ribbon!=null) Destroy(ribbon); if(coreMaterial!=null)Destroy(coreMaterial); if(lineMaterial!=null)Destroy(lineMaterial); }
     }
 }

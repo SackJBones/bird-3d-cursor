@@ -12,6 +12,10 @@ presentation; its subjective feel has not yet been checked. See
 [geometry and presentation](GEOMETRY-AND-PRESENTATION.md) for the separation,
 parameters, test evidence and remaining limits.
 
+Version 0.3 fixes the trail tip detaching between history samples at higher
+update rates. Rapid-return and mixed-depth mesh tests pass at simulated
+30/72/120 Hz; they do not establish headset frame pacing or subjective feel.
+
 The runner copies the two production port sources into an ignored generated
 project with `QuestHandsUdonShim.cs`. They execute as ordinary C# MonoBehaviours.
 This does **not** exercise the Udon VM, the 12-point avatar-bone approximation,
@@ -113,3 +117,5 @@ and [Hand Tracking feature](https://docs.unity3d.com/Packages/com.unity.xr.hands
 
 
 Version 0.2 built and installed successfully on 2026-09-25 (ARM64; SHA256 9333F7D8CBD90F644B920B9D5563076ACA8247A1C6A07B567DBC4D1C5F2A2FEF). Its new palm/depth feel awaits Dana's return; v0.1 received the earlier small-gap report.
+
+Version 0.3 is now installed (2026-09-25): attached trail-tip fix, APK SHA256 4C126AE2BDFE82A25B8217E3B6FDDA6A7D49EBE0AAEB6542EC9A841D959FB195. Earlier deployment entries describe historical versions.
