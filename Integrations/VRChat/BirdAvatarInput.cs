@@ -11,11 +11,16 @@ public class BirdAvatarInput : UdonSharpBehaviour
     public bool rightHand;
     public Text label;
     public float maximumPreviewRange = 3;
+    public float neutralPreviewRange = 0.3f;
+    [HideInInspector] public bool calibrated;
     [HideInInspector] public bool dataReady;
     [HideInInspector] public int available;
     [HideInInspector] public bool rangeRejected;
     [HideInInspector] public float measuredRange;
     private float nextSample;
+    private float neutralShape;
+    private float mappedNeutralDistance;
+    private bool calibratedRightHand;
     private Vector3[] samples = new Vector3[12];
     private int[] bones = new int[] {
         (int)HumanBodyBones.LeftThumbIntermediate, (int)HumanBodyBones.LeftThumbDistal,
@@ -59,7 +64,7 @@ public class BirdAvatarInput : UdonSharpBehaviour
         if (available != 14)
         {
             cursor.tracking = false;
-            cursor.Cancel();
+            ResetCalibration();
         }
         else
         {
@@ -69,6 +74,10 @@ public class BirdAvatarInput : UdonSharpBehaviour
             // Required finite input only; clicks are disabled because this is not a tip.
             cursor.indexTip = indexDistal;
             cursor.tracking = true;
+            if (calibrated && calibratedRightHand != rightHand) ResetCalibration();
+            float length = HandLength();
+            if (calibrated && (!Positive(length) || !Positive(neutralShape))) ResetCalibration();
+            cursor.rangeDistanceMultiplier = calibrated ? mappedNeutralDistance / (length * neutralShape) : 1;
             cursor.Step();
             if (cursor.poseValid)
             {
@@ -82,6 +91,46 @@ public class BirdAvatarInput : UdonSharpBehaviour
         if (label != null) label.text = "EXPERIMENTAL AVATAR BONES\n" + (rightHand ? "Right " : "Left ") + available +
             "/14  " + (rangeRejected ? "Range rejected: calibrate avatar" : cursor.poseValid ? "Fit accepted" : "No valid fit") + "\nClicks disabled / no tracked fingertips";
     }
+    // Explicitly anchor this pose; never silently calibrate the first observed avatar pose.
+    public void CalibrateNeutral()
+    {
+        ResetCalibration();
+        if (!dataReady || cursor == null || cursor.fitter == null || !cursor.fitter.fitValid ||
+            !Positive(neutralPreviewRange) || neutralPreviewRange > 3 ||
+            !Positive(maximumPreviewRange) || neutralPreviewRange > maximumPreviewRange) return;
+        float length = HandLength();
+        float distance = (cursor.fitter.center - cursor.handRoot).magnitude;
+        if (!Positive(length) || !Positive(distance)) return;
+        // Invert the monotonic original range law with a fixed work budget.
+        float low = 0, high = 0.2f;
+        for (int i = 0; i < 24; i++)
+        {
+            float middle = (low + high) * 0.5f;
+            float far = middle / 0.03f;
+            float range = middle + middle * middle / 0.02f + 0.02f * far * far * far * far * far * far;
+            if (range < neutralPreviewRange) low = middle; else high = middle;
+        }
+        mappedNeutralDistance = (low + high) * 0.5f;
+        neutralShape = distance / length;
+        calibratedRightHand = rightHand;
+        calibrated = true;
+        nextSample = 0;
+    }
+    public void ResetCalibration()
+    {
+        calibrated = false;
+        if (cursor != null) { cursor.rangeDistanceMultiplier = 1; cursor.Cancel(); }
+    }
+    public override void OnAvatarChanged(VRCPlayerApi player)
+    {
+        if (Utilities.IsValid(player) && player.isLocal) { dataReady = false; ResetCalibration(); }
+    }
+    private float HandLength()
+    {
+        // Sum segment lengths, not the bend-dependent proximal-to-distal chord.
+        return (samples[3] - samples[4]).magnitude + (samples[4] - samples[5]).magnitude;
+    }
+    private bool Positive(float value) { return value > 0 && !float.IsNaN(value) && !float.IsInfinity(value); }
     private bool Valid(Vector3 p)
     {
         return p != Vector3.zero && !float.IsNaN(p.x) && !float.IsInfinity(p.x) &&

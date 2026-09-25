@@ -12,6 +12,7 @@ public class BirdCursorState : UdonSharpBehaviour
     public bool tracking;
     public bool smoothing;
     public bool clicksAllowed = true;
+    public float rangeDistanceMultiplier = 1;
     public Transform cursorVisual;
     [HideInInspector] public Vector3 position;
     [HideInInspector] public Vector3 rawPosition;
@@ -33,9 +34,12 @@ public class BirdCursorState : UdonSharpBehaviour
         Vector3 pointing = fitter.center - handRoot;
         float distance = pointing.magnitude;
         if (!Finite(distance) || distance <= 0) { Reject(); return; }
+        if (!Finite(rangeDistanceMultiplier) || rangeDistanceMultiplier <= 0) { Reject(); return; }
+        float mappedDistance = distance * rangeDistanceMultiplier;
+        if (!Finite(mappedDistance)) { Reject(); return; }
         // Preserve Bird.cs's unfiltered range law: x + x^2/.02 + .02*(x/.03)^6.
-        float near = distance / 0.02f;
-        float far = distance / 0.03f;
+        float near = mappedDistance / 0.02f;
+        float far = mappedDistance / 0.03f;
         float range = (near + near * near + far * far * far * far * far * far) * 0.02f;
         Vector3 candidate = handRoot + pointing / distance * range;
         if (!FiniteVector(candidate)) { Reject(); return; }
@@ -44,7 +48,7 @@ public class BirdCursorState : UdonSharpBehaviour
         if (smoothing && filterReady)
         {
             // Bird's scalar-covariance Vector3 Kalman recurrence: Q=.001, R=270*d^3.
-            float noise = 270f * distance * distance * distance;
+            float noise = 270f * mappedDistance * mappedDistance * mappedDistance;
             float predicted = variance + 0.001f;
             float denominator = predicted + noise;
             if (!Finite(noise) || !Finite(denominator) || denominator <= 0) { Reject(); return; }

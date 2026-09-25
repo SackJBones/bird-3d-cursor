@@ -30,3 +30,12 @@ The diagnostic normalization `d_normalized = d * baseline_span / current_span` h
 - Missing fingertip endpoints and avatar IK remain separate fidelity problems. Index distal must not silently become a fingertip; clicks stay disabled.
 
 Reproduction: restore integration sources and the UnityAvatarInputChecks helper as described in the integration README, then run `UnityAvatarInputChecks.RunScaleCalibration` in batchmode/nographics. The check compares compiled-Udon fits with the original centered 4x4 equations (0.2 mm tolerance), checks geometry scales proportionally (absolute ratio tolerance 0.002), and checks raw/normalized range agreement (1%). Its CSV is generated in BirdWorld and ignored there; this document preserves the reviewed snapshot. No authored scene or global ClientSim preferences are changed.
+
+
+## Neutral preview prototype, 2026-09-25 01:11 UTC
+
+The experimental adapter now offers explicit CalibrateNeutral/ResetCalibration events. Calibration records center distance divided by the sum of the two middle-finger bone-segment lengths and inverts the original monotonic range law to anchor this chosen pose at 0.3 m by default. Summed segment lengths replace the earlier straight-line diagnostic span for live compensation because finger bending changes a chord even when bone lengths stay fixed. Each sample adjusts the range-law input for current hand size; the ordinary cursor multiplier defaults to 1.
+
+Compiled-Udon tests with both default-avatar hands passed at 1x/0.5x/1.5x size: raw target range remains within 2 mm of 0.3 m. Filtering can lag after root movement; this tolerance describes the raw target, not every filtered transitional position. Missing data clears calibration; invalid target, explicit recalibration and reset were checked. The local-avatar-change callback compiles but actual swap delivery is not validated.
+
+This is one simulator pose and an opt-in preview policy, not a completed hand-control calibration. Multiple physical poses, hand sizes, comfort, calibration-loss ergonomics and avatar replacement remain gates before it is enabled in the authored world. No inferred fingertip or click input was added.

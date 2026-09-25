@@ -82,3 +82,14 @@ Observed limitation: the default desktop ClientSim avatar produces accepted 12-p
 
 
 Scale diagnosis: RunScaleCalibration verifies both hands at 0.5x/1x/1.5x and restored size. Default-avatar raw ranges are about 20 m / 1250 m / 14220 m; hand-span normalization stabilizes the baseline but leaves it unusable. Compiled fits agree with the original 4x4 equations within 0.2 mm. See ../../docs/modernization/AVATAR-CALIBRATION.md and its CSV for measured geometry, range-law analysis and the next calibration gate. No production normalization was selected from this one pose.
+
+
+## Opt-in neutral preview calibration
+
+After valid bone data has arrived, send CalibrateNeutral to BirdAvatarInput to anchor the current pose to neutralPreviewRange (default 0.3 m, finite and >0, at most 3 m and maximumPreviewRange). The fixed 24-iteration inversion finds the corresponding input to Bird's original monotonic range law. Calibration stores fitted-center distance divided by the sum of middle-proximal/intermediate and intermediate/distal segment lengths; this length measure is less bend-dependent than the diagnostic straight-line span. Each sample compensates for current hand size and applies that calibrated distance ratio to the range law. Direction and the nonlinear range shape remain intact.
+
+BirdCursorState.rangeDistanceMultiplier defaults to 1 and affects both the range-law input and distance-dependent filter noise. Raw target range is anchored in world meters; filtering can lag while the hand/root moves. Existing synthetic/default cursor mapping is unchanged. The adapter still disables clicks and retains its excessive-preview-range rejection.
+
+Calibration is explicit and runtime-only. ResetCalibration cancels the cursor and restores multiplier 1. Missing required bone data, a handedness change, or a local OnAvatarChanged callback clears calibration. It does not automatically resume a previous calibration after loss. The avatar-change callback compiles, but actual avatar-swap event delivery and physical tracking-loss ergonomics remain unvalidated. Calibration needs re-evaluation across multiple real poses/avatars; this adapter is still outside the authored scene.
+
+Run UnityAvatarInputChecks.RunNeutralPreview to test the 0.3 m raw target across default-avatar 1x/0.5x/1.5x scale, missing-avatar invalidation, invalid target rejection, explicit recalibration and reset. Original eye height is restored afterward. The single simulator pose cannot establish hand-gesture fidelity or comfort.

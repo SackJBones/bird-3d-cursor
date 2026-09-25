@@ -130,3 +130,6 @@ UnityAvatarInputChecks.Run checks experimental BirdAvatarInput in actual ClientS
 
 
 UnityAvatarInputChecks.RunScaleCalibration uses the same setup to measure both hands at baseline, half scale, 1.5x scale and restored baseline. It verifies proportional middle-proximal-to-distal span, fitted radius and fitted-center distance, original range-law agreement, and baseline hand-span normalization. It writes udon-avatar-calibration-result.txt and udon-avatar-calibration.csv in BirdWorld, restoring runtime eye height on completion/failure. CSV units are meters except scale, distance/span and normalized RMS residual. Baseline-normalized range is a diagnostic evaluation of the original law at d * baselineSpan / currentSpan; it is not a production calibration or a claim that the baseline range is usable.
+
+
+RunNeutralPreview (same UnityAvatarInputChecks setup) dispatches real CalibrateNeutral/ResetCalibration events and checks both default-avatar raw target ranges against 0.3 m within 2 mm at 1x/0.5x/1.5x size. It checks loss invalidation, NaN-target rejection, explicit recalibration, reset and disabled clicks. These checks use a single simulator pose and do not validate actual avatar-swap events or physical input. Cursor regression also checks distance-multiplier mapping, zero/NaN rejection and recovery with multiplier 1.

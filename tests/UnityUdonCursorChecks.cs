@@ -94,6 +94,13 @@ public class UnityUdonCursorChecks : MonoBehaviour
             left.SetProgramVariable("clicksAllowed", true);
             left.SendCustomEvent("Step"); State(left, true, true, true, false);
             CheckSmoothing(left, root);
+            left.SendCustomEvent("Cancel"); left.SetProgramVariable("smoothing", false);
+            left.SetProgramVariable("rangeDistanceMultiplier", 0.5f);
+            Sample(left, root, 0.04f, 0.004f);
+            Assert(Vector3.Distance((Vector3)left.GetProgramVariable("position"), expected) < 0.0001f, "Calibrated distance retains pointing direction and original range shape");
+            left.SetProgramVariable("rangeDistanceMultiplier", 0f); left.SendCustomEvent("Step"); State(left, false, false, false, false);
+            left.SetProgramVariable("rangeDistanceMultiplier", float.NaN); left.SendCustomEvent("Step"); State(left, false, false, false, false);
+            left.SetProgramVariable("rangeDistanceMultiplier", 1f); Sample(left, root, 0.02f, 0.004f); State(left, true, false, false, false);
             Finish(true, checks + " compiled-Udon cursor assertions passed: range/click/loss/recovery plus smoothing agreement with original KalmanFilterVector3, jitter attenuation, movement and recovery reseeding. Synthetic data; no avatar/hardware validation.");
         }
         catch (Exception e) { Finish(false, e.ToString()); }

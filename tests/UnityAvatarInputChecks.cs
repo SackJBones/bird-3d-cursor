@@ -27,15 +27,18 @@ public class UnityAvatarInputChecks : MonoBehaviour
     private static float[] baselineDistances = new float[2];
     private static float[] baselineRadii = new float[2];
     private static bool Calibration { get { return SessionState.GetBool("Bird.AvatarInput.Calibration", false); } }
-    private static string ResultPath { get { return Calibration ? "udon-avatar-calibration-result.txt" : "udon-avatar-result.txt"; } }
+    private static bool Neutral { get { return SessionState.GetBool("Bird.AvatarInput.Neutral", false); } }
+    private static string ResultPath { get { return Neutral ? "udon-avatar-neutral-result.txt" : Calibration ? "udon-avatar-calibration-result.txt" : "udon-avatar-result.txt"; } }
     public static void Run()
     {
         Begin(false);
     }
     public static void RunScaleCalibration() { Begin(true); }
-    private static void Begin(bool calibration)
+    public static void RunNeutralPreview() { Begin(false, true); }
+    private static void Begin(bool calibration, bool neutral = false)
     {
         SessionState.SetBool("Bird.AvatarInput.Calibration", calibration);
+        SessionState.SetBool("Bird.AvatarInput.Neutral", neutral);
         File.WriteAllText(ResultPath, "PENDING");
         if (calibration) File.WriteAllText("udon-avatar-calibration.csv", "hand,scale,eye_height_m,span_m,fit_radius_m,center_distance_m,distance_over_span,rms_residual_over_span,raw_range_m,baseline_normalized_range_m\n");
         if (!ClientSimSettings.Instance.enableClientSim || !ClientSimSettings.Instance.spawnPlayer) throw new Exception("ClientSim required");
@@ -80,6 +83,7 @@ public class UnityAvatarInputChecks : MonoBehaviour
             observed = "";
             var inputs = FindObjectsOfType<BirdAvatarInput>();
             if (inputs.Length != 2) throw new Exception("Expected two inputs");
+            if (Neutral) { CheckNeutral(inputs); return; }
             foreach (var proxy in inputs)
             {
                 var vm = UdonSharpEditorUtility.GetBackingUdonBehaviour(proxy);
@@ -143,6 +147,62 @@ public class UnityAvatarInputChecks : MonoBehaviour
     {
         if (manager != null && field != null && animator != null) field.SetValue(manager, animator);
         manager = null; field = null; animator = null;
+    }
+    private static void CheckNeutral(BirdAvatarInput[] inputs)
+    {
+        foreach (var proxy in inputs)
+        {
+            var input = UdonSharpEditorUtility.GetBackingUdonBehaviour(proxy);
+            var cursor = UdonSharpEditorUtility.GetBackingUdonBehaviour(proxy.cursor);
+            bool calibrated = (bool)input.GetProgramVariable("calibrated");
+            if ((bool)cursor.GetProgramVariable("clicksAllowed") || (bool)cursor.GetProgramVariable("selected")) throw new Exception("Calibrated adapter enabled clicks");
+            if (stage == 4)
+            {
+                if (calibrated || (bool)input.GetProgramVariable("dataReady") || (bool)cursor.GetProgramVariable("poseValid")) throw new Exception("Loss retained calibration");
+                continue;
+            }
+            if (!(bool)input.GetProgramVariable("dataReady")) throw new Exception("Neutral preview missing data");
+            if (stage == 0 || stage == 5)
+            {
+                if (calibrated) throw new Exception("Unexpected automatic calibration");
+                if (stage == 5)
+                {
+                    input.SetProgramVariable("neutralPreviewRange", float.NaN);
+                    input.SendCustomEvent("CalibrateNeutral");
+                    if ((bool)input.GetProgramVariable("calibrated")) throw new Exception("Invalid target accepted");
+                    input.SetProgramVariable("neutralPreviewRange", 0.3f);
+                }
+                input.SendCustomEvent("CalibrateNeutral");
+                if (!(bool)input.GetProgramVariable("calibrated")) throw new Exception("Neutral calibration rejected valid data");
+            }
+            else
+            {
+                Vector3 root = (Vector3)cursor.GetProgramVariable("handRoot");
+                float rawRange = Vector3.Distance(root, (Vector3)cursor.GetProgramVariable("rawPosition"));
+                if (!calibrated || !(bool)cursor.GetProgramVariable("poseValid") || !Finite(rawRange) || Mathf.Abs(rawRange - 0.3f) > 0.002f)
+                    throw new Exception("Neutral range not preserved: " + rawRange + " at stage " + stage);
+                if (stage == 6)
+                {
+                    input.SendCustomEvent("ResetCalibration");
+                    if ((bool)input.GetProgramVariable("calibrated") || (bool)cursor.GetProgramVariable("poseValid")) throw new Exception("Reset did not invalidate calibration/cursor");
+                }
+            }
+        }
+        if (stage == 0) originalHeight = Networking.LocalPlayer.GetAvatarEyeHeightAsMeters();
+        if (stage == 1) Networking.LocalPlayer.SetAvatarEyeHeightByMeters(originalHeight * 0.5f);
+        if (stage == 2) Networking.LocalPlayer.SetAvatarEyeHeightByMeters(originalHeight * 1.5f);
+        if (stage == 3)
+        {
+            manager = Networking.LocalPlayer.GetClientSimPlayer().GetAvatarDataProvider() as ClientSimPlayerAvatarManager;
+            field = typeof(ClientSimPlayerAvatarManager).GetField("avatarAnimator", BindingFlags.Instance | BindingFlags.NonPublic);
+            if (manager == null || field == null) throw new Exception("SDK fixture changed");
+            animator = field.GetValue(manager) as Animator;
+            if (animator == null) throw new Exception("Missing animator");
+            field.SetValue(manager, null);
+        }
+        if (stage == 4) Restore();
+        if (stage == 6) { Finish(true, "Both neutral previews anchored at 0.3 m within 2 mm across 1x/0.5x/1.5x avatar size; loss invalidated calibration, NaN target rejected, explicit recalibration and reset checked. Clicks disabled. One simulator pose; no avatar-swap/physical fidelity validation."); return; }
+        stage++; next = Time.time + 0.6f;
     }
     private static void RecordCalibration(BirdAvatarInput proxy, Vector3[] points, Vector3 root, float rawRange)
     {
