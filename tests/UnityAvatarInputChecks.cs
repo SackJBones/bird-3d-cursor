@@ -28,17 +28,20 @@ public class UnityAvatarInputChecks : MonoBehaviour
     private static float[] baselineRadii = new float[2];
     private static bool Calibration { get { return SessionState.GetBool("Bird.AvatarInput.Calibration", false); } }
     private static bool Neutral { get { return SessionState.GetBool("Bird.AvatarInput.Neutral", false); } }
-    private static string ResultPath { get { return Neutral ? "udon-avatar-neutral-result.txt" : Calibration ? "udon-avatar-calibration-result.txt" : "udon-avatar-result.txt"; } }
+    private static bool PoseVariation { get { return SessionState.GetBool("Bird.AvatarInput.Pose", false); } }
+    private static string ResultPath { get { return PoseVariation ? "udon-avatar-pose-result.txt" : Neutral ? "udon-avatar-neutral-result.txt" : Calibration ? "udon-avatar-calibration-result.txt" : "udon-avatar-result.txt"; } }
     public static void Run()
     {
         Begin(false);
     }
     public static void RunScaleCalibration() { Begin(true); }
     public static void RunNeutralPreview() { Begin(false, true); }
-    private static void Begin(bool calibration, bool neutral = false)
+    public static void RunPoseVariation() { Begin(false, false, true); }
+    private static void Begin(bool calibration, bool neutral = false, bool pose = false)
     {
         SessionState.SetBool("Bird.AvatarInput.Calibration", calibration);
         SessionState.SetBool("Bird.AvatarInput.Neutral", neutral);
+        SessionState.SetBool("Bird.AvatarInput.Pose", pose);
         File.WriteAllText(ResultPath, "PENDING");
         if (calibration) File.WriteAllText("udon-avatar-calibration.csv", "hand,scale,eye_height_m,span_m,fit_radius_m,center_distance_m,distance_over_span,rms_residual_over_span,raw_range_m,baseline_normalized_range_m\n");
         if (!ClientSimSettings.Instance.enableClientSim || !ClientSimSettings.Instance.spawnPlayer) throw new Exception("ClientSim required");
@@ -83,6 +86,11 @@ public class UnityAvatarInputChecks : MonoBehaviour
             observed = "";
             var inputs = FindObjectsOfType<BirdAvatarInput>();
             if (inputs.Length != 2) throw new Exception("Expected two inputs");
+            if (PoseVariation)
+            {
+                if (UnityAvatarPoseFixture.Tick(inputs)) Finish(true, "Compiled adapter consumed controlled +/-15 degree local-Z finger bends; chain lengths preserved, fit/range response recorded and neutral target recovered. CSV in Validation/AvatarPose. This is synthetic articulation, not physical gesture fidelity.");
+                return;
+            }
             if (Neutral) { CheckNeutral(inputs); return; }
             foreach (var proxy in inputs)
             {
@@ -264,6 +272,7 @@ public class UnityAvatarInputChecks : MonoBehaviour
     private static float Range(float distance) { return distance + distance * distance / 0.02f + 0.02f * Mathf.Pow(distance / 0.03f, 6); }
     private static void Finish(bool success, string text)
     {
+        UnityAvatarPoseFixture.Restore();
         Restore(); SessionState.SetBool(Active, false);
         if (originalHeight > 0 && Utilities.IsValid(Networking.LocalPlayer)) Networking.LocalPlayer.SetAvatarEyeHeightByMeters(originalHeight);
         File.WriteAllText(ResultPath, (success ? "PASS: " : "FAIL: ") + text);

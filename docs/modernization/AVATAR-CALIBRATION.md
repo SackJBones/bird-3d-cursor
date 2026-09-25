@@ -39,3 +39,19 @@ The experimental adapter now offers explicit CalibrateNeutral/ResetCalibration e
 Compiled-Udon tests with both default-avatar hands passed at 1x/0.5x/1.5x size: raw target range remains within 2 mm of 0.3 m. Filtering can lag after root movement; this tolerance describes the raw target, not every filtered transitional position. Missing data clears calibration; invalid target, explicit recalibration and reset were checked. The local-avatar-change callback compiles but actual swap delivery is not validated.
 
 This is one simulator pose and an opt-in preview policy, not a completed hand-control calibration. Multiple physical poses, hand sizes, comfort, calibration-loss ergonomics and avatar replacement remain gates before it is enabled in the authored world. No inferred fingertip or click input was added.
+
+
+## Controlled articulation, 2026-09-25 03:12 UTC
+
+With the simulator Animator temporarily disabled, the fixture rotated middle/ring/little proximal finger joints on both hands by +15 and -15 degrees around each joint's local Z axis, then restored them. This is a controlled perturbation, not a validated human open/close pose. SDK middle-distal positions moved about 26.5 mm while middle-finger segment sums stayed constant within 0.2 mm.
+
+| Fixture pose | Right raw target (m) | Left raw target (m) | Result |
+| --- | --- | --- | --- |
+| Neutral | 0.3000002 | 0.3000002 | Accepted |
+| +15 local Z | 0.5791616 | 0.5791630 | Accepted |
+| -15 local Z | 0.1498147 | 0.1498139 | Accepted |
+| Restored | 0.3000002 | 0.3000002 | Accepted |
+
+All samples retained calibration and kept clicks disabled. Marker visibility matched validity. The fixture restored joint rotations and the Animator's original enabled state without saving SDK/scene edits. [Full measurements](data/clientsim-avatar-pose-2026-09-25.csv) preserve both hands and fit/range-guard flags. This establishes response to these simulator articulations and reversible neutral recovery, not anatomical gesture fidelity, tracking quality, transient filtered response or comfort. The first helper import logged transient missing-helper C# errors before Unity rebuilt successfully and ran the passing test.
+
+Reproduce with both UnityAvatarInputChecks.cs and UnityAvatarPoseFixture.cs in the ignored generated runtime folder, then run UnityAvatarInputChecks.RunPoseVariation. The same fixture is now a compile-time dependency of the other avatar-check entry points.

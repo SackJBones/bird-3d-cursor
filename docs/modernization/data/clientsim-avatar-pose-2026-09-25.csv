@@ -1,0 +1,9 @@
+hand,pose,chain_length_m,distal_displacement_m,fit_valid,cursor_valid,range_rejected,raw_target_m
+right,neutral,0.101518705,0,True,True,False,0.3000002
+left,neutral,0.101520129,0,True,True,False,0.300000221
+right,plus15_localZ,0.101518556,0.0264982134,True,True,False,0.5791616
+left,plus15_localZ,0.101520047,0.0264984425,True,True,False,0.579163
+right,minus15_localZ,0.101518452,0.0264979079,True,True,False,0.14981471
+left,minus15_localZ,0.101519883,0.0264983885,True,True,False,0.14981389
+right,restored,0.101518705,0,True,True,False,0.3000002
+left,restored,0.101520129,0,True,True,False,0.300000221
