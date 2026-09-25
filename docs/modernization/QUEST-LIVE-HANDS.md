@@ -1,10 +1,16 @@
 # Quest live hand comparison
 
 This standalone `Bird Live Hands` app feeds real Quest finger joints into the
-existing Unity `Bird.cs` core and into the port's unchanged `BirdSphereFit` and
+existing Unity `Bird.cs` core and into the port's `BirdSphereFit` and
 `BirdCursorState` sources. Both receive the **same original 16 fit points**, root
 and index fingertip. There is no avatar calibration, hand-size normalization or
 range multiplier. This is a physical math comparison, not a VRChat world.
+
+Version 0.1 was physically tried by Dana, who reports an extremely small port
+gap. Version 0.2 adds experimental palm-side continuation and optional depth
+presentation; its subjective feel has not yet been checked. See
+[geometry and presentation](GEOMETRY-AND-PRESENTATION.md) for the separation,
+parameters, test evidence and remaining limits.
 
 The runner copies the two production port sources into an ignored generated
 project with `QuestHandsUdonShim.cs`. They execute as ordinary C# MonoBehaviours.
@@ -49,15 +55,20 @@ device logs out of public commits.
 ## In-headset check
 
 Hold a hand comfortably in view and cup it as if holding a small ball. Cyan is
-left, pink is right. The colored wire sphere is the original fitted sphere;
+left, pink is right. The colored wire sphere uses the guarded port fit;
 small joint markers show the skeleton used by Bird. Green marks the weighted
-hand root. The index fingertip is white.
+hand root and a green line shows palm front. The index fingertip is white.
 
-- **Colored cursor and short trail:** original Bird position after Kalman
-  filtering. The cursor grows while the index selects.
-- **Small white cursor:** original polynomial output before filtering.
-- **Gold ring:** port's filtered result on exactly the same input. Overlap with
-  the colored cursor is expected after initial/recovery transients.
+- **Colored cursor and short trail:** guarded port point after the standard
+  Kalman recurrence. It brightens while selected without changing near size.
+- **Small white cursor:** guarded fit through the original range polynomial,
+  before filtering.
+- **Gold ring:** unchanged legacy core's filtered point. Ordinary curved poses
+  should closely overlap; near flat/inverted fits intentionally diverge.
+
+Hold an index fingertip on a mode label for 0.6 seconds to compare Fixed,
+Inflate and Inflate + lag. All retain 32 mm physical cursor diameter through
+4 m. No controllers are needed. These are diagnostic presentation alternatives.
 
 First cup/open slowly to assess sphere center, radius and range response. Then
 hold still to compare raw jitter with the colored cursor; draw slow loops and
@@ -69,14 +80,18 @@ The display reports fit radius, center-to-root distance `d`, raw range, original
 and port click states, and center/raw/filtered differences in millimeters.
 Original mapping is `d + d*d/.02 + .02*(d/.03)^6`; Kalman is `Q=.001`,
 `R=270*d^3`. Open, nearly planar hands can produce very long ranges. The demo
-does not clamp the computed range; cursor geometry beyond 20 m and sphere
-geometry of radius >=1 m are hidden, with a range message in the diagnostics.
+no longer hides the cursor beyond 20 m. A display-only depth shell preserves
+direction/angle while keeping astronomical points inside the camera clip.
+Logical interaction coordinates retain their full range. The optional fit's
+2 m sphere-center endpoint maps to roughly 1.76 billion meters of raw reach.
+See the architecture note for numerical and far-world occlusion limitations.
 
 ## Known differences and boundaries
 
 - The original core solves the centered 4x4 normal equations. The port solves
   the equivalent centered, scale-normalized 3x3 system and rejects normalized
-  determinants <=1e-6. A rejected port fit hides its ring and is labeled.
+  determinants <=1e-6 in its default mode. This comparison opts into the new
+  continuous palm-side fallback before degeneracy; the legacy core is unchanged.
 - Original Kalman state starts at zero and is retained over tracking loss.
   The port seeds at the first valid measurement after startup/loss. This can
   produce visible transient differences even with identical coefficients.
@@ -95,3 +110,6 @@ geometry of radius >=1 m are hidden, with a range message in the diagnostics.
 Official setup references:
 [Unity XR Hands 1.3](https://docs.unity3d.com/Packages/com.unity.xr.hands@1.3/manual/index.html)
 and [Hand Tracking feature](https://docs.unity3d.com/Packages/com.unity.xr.hands@1.3/manual/features/handtracking.html).
+
+
+Version 0.2 built and installed successfully on 2026-09-25 (ARM64; SHA256 9333F7D8CBD90F644B920B9D5563076ACA8247A1C6A07B567DBC4D1C5F2A2FEF). Its new palm/depth feel awaits Dana's return; v0.1 received the earlier small-gap report.

@@ -18,6 +18,7 @@ Set-Content (Join-Path $project 'ProjectSettings/ProjectVersion.txt') 'm_EditorV
     'com.unity.xr.openxr'='1.10.0'
     'com.unity.modules.xr'='1.0.0'
     'com.unity.modules.androidjni'='1.0.0'
+    'com.unity.modules.imageconversion'='1.0.0'
 }} | ConvertTo-Json -Depth 4 | Set-Content (Join-Path $project 'Packages/manifest.json')
 
 # Bootstrap has no optional adapter references; compile/quit once after adding
@@ -42,8 +43,11 @@ function Invoke-BirdUnity([string]$Method, [string]$Log, [bool]$Quit) {
     $process.Refresh()
     if ($process.ExitCode -ne 0) { throw "Unity failed; see $Log" }
 }
-foreach ($name in @('UnityQuestHands.cs','QuestHandsUdonShim.cs')) { Copy-Item (Join-Path $PSScriptRoot $name) (Join-Path $project "Assets/$name") }
-foreach ($name in @('UnityQuestHandsBuild.cs','UnityQuestHandsChecks.cs')) { Copy-Item (Join-Path $PSScriptRoot $name) (Join-Path $project "Assets/Editor/$name") }
+foreach ($name in @('UnityQuestHands.cs','QuestHandsUdonShim.cs','UnityDepthVisualChecks.cs')) { Copy-Item (Join-Path $PSScriptRoot $name) (Join-Path $project "Assets/$name") }
+foreach ($name in @('UnityQuestHandsBuild.cs','UnityQuestHandsChecks.cs','UnityPalmFitChecks.cs')) { Copy-Item (Join-Path $PSScriptRoot $name) (Join-Path $project "Assets/Editor/$name") }
+# Migrate the earlier generated helper: a Play Mode component must live outside Editor.
+$oldHelper = Join-Path $project 'Assets/Editor/UnityDepthVisualChecks.cs'
+if (Test-Path -LiteralPath $oldHelper) { Remove-Item -LiteralPath $oldHelper }
 foreach ($name in @('BirdSphereFit.cs','BirdCursorState.cs')) { Copy-Item (Join-Path $repo "Integrations/VRChat/$name") (Join-Path $project "Assets/$name") }
 Invoke-BirdUnity 'BirdHandsBootstrap.Run' 'hands-configure.log' $true
 Set-Content (Join-Path $project 'hands-build-result.txt') 'PENDING'

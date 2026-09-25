@@ -1,0 +1,6 @@
+{
+    "name": "Bird3D.Presentation",
+    "rootNamespace": "Bird3DCursor.Presentation",
+    "references": [],
+    "autoReferenced": true
+}

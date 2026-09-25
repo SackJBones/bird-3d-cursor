@@ -45,7 +45,7 @@ public static class UnityQuestHandsBuild
             EditorUtility.SetDirty(hands); EditorUtility.SetDirty(quest); EditorUtility.SetDirty(touch); EditorUtility.SetDirty(xr);
             PlayerSettings.companyName = "Bird3D";
             PlayerSettings.productName = "Bird Live Hands";
-            PlayerSettings.bundleVersion = "0.1";
+            PlayerSettings.bundleVersion = "0.2";
             PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.Android, "org.bird3d.livehands");
             PlayerSettings.SetScriptingBackend(BuildTargetGroup.Android, ScriptingImplementation.IL2CPP);
             PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
@@ -56,7 +56,7 @@ public static class UnityQuestHandsBuild
             PlayerSettings.SetGraphicsAPIs(BuildTarget.Android, new[] { GraphicsDeviceType.OpenGLES3 });
             QualitySettings.antiAliasing = 4;
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
-            string checks = UnityQuestHandsChecks.Run();
+            string checks = UnityQuestHandsChecks.Run() + "\n" + UnityDepthVisualChecks.CheckMath();
             File.WriteAllText("hands-math-result.txt", checks);
             Debug.Log(checks);
             new GameObject("Bird live hands comparison").AddComponent<UnityQuestHands>();

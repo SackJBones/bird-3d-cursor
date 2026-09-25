@@ -8,13 +8,17 @@ In Unity Package Manager, choose **Add package from disk** and select this folde
 
 Only the built-in physics and IMGUI modules are required by the base package. Create a custom `Bird3DCursor.Hand` implementation to supply poses directly to `Bird3DCursor.Bird`, or use synthetic input for evaluation. No hardware adapter is automatically enabled, and a BirdProvider needs a configured backend and its scene references before it can run.
 
+## Optional presentation
+
+An independent Bird3D.Presentation assembly supplies BirdDepthVisual, a point-in cursor/trail experiment with configurable near size, far inflation and outward growth lag. It has no dependency on Bird math or a hand SDK. A mandala or other experience can omit it entirely. See [geometry and presentation](../../../docs/modernization/GEOMETRY-AND-PRESENTATION.md) for boundaries, current tests and occlusion/perception limitations. Its current render/build evidence is Unity 2022.3.22f1; do not infer a new Unity 2020 run.
+
 ## Desktop preview
 
 The Package Manager Samples section offers **Desktop Preview**, a small synthetic two-cursor scene component with orientation, radius, selection and tracking-loss controls. Import it and follow its README in a separate empty scene. It requires no headset or SDK. Compilation, automated Play Mode behavior and 16:9 camera renders are verified on Unity 2020.3.33f1 with Direct3D 11. GUI input/layout, other render pipelines and standalone rendering remain pending.
 
 ## Tracking backends are still being migrated
 
-XR Hands now lives in the optional `Bird3D.XRHands` assembly, which references `Bird3D.Runtime` and `Unity.XR.Hands` and compiles only with the project scripting symbol `BIRD_OPENXR_ENABLED`. Install a compatible Unity XR Hands package and configure its tracking provider before enabling that symbol. No SDK reference needs to be added to Bird3D.Runtime for XR Hands. The assembly name was checked against Unity registry package com.unity.xr.hands 1.3.0 (minimum Unity 2021.3); an actual SDK-enabled compile remains pending on a supported editor. The base package still imports without that SDK in Unity 2020.3.33f1.
+XR Hands now lives in the optional `Bird3D.XRHands` assembly, which references `Bird3D.Runtime` and `Unity.XR.Hands` and compiles only with the project scripting symbol `BIRD_OPENXR_ENABLED`. Install a compatible Unity XR Hands package and configure its tracking provider before enabling that symbol. No SDK reference needs to be added to Bird3D.Runtime for XR Hands. The assembly name was checked against Unity registry package com.unity.xr.hands 1.3.0 (minimum Unity 2021.3); SDK-enabled compilation and an ARM64 OpenXR build now pass in Unity 2022.3.22f1, and Dana has tried the standalone Quest comparison. This does not establish VRChat avatar-joint equivalence. The base package still imports without that SDK in Unity 2020.3.33f1.
 
 Leap and Oculus OVR remain in the core assembly behind their existing symbols and still require explicit SDK assembly references there. The configuration menu sets symbols only; it does not install SDKs or configure providers. Do not treat base-package or API-double tests as proof that an enabled adapter compiles or tracks hands. Ultraleap is no longer downloaded unconditionally for every user.
 

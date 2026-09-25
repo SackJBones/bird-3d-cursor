@@ -8,6 +8,8 @@ The Bird is a one-handed tool for controlling an arbitrary point in 3D space. It
   <img src="docs/Images/BirdSwooshes.gif" alt="Bird Movement Demo">
 </p>
 
+Bird's geometry specifies a point; interaction and appearance belong to the experience. The development branch keeps its new cursor/trail experiments in an independent optional assembly. See [geometry and presentation](docs/modernization/GEOMETRY-AND-PRESENTATION.md) for the current palm-side and long-range experiments and validation limits.
+
 ## What is the Bird?
 
 The Bird is a novel interaction technique for spatial computing that solves a fundamental problem: how to smoothly control a precise point in 3D space with one hand. Unlike traditional interaction techniques:
