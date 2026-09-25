@@ -21,6 +21,8 @@ public class UnityAvatarInputChecks : MonoBehaviour
     private static ClientSimPlayerAvatarManager manager;
     private static FieldInfo field;
     private static Animator animator;
+    private static VRCPlayerApi eventRemote;
+    private static int eventPlayerCount;
     private static string observed;
     private static float originalHeight;
     private static float[] baselineSpans = new float[2];
@@ -30,7 +32,8 @@ public class UnityAvatarInputChecks : MonoBehaviour
     private static bool Neutral { get { return SessionState.GetBool("Bird.AvatarInput.Neutral", false); } }
     private static bool PoseVariation { get { return SessionState.GetBool("Bird.AvatarInput.Pose", false); } }
     private static bool SelectiveLoss { get { return SessionState.GetBool("Bird.AvatarInput.SelectiveLoss", false); } }
-    private static string ResultPath { get { return SelectiveLoss ? "udon-avatar-selective-result.txt" : PoseVariation ? "udon-avatar-pose-result.txt" : Neutral ? "udon-avatar-neutral-result.txt" : Calibration ? "udon-avatar-calibration-result.txt" : "udon-avatar-result.txt"; } }
+    private static bool AvatarEvents { get { return SessionState.GetBool("Bird.AvatarInput.Events", false); } }
+    private static string ResultPath { get { return AvatarEvents ? "udon-avatar-events-result.txt" : SelectiveLoss ? "udon-avatar-selective-result.txt" : PoseVariation ? "udon-avatar-pose-result.txt" : Neutral ? "udon-avatar-neutral-result.txt" : Calibration ? "udon-avatar-calibration-result.txt" : "udon-avatar-result.txt"; } }
     public static void Run()
     {
         Begin(false);
@@ -39,12 +42,14 @@ public class UnityAvatarInputChecks : MonoBehaviour
     public static void RunNeutralPreview() { Begin(false, true); }
     public static void RunPoseVariation() { Begin(false, false, true); }
     public static void RunSelectiveLoss() { Begin(false, false, false, true); }
-    private static void Begin(bool calibration, bool neutral = false, bool pose = false, bool selective = false)
+    public static void RunAvatarEvents() { Begin(false, false, false, false, true); }
+    private static void Begin(bool calibration, bool neutral = false, bool pose = false, bool selective = false, bool events = false)
     {
         SessionState.SetBool("Bird.AvatarInput.Calibration", calibration);
         SessionState.SetBool("Bird.AvatarInput.Neutral", neutral);
         SessionState.SetBool("Bird.AvatarInput.Pose", pose);
         SessionState.SetBool("Bird.AvatarInput.SelectiveLoss", selective);
+        SessionState.SetBool("Bird.AvatarInput.Events", events);
         File.WriteAllText(ResultPath, "PENDING");
         if (calibration) File.WriteAllText("udon-avatar-calibration.csv", "hand,scale,eye_height_m,span_m,fit_radius_m,center_distance_m,distance_over_span,rms_residual_over_span,raw_range_m,baseline_normalized_range_m\n");
         if (!ClientSimSettings.Instance.enableClientSim || !ClientSimSettings.Instance.spawnPlayer) throw new Exception("ClientSim required");
@@ -65,7 +70,7 @@ public class UnityAvatarInputChecks : MonoBehaviour
         {
             var input = new GameObject("Avatar input " + i).AddUdonSharpComponent<BirdAvatarInput>();
             input.rightHand = i == 1;
-            input.requireCalibration = selective;
+            input.requireCalibration = selective || events;
             input.cursor = new GameObject("Avatar cursor " + i).AddUdonSharpComponent<BirdCursorState>();
             input.cursor.fitter = new GameObject("Avatar fit " + i).AddUdonSharpComponent<BirdSphereFit>();
             input.cursor.cursorVisual = new GameObject("Avatar marker " + i).transform;
@@ -91,6 +96,7 @@ public class UnityAvatarInputChecks : MonoBehaviour
             observed = "";
             var inputs = FindObjectsOfType<BirdAvatarInput>();
             if (inputs.Length != 2) throw new Exception("Expected two inputs");
+            if (AvatarEvents) { CheckAvatarEvents(inputs); return; }
             if (SelectiveLoss)
             {
                 if (UnityAvatarSelectiveLossFixture.Tick(inputs)) Finish(true, "Compiled Udon in ClientSim: 28 required-bone zero-return cases, NaN and infinity cases, and unused-joint control passed. Loss cancels only the affected hand, rejects calibration while missing, and requires explicit recalibration after recovery. SDK return-value fault injection, not actual avatar replacement or physical tracking loss.");
@@ -165,6 +171,70 @@ public class UnityAvatarInputChecks : MonoBehaviour
     {
         if (manager != null && field != null && animator != null) field.SetValue(manager, animator);
         manager = null; field = null; animator = null;
+    }
+    private static void CheckAvatarEvents(BirdAvatarInput[] inputs)
+    {
+        foreach (var proxy in inputs)
+        {
+            var input = UdonSharpEditorUtility.GetBackingUdonBehaviour(proxy);
+            var cursor = UdonSharpEditorUtility.GetBackingUdonBehaviour(proxy.cursor);
+            bool calibrated = (bool)input.GetProgramVariable("calibrated");
+            bool valid = (bool)cursor.GetProgramVariable("poseValid");
+            bool visible = ((Transform)cursor.GetProgramVariable("cursorVisual")).gameObject.activeSelf;
+            if (!(bool)input.GetProgramVariable("dataReady") || (int)input.GetProgramVariable("available") != 14)
+                throw new Exception("Event fixture requires complete live bone data");
+            if ((bool)cursor.GetProgramVariable("clicksAllowed") || (bool)cursor.GetProgramVariable("selected"))
+                throw new Exception("Event fixture enabled clicks");
+            if (stage == 0 || stage == 3)
+            {
+                if (calibrated || valid || visible) throw new Exception("Startup/event recovery automatically calibrated");
+                input.SendCustomEvent("CalibrateNeutral");
+                if (!(bool)input.GetProgramVariable("calibrated")) throw new Exception("Explicit event-fixture calibration failed");
+            }
+            else
+            {
+                float range = Vector3.Distance((Vector3)cursor.GetProgramVariable("rawPosition"), (Vector3)cursor.GetProgramVariable("handRoot"));
+                if (!calibrated || !valid || !visible || !Finite(range) || Mathf.Abs(range - 0.3f) > 0.002f)
+                    throw new Exception("Remote join disturbed calibration or local recalibration failed");
+            }
+        }
+        if (stage == 1)
+        {
+            eventPlayerCount = VRCPlayerApi.GetPlayerCount();
+            ClientSimMain.SpawnRemotePlayer("Bird event fixture");
+            var players = new VRCPlayerApi[VRCPlayerApi.GetPlayerCount()];
+            VRCPlayerApi.GetPlayers(players);
+            foreach (var player in players)
+                if (Utilities.IsValid(player) && !player.isLocal && player.displayName == "Bird event fixture") eventRemote = player;
+            if (eventRemote == null || VRCPlayerApi.GetPlayerCount() != eventPlayerCount + 1)
+                throw new Exception("Remote simulator player was not created");
+        }
+        else if (stage == 2)
+        {
+            // Replay the SDK's event transport; this does not replace the avatar asset.
+            var sender = new ClientSimUdonManagerEventSender(UdonManager.Instance);
+            sender.RunEvent("_onAvatarChanged", ("player", eventRemote));
+            foreach (var proxy in inputs)
+                if (!(bool)UdonSharpEditorUtility.GetBackingUdonBehaviour(proxy).GetProgramVariable("calibrated"))
+                    throw new Exception("Remote avatar event cleared local calibration");
+            sender.RunEvent("_onAvatarChanged", ("player", Networking.LocalPlayer));
+            foreach (var proxy in inputs)
+            {
+                var input = UdonSharpEditorUtility.GetBackingUdonBehaviour(proxy);
+                var cursor = UdonSharpEditorUtility.GetBackingUdonBehaviour(proxy.cursor);
+                if ((bool)input.GetProgramVariable("calibrated") || (bool)input.GetProgramVariable("dataReady") ||
+                    (bool)cursor.GetProgramVariable("poseValid") || ((Transform)cursor.GetProgramVariable("cursorVisual")).gameObject.activeSelf)
+                    throw new Exception("Local SDK avatar event did not immediately cancel both cursors");
+            }
+        }
+        else if (stage == 4)
+        {
+            ClientSimMain.RemovePlayer(eventRemote); eventRemote = null;
+            if (VRCPlayerApi.GetPlayerCount() != eventPlayerCount) throw new Exception("Remote fixture cleanup failed");
+            Finish(true, "Compiled Udon: real ClientSim remote join preserved calibration; SDK-transport remote avatar event ignored, local event immediately cleared both cursors/calibration; hidden hold and explicit recalibration passed. Remote fixture removed. Event replay is not actual avatar replacement or multiplayer validation.");
+            return;
+        }
+        stage++; next = Time.time + 0.5f;
     }
     private static void CheckNeutral(BirdAvatarInput[] inputs)
     {
@@ -282,6 +352,8 @@ public class UnityAvatarInputChecks : MonoBehaviour
     private static float Range(float distance) { return distance + distance * distance / 0.02f + 0.02f * Mathf.Pow(distance / 0.03f, 6); }
     private static void Finish(bool success, string text)
     {
+        if (Utilities.IsValid(eventRemote)) ClientSimMain.RemovePlayer(eventRemote);
+        eventRemote = null;
         UnityAvatarSelectiveLossFixture.Restore();
         UnityAvatarPoseFixture.Restore();
         Restore(); SessionState.SetBool(Active, false);
