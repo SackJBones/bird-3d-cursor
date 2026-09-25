@@ -379,3 +379,11 @@ Documented reproduction and ticked only event-routing validation. Actual avatar 
 ## Unity Hub CLI availability note - 2026-09-25
 
 Dana updated Unity Hub and reports its banner advertises a new Unity CLI. Consider that CLI for future editor/module setup before relying on GUI installation. A quick Get-Command check found no unity, unity-cli or unityhub command in this session's PATH; this does not establish the executable's actual name or installation location. Discover the installed CLI and inspect its help before using it. No editor/module changes were made for this note.
+
+## Probe automatic-disable cleanup - 2026-09-25, 15:16 UTC cycle
+
+Reproduced the original automatic GameObject-disable failure under the now-configured SDK: marker flags/counts remained stale, while diagnostic direct _onDisable dispatch cleared them. Traced SDK 3.10.5 UdonManager.Update: it iterates registered behaviours before draining queued unregistrations; UdonBehaviour.ManagedUpdate dispatches _update without an enabled/active check. Thus a final queued sample can undo OnDisable cleanup. Added a small production guard in BirdHandDataProbe.Update for enabled and activeInHierarchy, preserving the paused guard.
+
+Strengthened the observer to require immediate OnDisable marker/count/label clearing, then retained its later disabled-interval and re-enable recovery checks. Added RunComponentDisable using the backing component's enabled flag with normal SDK proxy synchronization. Both separate Unity 2022.3.22f1/compiled-Udon ClientSim runs PASS: GameObject deactivate/reactivate and component disable/re-enable, restoring 16/16 counts and marker/label agreement. No direct event dispatch is used to obtain either passing result. No authored scene, SDK source, headset or global preferences changed; heavy repository has no meaningful diff.
+
+Updated current reproduction notes and checked off the probe-specific lifecycle result. This fixes the diagnostic probe only. Cursor state and avatar/synthetic drivers still require explicit cancellation before external deactivation; extend lifecycle handling and tests to those components next. Actual avatar replacement, physical tracking, headset comfort and multiplayer remain unverified.

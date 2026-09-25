@@ -42,6 +42,8 @@ public static class UnityClientSimProbeChecks
         Begin(false);
     }
 
+    public static void RunComponentDisable() { Begin(true, false, false, true); }
+
     public static void RunMissingBones()
     {
         Begin(false, true);
@@ -55,13 +57,15 @@ public static class UnityClientSimProbeChecks
     private static bool Automatic { get { return SessionState.GetBool("Bird.ClientSim.Automatic", true); } }
     private static bool MissingBones { get { return SessionState.GetBool("Bird.ClientSim.MissingBones", false); } }
     private static bool Scale { get { return SessionState.GetBool("Bird.ClientSim.Scale", false); } }
-    private static string ResultPath { get { return Scale ? "clientsim-probe-scale-result.txt" : MissingBones ? "clientsim-probe-missing-result.txt" : Automatic ? "clientsim-probe-result.txt" : "clientsim-probe-explicit-result.txt"; } }
+    private static bool ComponentDisable { get { return SessionState.GetBool("Bird.ClientSim.ComponentDisable", false); } }
+    private static string ResultPath { get { return ComponentDisable ? "clientsim-probe-component-result.txt" : Scale ? "clientsim-probe-scale-result.txt" : MissingBones ? "clientsim-probe-missing-result.txt" : Automatic ? "clientsim-probe-result.txt" : "clientsim-probe-explicit-result.txt"; } }
 
-    private static void Begin(bool automatic, bool missingBones = false, bool scale = false)
+    private static void Begin(bool automatic, bool missingBones = false, bool scale = false, bool component = false)
     {
         SessionState.SetBool("Bird.ClientSim.Automatic", automatic);
         SessionState.SetBool("Bird.ClientSim.MissingBones", missingBones);
         SessionState.SetBool("Bird.ClientSim.Scale", scale);
+        SessionState.SetBool("Bird.ClientSim.ComponentDisable", component);
         deadline = nextCheck = 0;
         stage = 0;
         File.WriteAllText(ResultPath, "PENDING");
@@ -155,9 +159,19 @@ public static class UnityClientSimProbeChecks
                     return;
                 }
                 if (stage == 2) { Finish(true, observed + (Automatic ? "; automatic disable/re-enable" : "; explicit Udon PauseProbe/ResumeProbe") + " clearing and recovery checked. No hardware or scale validation."); return; }
-                // Disable the object: the UdonSharp editor synchronizes component enabled state
-                // with its proxy, so toggling only the backing component is not a stable test.
-                if (Automatic) proxy.gameObject.SetActive(false);
+                // Exercise Unity's lifecycle on either the GameObject or the backing
+                // component; the UdonSharp editor synchronizes its proxy enabled state.
+                if (Automatic)
+                {
+                    if (ComponentDisable) backing.enabled = false;
+                    else proxy.gameObject.SetActive(false);
+                    // Distinguish failed OnDisable delivery from a queued Update
+                    // that repopulates state after successful immediate cleanup.
+                    foreach (var marker in markers)
+                        if (marker.gameObject.activeSelf) throw new Exception("Immediate automatic cleanup left a marker active");
+                    if ((int)backing.GetProgramVariable("leftAvailable") != 0 || (int)backing.GetProgramVariable("rightAvailable") != 0 || !label.text.Contains("Disabled"))
+                        throw new Exception("Immediate OnDisable state was not cleared");
+                }
                 else backing.SendCustomEvent("PauseProbe");
                 stage = 1;
                 nextCheck = EditorApplication.timeSinceStartup + 0.5;
@@ -177,7 +191,11 @@ public static class UnityClientSimProbeChecks
                 }
                 if ((int)backing.GetProgramVariable("leftAvailable") != 0 || (int)backing.GetProgramVariable("rightAvailable") != 0 || !label.text.Contains(Automatic ? "Disabled" : "Paused"))
                     throw new Exception("Disable event did not clear Udon state");
-                if (Automatic) proxy.gameObject.SetActive(true);
+                if (Automatic)
+                {
+                    if (ComponentDisable) backing.enabled = true;
+                    else proxy.gameObject.SetActive(true);
+                }
                 else backing.SendCustomEvent("ResumeProbe");
                 stage = 2;
                 nextCheck = EditorApplication.timeSinceStartup + 0.5;

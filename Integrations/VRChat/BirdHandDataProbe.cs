@@ -50,7 +50,9 @@ public class BirdHandDataProbe : UdonSharpBehaviour
 
     private void Update()
     {
-        if (paused) return;
+        // UdonManager can deliver one queued Update after OnDisable. Keep the
+        // cleared display intact until this behaviour is active again.
+        if (paused || !enabled || !gameObject.activeInHierarchy) return;
         if (Time.time < nextSample) return;
         nextSample = Time.time + 0.1f;
         leftAvailable = 0;
