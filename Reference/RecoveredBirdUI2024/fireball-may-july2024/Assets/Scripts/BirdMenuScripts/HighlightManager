@@ -1,0 +1,26 @@
+using UnityEngine;
+using System.Collections;
+
+public class HighlightManager : MonoBehaviour
+{
+    //list to keep track of all currently highlighted basemenuelements
+    private List<BaseMenuElement> highlighted;
+    
+    // method to find all of the child gameobjects of this gameobject that have a basemenuelement component and un-highlight them
+    public void UnhighlightAll()
+    {
+        //get all of the children of this gameobject
+        Transform[] children = GetComponentsInChildren<Transform>();
+        //loop through all of the children
+        foreach (Transform child in children)
+        {
+            //if the child has a basemenuelement component
+            if (child.GetComponent<BaseMenuElement>() != null)
+            {
+                //unhighlight the child
+                child.GetComponent<BaseMenuElement>().Unhighlight();
+            }
+        }
+    }
+
+}

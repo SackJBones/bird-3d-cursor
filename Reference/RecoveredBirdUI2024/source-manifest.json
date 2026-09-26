@@ -1,0 +1,354 @@
+{
+  "captured_utc": "2026-09-26T07:20:21.907988+00:00",
+  "source_root_hint": "MIT Dropbox/Dana Gretton/Unity/bird-3d-cursor-mac/BirdFireballDemo",
+  "notes": [
+    "Read-only reference snapshot outside Unity package. Not runnable by itself.",
+    "Timestamps are source filesystem metadata, not proof of authored chronology.",
+    "Original bytes retained; see .gitattributes. No DOTween/vendor binaries copied."
+  ],
+  "files": [
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Editor/BaseMenuElementEditor.cs",
+      "source_path": "Assets/Editor/BaseMenuElementEditor.cs",
+      "bytes": 13124,
+      "sha256": "47897a7142e2980ccc92a2e669d7883d592b79c44ad5ed956bc2fa08b8c6296f",
+      "source_mtime_utc": "2023-07-27T21:40:29+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Editor/BaseMenuElementEditor.cs.meta",
+      "source_path": "Assets/Editor/BaseMenuElementEditor.cs.meta",
+      "bytes": 243,
+      "sha256": "b7ea415aa8e51f7066954d0a9b45731ecdc1a35d7e4847f510edb1c8ff00a79b",
+      "source_mtime_utc": "2023-07-20T01:43:46+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Scripts/BirdHitInvoke.cs",
+      "source_path": "Assets/Scripts/BirdHitInvoke.cs",
+      "bytes": 507,
+      "sha256": "112bf249d8184fe16255e0f51128ef592ee70ce500af3e4f75cc70febb844225",
+      "source_mtime_utc": "2024-05-16T15:34:38+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Scripts/BirdHitInvoke.cs.meta",
+      "source_path": "Assets/Scripts/BirdHitInvoke.cs.meta",
+      "bytes": 243,
+      "sha256": "fcba8c39568c47ac1a280566a721fcebc9be01862bb8eca467016531b96d34af",
+      "source_mtime_utc": "2023-07-14T05:55:28+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Scripts/BirdMenuScripts/BaseMenuElement.cs",
+      "source_path": "Assets/Scripts/BirdMenuScripts/BaseMenuElement.cs",
+      "bytes": 19574,
+      "sha256": "a317c7987754e055a3d355aeb9163274e515f54c37be87a88730cb0d40c7dfa4",
+      "source_mtime_utc": "2024-05-16T15:39:52+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Scripts/BirdMenuScripts/BaseMenuElement.cs.meta",
+      "source_path": "Assets/Scripts/BirdMenuScripts/BaseMenuElement.cs.meta",
+      "bytes": 243,
+      "sha256": "48f2c9cdb1de71debf60dce860bbfc5c5acc004ba5360e54213ce93a459d3378",
+      "source_mtime_utc": "2023-07-16T15:20:45+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Scripts/BirdMenuScripts/HighlightManager",
+      "source_path": "Assets/Scripts/BirdMenuScripts/HighlightManager",
+      "bytes": 884,
+      "sha256": "79a81c3efabac67c9b88dcc57c84e83f2f9761ee88366da8306fc1f62151dd1a",
+      "source_mtime_utc": "2023-07-20T23:50:45+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Scripts/BirdMenuScripts/HighlightManager.meta",
+      "source_path": "Assets/Scripts/BirdMenuScripts/HighlightManager.meta",
+      "bytes": 155,
+      "sha256": "5776e7f480cfb6819afaa35698fa88873f4484e3827f624001bdecebda2338dc",
+      "source_mtime_utc": "2023-07-19T23:15:59+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Scripts/BirdMenuScripts.meta",
+      "source_path": "Assets/Scripts/BirdMenuScripts.meta",
+      "bytes": 172,
+      "sha256": "3dfe28849eeb6c433cbb06e3be9cf2ee4f6dafa06aa34c690f7e1ae2b40273e4",
+      "source_mtime_utc": "2023-07-16T15:20:21+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Scripts/Bomb.cs",
+      "source_path": "Assets/Scripts/Bomb.cs",
+      "bytes": 1001,
+      "sha256": "ee4a3ce2bc17927cd286cbb4df791701043209dace86b81ab5c35792526c2f9f",
+      "source_mtime_utc": "2022-12-16T22:18:10+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Scripts/Bomb.cs.meta",
+      "source_path": "Assets/Scripts/Bomb.cs.meta",
+      "bytes": 243,
+      "sha256": "18ab2a961a80af7ace96773a2991d6840b445bc9ba204c3703effced9aa92908",
+      "source_mtime_utc": "2022-12-16T22:18:10+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Scripts/BuildWireframe.cs",
+      "source_path": "Assets/Scripts/BuildWireframe.cs",
+      "bytes": 6028,
+      "sha256": "7827cce3f16eee1a5ec885bd6db7627a7c17e583d57573af7b501d4ea6814580",
+      "source_mtime_utc": "2023-07-29T15:10:40+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Scripts/BuildWireframe.cs.meta",
+      "source_path": "Assets/Scripts/BuildWireframe.cs.meta",
+      "bytes": 243,
+      "sha256": "0af932468d1f2c95e3bc188ef20623d54adb741181fcea0dd4e8b9669c5165da",
+      "source_mtime_utc": "2023-07-29T11:05:45+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Scripts/DisappearOnBirdTouch.cs",
+      "source_path": "Assets/Scripts/DisappearOnBirdTouch.cs",
+      "bytes": 769,
+      "sha256": "c86b31e5ab4d2c8cadcd097f6a83549c8e6601bd25aff07570130eb520e31e70",
+      "source_mtime_utc": "2024-05-16T15:34:22+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Scripts/DisappearOnBirdTouch.cs.meta",
+      "source_path": "Assets/Scripts/DisappearOnBirdTouch.cs.meta",
+      "bytes": 243,
+      "sha256": "5ac70383457e5ae5819759bcf76a65f71663d349253e8252a573a800e5f534a3",
+      "source_mtime_utc": "2023-07-14T03:23:32+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Scripts/DodecahedronGenerator.cs",
+      "source_path": "Assets/Scripts/DodecahedronGenerator.cs",
+      "bytes": 7349,
+      "sha256": "062eadfffbe7b980bd596a74fc8bc6b57fd225524249276450cd1dc6974cd029",
+      "source_mtime_utc": "2023-07-29T20:40:43+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Scripts/DodecahedronGenerator.cs.meta",
+      "source_path": "Assets/Scripts/DodecahedronGenerator.cs.meta",
+      "bytes": 243,
+      "sha256": "8aa41c86a1b5f45714804b7b5d7342c0db155c54c86029e9689a614be0628e8e",
+      "source_mtime_utc": "2023-07-26T03:51:45+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Scripts/FadeLight.cs",
+      "source_path": "Assets/Scripts/FadeLight.cs",
+      "bytes": 424,
+      "sha256": "039f2a6e01b257b173b5db513db981e2f6752e2c57b88809150e845d180d9343",
+      "source_mtime_utc": "2023-07-20T23:22:22+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Scripts/FadeLight.cs.meta",
+      "source_path": "Assets/Scripts/FadeLight.cs.meta",
+      "bytes": 243,
+      "sha256": "d8f727096a31c8815121a0bd79c662f1657eaf0ed9ae6483389db363e0742236",
+      "source_mtime_utc": "2022-12-16T22:18:10+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Scripts/FloatingObject.cs",
+      "source_path": "Assets/Scripts/FloatingObject.cs",
+      "bytes": 1567,
+      "sha256": "e009243d8ac7a7420005097d55224542845ebaaeafaab5a472525b91b40be713",
+      "source_mtime_utc": "2023-07-30T02:26:49+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Scripts/FloatingObject.cs.meta",
+      "source_path": "Assets/Scripts/FloatingObject.cs.meta",
+      "bytes": 243,
+      "sha256": "fe9a5b3b71af39bce9c1637d9c284efe5227485a22232faea6f1939a2e31855d",
+      "source_mtime_utc": "2023-07-14T05:21:44+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Scripts/GlowingOutline.cs",
+      "source_path": "Assets/Scripts/GlowingOutline.cs",
+      "bytes": 3811,
+      "sha256": "039dce699cc844315bf1974399e418f19e4250156a0d3c16418781f890ed7669",
+      "source_mtime_utc": "2023-07-27T18:09:49+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Scripts/GlowingOutline.cs.meta",
+      "source_path": "Assets/Scripts/GlowingOutline.cs.meta",
+      "bytes": 243,
+      "sha256": "2b3ec4b57e1c8c91a0405f510cd0af155141c9a804c8c3af18af76c1c584deb2",
+      "source_mtime_utc": "2023-07-14T04:13:01+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Scripts/GoGetEffectColor.cs",
+      "source_path": "Assets/Scripts/GoGetEffectColor.cs",
+      "bytes": 760,
+      "sha256": "6e9da053d610a82622d82089df9df7a917b351491ec8f825f639e88d1add6a4b",
+      "source_mtime_utc": "2023-07-29T06:29:13+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Scripts/GoGetEffectColor.cs.meta",
+      "source_path": "Assets/Scripts/GoGetEffectColor.cs.meta",
+      "bytes": 243,
+      "sha256": "1dffbacf8d6873dd963f3cd566b9aa2251be6e0f3034b63849aaf301dd052b42",
+      "source_mtime_utc": "2023-07-29T06:26:20+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Scripts/InactivateParticles.cs",
+      "source_path": "Assets/Scripts/InactivateParticles.cs",
+      "bytes": 1078,
+      "sha256": "1c75d5fe42e04b7f090f9dec33c26a83cb383a20c4be7a06d3d8fc869d657024",
+      "source_mtime_utc": "2023-07-30T08:03:24+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Scripts/InactivateParticles.cs.meta",
+      "source_path": "Assets/Scripts/InactivateParticles.cs.meta",
+      "bytes": 243,
+      "sha256": "342b79cbed4142373a16745b0804ad9c1a6ceb1f0a67c1d8d1dae4abc63101b6",
+      "source_mtime_utc": "2023-07-30T03:04:08+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Scripts/MoveForward.cs",
+      "source_path": "Assets/Scripts/MoveForward.cs",
+      "bytes": 149,
+      "sha256": "8b366ea0a92ca66d7a751b269146164f9841abc625e8c36483bd9b052b25fa79",
+      "source_mtime_utc": "2023-07-20T23:54:55+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Scripts/MoveForward.cs.meta",
+      "source_path": "Assets/Scripts/MoveForward.cs.meta",
+      "bytes": 243,
+      "sha256": "553051040ab434801dfd441632509b2c182bbcb681ec5c2a38a3396b6cfb78cc",
+      "source_mtime_utc": "2023-07-20T22:31:35+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Scripts/PointerDynamics.cs",
+      "source_path": "Assets/Scripts/PointerDynamics.cs",
+      "bytes": 715,
+      "sha256": "42e2ec2289c53207021fb0a72d8b88105e722368de90243dc8ef56b14926aa86",
+      "source_mtime_utc": "2024-05-16T15:41:30+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Scripts/PointerDynamics.cs.meta",
+      "source_path": "Assets/Scripts/PointerDynamics.cs.meta",
+      "bytes": 243,
+      "sha256": "fb7f70096c68c1ef96e18b4c969adffec1be17c2ca141d70179697f8e2007384",
+      "source_mtime_utc": "2023-07-01T01:58:09+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Scripts/PointOfInterest.cs",
+      "source_path": "Assets/Scripts/PointOfInterest.cs",
+      "bytes": 3035,
+      "sha256": "9414a45a385632e1083e2ba0dbe9e72e42ce2eb7af24ba78be52fc8cbe7be09a",
+      "source_mtime_utc": "2023-07-30T08:18:09+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Scripts/PointOfInterest.cs.meta",
+      "source_path": "Assets/Scripts/PointOfInterest.cs.meta",
+      "bytes": 243,
+      "sha256": "19a49e24b2ea6ebb7e5f5212078f00b983087c96af530942857f230a0bac77b3",
+      "source_mtime_utc": "2023-07-30T05:27:27+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Scripts/ResetObjects.cs",
+      "source_path": "Assets/Scripts/ResetObjects.cs",
+      "bytes": 5168,
+      "sha256": "d49a73499d7b435644bb5934b2d5e271975577277b3b677c1ce80d3c0e209dc4",
+      "source_mtime_utc": "2023-07-14T08:27:20+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Scripts/ResetObjects.cs.meta",
+      "source_path": "Assets/Scripts/ResetObjects.cs.meta",
+      "bytes": 243,
+      "sha256": "e060ded9bab84c5423b8098e72837864d2c0d1496221f86e42bd48290c474077",
+      "source_mtime_utc": "2023-07-14T05:52:08+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Scripts/RespawnChild.cs",
+      "source_path": "Assets/Scripts/RespawnChild.cs",
+      "bytes": 1176,
+      "sha256": "ac2045b517cd11a9e47de840efbf3f335f97d9882f20afa4605db6c484aec921",
+      "source_mtime_utc": "2023-07-28T05:14:03+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Scripts/RespawnChild.cs.meta",
+      "source_path": "Assets/Scripts/RespawnChild.cs.meta",
+      "bytes": 243,
+      "sha256": "0aa95e195f39a4400764e7a1c943f3b680ce057daeefcac066f35fec9916a342",
+      "source_mtime_utc": "2022-12-16T22:18:10+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Scripts/RotateWithBird.cs",
+      "source_path": "Assets/Scripts/RotateWithBird.cs",
+      "bytes": 3478,
+      "sha256": "d17aa38bd7d4ae773cf08a64c8264164092e0184cf6241b1fa1186b29b95cdc3",
+      "source_mtime_utc": "2024-05-16T15:42:28+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Scripts/RotateWithBird.cs.meta",
+      "source_path": "Assets/Scripts/RotateWithBird.cs.meta",
+      "bytes": 243,
+      "sha256": "fff5620a630a3ce0468da78af53915b8badadb78ca19f57abe83cc8501faa98f",
+      "source_mtime_utc": "2023-07-29T02:31:59+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Scripts/ScaleWithBird.cs",
+      "source_path": "Assets/Scripts/ScaleWithBird.cs",
+      "bytes": 2911,
+      "sha256": "71313b34a836d3f94389504cd6a7ca1aab9e59400d68fe9f58a631adc4b95529",
+      "source_mtime_utc": "2024-05-16T15:40:49+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Scripts/ScaleWithBird.cs.meta",
+      "source_path": "Assets/Scripts/ScaleWithBird.cs.meta",
+      "bytes": 243,
+      "sha256": "c1862039d212f1d96288ba31fa15652ae3c62d67687622e2dfaea0bb6e866ed1",
+      "source_mtime_utc": "2023-07-29T21:48:23+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Scripts/SetEffectColors.cs",
+      "source_path": "Assets/Scripts/SetEffectColors.cs",
+      "bytes": 4322,
+      "sha256": "1376527d3dd29fb9db7664c5d7502998ed037a9b599b54d358f59f050d0953b8",
+      "source_mtime_utc": "2023-07-29T01:48:17+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Scripts/SetEffectColors.cs.meta",
+      "source_path": "Assets/Scripts/SetEffectColors.cs.meta",
+      "bytes": 243,
+      "sha256": "1be258e90553ae8fd2ce5361ac7ca4dba36831d5a16bbc7914de070bd86aeb56",
+      "source_mtime_utc": "2023-07-21T20:03:51+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Scripts/StickToBird.cs",
+      "source_path": "Assets/Scripts/StickToBird.cs",
+      "bytes": 1240,
+      "sha256": "8b02fb92cafff00b7505264ea843cc5494f46e70009caac870e99a4462954272",
+      "source_mtime_utc": "2024-05-16T15:42:04+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Assets/Scripts/StickToBird.cs.meta",
+      "source_path": "Assets/Scripts/StickToBird.cs.meta",
+      "bytes": 243,
+      "sha256": "5f1f4802cb915a8506868e2a6751372d012b268932edf924508fe8864c869241",
+      "source_mtime_utc": "2022-12-16T22:18:10+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/Packages/manifest.json",
+      "source_path": "Packages/manifest.json",
+      "bytes": 2213,
+      "sha256": "bcf21bb3b86d5aaa2eb7d4099ed9234d9c39431714669f630d42a82a6df90342",
+      "source_mtime_utc": "2023-06-13T14:31:00+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/ProjectSettings/EditorBuildSettings.asset",
+      "source_path": "ProjectSettings/EditorBuildSettings.asset",
+      "bytes": 568,
+      "sha256": "b9d2a1045f5e28bd5fe79c2efa8550034ee1e1af74fab94177e38c67b2342daf",
+      "source_mtime_utc": "2024-05-23T13:01:20+00:00"
+    },
+    {
+      "snapshot_path": "fireball-may-july2024/ProjectSettings/ProjectVersion.txt",
+      "source_path": "ProjectSettings/ProjectVersion.txt",
+      "bytes": 85,
+      "sha256": "e1dc8880aad4ea710ad2443ec542b0579a0629bf88062659cf4ee77d1caf926e",
+      "source_mtime_utc": "2022-12-16T22:18:14+00:00"
+    },
+    {
+      "snapshot_path": "october2024-variant/BaseMenuElement.cs",
+      "source_path": "Dropbox/Storage/Downloads_dir_20250402/BaseMenuElement.cs",
+      "bytes": 19589,
+      "sha256": "526fc99cf6942c7496b6dcefa59044147e2cd4c9ede39a98ac914e40b46f28bf",
+      "source_mtime_utc": "2024-10-31T21:55:08+00:00"
+    }
+  ]
+}

@@ -86,3 +86,10 @@ ok! it's awesome. I'm having trouble getting the bird to go all the way to the m
 
 --- Local UI history recovery request, 2026-09-26 ---
 in coming cycles I would love to get UI working. I'm realizing a lot of the most recent work is not actually committed & present here in these repos. at least I think so. it's hard to keep track. could you please find everything bird-related on this computer? mostly the unity work, especially in MIT Dropbox/Dana Gretton/Unity. that's a wide time range but I think the newest versions of basemenuelement are in there. maybe just launch some exploration agents to report back about what is there and the approximate timeline? sorry in advance if it isn't synced with dropbox--it would be crazy to sync all of those here, they're multiple gigs each, but you can feel free to sync any/all source files you want. I think you can do this just by opening them, or any other means you might know of. if you have trouble let me know. this would be so you can see what I was doing, which is functionally very close to what I want even if structurally it's quite messy. and if you do in fact already have all that here, great. just, see if you can find somewhere where we have a main menu world where you can open one of several demo scenes using the bird UI, that's a good one for what the basics of bird UI can look like, though I of course still have in mind to implement everything I described in the initial prompt.
+
+
+--- Recovery scope clarification, 2026-09-26 ---
+it's possible that all was developed on my partner's computer & I don't have a copy locally. however, if you have a relatively well-developed basemenuelement with point through, highlighting, visual states, unity events you can use to launch scenes or call functions, etc it won't be off track by much, we didn't expand it, we just used it.
+
+--- Implementation style, 2026-09-26 ---
+great. again, please do try to get the flavor but not the development style, I am not a unity developer at all and I just improvised this. I'd like the real implementation to feel familiar and politely conforming to convention to experienced unity people.

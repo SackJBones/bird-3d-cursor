@@ -133,8 +133,11 @@ studies dynamically scaling selectable objects to improve acquisition. It is
 useful adjacent work on visibility/selection, but does not validate Bird's
 cursor-size curve or lag. Those remain experimental design choices.
 
-The tracked Fireball scripts, earlier root Bird scripts, initial Fireball
-`Bird.cs` at heavy-repo commit `327069e`, and packaged plugin scripts inspected
-so far do not contain the remembered marker inflation code. The initial Fireball
-script has a different range polynomial and scales the debug fit sphere only.
-Do not claim that this new presentation reproduces the historical experiment.
+The original Fireball scale script has now been recovered from local Dropbox
+work that was absent from Git: `PointerDynamics.cs` uses a 3 cm floor and
+`3*ln(1+hand-root range/100)` local scale, without temporal smoothing. See the
+[local history and byte-preserved source](LOCAL-BIRD-HISTORY.md). This supersedes
+the earlier unsuccessful search of tracked/package scripts. It is a reference,
+not the current policy: Dana's later fixed-size working-volume requirement
+continues to govern presentation, and local scale is not automatically visible
+diameter under arbitrary mesh/parent transforms.

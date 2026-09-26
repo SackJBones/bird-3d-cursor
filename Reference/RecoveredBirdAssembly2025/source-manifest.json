@@ -1,0 +1,90 @@
+{
+  "source_root_hint": "MIT Dropbox/Dana Gretton/Unity/bird-mac",
+  "captured_utc": "2026-09-26T07:23:29.737356+00:00",
+  "files": [
+    {
+      "path": "Assets/Scripts/AssemblySnap.cs",
+      "bytes": 3550,
+      "sha256": "e7f3db69d9fae9e174ae95e2131c59104e1ff99c537cbd32490e5f4ece957e44",
+      "source_mtime_utc": "2025-01-04T23:02:43+00:00"
+    },
+    {
+      "path": "Assets/Scripts/AssemblySnap.cs.meta",
+      "bytes": 243,
+      "sha256": "43a76bef0cced2030ddf68cd9d3c717b3ca28b25fc1a96c6659f7433c96281f5",
+      "source_mtime_utc": "2025-01-04T23:02:36+00:00"
+    },
+    {
+      "path": "Assets/Scripts/Bird.cs",
+      "bytes": 17038,
+      "sha256": "ccda36a03a3fdd23631ebad5401d183d58ec8ad5c611141e4fe3747fe0058e83",
+      "source_mtime_utc": "2023-05-29T02:55:36+00:00"
+    },
+    {
+      "path": "Assets/Scripts/Bird.cs.meta",
+      "bytes": 243,
+      "sha256": "b9584e63b855474db56657d708317dd5f03eee1ce60fbaa05ea136981857f37c",
+      "source_mtime_utc": "2022-11-15T23:09:02+00:00"
+    },
+    {
+      "path": "Assets/Scripts/BirdInteractable.cs",
+      "bytes": 13578,
+      "sha256": "064dcefa21b9e8c0a757f3964ce02b05e8b6091d17ab7d15225beeb8b283a59f",
+      "source_mtime_utc": "2025-01-04T23:04:00+00:00"
+    },
+    {
+      "path": "Assets/Scripts/BirdInteractable.cs.meta",
+      "bytes": 243,
+      "sha256": "d90d47d2d4f526c1baf205f309cfa561b3288ee3f45aa5eac8ed70655d729182",
+      "source_mtime_utc": "2022-11-15T23:08:58+00:00"
+    },
+    {
+      "path": "Assets/Scripts/ExtractSubmeshes.cs",
+      "bytes": 5009,
+      "sha256": "c65d021450e45a6c2067673fd267e0114682f8cab5b1ff99d4ee869033ffafd5",
+      "source_mtime_utc": "2025-01-04T21:36:38+00:00"
+    },
+    {
+      "path": "Assets/Scripts/ExtractSubmeshes.cs.meta",
+      "bytes": 243,
+      "sha256": "54502860b5a9d579639adfbdf78e85c1d862d9b98570b3cbb9ef9cc710482e1d",
+      "source_mtime_utc": "2025-01-04T21:27:37+00:00"
+    },
+    {
+      "path": "Assets/Scripts/PointerDynamics.cs",
+      "bytes": 681,
+      "sha256": "b80e3e931b45dad10736e069374f6ca5a9dd3a0db323a22d17cc50141a06a082",
+      "source_mtime_utc": "2023-05-29T02:22:38+00:00"
+    },
+    {
+      "path": "Assets/Scripts/PointerDynamics.cs.meta",
+      "bytes": 243,
+      "sha256": "d620f8dd3f4d765881717adf8410657f411e8bdae42059ee0cf62115ca134461",
+      "source_mtime_utc": "2023-05-29T01:40:51+00:00"
+    },
+    {
+      "path": "Assets/Scripts/ScaleByRange.cs",
+      "bytes": 367,
+      "sha256": "2ec5fcaf39faca957267c5e7fc6cb4ae0ec0df83df43af581c95f5292a145298",
+      "source_mtime_utc": "2022-12-16T23:04:07+00:00"
+    },
+    {
+      "path": "Assets/Scripts/ScaleByRange.cs.meta",
+      "bytes": 243,
+      "sha256": "3939fc526dfff8903641eb1ce705ef2f51f9098c1267519f4c2df2125dd5d110",
+      "source_mtime_utc": "2022-12-16T22:58:02+00:00"
+    },
+    {
+      "path": "ProjectSettings/EditorBuildSettings.asset",
+      "bytes": 568,
+      "sha256": "a26f40fef6fde90bd9bbd3d8bcf54e6b62ab746ab7ee978a48370020bc1727bb",
+      "source_mtime_utc": "2025-01-05T01:53:51+00:00"
+    },
+    {
+      "path": "ProjectSettings/ProjectVersion.txt",
+      "bytes": 85,
+      "sha256": "9445d4df8da23fb28123cb86cc83634991d1946c62cdc74832911397d5a55264",
+      "source_mtime_utc": "2022-11-15T22:22:29+00:00"
+    }
+  ]
+}

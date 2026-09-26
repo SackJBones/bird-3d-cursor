@@ -24,13 +24,23 @@ candidates below remain optional editor experiments.
 - [ ] Assess v0.8 on-headset depth/visibility/performance physically; do not block independent work.
 
 Dana's latest direction is to prioritize working Bird UI in upcoming cycles.
-Explore local Unity history, especially MIT Dropbox/Dana Gretton/Unity, before
-recreating existing interactions. Recover the newer BaseMenuElement family and
-the main menu that launches demo scenes, establish approximate chronology and
-preserve readable custom source with provenance. Then adapt the existing design
-into the maintained package and VRChat world. The overlook is a standalone scale
-test harness, explicitly not the intended final Bird World. Keep the original
-adoption flow, mandala and paired Hanoi milestones.
+Local recovery is complete enough to proceed: [history and preserved reference](LOCAL-BIRD-HISTORY.md)
+contains the mature BaseMenuElement family, actual color/map scene wiring, the
+original Fireball scale law, and the 2025 assembly/snapping experiment. Dana
+clarified the multi-demo launcher may only exist on their partner's computer;
+the recovered capabilities are sufficient and the launcher is not a blocker.
+
+- [x] Explore local Bird/Unity history with three bounded read-only agents; distinguish newer uncommitted UI from historical repo copies and sparse checkout omissions.
+- [x] Preserve selected custom source and scene/prefab references with original bytes, GUIDs, SHA256 and chronology notes; no bulk project sync.
+- [ ] Build the first working UI slice: directional open, point-through highlighting, select action, child/background focus and back/close; validate deterministic lifecycle and real rendering before live-hand integration.
+- [ ] Reproduce nested color/map affordances and bind supported VRChat-world actions; retain UnityEvents/callbacks for ordinary Unity hosts.
+
+Preserve the interaction flavor, not the improvised source structure. Dana wants
+conventional Unity components, serialization/Inspector/prefab workflows and clear
+runtime/editor boundaries. Keep the archive read-only and preserve maintained
+core fixes. Do not start another broad filesystem search absent a specific lead.
+The overlook is a standalone scale harness, explicitly not the intended final
+Bird World. Keep the original adoption flow, mandala and paired Hanoi milestones.
 
 Dana physically tested v0.5 and supplied a 20-second joint recording. A full
 open palm-normal aim required awkward wrist angles. Version 0.6 adds a 45-degree
@@ -70,7 +80,7 @@ interaction framework. Preserve the mandala, Fireball and other existing demo
 ambitions. Dana's full wording is appended to `user-request.txt` and included
 in the recurring-task prompt.
 
-- [ ] Review existing BirdInteractable/grabbing/snapping experiments before designing the shared framework.
+- [x] Review existing BirdInteractable/grabbing/snapping experiments, including recovered 2025 AssemblySnap; preserve reference and document limitations before designing the shared framework.
 - [ ] Specify selection, gripping, moving, releasing and graceful cancellation independently of the geometric point and its UI marker.
 - [ ] Keep held building volumes outside the user's occupied space when the hand closes; preserve a safe manipulation region without clamping Bird itself.
 - [ ] Guide a nearby approach trajectory softly, with hysteresis/cues that tolerate distant input noise; firmly settle only into an allowed final placement.

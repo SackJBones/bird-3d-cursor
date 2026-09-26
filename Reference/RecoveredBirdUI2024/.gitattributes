@@ -1,0 +1,3 @@
+# Preserve historical bytes, including their original whitespace.
+fireball-may-july2024/** -text -whitespace
+october2024-variant/** -text -whitespace
