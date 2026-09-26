@@ -89,6 +89,10 @@ optional unsmoothed geometric replay.
 
 ## Next experiment
 
+The first comparison is now complete in [FILTER-CANDIDATES.md](FILTER-CANDIDATES.md).
+It favors a smooth history correction for further testing; no production
+filter or installed APK has changed.
+
 Evaluate a return-aware policy for filter state acquired in limiting poses.
 Candidates include filtering a compressed radial coordinate or smoothly
 removing obsolete far-range state as the hand returns. Both change feel and

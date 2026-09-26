@@ -1,0 +1,40 @@
+MEASURED: experimental filters, no runtime or APK change.
+History contraction exact-flow max partition error=4.76837158E-07m
+At flatWeight=1e-6, relative correction onset=1.0097973E-06
+synthetic30-legacy: t=2s, raw=999999360m, filtered=59504.668m
+synthetic30-log-radial: t=2s, raw=999999360m, filtered=3.66601634m
+synthetic30-elastic-history: t=2s, raw=999999360m, filtered=59504.668m
+synthetic30-legacy: t=3s, raw=999999360m, filtered=922424.063m
+synthetic30-log-radial: t=3s, raw=999999360m, filtered=3.73450446m
+synthetic30-elastic-history: t=3s, raw=999999360m, filtered=922424.063m
+synthetic30-legacy: samples=151, near=88, near-but-filter-far=55, max-filtered-while-raw-under-4m=255528.328m, returns=1, settled=0, censored=1, max-settled-delay=0.000000s
+synthetic30-log-radial: samples=151, near=88, near-but-filter-far=0, max-filtered-while-raw-under-4m=2.63464737m, returns=1, settled=1, censored=0, max-settled-delay=0.000000s
+synthetic30-elastic-history: samples=151, near=88, near-but-filter-far=0, max-filtered-while-raw-under-4m=2.15868664m, returns=1, settled=1, censored=0, max-settled-delay=0.000000s
+synthetic72-legacy: t=2s, raw=999999360m, filtered=250852.25m
+synthetic72-log-radial: t=2s, raw=999999360m, filtered=16.0437679m
+synthetic72-elastic-history: t=2s, raw=999999360m, filtered=250852.25m
+synthetic72-legacy: t=3s, raw=999999360m, filtered=4613930.5m
+synthetic72-log-radial: t=3s, raw=999999360m, filtered=17.326088m
+synthetic72-elastic-history: t=3s, raw=999999360m, filtered=4613930.5m
+synthetic72-legacy: samples=361, near=210, near-but-filter-far=62, max-filtered-while-raw-under-4m=637396.813m, returns=1, settled=1, censored=0, max-settled-delay=0.861111s
+synthetic72-log-radial: samples=361, near=210, near-but-filter-far=1, max-filtered-while-raw-under-4m=5.50703335m, returns=1, settled=1, censored=0, max-settled-delay=0.013889s
+synthetic72-elastic-history: samples=361, near=210, near-but-filter-far=0, max-filtered-while-raw-under-4m=3.32577324m, returns=1, settled=1, censored=0, max-settled-delay=0.000000s
+synthetic120-legacy: t=2s, raw=999999360m, filtered=593060.813m
+synthetic120-log-radial: t=2s, raw=999999360m, filtered=72.0437012m
+synthetic120-elastic-history: t=2s, raw=999999360m, filtered=593060.813m
+synthetic120-legacy: t=3s, raw=999999360m, filtered=11783884m
+synthetic120-log-radial: t=3s, raw=999999360m, filtered=86.3345184m
+synthetic120-elastic-history: t=3s, raw=999999360m, filtered=11783884m
+synthetic120-legacy: samples=601, near=351, near-but-filter-far=65, max-filtered-while-raw-under-4m=1380901.38m, returns=1, settled=1, censored=0, max-settled-delay=0.541667s
+synthetic120-log-radial: samples=601, near=351, near-but-filter-far=3, max-filtered-while-raw-under-4m=16.8137112m, returns=1, settled=1, censored=0, max-settled-delay=0.025000s
+synthetic120-elastic-history: samples=601, near=351, near-but-filter-far=2, max-filtered-while-raw-under-4m=6.42137527m, returns=1, settled=1, censored=0, max-settled-delay=0.016667s
+Elastic nonlimiting whole-trajectory max relative error=0
+Synthetic ordinary max error=9.21585936E-08m; rigid/mirror max relative error=5.98962151E-06; fist and recovery PASS.
+Recorded usable samples=1442, baseline max relative error=5.30782188E-07
+record-left-legacy: samples=2, near=2, near-but-filter-far=0, max-filtered-while-raw-under-4m=0.331917137m, returns=0, settled=0, censored=0, max-settled-delay=0.000000s
+record-left-log-radial: samples=2, near=2, near-but-filter-far=0, max-filtered-while-raw-under-4m=0.331917137m, returns=0, settled=0, censored=0, max-settled-delay=0.000000s
+record-left-elastic-history: samples=2, near=2, near-but-filter-far=0, max-filtered-while-raw-under-4m=0.331917137m, returns=0, settled=0, censored=0, max-settled-delay=0.000000s
+record-right-legacy: samples=1440, near=647, near-but-filter-far=273, max-filtered-while-raw-under-4m=2385318.75m, returns=13, settled=8, censored=5, max-settled-delay=0.666626s
+record-right-log-radial: samples=1440, near=647, near-but-filter-far=38, max-filtered-while-raw-under-4m=8.77256393m, returns=13, settled=13, censored=0, max-settled-delay=0.111084s
+record-right-elastic-history: samples=1440, near=647, near-but-filter-far=45, max-filtered-while-raw-under-4m=7.78311205m, returns=13, settled=13, censored=0, max-settled-delay=0.152710s
+No candidate is promoted by this measurement. Synthetic timing is not hardware timing or subjective feel.

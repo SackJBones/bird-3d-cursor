@@ -34,7 +34,7 @@ public static class UnityQuestTemporalChecks
             if (error>0.00002) throw new Exception("Independent double Kalman reference mismatch: "+error);
         }
     }
-    sealed class ReturnMetrics
+    public sealed class ReturnMetrics
     {
         public int samples, nearSamples, nearButFarSamples, returns, settled, censored;
         public float maxFilteredWhileNear, maxSettledDelay;

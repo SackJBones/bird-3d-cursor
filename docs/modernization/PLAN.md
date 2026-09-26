@@ -23,11 +23,16 @@ head or world up. Keep the existing mandala and Hanoi milestones below.
 The temporal audit now confirms severe distant-history carryover in the
 recorded v0.5 filter and the v0.6 replay: raw returns inside 4 m can leave the
 filtered point millions of meters away. See [return-filter baseline](HAND-RETURN-FILTER.md).
-Next investigate a return-aware filtering policy confined to limiting-range
-history, preserving ordinary legacy behavior, the closed-fist endpoint and
-hand-frame invariance. Compare on the recorded transitions and synthetic
-ordinary/rapid-return cases before changing the installed build. Keep v0.6's
-45-degree aiming and plain Inflate while awaiting physical feedback.
+The [editor candidate comparison](FILTER-CANDIDATES.md) favors smoothly
+contracting obsolete history over log-radial filtering: all 13 recorded
+returns reach the near volume, while synthetic outward reach is retained.
+This is not yet a runtime fix. Keep v0.6's 45-degree aiming and plain Inflate
+while awaiting physical feedback.
+
+- [x] Compare legacy, log-radial and return-aware history policies on recorded input and 30/72/120 Hz synthetic sweeps.
+- [x] Check ordinary/no-limit legacy equivalence, mirrored/rigid transforms, gradual activation, fist return and recovery in real Unity C#.
+- [ ] Assess candidate trajectories with noisy direction/range, partial flat contributions, repeated near/far reversals and rendered return motion; choose or revise the policy before promotion.
+- [ ] If promoted, define sample timing and reset semantics in the shared runtime, verify click/loss behavior and compiled Udon, then rebuild the Quest comparison. Physical feel remains a separate check.
 
 Bird specifies a geometric point; keep interaction and optional presentation
 downstream. Preserve constant physical marker size through the natural working
