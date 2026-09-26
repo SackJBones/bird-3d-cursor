@@ -68,3 +68,24 @@ with a shared user ID. The Quest comparison host now uses this path directly.
 Ordinary point-through highlighting is distinct from the back-surface scrolling
 gate. The reusable scroll component also accepts an optional owning menu panel.
 Udon/VRChat action dispatch and headset usability remain separate integration work.
+
+## Map rotation and zoom
+
+Attach `BirdMapPreview` in its own empty scene. Reach through **OPEN MAP**, then
+select **ROTATE** or **ZOOM**. Rotation uses the same back-surface flick and coast.
+Zoom is explicitly armed: point through the fixed sphere, vary Bird's distance
+from its input origin, and withdraw to stop. A new reach starts from the displayed
+size. Neither gesture needs a held click. **RESET** restores size/orientation and
+selects rotation; **CLOSE** ends both modes.
+
+`BirdRangeScale` is a separate component with a fixed engagement collider, a
+scale target, both logical inputs, an optional owning panel, positive factor
+limits, response rate, and Started/Stopped/Changed UnityEvents. The map sample
+uses factors 0.3–2.3 and preserves the recovered squared range ratio. Scale and
+rotation have separate pivots; the gesture sphere never scales with the map.
+Zoom acts around the target's own pivot. It does not impose a limit on Bird's point.
+
+Call `Initialize(pointerInputs)` before Start to embed the sample without a
+camera, desktop source or extra marker. The block map is diagnostic geometry.
+The compiled local Udon adaptation and authored `BirdMapDemo` are in the VRChat
+integration/heavy repository; ordinary package components are not world Udon.

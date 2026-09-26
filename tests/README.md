@@ -1,5 +1,23 @@
 # Focused checks
 
+## Map rotation and range zoom
+
+`Invoke-UnityMapChecks.ps1 -UnityEditor <2022.3.22f1 executable> -ProjectPath
+<new-or-marked validation directory> -BuildPlayer` runs 71 range/map checks and
+316 existing spherical assertions, captures six editor views, then builds and
+runs a normal-frame Windows player smoke sequence with two captures. The
+checks cover squared reach, reentry, limits, loss/disable/pause/owner/focus,
+nonuniform/mirrored frames, 30/72/120 Hz response, persistent prefab events,
+mode actions and back-only rotation. Rendering needs D3D11; no headset is used.
+
+`Invoke-UnityUdonMapChecks.ps1 -UnityEditor <executable> -ProjectPath <BirdWorld>`
+restores/compiles integration sources and validates the authored map branch
+through backing Udon VMs and normal ClientSim frames. Its image captures run
+separately from the normal-frame sequence: PNG encoding may exceed the intentional
+250 ms pause-cancellation threshold. `-Generate` refuses existing scene overwrite;
+`-BuildWorld` builds a Windows SDK artifact and independently reads its catalog.
+See [map contracts and limits](../docs/modernization/MAP-CONTROLS.md).
+
 ## VRChat UI station
 
 `Invoke-UnityUdonUiChecks.ps1 -UnityEditor <2022.3.22f1 executable> -ProjectPath

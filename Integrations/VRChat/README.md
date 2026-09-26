@@ -2,8 +2,9 @@
 
 The integration includes caller-fed geometry, experimental avatar input, and
 local Udon menu/spherical and bounded object manipulation components. The latest
-authored example is `BirdWorld/Assets/BirdWorld/Scenes/BirdHanoiDemo.unity` in the
-heavy repository: tabletop and full-size building puzzles share grip/snapping,
+authored example is `BirdWorld/Assets/BirdWorld/Scenes/BirdMapDemo.unity` in the
+heavy repository: a map rotation/zoom branch joins colors and paired Hanoi.
+`BirdHanoiDemo.unity` retains the focused paired puzzle: tabletop and full-size building puzzles share grip/snapping,
 menu arbitration and a viewing-area gate. `BirdUiDemo.unity` remains the focused
 nested color selection, back-surface flick/coast and Back/Close/Reset station.
 Its labeled desktop input is a demonstration source; avatar-pose calibration and
@@ -18,6 +19,13 @@ For paired Hanoi, use `tests/Invoke-UnityUdonHanoiChecks.ps1`. It also restores 
 surface shader from the ordinary Unity sample, runs compiled Hanoi and existing
 UI checks, and supports optional Windows/Android SDK builds. See
 [Udon object authoring and limits](../../docs/modernization/OBJECT-MANIPULATION-UDON.md).
+
+For the map branch, use `tests/Invoke-UnityUdonMapChecks.ps1`; optional
+`-BuildWorld` builds and reads the Windows bundle catalog. `BirdUiRangeScale`
+provides squared-range zoom with explicit arming and no-jump reentry;
+`BirdMapStation` selects zoom or the existing back-surface rotation component.
+Both are local Udon programs with conventional Inspector references and events.
+See [map controls](../../docs/modernization/MAP-CONTROLS.md).
 
 ## Hand-data feasibility probe
 

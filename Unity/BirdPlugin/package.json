@@ -27,7 +27,7 @@
       },
       {
         "displayName": "Menu Preview",
-        "description": "Nested menus and a twelve-color spherical selector with back-surface flick scrolling. Desktop input or caller-fed logical Bird points.",
+        "description": "Nested menus, a twelve-color back-surface spherical selector, and map rotation/range zoom. Desktop input or caller-fed logical Bird points.",
         "path": "Samples~/MenuPreview"
       },
       {
