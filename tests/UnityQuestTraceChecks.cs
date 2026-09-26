@@ -48,7 +48,7 @@ public static class UnityQuestTraceChecks
             if (lines.Length != 2) throw new Exception("Trace row count mismatch");
             var first = JsonUtility.FromJson<UnityQuestHands.JointTrace>(lines[0]);
             var second = JsonUtility.FromJson<UnityQuestHands.JointTrace>(lines[1]);
-            if (first.schema != 1 || first.appVersion != "0.5" || first.hand != "Left" || first.joints.Length != 20 ||
+            if (first.schema != 1 || first.appVersion != "0.6" || first.hand != "Left" || first.joints.Length != 20 ||
                 first.joints[0] != new Vector3(0,.2f,.3f) || second.joints[0] != Vector3.one || !first.tracked || second.tracked ||
                 first.root != port.handRoot || first.palmNormal != Vector3.forward || first.time < 0)
                 throw new Exception("Saved joint snapshot/schema/loss information differs");

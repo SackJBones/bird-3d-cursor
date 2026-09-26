@@ -58,7 +58,8 @@ A sphere diagnostic fades when that fit ceases to define the point.
 Default choices are a **32 mm physical diameter through 4 m**, an inflation
 band from 4 to 20 m reaching 8x diameter, then square-root growth. Beyond that
 band the solid cursor continues shrinking in apparent size with distance.
-Three modes permit comparison: fixed world size, inflation, and inflation with
+Plain inflation is the default after Dana's physical preference report.
+Three modes still permit comparison: fixed world size, inflation, and inflation with
 0.22 s outward growth lag. Inward resizing is immediate, including a one-frame
 return from enormous range to the palm. The working volume, diameter, inflation
 band/factor, exponent and lag are designer settings.

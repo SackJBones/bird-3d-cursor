@@ -24,7 +24,7 @@ namespace Bird3DCursor.Presentation
     public sealed class BirdDepthVisual : MonoBehaviour
     {
         public enum SizeMode { Fixed, Inflation, InflationWithLag }
-        public SizeMode sizeMode = SizeMode.InflationWithLag;
+        public SizeMode sizeMode = SizeMode.Inflation;
         public Color tint = Color.cyan;
         public bool showTrail = true;
         public BirdDepthStyle style = new BirdDepthStyle();

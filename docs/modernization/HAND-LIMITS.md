@@ -6,6 +6,11 @@ despite the earlier synthetic paraboloid tests passing. Version 0.5 replaces
 it with an optional **point law**, downstream of the ordinary sphere fit.
 Original `Bird.cs` remains the comparison reference.
 
+Version 0.6 adds a configurable 45-degree tilt toward the knuckles to the flat
+law, based only on the palm frame. Dana supplied a usable recording and prefers
+plain Inflate. See [recorded replay and the house/vista](QUEST-VISTA.md) for
+current direction, evidence and presentation; the v0.5 law below is its baseline.
+
 ## Two laws, plus a closed endpoint
 
 `BirdSphereFit` again only fits a sphere. It also reports a continuous
@@ -63,7 +68,7 @@ recovery and a one-sample billion-meter-to-fist return.
 Preserve the original 400-sample fit/range/Kalman comparison, baseline compiled
 sphere checks and compiled range/click/filter tests as separate evidence.
 Passing synthetic checks does not establish natural feel. No captured human
-joint sequence was available for this revision; thumb opposition, asymmetric
+joint sequence was available for the initial v0.5 revision; thumb opposition, asymmetric
 finger curls, tracking jitter and individual closure thresholds still need
 physical evidence. The old grid tests did not cover the failure Dana found.
 

@@ -45,7 +45,7 @@ public static class UnityQuestHandsBuild
             EditorUtility.SetDirty(hands); EditorUtility.SetDirty(quest); EditorUtility.SetDirty(touch); EditorUtility.SetDirty(xr);
             PlayerSettings.companyName = "Bird3D";
             PlayerSettings.productName = "Bird Live Hands";
-            PlayerSettings.bundleVersion = "0.5";
+            PlayerSettings.bundleVersion = "0.6";
             PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.Android, "org.bird3d.livehands");
             PlayerSettings.SetScriptingBackend(BuildTargetGroup.Android, ScriptingImplementation.IL2CPP);
             PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
@@ -56,11 +56,16 @@ public static class UnityQuestHandsBuild
             PlayerSettings.SetGraphicsAPIs(BuildTarget.Android, new[] { GraphicsDeviceType.OpenGLES3 });
             QualitySettings.antiAliasing = 4;
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
-            string checks = UnityQuestHandsChecks.Run() + "\n" + UnityDepthVisualChecks.CheckMath() + "\n" + UnityQuestTraceChecks.Run();
+            // Vista lighting is created after tracking starts. Keep its fog
+            // variant in the serialized scene so Android stripping retains it.
+            RenderSettings.fog = true;
+            RenderSettings.fogMode = FogMode.ExponentialSquared;
+            RenderSettings.fogDensity = .0014f;
+            string checks = UnityQuestHandsChecks.Run() + "\n" + UnityDepthVisualChecks.CheckMath() + "\n" + UnityQuestTraceChecks.Run() + "\n" + UnityQuestReplayChecks.RunOptional();
             File.WriteAllText("hands-math-result.txt", checks);
             Debug.Log(checks);
             new GameObject("Bird live hands comparison").AddComponent<UnityQuestHands>();
-            foreach (string shaderName in new[] { "Unlit/Color", "Sprites/Default" })
+            foreach (string shaderName in new[] { "Unlit/Color", "Sprites/Default", "Standard" })
             {
                 string path = "Assets/" + shaderName.Replace('/', '-') + ".mat";
                 var material = AssetDatabase.LoadAssetAtPath<Material>(path);

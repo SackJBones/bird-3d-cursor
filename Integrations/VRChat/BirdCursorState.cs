@@ -18,6 +18,8 @@ public class BirdCursorState : UdonSharpBehaviour
     // a caller-verified normal facing OUT of the palm. No rendering assumptions.
     public bool useHandLimits;
     public Vector3 palmNormal;
+    // Rotate within the palm frame toward the knuckles. Zero restores v0.5.
+    public float flatDirectionDegrees = 45;
     public float flatBlendStartDegrees = 45;
     public float flatBlendEndDegrees = 15;
     public float fistBlendStartDegrees = 140;
@@ -105,6 +107,7 @@ public class BirdCursorState : UdonSharpBehaviour
     private bool HandLimits()
     {
         if (points == null || points.Length != 16 || !FiniteVector(palmNormal) || palmNormal.sqrMagnitude < 0.000000000001f ||
+            !Finite(flatDirectionDegrees) || flatDirectionDegrees < 0 || flatDirectionDegrees > 90 ||
             !Finite(maximumLimitDistance) || maximumLimitDistance <= 0 ||
             !Finite(flatBlendEndDegrees) || !Finite(flatBlendStartDegrees) || !Finite(fistBlendStartDegrees) || !Finite(fistBlendEndDegrees) ||
             flatBlendEndDegrees < 0 || flatBlendStartDegrees <= flatBlendEndDegrees ||
@@ -148,7 +151,15 @@ public class BirdCursorState : UdonSharpBehaviour
         float halfLength = length * 0.5f;
         float angle = bendDegrees * Mathf.Deg2Rad;
         float fallbackDistance = halfLength / Mathf.Sqrt(angle*angle + halfLength*halfLength / (maximumLimitDistance*maximumLimitDistance));
-        Vector3 fallback = normal * fallbackDistance;
+        // Knuckle span defines the transverse axis. Its perpendicular points
+        // toward the fingers after resolving the sign with the palm geometry.
+        // Neither head/torso position nor world up participates in this law.
+        Vector3 knuckleForward = Vector3.Cross(normal, points[12]-points[3]);
+        if (knuckleForward.sqrMagnitude < 0.000000000001f) return false;
+        knuckleForward = knuckleForward.normalized;
+        if (Vector3.Dot(knuckleForward, forward) < 0) knuckleForward = -knuckleForward;
+        float tilt = flatDirectionDegrees * Mathf.Deg2Rad;
+        Vector3 fallback = (normal*Mathf.Cos(tilt) + knuckleForward*Mathf.Sin(tilt)) * fallbackDistance;
         float legacyWeight = fitter.fitValid ? (1-flatWeight) * fitter.confidence : 0;
         limitWeight = 1 - legacyWeight;
         // Blend before the original polynomial: blending billion-meter outputs

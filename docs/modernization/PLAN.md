@@ -10,13 +10,15 @@ Use `feature/vrchat-modernization` in both repositories. All maintained package 
 
 ## Current priorities, 2026-09-26 UTC
 
-Dana physically tested the palm continuation: the cap engaged suddenly and a
-closed fist wrongly reached the maximum sphere. Prioritize ordinary legacy
-behavior and continuous pose-aware flat/fist limits before more rendering
-experiments. Fully closing the hand must bring the point to the fist. The
-v0.5 implementation separates sphere fitting from the optional limit law; see
-[hand limits](HAND-LIMITS.md). Real recordings would help tune it, but are
-optional and must not block independent development.
+Dana physically tested v0.5 and supplied a 20-second joint recording. A full
+open palm-normal aim required awkward wrist angles. Version 0.6 adds a 45-degree
+knuckle-directed tilt using only the palm frame, preserving ordinary poses and
+closed-fist return. Plain Inflate is Dana's preferred visual mode and the new
+default. A basic house/vista with full-size landmarks now supplies scale cues.
+See [recorded replay and vista](QUEST-VISTA.md) and [hand limits](HAND-LIMITS.md).
+Continue physical feel/direction tuning and replay work without making optional
+recordings or headset availability blockers. Do not infer aim from the torso,
+head or world up. Keep the existing mandala and Hanoi milestones below.
 
 Bird specifies a geometric point; keep interaction and optional presentation
 downstream. Preserve constant physical marker size through the natural working
@@ -97,7 +99,8 @@ Checked against official pages on 2026-09-18/19; revisit before implementation i
 - [x] Build/install the standalone real-XR-Hands comparison using unchanged original and port math; verify 400-sample parity, active XR and running hand subsystem.
 - [x] Obtain Dana's physical Bird Live Hands v0.1 comparison report: port gap is extremely small. This is user-observed live use, beyond startup logs.
 - [x] Obtain physical feedback on the initial palm continuation: sudden cap activation and closed-fist maximum range were reported.
-- [ ] Validate the replacement v0.5 flat/fist limits physically, using optional joint traces for tuning.
+- [x] Obtain physical v0.5 feedback and a usable 20-second joint recording; open-hand direction needs knuckle tilt.
+- [ ] Assess v0.6 palm-frame aiming and house/vista scale cues physically, using optional traces for further tuning.
 - [x] Verify opt-in continuous palm-side fitting in Unity C# and compiled Udon, including flat/inverted curvature, both handednesses, transforms, recovery and billion-meter logical reach.
 - [x] Separate optional point-consuming depth presentation into its own assembly with configurable working volume, size curve, lag and trail choices; keep mandala presentation independent.
 - [x] Render three presentation alternatives at seven distances and check near physical size, continuity, huge-range projection and immediate return sizing mathematically.

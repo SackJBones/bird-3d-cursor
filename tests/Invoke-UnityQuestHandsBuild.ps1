@@ -1,6 +1,7 @@
 param(
     [Parameter(Mandatory = $true)][string]$UnityEditor,
-    [Parameter(Mandatory = $true)][string]$ProjectPath
+    [Parameter(Mandatory = $true)][string]$ProjectPath,
+    [string]$JointTracePath
 )
 $ErrorActionPreference = 'Stop'
 $repo = Split-Path $PSScriptRoot -Parent
@@ -37,14 +38,15 @@ public static class BirdHandsBootstrap {
 '@ | Set-Content (Join-Path $project 'Assets/Editor/BirdHandsBootstrap.cs')
 function Invoke-BirdUnity([string]$Method, [string]$Log, [bool]$Quit) {
     $arguments=@('-batchmode','-nographics','-buildTarget','Android','-projectPath',('"'+$project+'"'),'-executeMethod',$Method,'-logFile',('"'+(Join-Path $project $Log)+'"'))
+    if ($JointTracePath) { $arguments += @('-birdJointTrace', ('"'+[IO.Path]::GetFullPath($JointTracePath)+'"')) }
     if ($Quit) { $arguments += '-quit' }
     $process=Start-Process $UnityEditor -ArgumentList $arguments -WindowStyle Hidden -PassThru
     if (!$process.WaitForExit(900000)) { $process.Kill(); throw "Unity exceeded 15 minutes; see $Log" }
     $process.Refresh()
     if ($process.ExitCode -ne 0) { throw "Unity failed; see $Log" }
 }
-foreach ($name in @('UnityQuestHands.cs','QuestHandsUdonShim.cs','UnityDepthVisualChecks.cs','UnityDepthMotionChecks.cs','UnityDepthStereoChecks.cs')) { Copy-Item (Join-Path $PSScriptRoot $name) (Join-Path $project "Assets/$name") }
-foreach ($name in @('UnityQuestHandsBuild.cs','UnityQuestHandsChecks.cs','UnityPalmFitChecks.cs','UnityQuestTraceChecks.cs')) { Copy-Item (Join-Path $PSScriptRoot $name) (Join-Path $project "Assets/Editor/$name") }
+foreach ($name in @('UnityQuestHands.cs','UnityQuestVista.cs','UnityQuestVistaChecks.cs','QuestHandsUdonShim.cs','UnityDepthVisualChecks.cs','UnityDepthMotionChecks.cs','UnityDepthStereoChecks.cs')) { Copy-Item (Join-Path $PSScriptRoot $name) (Join-Path $project "Assets/$name") }
+foreach ($name in @('UnityQuestHandsBuild.cs','UnityQuestHandsChecks.cs','UnityPalmFitChecks.cs','UnityQuestTraceChecks.cs','UnityQuestReplayChecks.cs')) { Copy-Item (Join-Path $PSScriptRoot $name) (Join-Path $project "Assets/Editor/$name") }
 # Migrate the earlier generated helper: a Play Mode component must live outside Editor.
 $oldHelper = Join-Path $project 'Assets/Editor/UnityDepthVisualChecks.cs'
 if (Test-Path -LiteralPath $oldHelper) { Remove-Item -LiteralPath $oldHelper }

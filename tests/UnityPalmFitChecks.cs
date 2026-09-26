@@ -69,6 +69,25 @@ public static class UnityPalmFitChecks
             Require(error < .0001f, "mirror/rigid transform " + bend + " error=" + error);
         }
         set("handRoot", root); set("palmNormal", Vector3.forward);
+        var flatPoints = Hand(0);
+        Vector3 towardKnuckles = Vector3.Cross(Vector3.forward, flatPoints[12]-flatPoints[3]).normalized;
+        foreach (float tilt in new[] { 0f, 45, 90 })
+        {
+            set("flatDirectionDegrees", tilt); sample(flatPoints);
+            Vector3 expected = (Vector3.forward*Mathf.Cos(tilt*Mathf.Deg2Rad)+towardKnuckles*Mathf.Sin(tilt*Mathf.Deg2Rad))*2;
+            Require(Vector3.Distance((Vector3)get("rangeInput"), expected) < .0001f, "hand-frame tilt " + tilt);
+        }
+        set("flatDirectionDegrees", 45f);
+        foreach (var rotation in new[] { Quaternion.Euler(30,0,0), Quaternion.Euler(30,0,180) })
+        {
+            var rotated = new Vector3[16];
+            for (int i=0;i<16;i++) rotated[i]=rotation*flatPoints[i];
+            set("palmNormal", rotation*Vector3.forward); set("handRoot", rotation*root); sample(rotated);
+            Vector3 expected = rotation*(Vector3.forward+towardKnuckles).normalized*2;
+            Require(Vector3.Distance((Vector3)get("rangeInput"), expected) < .0001f, "reaching/upside-down follows palm frame");
+            if (rotation == Quaternion.Euler(30,0,0)) Require(((Vector3)get("rangeInput")).y > .4f, "down-forward palm reaches above horizon");
+        }
+        set("handRoot", root); set("palmNormal", Vector3.forward);
         sample(Hand(90)); Vector3 withoutIndex = (Vector3)get("rawPosition");
         set("indexTip", Vector3.one*20); sample(Hand(90));
         Require((Vector3)get("rawPosition") == withoutIndex, "index click independent of pose classifier");
@@ -78,6 +97,8 @@ public static class UnityPalmFitChecks
         set("palmNormal", Vector3.zero); call("Step"); Require(!(bool)get("poseValid"), "invalid normal rejected");
         set("palmNormal", Vector3.forward); set("maximumLimitDistance", float.NaN); call("Step"); Require(!(bool)get("poseValid"), "invalid endpoint rejected");
         set("maximumLimitDistance", 2f); var bad = Hand(90); bad[7].x = float.NaN; set("points", bad); call("Step"); Require(!(bool)get("poseValid"), "invalid joint rejected");
+        set("flatDirectionDegrees", float.NaN); set("points", Hand(90)); call("Step"); Require(!(bool)get("poseValid"), "invalid tilt rejected");
+        set("flatDirectionDegrees", 45f);
         bad = Hand(90); bad[5] = bad[4]; set("points", bad); call("Step"); Require(!(bool)get("poseValid"), "collapsed bone rejected");
         sample(Hand(90)); Require((Vector3)get("position") == (Vector3)get("rawPosition"), "recovery seeds current point");
         return string.Format(System.Globalization.CultureInfo.InvariantCulture,

@@ -77,7 +77,9 @@ public sealed class UnityQuestHands : MonoBehaviour
     XRHandSubsystem subsystem;
     Side[] sides;
     Camera view;
+    GameObject vista;
     TextMesh label;
+    Transform labelBackdrop;
     float nextStatus;
     bool subscribed;
     int dynamicSamples;
@@ -85,7 +87,7 @@ public sealed class UnityQuestHands : MonoBehaviour
     TextMesh[] modeLabels;
     int touchMode = -1;
     float touchSince, nextModeChange;
-    BirdDepthVisual.SizeMode sizeMode = BirdDepthVisual.SizeMode.InflationWithLag;
+    BirdDepthVisual.SizeMode sizeMode = BirdDepthVisual.SizeMode.Inflation;
     StringBuilder capture;
     float captureStart, captureEnd;
     int captureSamples;
@@ -96,7 +98,7 @@ public sealed class UnityQuestHands : MonoBehaviour
     [Serializable] public class JointTrace
     {
         public int schema = 1;
-        public string appVersion = "0.5", hand;
+        public string appVersion = "0.6", hand;
         public float time;
         public bool tracked, poseValid;
         // Base/intermediate/distal/tip for thumb, index, middle, ring, little.
@@ -123,11 +125,16 @@ public sealed class UnityQuestHands : MonoBehaviour
         label.anchor = TextAnchor.UpperLeft;
         label.color = new Color(.85f, .9f, 1);
         label.text = "BIRD / LIVE HANDS\nStarting OpenXR hand tracking...";
+        var backdrop = GameObject.CreatePrimitive(PrimitiveType.Quad);
+        backdrop.name = "Readable diagnostics backing";
+        Destroy(backdrop.GetComponent<Collider>());
+        labelBackdrop=backdrop.transform; labelBackdrop.SetParent(view.transform,false);
+        backdrop.GetComponent<Renderer>().sharedMaterial = new Material(Shader.Find("Sprites/Default")) { color=new Color(.008f,.018f,.03f,.8f) };
         sides = new[] { CreateSide(Hand.Chirality.Left, new Color(.1f, .9f, 1)),
             CreateSide(Hand.Chirality.Right, new Color(1, .25f, .65f)) };
         CreateModeControls();
         Application.onBeforeRender += UpdateHead;
-        Debug.Log("BIRD_HANDS_START: v0.5 pose-aware flat/fist limits + legacy ordinary geometry; original Bird.cs reference; real XR Hands; 32mm cursor through 4m; Q=.001 R=270*d^3");
+        Debug.Log("BIRD_HANDS_START: v0.6 palm-frame knuckle tilt + house/vista; default Inflate; original Bird.cs reference; real XR Hands; 32mm through 4m; Q=.001 R=270*d^3");
     }
 
     Side CreateSide(Hand.Chirality chirality, Color color)
@@ -184,6 +191,22 @@ public sealed class UnityQuestHands : MonoBehaviour
     void Update()
     {
         UpdateHead();
+        if (vista == null)
+        {
+            var head = InputDevices.GetDeviceAtXRNode(XRNode.Head);
+            bool tracked;
+            Vector3 headPosition;
+            Quaternion headRotation;
+            bool hasTrackingFlag=head.TryGetFeatureValue(CommonUsages.isTracked, out tracked);
+            if (head.isValid && (!hasTrackingFlag || tracked) &&
+                head.TryGetFeatureValue(CommonUsages.devicePosition,out headPosition) &&
+                head.TryGetFeatureValue(CommonUsages.deviceRotation,out headRotation))
+            {
+                view.transform.SetPositionAndRotation(headPosition,headRotation);
+                vista = UnityQuestVista.Create(view);
+                Debug.Log("BIRD_VISTA_READY: tracked-head anchor; 1.65m nominal eye height; 30/100/300m landmarks");
+            }
+        }
         if (subsystem == null || !subsystem.running)
         {
             Unsubscribe();
@@ -201,12 +224,15 @@ public sealed class UnityQuestHands : MonoBehaviour
         if (Time.unscaledTime >= nextStatus)
         {
             nextStatus = Time.unscaledTime + 1;
-            string status = "BIRD v0.5 / FIST + FLAT TEST   |   close, cup, flare\n" +
+            string status = "BIRD v0.6 / PALM-FRAME AIM   |   close, reach, flare\n" +
                 "Color: new point | sphere: legacy fit | white: raw | gold: legacy\n" +
                 "32mm through 4m. Green line points out of palm.\n" +
                 "Touch a label below for 0.6s: " + sizeMode + "\n" + CaptureDescription() + "\n";
             foreach (var side in sides) status += Describe(side) + "\n";
             label.text = status;
+            Bounds bounds=label.GetComponent<Renderer>().localBounds;
+            labelBackdrop.localPosition=label.transform.localPosition+bounds.center+Vector3.forward*.02f;
+            labelBackdrop.localScale=new Vector3(bounds.size.x+.04f,bounds.size.y+.03f,1);
             Debug.Log("BIRD_HANDS_STATUS: xr=" + XRSettings.isDeviceActive + " subsystem=" +
                 (subsystem != null && subsystem.running) + " samples=" + dynamicSamples + " " + Describe(sides[0]) + " | " + Describe(sides[1]));
         }
