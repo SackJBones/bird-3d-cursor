@@ -203,3 +203,22 @@ comparison is deliberately in sky to avoid treating correct mountain occlusion
 as a missing-marker failure. `UnityDepthMotionChecks.Run` checks near/return
 behavior. The Android builder retains Bird/LogicalDepth explicitly; inspect
 GLES3 compilation in the build log. Actual device performance remains separate.
+
+
+### Bounded manipulation and paired Hanoi
+
+`Invoke-UnityHanoiChecks.ps1 -UnityEditor <Unity.exe> -ProjectPath <new-or-marked-project> -BuildPlayer`
+imports the real local package and complete Hanoi sample, then checks actual Unity
+Play Mode behavior and renders six D3D11 views. The Windows player build/run adds
+normal Update/LateUpdate pickup, guided drop, distant closed-hand bounding,
+tracking-loss rollback, two renders and owned-object cleanup. Each result is reset
+before its process; watchdogs reject incomplete runs. The player only enables its
+automated driver with `-birdHanoiResult`; normal launch remains interactive.
+
+The 1216-assertion editor run includes both seven-move solutions, invalid drop,
+whole-box constraints under transformed frames, offset/far-point pickup, raw versus
+guided intent, lane hysteresis, tiny timesteps, both hands, same-frame cancel,
+lifecycle/recovery, renderer restoration and a real persistent prefab-event drop.
+Generated outputs live in ignored `Validation/Hanoi2022`. See
+[OBJECT-MANIPULATION.md](../docs/modernization/OBJECT-MANIPULATION.md) for details
+and explicit collision, input-arbitration, Udon and physical-testing limits.

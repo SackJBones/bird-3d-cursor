@@ -87,14 +87,16 @@ ambitions. Dana's full wording is appended to `user-request.txt` and included
 in the recurring-task prompt.
 
 - [x] Review existing BirdInteractable/grabbing/snapping experiments, including recovered 2025 AssemblySnap; preserve reference and document limitations before designing the shared framework.
-- [ ] Specify selection, gripping, moving, releasing and graceful cancellation independently of the geometric point and its UI marker.
-- [ ] Keep held building volumes outside the user's occupied space when the hand closes; preserve a safe manipulation region without clamping Bird itself.
-- [ ] Guide a nearby approach trajectory softly, with hysteresis/cues that tolerate distant input noise; firmly settle only into an allowed final placement.
-- [ ] Build tabletop and distant full-building Hanoi instances using the same behaviors and policies, with correct top-piece and larger-on-smaller restrictions.
-- [ ] Validate cancellation, invalid drop rollback, tracking loss, safe return, scale changes and both instance sizes; assess physical usability separately.
+- [x] Specify and implement local Unity selection, gripping, bounded translation, releasing and graceful cancellation independently of the geometric point and its UI marker; see [OBJECT-MANIPULATION.md](OBJECT-MANIPULATION.md).
+- [x] Confine the full configured held volume to an authored safe workspace without clamping Bird itself; the building prototype stays over 300 m away on closed-hand return. Dynamic occupancy/teleport exclusion remains a world-integration requirement.
+- [x] Guide a nearby approach segment softly with candidate hysteresis and visible cues; release commits an allowed exact position only when raw intent and the visible piece are close enough. Physical distant-noise usability remains unassessed.
+- [x] Build an importable ordinary Unity paired Hanoi prototype at 0.2 m and 75 m per unit, with shared behaviors and top-piece/larger-on-smaller restrictions; both seven-move solutions pass.
+- [x] Validate cancellation, invalid drop rollback, tracking loss, bounded return, scale/frame changes and both instance sizes in Unity: 1216 assertions, six editor captures and a Windows build/frame-driven player/render pass.
+- [ ] Adapt the manipulation/Hanoi contract into local Udon and the authored VRChat world; add menu/world input arbitration and explicit player/workspace separation.
+- [ ] Assess actual hand-driven grip/snapping, collision/lift policy and headset performance; define multiplayer reservations before claiming shared interaction.
 
-This is an approved proposed demo/framework milestone, not an implemented Hanoi
-scene. UI recovery and interaction integration are the immediate main-plan priority. Historical entries
+The ordinary Unity prototype is implemented; VRChat-world adaptation and physical
+feel remain pending. UI and interaction integration remain the immediate priority. Historical entries
 below remain a chronological record.
 
 ## Inventory, 2026-09-19

@@ -86,3 +86,17 @@ At Start, null snapObjects, null entries and objects without colliders are toler
 
 
 The SDK-free package also passes its 75 core/factory/assembly checks in Unity 2022.3.22f1 (2026-09-23). This extends editor import validation beyond 2020.3; enabled tracking adapters, modern-editor player builds and Udon execution remain separate gates.
+
+
+## Object manipulation and paired Hanoi preview
+
+The separate `Bird3D.Manipulation` assembly consumes logical `BirdPointerInput`
+samples for bounded translation, approach guidance, allowed final placement and
+cancellation. It does not modify the geometric Bird point or require menu objects.
+Import **Hanoi Preview** to try a normal tabletop puzzle and full-size building
+sections 420 m away, driven by the same components at two scales. Conventional
+Inspector references and UnityEvents remain separate from the sample Hanoi rules.
+See [object manipulation](../../../docs/modernization/OBJECT-MANIPULATION.md) for
+input/ownership contracts, authoring, tests and known limits. This slice passes
+Unity 2022.3.22f1 editor and Windows player checks; Udon/VRChat and physical hand
+validation remain separate future work.

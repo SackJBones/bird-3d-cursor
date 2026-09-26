@@ -1,0 +1,6 @@
+{
+    "name": "Bird3D.Manipulation",
+    "rootNamespace": "Bird3DCursor.Manipulation",
+    "references": ["Bird3D.UI"],
+    "autoReferenced": true
+}

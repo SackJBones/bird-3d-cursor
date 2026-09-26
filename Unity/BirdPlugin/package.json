@@ -29,6 +29,11 @@
         "displayName": "Menu Preview",
         "description": "Nested menus and a twelve-color spherical selector with back-surface flick scrolling. Desktop input or caller-fed logical Bird points.",
         "path": "Samples~/MenuPreview"
+      },
+      {
+        "displayName": "Hanoi Preview",
+        "description": "Paired tabletop and full-scale building puzzles sharing bounded grip, approach guidance, placement and cancellation. Desktop or caller-fed logical input.",
+        "path": "Samples~/HanoiPreview"
       }
     ],
     "dependencies": {
