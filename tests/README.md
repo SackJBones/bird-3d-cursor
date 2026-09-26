@@ -1,5 +1,27 @@
 # Focused checks
 
+## Menu visual states
+
+`Invoke-UnityVisualChecks.ps1 -UnityEditor <2022.3.22f1 executable> -ProjectPath
+<new-or-marked validation directory> -BuildPlayer` runs 49 actual Unity assertions,
+five rendered states, a prefab/style/persistent-event round trip and a Windows
+standalone normal-frame hover/press/background/loss check with two captures.
+The synthetic player driver only runs with `-birdVisualResult`.
+
+`Invoke-UnityUdonVisualChecks.ps1 -UnityEditor <executable> -ProjectPath <BirdWorld>
+-BuildWorld` restores all integration sources/metas and the sample shader, compiles
+Udon, runs 35 visual checks against backing VMs and the 61 map checks, then builds
+and audits a Windows scene bundle. `-Author` upgrades unstyled boxed controls in
+the existing map scene and skips already authored controls. It preserves a local
+baseline when absent; the optional historical-scene comparison checks all eight
+corners of every collider even when inactive. Normal validation does not migrate
+the scene. Results/logs/artifacts have separate paths and bounded process waits.
+
+See [visual contracts and evidence](../docs/modernization/UI-VISUAL-STATES.md).
+These checks use synthetic logical inputs; headset feel and VRChat-client loading
+remain separate. New component checks were run on 2022.3.22f1, not every Unity
+version named by the package minimum.
+
 ## Map rotation and range zoom
 
 `Invoke-UnityMapChecks.ps1 -UnityEditor <2022.3.22f1 executable> -ProjectPath

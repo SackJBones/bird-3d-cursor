@@ -20,6 +20,11 @@ cursor size. An experience can use the point without installing menu objects.
 | `BirdMenuPanel` | Explicit parent/child branch, per-user focus, content visibility, open/close UnityEvents |
 | `BirdMenuInteractor` | Evaluate registered inputs and controls, dispatch at most one action per new pointer sample, clear lost focus |
 | `BirdMenuFeedback` | Optional eased Built-in `_Color` feedback using a MaterialPropertyBlock; never change collider size |
+| `BirdMenuVisual` | Optional five-state artwork position, rotation, scale, color and visibility with finite-duration transitions; keeps hit geometry stationary |
+
+For richer state styling and its separate Udon implementation, see
+[visual-state authoring](UI-VISUAL-STATES.md). Use one visual owner per artwork
+branch/renderer; the richer component replaces tint-only feedback on that target.
 
 The archived `BaseMenuElement` supplied interaction requirements. Its inheritance
 and animation implementation are not the authoring contract. The new sample is a

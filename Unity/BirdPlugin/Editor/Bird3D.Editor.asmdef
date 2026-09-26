@@ -1,6 +1,6 @@
 {
     "name": "Bird3D.Editor",
-    "references": ["Bird3D.Runtime"],
+    "references": ["Bird3D.Runtime", "Bird3D.UI"],
     "includePlatforms": ["Editor"],
     "autoReferenced": true
 }

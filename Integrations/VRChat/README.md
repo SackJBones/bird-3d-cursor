@@ -27,6 +27,14 @@ provides squared-range zoom with explicit arming and no-jump reentry;
 Both are local Udon programs with conventional Inspector references and events.
 See [map controls](../../docs/modernization/MAP-CONTROLS.md).
 
+For five-state artwork, `BirdUiVisual` is a separate local Udon program. The saved
+`BirdMapDemo` uses it on eleven boxed controls, with stationary hit colliders and
+animated body/label children. Restore and validate with
+`tests/Invoke-UnityUdonVisualChecks.ps1`; this also runs the map regression and
+accepts `-BuildWorld` for a Windows artifact/catalog check. `-Author` is an explicit
+one-time scene migration, unnecessary for the committed scene. See
+[visual-state authoring](../../docs/modernization/UI-VISUAL-STATES.md).
+
 ## Hand-data feasibility probe
 
 `BirdHandDataProbe.cs` is a separate UdonSharp diagnostic for a Worlds SDK project. It does not adapt or enable the ordinary Bird MonoBehaviour package in VRChat, and does not implement sphere fitting or clicking.

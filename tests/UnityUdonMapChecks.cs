@@ -59,7 +59,12 @@ public class UnityUdonMapChecks : MonoBehaviour
         {
             Assert(Number(panel,"state")==1 && Number(root,"state")==2,"Map branch receives foreground focus");
             foreach(string name in new[]{"UI Map","Map Rotate","Map Zoom","Map Reset","Map Back"})
-                Assert(Vector3.Distance(FindScene(name+" label").transform.position,FindScene(name).transform.position)<.1f,"Reloaded world-space label remains on control: "+name);
+            {
+                Transform label=FindScene(name+" label").transform;
+                var visual=FindScene(name).GetComponent<BirdUiVisual>();
+                Transform artwork=visual==null?FindScene(name).transform:(Transform)UdonSharpEditorUtility.GetBackingUdonBehaviour(visual).GetProgramVariable("visualRoot");
+                Assert(label.parent==artwork && Vector3.Distance(label.position,artwork.position)<.1f,"Reloaded world-space label remains on its assigned artwork: "+name);
+            }
             Aim("Map Zoom"); stage++; return false;
         }
         if(stage==5) { Aim("Map Zoom",true); stage++; return false; }

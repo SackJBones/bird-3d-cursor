@@ -44,6 +44,37 @@ your own action. Set a child panel's Parent explicitly. Register all elements,
 including inactive children, on one interactor with both pointer inputs. Its
 **Refresh Child Menu Elements** context command fills the element list.
 
+## Authoring visual states
+
+Attach `BirdVisualStatesPreview` in a separate empty scene to try the same nested
+menu with animated artwork. It adds the required `BirdMenuPreview`; controls are
+the same. Hover moves the artwork forward with a slight tilt, press compresses
+it, and a background parent recedes. This one-time sample builder replaces its
+simple tint feedback. The base preview owns the generated objects and materials.
+
+For your own controls, add **Bird / UI / Menu Visual** to the stationary control
+and assign its source `BirdMenuElement`. Put its body and labels under a separate
+**Visual Root** child. Keep all colliders, menu elements and the visual controller
+outside that branch. The optional tint renderer must be inside it. The Inspector
+warns about invalid references or geometry in the animated branch.
+
+Each of the five state foldouts has a parent-space position offset, rotation
+relative to the rest pose, scale multiplier, color and visibility. They use normal
+Unity serialization, prefab overrides and Undo. Select the shader's color property
+(`_Color` for the sample's Built-in material). Give this component sole ownership
+of that renderer's property block; disable `BirdMenuFeedback` on the same renderer.
+
+Transitions finish in the configured duration and retarget from the currently
+displayed pose. Initial binding displays the current state immediately. Showing
+activates artwork immediately; hiding waits for the transition to finish.
+Disabling the component restores its original transform, active state and complete
+property block without changing the shared material.
+
+**Activated** is the existing pressed visual state, not an action acknowledgement
+or persistent selected value. Use the element's Activated event for actions and
+keep persistent selection in the experience's own model. See the maintained
+`docs/modernization/UI-VISUAL-STATES.md` for timing, ownership and Udon contracts.
+
 ## Spherical selector
 
 For the spherical example, attach `BirdSphericalSelectorPreview` in a separate
