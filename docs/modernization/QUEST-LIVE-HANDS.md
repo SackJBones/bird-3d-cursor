@@ -8,7 +8,7 @@ range multiplier. This is a physical math comparison, not a VRChat world.
 
 Version 0.1 was physically tried by Dana, who reports an extremely small port
 gap. Version 0.2 adds experimental palm-side continuation and optional depth
-presentation; its subjective feel has not yet been checked. See
+presentation. Dana later reported abrupt capping and a closed-fist maximum-range bug; that continuation is replaced in v0.5. See
 [geometry and presentation](GEOMETRY-AND-PRESENTATION.md) for the separation,
 parameters, test evidence and remaining limits.
 
@@ -20,6 +20,13 @@ Version 0.4 integrates outward size growth between samples to reduce the
 measured update-rate bias, and stops catch-up growth when the target starts
 decreasing. Immediate near-size restoration remains in place. See
 [the growth experiment](DEPTH-GROWTH.md) for the numerical comparison.
+
+Version 0.5 preserves ordinary fits and replaces the cap with separate
+pose-aware flat/fist limits. The sphere diagnostic fades as its contribution
+fades; the colored point is the limited/filter result. The new **Record 20s**
+fingertip control has a three-second countdown and saves both hands locally.
+See [hand limits and recording instructions](HAND-LIMITS.md). Natural feel and
+the recording control still need a physical attempt.
 
 The runner copies the two production port sources into an ignored generated
 project with `QuestHandsUdonShim.cs`. They execute as ordinary C# MonoBehaviours.
@@ -64,13 +71,13 @@ device logs out of public commits.
 ## In-headset check
 
 Hold a hand comfortably in view and cup it as if holding a small ball. Cyan is
-left, pink is right. The colored wire sphere uses the guarded port fit;
+left, pink is right. The colored wire sphere shows the actual fit and fades when a limit law takes over;
 small joint markers show the skeleton used by Bird. Green marks the weighted
 hand root and a green line shows palm front. The index fingertip is white.
 
-- **Colored cursor and short trail:** guarded port point after the standard
+- **Colored cursor and short trail:** pose-limited port point after the standard
   Kalman recurrence. It brightens while selected without changing near size.
-- **Small white cursor:** guarded fit through the original range polynomial,
+- **Small white cursor:** blended geometry through the original range polynomial,
   before filtering.
 - **Gold ring:** unchanged legacy core's filtered point. Ordinary curved poses
   should closely overlap; near flat/inverted fits intentionally diverge.
@@ -85,14 +92,14 @@ make short movements/stops to assess filter lag. Bend the index into/out of the
 sphere to check selection. Finally move a hand out of view and back to inspect
 loss/recovery. Repeat with the other hand and with both hands together.
 
-The display reports fit radius, center-to-root distance `d`, raw range, original
+The display reports fit radius, effective range-input distance `d`, bend and blend weights, raw range, original
 and port click states, and center/raw/filtered differences in millimeters.
 Original mapping is `d + d*d/.02 + .02*(d/.03)^6`; Kalman is `Q=.001`,
 `R=270*d^3`. Open, nearly planar hands can produce very long ranges. The demo
 no longer hides the cursor beyond 20 m. A display-only depth shell preserves
 direction/angle while keeping astronomical points inside the camera clip.
-Logical interaction coordinates retain their full range. The optional fit's
-2 m sphere-center endpoint maps to roughly 1.76 billion meters of raw reach.
+Logical interaction coordinates retain their full range. The flat-hand law
+ends at a 2 m range input, mapping to roughly 1.76 billion meters of raw reach.
 See the architecture note for numerical and far-world occlusion limitations.
 
 ## Known differences and boundaries
@@ -100,7 +107,7 @@ See the architecture note for numerical and far-world occlusion limitations.
 - The original core solves the centered 4x4 normal equations. The port solves
   the equivalent centered, scale-normalized 3x3 system and rejects normalized
   determinants <=1e-6 in its default mode. This comparison opts into the new
-  continuous palm-side fallback before degeneracy; the legacy core is unchanged.
+  pose-aware point law near flat/fist limits; the legacy core is unchanged.
 - Original Kalman state starts at zero and is retained over tracking loss.
   The port seeds at the first valid measurement after startup/loss. This can
   produce visible transient differences even with identical coefficients.
@@ -126,3 +133,6 @@ Version 0.2 built and installed successfully on 2026-09-25 (ARM64; SHA256 9333F7
 Version 0.3 is now installed (2026-09-25): attached trail-tip fix, APK SHA256 4C126AE2BDFE82A25B8217E3B6FDDA6A7D49EBE0AAEB6542EC9A841D959FB195. Earlier deployment entries describe historical versions.
 
 Version 0.4 is now installed (2026-09-25): integrated outward growth, APK SHA256 B95B426B42A9109A9E18D75450010BE4E4570818168930D1FFB49C734F979138. Physical feel remains deferred.
+
+
+Version 0.5 built and installed successfully (2026-09-26 UTC), replacing the physically problematic sphere cap with the pose-aware two-law experiment and adding optional local joint recording. APK SHA256 1559DDD34617A2300561D1EBCD5251A076FE53D0FA501A3FEB79CBA8CE04C57A. Both actual C# and compiled-Udon hand-limit checks pass; physical v0.5 feel remains pending.

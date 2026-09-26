@@ -79,12 +79,7 @@ public class UnityUdonSphereFitChecks : MonoBehaviour
             var invalid = Sphere(Vector3.zero, 1, 16); invalid[7].x = float.NaN; Invalid(vm, invalid);
             invalid = Sphere(Vector3.zero, 1, 16); invalid[7].y = float.PositiveInfinity; Invalid(vm, invalid);
             Valid(vm, Sphere(Vector3.one, 0.2f, 16), Vector3.one, 0.2f);
-            string palmResult = UnityPalmFitChecks.Check((points, root, normal, cap, enabled) => {
-                vm.SetProgramVariable("points", points); vm.SetProgramVariable("palmOrigin", root);
-                vm.SetProgramVariable("palmNormal", normal); vm.SetProgramVariable("maximumCenterDistance", cap);
-                vm.SetProgramVariable("constrainToPalm", enabled); vm.SendCustomEvent("Fit");
-            }, () => (bool)vm.GetProgramVariable("fitValid"), () => (Vector3)vm.GetProgramVariable("center"), () => (float)vm.GetProgramVariable("radius"));
-            Finish(true, checks + " compiled-Udon baseline sphere cases passed. " + palmResult + ". Synthetic points only; no avatar mapping/click/hardware validation.");
+            Finish(true, checks + " compiled-Udon baseline sphere cases passed. Sphere fitting is independent of the optional hand limit law (tested by UnityUdonCursorChecks).");
         }
         catch (Exception e) { Finish(false, e.ToString()); }
     }

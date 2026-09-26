@@ -2,120 +2,112 @@
 using System;
 using UnityEngine;
 
-// The same cases can target ordinary C# or compiled Udon through delegates.
+// Shared by actual Unity C# and compiled Udon. Articulated synthetic joints,
+// not human recordings: catches the flat/fist ambiguity in the old grid tests.
 public static class UnityPalmFitChecks
 {
-    public static string Check(Action<Vector3[], Vector3, Vector3, float, bool> fit,
-        Func<bool> valid, Func<Vector3> center, Func<float> radius)
+    static int checks;
+    public static string Check(Action<string, object> set, Func<string, object> get, Action<string> call)
     {
-        int samples = 0;
-        float maxStep = 0, maxMirror = 0, maxRigid = 0;
-        Vector3 previous = Vector3.zero;
-        float previousRange = 0, maxRangeStep = 0;
-        // Cupped -> perfectly flat -> hyperextended -> cupped, with small
-        // deterministic non-spherical perturbations and no temporal smoothing.
-        for (int frame = 0; frame <= 1600; frame++)
+        checks = 0;
+        Vector3 root = new Vector3(0, -.02f, 0);
+        set("tracking", true); set("smoothing", false); set("clicksAllowed", false);
+        set("rangeDistanceMultiplier", 1f); set("maximumLimitDistance", 2f);
+        set("palmNormal", Vector3.forward); set("handRoot", root); set("indexTip", Vector3.up);
+        Action<Vector3[]> sample = points => { set("points", points); call("Step"); Require((bool)get("poseValid"), "valid articulated pose"); };
+        float ordinaryError = 0;
+        foreach (float bend in new[] { 50f, 70, 90, 110, 130, 140 })
         {
-            float curvature = frame <= 800 ? 60 - frame*.1f : -20 + (frame - 800)*.1f;
-            Vector3[] points = Patch(curvature, false);
-            fit(points, Vector3.zero, Vector3.forward, .08f, true);
-            Require(valid(), "Continuous patch rejected at " + frame);
-            Vector3 c = center();
-            float r = radius();
-            Require(c.z >= -.000001f && c.magnitude <= .080001f && r > 0 && !float.IsNaN(r), "Front/bounded/finite fit");
-            float range = Range(c.magnitude);
-            if (frame > 0)
+            var points = Hand(bend);
+            set("useHandLimits", false); sample(points); Vector3 expected = (Vector3)get("rawPosition");
+            set("useHandLimits", true); sample(points);
+            ordinaryError = Mathf.Max(ordinaryError, Vector3.Distance(expected, (Vector3)get("rawPosition")));
+            Require((float)get("flatWeight") == 0 && (float)get("fistWeight") < .000001f, "ordinary pose uses legacy law " + bend);
+            Require(ordinaryError < .00001f, "ordinary legacy parity at shipped 2m endpoint");
+        }
+        float maxStep = 0, maxLogStep = 0, maxFistRange = 0;
+        Vector3 previous = Vector3.zero; float previousRange = 0;
+        for (int i = 0; i <= 2400; i++)
+        {
+            float bend = 230 - i*.1f;
+            sample(Hand(bend));
+            Vector3 input = (Vector3)get("rangeInput"), raw = (Vector3)get("rawPosition");
+            float range = Vector3.Distance(raw, root);
+            Require(Finite(raw) && input.magnitude <= 2.001f, "finite two-law sweep");
+            if (bend >= 211) { maxFistRange = Mathf.Max(maxFistRange, range); Require(raw == root, "closed fist exactly at root"); }
+            if (i > 0)
             {
-                maxStep = Mathf.Max(maxStep, (c - previous).magnitude);
-                maxRangeStep = Mathf.Max(maxRangeStep, Mathf.Abs(range - previousRange));
+                maxStep = Mathf.Max(maxStep, Vector3.Distance(previous, input));
+                maxLogStep = Mathf.Max(maxLogStep, Mathf.Abs(Mathf.Log(1+range)-Mathf.Log(1+previousRange)));
             }
-            previous = c;
-            previousRange = range;
-            if (frame % 40 == 0)
-            {
-                for (int j = 0; j < points.Length; j++) points[j].x = -points[j].x;
-                fit(points, Vector3.zero, Vector3.forward, .08f, true);
-                Require(valid(), "Mirrored hand rejected");
-                maxMirror = Mathf.Max(maxMirror, (center() - new Vector3(-c.x, c.y, c.z)).magnitude);
-                var rotation = Quaternion.Euler(frame*.2f, 127, -43);
-                Vector3 translation = new Vector3(.3f, 1.2f, -.4f);
-                points = Patch(curvature, false);
-                for (int j = 0; j < points.Length; j++) points[j] = rotation*points[j] + translation;
-                fit(points, translation, rotation*Vector3.forward, .08f, true);
-                Require(valid(), "Rigidly transformed hand rejected");
-                maxRigid = Mathf.Max(maxRigid, (center() - (rotation*c + translation)).magnitude);
-            }
-            samples++;
+            previous = input; previousRange = range;
         }
-        Require(maxStep < .001f, "Center jumped >1mm for a .1/m curvature increment: " + maxStep);
-        Require(maxRangeStep < .15f, "Raw polynomial output discontinuity: " + maxRangeStep);
-        Require(maxMirror < .00001f && maxRigid < .00003f, "Mirroring/rigid transform changed fit");
-
-        // The shipped 2m numerical sphere endpoint means ~1.76e9m of logical
-        // Bird reach, not the .08m-center stress fixture's short range.
-        Vector3 priorFar = Vector3.zero;
-        float maxFarStep=0;
-        for(int frame=0;frame<=800;frame++)
+        Require(previousRange > 1e9f, "flat and overextended hand retains billion-meter logical reach");
+        Require(maxStep < .07f && maxLogStep < .5f, "no discontinuity in 0.1 degree sweep: " + maxStep + ", " + maxLogStep);
+        // A planar folded chain is maximally bent, despite a singular sphere.
+        sample(Hand(230, 0, true));
+        Require((Vector3)get("rawPosition") == root, "folded planar fist stays home");
+        foreach (float proximalFraction in new[] { .38f, .40f, .42f, .46f })
         {
-            fit(Patch(2-frame*.005f,true),Vector3.zero,Vector3.forward,2,true);
-            Require(valid() && center().z>=0 && center().magnitude<=2.00001f,"Long-reach continuation failed");
-            if(frame>0)maxFarStep=Mathf.Max(maxFarStep,(center()-priorFar).magnitude);
-            priorFar=center();
+            sample(Hand(230, 0, false, proximalFraction));
+            Require((Vector3)get("rawPosition") == root, "MCP across 90 degrees remains a fist");
         }
-        Require(maxFarStep<.03f,"Long-range center discontinuity: "+maxFarStep);
-        Require(Range(priorFar.magnitude)>1e9f,"Numerical endpoint truncated long reach");
-
-        // Exact planar and symmetric curved caps, including infinitesimal
-        // perturbations around zero, do not need the previous valid frame.
-        Vector3 flat = Vector3.zero;
-        foreach (float k in new[] { 0f, .0001f, -.0001f, 0f })
+        float maxTransformError = 0;
+        foreach (float scale in new[] { .7f, 1f, 1.3f })
+        foreach (float bend in new[] { 230f, 210, 180, 140, 90, 45, 30, 15, 5, 0, -5 })
         {
-            fit(Patch(k, true), Vector3.zero, Vector3.forward, .08f, true);
-            Require(valid() && center().z > 0, "Fresh flat/inverted cap must produce front-facing fit");
-            if (k == 0) flat = center();
-            Require((center() - flat).magnitude < .00001f, "Discontinuity at perfectly flat cap");
+            var source = Hand(bend, .00002f);
+            for (int i = 0; i < source.Length; i++) source[i] *= scale;
+            set("handRoot", root*scale); set("palmNormal", Vector3.forward); sample(source);
+            Vector3 expectedInput = (Vector3)get("rangeInput");
+            Quaternion rotation = Quaternion.Euler(23, -31, 41); Vector3 offset = new Vector3(.2f, -.3f, .4f);
+            for (int i = 0; i < source.Length; i++) { source[i].x = -source[i].x; source[i] = rotation*source[i]+offset; }
+            set("handRoot", rotation*(root*scale)+offset); set("palmNormal", rotation*Vector3.forward); sample(source);
+            expectedInput.x = -expectedInput.x;
+            float error = Vector3.Distance((Vector3)get("rangeInput"), rotation*expectedInput);
+            maxTransformError = Mathf.Max(maxTransformError, error);
+            Require(error < .0001f, "mirror/rigid transform " + bend + " error=" + error);
         }
-        // Fully curved sphere where the continuation is inactive retains the
-        // original least-squares result (including radius recomputation).
-        var sphere = new Vector3[16];
-        for (int j = 0; j < 16; j++)
-        {
-            float y = 1 - 2*(j+.5f)/16;
-            float a = j*2.39996323f, xz = Mathf.Sqrt(1-y*y);
-            sphere[j] = new Vector3(0, 0, .025f) + new Vector3(xz*Mathf.Cos(a), y, xz*Mathf.Sin(a))*.02f;
-        }
-        fit(sphere, Vector3.zero, Vector3.forward, .08f, false);
-        var legacy = center(); float legacyRadius = radius();
-        fit(sphere, Vector3.zero, Vector3.forward, .08f, true);
-        Require(valid() && (center() - legacy).magnitude < .000001f && Mathf.Abs(radius() - legacyRadius) < .000001f, "Ordinary sphere changed");
-        fit(Patch(0, true), Vector3.zero, Vector3.zero, .08f, true);
-        Require(!valid() && center() == Vector3.zero && radius() == 0, "Missing normal must clear output");
-        fit(Patch(0, true), Vector3.zero, Vector3.forward, float.NaN, true);
-        Require(!valid(), "Nonfinite cap accepted");
-        var invalid = Patch(0, true); invalid[2].z = float.NaN;
-        fit(invalid, Vector3.zero, Vector3.forward, .08f, true);
-        Require(!valid(), "Nonfinite joint accepted");
-        fit(Patch(0, true), Vector3.zero, Vector3.forward, .08f, true);
-        Require(valid(), "Recovery failed");
+        set("handRoot", root); set("palmNormal", Vector3.forward);
+        sample(Hand(90)); Vector3 withoutIndex = (Vector3)get("rawPosition");
+        set("indexTip", Vector3.one*20); sample(Hand(90));
+        Require((Vector3)get("rawPosition") == withoutIndex, "index click independent of pose classifier");
+        call("Cancel"); set("smoothing", true); sample(Hand(0));
+        Require(Vector3.Distance((Vector3)get("position"), root) > 1e9f, "seed distant filter history");
+        sample(Hand(230)); Require((Vector3)get("position") == root, "filtered fist returns exactly from billion-meter history");
+        set("palmNormal", Vector3.zero); call("Step"); Require(!(bool)get("poseValid"), "invalid normal rejected");
+        set("palmNormal", Vector3.forward); set("maximumLimitDistance", float.NaN); call("Step"); Require(!(bool)get("poseValid"), "invalid endpoint rejected");
+        set("maximumLimitDistance", 2f); var bad = Hand(90); bad[7].x = float.NaN; set("points", bad); call("Step"); Require(!(bool)get("poseValid"), "invalid joint rejected");
+        bad = Hand(90); bad[5] = bad[4]; set("points", bad); call("Step"); Require(!(bool)get("poseValid"), "collapsed bone rejected");
+        sample(Hand(90)); Require((Vector3)get("position") == (Vector3)get("rawPosition"), "recovery seeds current point");
         return string.Format(System.Globalization.CultureInfo.InvariantCulture,
-            "PASS: {0} continuous palm samples + 801 billion-meter-reach samples + mirrored/rigid/flat/legacy/invalid/recovery checks; max center step={1:F4}mm raw range step={2:F4}m mirror={3:F5}mm rigid={4:F5}mm",
-            samples, maxStep*1000, maxRangeStep, maxMirror*1000, maxRigid*1000);
+            "{0} hand-limit assertions; 2401 articulated samples; ordinary error={1:G6}m; max input step={2:G6}m/0.1deg, log(1+range) step={3:G6}; closed range={4:G6}m; mirror/rigid input error={5:G6}m. Synthetic hands, physical feel pending.",
+            checks, ordinaryError, maxStep, maxLogStep, maxFistRange, maxTransformError);
     }
-
-    static Vector3[] Patch(float curvature, bool exact)
+    static Vector3[] Hand(float bend, float noise = 0, bool foldedPlane = false, float proximalFraction = .32f)
     {
-        var points = new Vector3[16];
-        for (int j = 0; j < 16; j++)
+        var p = new Vector3[16];
+        p[0] = new Vector3(-.043f, -.025f, .006f); p[1] = new Vector3(-.047f, -.008f, .012f); p[2] = new Vector3(-.05f, .01f, .016f);
+        p[3] = new Vector3(-.025f, 0, 0);
+        for (int f = 0; f < 3; f++)
         {
-            float x = (j%4 - 1.5f)*.015f + .003f;
-            float y = (j/4 - 1.5f)*.018f + .006f;
-            float z = .5f*curvature*(x*x + y*y);
-            if (!exact) z += .00002f*Mathf.Sin(j*2.1f);
-            points[j] = new Vector3(x, y, z);
+            int j = 4+f*4; p[j] = new Vector3((f-1)*.021f, -f*.004f, 0);
+            float splay = (f-1)*.12f;
+            float[] angles = { bend*proximalFraction, bend*.72f, bend };
+            float[] lengths = { .038f-f*.003f, .025f-f*.002f, .021f-f*.002f };
+            for (int k = 0; k < 3; k++)
+            {
+                float angle = angles[k]*Mathf.Deg2Rad;
+                Vector3 segment = new Vector3(Mathf.Sin(splay)*Mathf.Cos(angle), Mathf.Cos(splay)*Mathf.Cos(angle), Mathf.Sin(angle));
+                if (foldedPlane) segment = k == 0 ? Vector3.up : Vector3.down;
+                p[j+k+1] = p[j+k]+segment*lengths[k];
+            }
         }
-        return points;
+        if (foldedPlane) { p[0].z = p[1].z = p[2].z = 0; }
+        for (int i = 0; i < p.Length; i++) p[i] += new Vector3(Mathf.Sin(i*1.7f), Mathf.Cos(i*.7f), Mathf.Sin(i*.3f))*noise;
+        return p;
     }
-    static float Range(float d) { float f = d/.03f; return d + d*d/.02f + .02f*f*f*f*f*f*f; }
-    static void Require(bool pass, string message) { if (!pass) throw new Exception(message); }
+    static bool Finite(Vector3 v) { return !float.IsNaN(v.x+v.y+v.z) && !float.IsInfinity(v.x+v.y+v.z); }
+    static void Require(bool condition, string message) { checks++; if (!condition) throw new Exception(message); }
 }
 #endif

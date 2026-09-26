@@ -101,7 +101,10 @@ public class UnityUdonCursorChecks : MonoBehaviour
             left.SetProgramVariable("rangeDistanceMultiplier", 0f); left.SendCustomEvent("Step"); State(left, false, false, false, false);
             left.SetProgramVariable("rangeDistanceMultiplier", float.NaN); left.SendCustomEvent("Step"); State(left, false, false, false, false);
             left.SetProgramVariable("rangeDistanceMultiplier", 1f); Sample(left, root, 0.02f, 0.004f); State(left, true, false, false, false);
-            Finish(true, checks + " compiled-Udon cursor assertions passed: range/click/loss/recovery plus smoothing agreement with original KalmanFilterVector3, jitter attenuation, movement and recovery reseeding. Synthetic data; no avatar/hardware validation.");
+            string palmChecks = UnityPalmFitChecks.Check(
+                (name, value) => left.SetProgramVariable(name, value),
+                name => left.GetProgramVariable(name), name => left.SendCustomEvent(name));
+            Finish(true, checks + " compiled-Udon cursor assertions passed: range/click/loss/recovery plus smoothing agreement with original KalmanFilterVector3, jitter attenuation, movement and recovery reseeding. Synthetic data; no avatar/hardware validation. " + palmChecks);
         }
         catch (Exception e) { Finish(false, e.ToString()); }
     }

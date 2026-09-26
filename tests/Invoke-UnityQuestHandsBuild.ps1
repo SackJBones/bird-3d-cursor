@@ -44,7 +44,7 @@ function Invoke-BirdUnity([string]$Method, [string]$Log, [bool]$Quit) {
     if ($process.ExitCode -ne 0) { throw "Unity failed; see $Log" }
 }
 foreach ($name in @('UnityQuestHands.cs','QuestHandsUdonShim.cs','UnityDepthVisualChecks.cs','UnityDepthMotionChecks.cs','UnityDepthStereoChecks.cs')) { Copy-Item (Join-Path $PSScriptRoot $name) (Join-Path $project "Assets/$name") }
-foreach ($name in @('UnityQuestHandsBuild.cs','UnityQuestHandsChecks.cs','UnityPalmFitChecks.cs')) { Copy-Item (Join-Path $PSScriptRoot $name) (Join-Path $project "Assets/Editor/$name") }
+foreach ($name in @('UnityQuestHandsBuild.cs','UnityQuestHandsChecks.cs','UnityPalmFitChecks.cs','UnityQuestTraceChecks.cs')) { Copy-Item (Join-Path $PSScriptRoot $name) (Join-Path $project "Assets/Editor/$name") }
 # Migrate the earlier generated helper: a Play Mode component must live outside Editor.
 $oldHelper = Join-Path $project 'Assets/Editor/UnityDepthVisualChecks.cs'
 if (Test-Path -LiteralPath $oldHelper) { Remove-Item -LiteralPath $oldHelper }

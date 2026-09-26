@@ -22,9 +22,9 @@ belongs to the experience. Cursor visuals do not define an interaction volume.
 
 ## Current code boundaries
 
-- `Integrations/VRChat/BirdSphereFit.cs` accepts points and an optional palm
-  frame. It knows nothing about rendering, input SDKs, clicks or raycasts.
-- `BirdCursorState` retains the existing range, filter and click convenience
+- `Integrations/VRChat/BirdSphereFit.cs` accepts points and reports fit conditioning. It knows nothing about rendering, input SDKs, clicks or raycasts.
+- `BirdCursorState` adds an optional pose-aware geometric limit law and retains
+  the existing range, filter and click convenience
   state for compatibility. Callers can disable clicks. Legacy `Bird.cs` also
   retains its public convenience APIs; this change does not claim to have
   separated every historical class.
@@ -38,33 +38,20 @@ belongs to the experience. Cursor visuals do not define an interaction volume.
 - Existing `BirdTrail` and `BirdRadialTrail` are unchanged. A mandala need not
   instantiate a UI cursor or adopt its depth/size mapping.
 
-## Experimental palm-side continuation
+## Pose-aware geometric limits
 
-`constrainToPalm` defaults to false. A caller opting in supplies a front-facing
-palm normal and root. The Quest comparison derives a cross product from thumb,
-index and little-finger bases, mirrors handedness, and uses the tracked palm
-orientation to disambiguate the sign when available. The OpenXR joint convention
-places +Y toward the back of the hand, so palm front is -Y:
-[OpenXR specification](https://registry.khronos.org/OpenXR/specs/1.1-khr/pdf/xrspec.pdf).
-The VRChat avatar adapter does not yet provide a verified equivalent frame and
-does not enable this option.
+Dana's physical test found sudden cap activation and a closed fist reaching the
+maximum sphere. The v0.2-v0.4 palm continuation is withdrawn. Version 0.5 keeps
+the original sphere fit separate and blends its center vector with an
+independent palm-outward law near extension; a closed-hand endpoint brings the
+point to the hand root. Finger articulation distinguishes flat from folded
+singular fits. See [hand limits and recording](HAND-LIMITS.md) for the actual
+parameters, API requirements, tests and remaining physical-tuning questions.
 
-The fallback regresses palm height on tangent coordinates and squared distance.
-Its signed curvature stays finite when the points approach a plane. Positive
-curvature uses reciprocal center distance, transitioning through a C1 shoulder
-to a finite endpoint as curvature approaches zero. Negative curvature retains
-the front-side continuation rather than reflecting an already inverted center.
-A smooth confidence blend preserves the original fit for ordinary well-curved
-poses; the result remains in the front half of the configured center ball.
-This is an experimental continuation objective, not a claim that a unique
-least-squares sphere exists for a plane.
-
-`maximumCenterDistance=2 m` is a numerical sphere-center endpoint. The unchanged
-polynomial maps it to about **1.76 billion meters** of logical cursor reach.
-It is not a 2 m cursor limit. True infinity is not represented in a float; an
-experience can consume the direction as a ray. Invalid/collapsed input is still
-rejected. The fitted sphere stays palm-side; the filtered point can lag a moving
-palm because the original Kalman recurrence is retained.
+`useHandLimits` defaults off on `BirdCursorState`. The Quest demo supplies a
+verified palm frame and canonical points/root. The avatar adapter does not
+enable it. The old `BirdSphereFit.constrainToPalm` fields have been removed.
+A sphere diagnostic fades when that fit ceases to define the point.
 
 ## Experimental depth presentation
 
@@ -98,10 +85,11 @@ but two confirmed cases of a distant cursor showing through an opaque wall.
 Logical world occlusion remains unsolved; the successful probe is measurement
 evidence, not an occlusion pass or a headset stereo result.
 
-The shared palm fixture runs in actual Unity C# and compiled Udon: 1601 noisy
-curvature sweep samples, 801 billion-meter reach samples, mirrored hands, rigid
-transforms, fresh flat input, original-fit preservation, invalid input and
-recovery. These are synthetic geometry tests, not recordings of human hands.
+The shared hand fixture now tests articulated finger chains, including flat,
+closed and planar folded inputs, ordinary legacy parity at shipped parameters,
+mirrored/rigid/scale/noise cases and return from distant filter history. It
+runs in actual Unity C# and compiled Udon. The old grid-only checks did not
+cover the physical failure; synthetic passes are not a substitute for feel.
 Visual math checks cover constant near size, immediate return, onset continuity,
 outward lag and direction-preserving finite projection through 1e12 m.
 

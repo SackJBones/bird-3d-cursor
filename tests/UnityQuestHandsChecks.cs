@@ -83,10 +83,10 @@ public static class UnityQuestHandsChecks
             port.Step();
             if (!port.poseValid || Vector3.Distance(port.position, port.rawPosition) > .000001f)
                 throw new Exception("Port must seed first valid measurement after loss");
-            string palmChecks = UnityPalmFitChecks.Check((points, root, normal, cap, enabled) => {
-                port.fitter.points = points; port.fitter.palmOrigin = root; port.fitter.palmNormal = normal;
-                port.fitter.maximumCenterDistance = cap; port.fitter.constrainToPalm = enabled; port.fitter.Fit();
-            }, () => port.fitter.fitValid, () => port.fitter.center, () => port.fitter.radius);
+            string palmChecks = UnityPalmFitChecks.Check(
+                (name, value) => typeof(BirdCursorState).GetField(name).SetValue(port, value),
+                name => typeof(BirdCursorState).GetField(name).GetValue(port),
+                name => typeof(BirdCursorState).GetMethod(name).Invoke(port, null));
             return string.Format(System.Globalization.CultureInfo.InvariantCulture,
                 "PASS: 400 moving noisy sphere samples; original/port center max={0:F6}mm raw max={1:F6}mm; port Kalman reference max={2:F6}mm; recovery seed verified\n{3}", maxFit * 1000, maxRaw * 1000, maxFilter * 1000, palmChecks);
         }

@@ -8,16 +8,40 @@ Work in small passes every two hours, approximately 10–15 minutes of active wo
 
 Use `feature/vrchat-modernization` in both repositories. All maintained package code belongs in `SackJBones/bird-3d-cursor`; full projects, large scenes and assets belong in `SackJBones/bird-3d-cursor-projects`. Pin dependencies to reproducible revisions. Create eventual review PRs; do not merge unfinished work. Later engine integrations branch off this feature branch, with separate large demo repositories where necessary.
 
-## Current priorities, 2026-09-25
+## Current priorities, 2026-09-26 UTC
 
-Dana is away and authorizes continued scheduled development. Keep physical and
-subjective checks deferred without holding up independent work. Bird specifies
-a geometric point; keep interaction and optional presentation downstream.
-Preserve fixed physical cursor size throughout the natural working volume and
-enormous logical reach. See [geometry and presentation](GEOMETRY-AND-PRESENTATION.md)
-for palm continuation, depth experiments and the next bounded checks. The
-two-hour heartbeat prompt now carries these priorities and supersedes the old
-headset-first note. Historical entries below remain a chronological record.
+Dana physically tested the palm continuation: the cap engaged suddenly and a
+closed fist wrongly reached the maximum sphere. Prioritize ordinary legacy
+behavior and continuous pose-aware flat/fist limits before more rendering
+experiments. Fully closing the hand must bring the point to the fist. The
+v0.5 implementation separates sphere fitting from the optional limit law; see
+[hand limits](HAND-LIMITS.md). Real recordings would help tune it, but are
+optional and must not block independent development.
+
+Bird specifies a geometric point; keep interaction and optional presentation
+downstream. Preserve constant physical marker size through the natural working
+volume and enormous logical reach. The known far-world occlusion issue remains
+open. Physical feel must be reported separately from synthetic checks.
+
+### Proposed paired Towers of Hanoi demo and shared object interaction
+
+Add a normal tabletop Bird Hanoi puzzle, with a second puzzle behind it using
+full-scale buildings or building sections, far enough away to see the whole
+arrangement while manipulating it. Both must consume one reusable Bird object
+interaction framework. Preserve the mandala, Fireball and other existing demo
+ambitions. Dana's full wording is appended to `user-request.txt` and included
+in the recurring-task prompt.
+
+- [ ] Review existing BirdInteractable/grabbing/snapping experiments before designing the shared framework.
+- [ ] Specify selection, gripping, moving, releasing and graceful cancellation independently of the geometric point and its UI marker.
+- [ ] Keep held building volumes outside the user's occupied space when the hand closes; preserve a safe manipulation region without clamping Bird itself.
+- [ ] Guide a nearby approach trajectory softly, with hysteresis/cues that tolerate distant input noise; firmly settle only into an allowed final placement.
+- [ ] Build tabletop and distant full-building Hanoi instances using the same behaviors and policies, with correct top-piece and larger-on-smaller restrictions.
+- [ ] Validate cancellation, invalid drop rollback, tracking loss, safe return, scale changes and both instance sizes; assess physical usability separately.
+
+This is an approved proposed demo/framework milestone, not an implemented Hanoi
+scene. Finish the hand-limit correction and validation first. Historical entries
+below remain a chronological record.
 
 ## Inventory, 2026-09-19
 
@@ -72,7 +96,8 @@ Checked against official pages on 2026-09-18/19; revisit before implementation i
 - [x] Obtain user confirmation of in-headset synthetic smoke visuals and normal head-view response. Live hand input and longer-session comfort remain unverified.
 - [x] Build/install the standalone real-XR-Hands comparison using unchanged original and port math; verify 400-sample parity, active XR and running hand subsystem.
 - [x] Obtain Dana's physical Bird Live Hands v0.1 comparison report: port gap is extremely small. This is user-observed live use, beyond startup logs.
-- [ ] Obtain detailed sphere/range/Kalman/click/loss feedback and evaluate the new palm/depth behavior in v0.2 when Dana returns.
+- [x] Obtain physical feedback on the initial palm continuation: sudden cap activation and closed-fist maximum range were reported.
+- [ ] Validate the replacement v0.5 flat/fist limits physically, using optional joint traces for tuning.
 - [x] Verify opt-in continuous palm-side fitting in Unity C# and compiled Udon, including flat/inverted curvature, both handednesses, transforms, recovery and billion-meter logical reach.
 - [x] Separate optional point-consuming depth presentation into its own assembly with configurable working volume, size curve, lag and trail choices; keep mandala presentation independent.
 - [x] Render three presentation alternatives at seven distances and check near physical size, continuity, huge-range projection and immediate return sizing mathematically.

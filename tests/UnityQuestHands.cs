@@ -1,6 +1,8 @@
 #if BIRD_OPENXR_ENABLED
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using Bird3DCursor;
 using Bird3DCursor.Presentation;
 using UnityEngine;
@@ -66,6 +68,7 @@ public sealed class UnityQuestHands : MonoBehaviour
         public Vector3 rawPosition;
         public float centerGap, rawGap, filterGap, radius, distance, range;
         public bool visible;
+        public bool jointTracking;
         public int frames, accepted;
     }
 
@@ -83,6 +86,24 @@ public sealed class UnityQuestHands : MonoBehaviour
     int touchMode = -1;
     float touchSince, nextModeChange;
     BirdDepthVisual.SizeMode sizeMode = BirdDepthVisual.SizeMode.InflationWithLag;
+    StringBuilder capture;
+    float captureStart, captureEnd;
+    int captureSamples;
+    bool captureArmed = true;
+    string captureStatus = "Touch Record 20s to save hand joints locally";
+    public string LastCapturePath { get; private set; }
+
+    [Serializable] public class JointTrace
+    {
+        public int schema = 1;
+        public string appVersion = "0.5", hand;
+        public float time;
+        public bool tracked, poseValid;
+        // Base/intermediate/distal/tip for thumb, index, middle, ring, little.
+        public Vector3[] joints;
+        public Vector3 root, palmNormal, rangeInput, raw, filtered;
+        public float bend, flatWeight, fistWeight, fitConfidence;
+    }
 
     void Start()
     {
@@ -106,7 +127,7 @@ public sealed class UnityQuestHands : MonoBehaviour
             CreateSide(Hand.Chirality.Right, new Color(1, .25f, .65f)) };
         CreateModeControls();
         Application.onBeforeRender += UpdateHead;
-        Debug.Log("BIRD_HANDS_START: v0.4 palm continuation + integrated visual growth; original Bird.cs reference; real XR Hands; 32mm cursor through 4m; Q=.001 R=270*d^3");
+        Debug.Log("BIRD_HANDS_START: v0.5 pose-aware flat/fist limits + legacy ordinary geometry; original Bird.cs reference; real XR Hands; 32mm cursor through 4m; Q=.001 R=270*d^3");
     }
 
     Side CreateSide(Hand.Chirality chirality, Color color)
@@ -117,7 +138,7 @@ public sealed class UnityQuestHands : MonoBehaviour
         side.port = math.AddComponent<BirdCursorState>();
         side.port.fitter = math.AddComponent<BirdSphereFit>();
         side.port.smoothing = true;
-        side.port.fitter.constrainToPalm = true;
+        side.port.useHandLimits = true;
         side.port.points = side.points;
         side.visual = new GameObject(side.name + " diagnostics");
         side.depthVisual = new GameObject(side.name + " depth cursor").AddComponent<BirdDepthVisual>();
@@ -180,15 +201,16 @@ public sealed class UnityQuestHands : MonoBehaviour
         if (Time.unscaledTime >= nextStatus)
         {
             nextStatus = Time.unscaledTime + 1;
-            string status = "BIRD / PALM + DEPTH TEST   |   cup, flare, return\n" +
-                "Color + sphere: guarded Bird  |  white: raw  |  gold: legacy\n" +
+            string status = "BIRD v0.5 / FIST + FLAT TEST   |   close, cup, flare\n" +
+                "Color: new point | sphere: legacy fit | white: raw | gold: legacy\n" +
                 "32mm through 4m. Green line points out of palm.\n" +
-                "Touch a mode label below for 0.6s: " + sizeMode + "\n";
+                "Touch a label below for 0.6s: " + sizeMode + "\n" + CaptureDescription() + "\n";
             foreach (var side in sides) status += Describe(side) + "\n";
             label.text = status;
             Debug.Log("BIRD_HANDS_STATUS: xr=" + XRSettings.isDeviceActive + " subsystem=" +
                 (subsystem != null && subsystem.running) + " samples=" + dynamicSamples + " " + Describe(sides[0]) + " | " + Describe(sides[1]));
         }
+        if (capture != null && Time.unscaledTime >= captureEnd) SaveCapture();
     }
 
     void UpdateHead()
@@ -208,6 +230,7 @@ public sealed class UnityQuestHands : MonoBehaviour
             var needed = i == 0 ? XRHandSubsystem.UpdateSuccessFlags.LeftHandJoints : XRHandSubsystem.UpdateSuccessFlags.RightHandJoints;
             side.hand.Capture();
             side.hand.valid &= (flags & needed) != 0;
+            side.jointTracking = side.hand.valid;
             side.frames++;
             side.bird.Update();
             if (!side.hand.valid) { Lose(side); continue; }
@@ -220,24 +243,24 @@ public sealed class UnityQuestHands : MonoBehaviour
             Pose palmPose;
             var xrHand = i == 0 ? source.leftHand : source.rightHand;
             if (xrHand.GetJoint(XRHandJointID.Palm).TryGetPose(out palmPose) && Vector3.Dot(normal, palmPose.rotation*Vector3.down) < 0) normal = -normal;
-            side.port.fitter.palmOrigin = side.port.handRoot;
-            side.port.fitter.palmNormal = normal;
+            side.port.palmNormal = normal;
             side.port.indexTip = side.hand.joints[7];
             side.port.tracking = true;
             side.port.Step();
-            side.distance = (side.port.fitter.center - side.port.handRoot).magnitude;
+            side.distance = side.port.rangeInput.magnitude;
             side.radius = side.port.fitter.radius;
-            side.range = Range(side.distance);
+            side.range = (side.port.rawPosition-side.port.handRoot).magnitude;
             side.rawPosition = side.port.rawPosition;
             side.centerGap = Vector3.Distance(side.bird.GetSphereFitCenter(), side.port.fitter.center);
             float legacyD = (side.bird.GetSphereFitCenter()-side.bird.GetHandRoot()).magnitude;
             side.rawGap = Vector3.Distance(side.rawPosition, side.bird.GetHandRoot() + (side.bird.GetSphereFitCenter()-side.bird.GetHandRoot()).normalized*Range(legacyD));
             side.filterGap = Vector3.Distance(side.bird.GetPosition(), side.port.position);
-            // The guarded fit remains usable through the legacy singularity.
-            if (!side.port.poseValid || !Finite(side.rawPosition) || side.radius <= 0) { Lose(side); continue; }
+            // The point law remains usable even when no sphere exists at the limit.
+            if (!side.port.poseValid || !Finite(side.rawPosition)) { Lose(side); continue; }
             side.accepted++;
             Draw(side);
         }
+        CaptureJoints();
     }
 
     void Draw(Side side)
@@ -248,10 +271,13 @@ public sealed class UnityQuestHands : MonoBehaviour
         for (int i = 0; i < 20; i++) side.joints[i].position = side.hand.joints[i];
         for (int f = 0; f < 5; f++)
             for (int j = 0; j < 4; j++) side.bones[f].SetPosition(j, side.hand.joints[f * 4 + j]);
+        float sphereOpacity = side.port.fitter.fitValid ? (1-side.port.limitWeight)*(1-side.port.fistWeight) : 0;
+        side.center.gameObject.SetActive(sphereOpacity > 0);
+        side.center.localScale = Vector3.one * (.004f*sphereOpacity);
         side.center.position = side.port.fitter.center;
         side.root.position = side.port.handRoot;
         side.palmLine.SetPosition(0, side.port.handRoot);
-        side.palmLine.SetPosition(1, side.port.handRoot + side.port.fitter.palmNormal.normalized*.06f);
+        side.palmLine.SetPosition(1, side.port.handRoot + side.port.palmNormal.normalized*.06f);
         side.depthVisual.sizeMode = sizeMode;
         side.depthVisual.Draw(side.port.position, view, side.port.selected, Time.unscaledTime, Time.unscaledDeltaTime);
         float rawD = Mathf.Max(.001f,(side.rawPosition-view.transform.position).magnitude);
@@ -264,7 +290,10 @@ public sealed class UnityQuestHands : MonoBehaviour
         side.portRing.startWidth = side.portRing.endWidth = Mathf.Max(.001f,legacyRenderD*.00025f);
         for (int plane = 0; plane < 3; plane++)
         {
-            side.sphere[plane].gameObject.SetActive(true);
+            side.sphere[plane].gameObject.SetActive(sphereOpacity > 0);
+            Color sphereColor = side.depthVisual.tint;
+            sphereColor.a = sphereOpacity;
+            side.sphere[plane].startColor = side.sphere[plane].endColor = sphereColor;
             for (int j = 0; j < 48; j++)
             {
                 float angle = j * Mathf.PI * 2 / 48;
@@ -297,18 +326,18 @@ public sealed class UnityQuestHands : MonoBehaviour
             "{0}: fit {1:F1}mm  d {2:F1}mm  range {3:G4}m  click {4}/{5}\n    legacy gap: fit {6:G3}mm  raw {7:G3}mm  filtered {8:G3}mm{9}",
             s.name, s.radius * 1000, s.distance * 1000, s.range, s.bird.GetClick() ? 1 : 0, s.port.selected ? 1 : 0,
             s.centerGap * 1000, s.rawGap * 1000, s.filterGap * 1000,
-            "  blend=" + s.port.fitter.continuationWeight.ToString("F2"));
+            "  bend=" + s.port.bendDegrees.ToString("F0") + " flat=" + s.port.flatWeight.ToString("F2") + " fist=" + s.port.fistWeight.ToString("F2"));
     }
 
     void CreateModeControls()
     {
-        modeLabels = new TextMesh[3];
-        string[] names = { "Fixed", "Inflate", "Inflate + lag" };
-        for (int i=0;i<3;i++)
+        modeLabels = new TextMesh[4];
+        string[] names = { "Fixed", "Inflate", "Inflate + lag", "Record 20s" };
+        for (int i=0;i<4;i++)
         {
             var text = new GameObject("Visual mode " + names[i]).AddComponent<TextMesh>();
             text.transform.SetParent(view.transform,false);
-            text.transform.localPosition = new Vector3((i-1)*.19f,-.20f,.55f);
+            text.transform.localPosition = i == 3 ? new Vector3(0,-.28f,.55f) : new Vector3((i-1)*.19f,-.20f,.55f);
             text.anchor = TextAnchor.MiddleCenter;
             text.fontSize = 48;
             text.characterSize = .008f;
@@ -321,21 +350,86 @@ public sealed class UnityQuestHands : MonoBehaviour
     {
         if (modeLabels == null) return;
         int touching = -1;
-        for (int i=0;i<3;i++)
+        for (int i=0;i<4;i++)
         {
-            modeLabels[i].color = (int)sizeMode == i ? Color.cyan : Color.gray;
+            modeLabels[i].color = i == 3 ? (capture != null ? Color.red : Color.white) : (int)sizeMode == i ? Color.cyan : Color.gray;
             foreach (var side in sides)
                 if (side.hand.valid && (side.hand.joints[7]-modeLabels[i].transform.position).magnitude < .045f) touching=i;
         }
+        if (touching != 3) captureArmed = true;
         if (touching != touchMode) { touchMode=touching; touchSince=Time.unscaledTime; }
         if (touching >= 0 && Time.unscaledTime-touchSince > .6f && Time.unscaledTime > nextModeChange)
         {
+            if (touching == 3)
+            {
+                if (capture == null && captureArmed)
+                {
+                    captureArmed = false;
+                    BeginCapture();
+                }
+                return;
+            }
             sizeMode=(BirdDepthVisual.SizeMode)touching;
             nextModeChange=Time.unscaledTime+1;
             foreach (var side in sides) side.depthVisual.Clear();
             Debug.Log("BIRD_VISUAL_MODE: " + sizeMode);
         }
     }
+
+    public void BeginCapture()
+    {
+        if (capture != null) return;
+        capture = new StringBuilder(1024*1024);
+        captureStart = Time.unscaledTime+3;
+        captureEnd = captureStart+20;
+        captureSamples = 0;
+    }
+
+    string CaptureDescription()
+    {
+        if (capture == null) return captureStatus;
+        float now = Time.unscaledTime;
+        return now < captureStart ? "Recording starts in " + Mathf.CeilToInt(captureStart-now) :
+            "RECORDING " + Mathf.CeilToInt(Mathf.Max(0,captureEnd-now)) + "s: fist > cup > flat > flare > fist";
+    }
+
+    void CaptureJoints()
+    {
+        if (capture == null || Time.unscaledTime < captureStart || Time.unscaledTime >= captureEnd) return;
+        foreach (var side in sides)
+        {
+            var trace = new JointTrace { time = Time.unscaledTime-captureStart, hand = side.name,
+                tracked = side.jointTracking, poseValid = side.port.poseValid, joints = side.hand.joints,
+                root = side.port.handRoot, palmNormal = side.port.palmNormal, rangeInput = side.port.rangeInput,
+                raw = side.port.rawPosition, filtered = side.port.position, bend = side.port.bendDegrees,
+                flatWeight = side.port.flatWeight, fistWeight = side.port.fistWeight, fitConfidence = side.port.fitter.confidence };
+            capture.AppendLine(JsonUtility.ToJson(trace));
+            captureSamples++;
+        }
+        // Bounded even if a device runs unexpectedly fast. No network upload.
+        if (captureSamples >= 6000) SaveCapture();
+    }
+
+    void SaveCapture()
+    {
+        if (capture == null) return;
+        if (captureSamples == 0) { capture = null; captureStatus = "Recording canceled before any samples"; return; }
+        try
+        {
+            string directory = Path.Combine(Application.persistentDataPath, "BirdJointTraces");
+            Directory.CreateDirectory(directory);
+            string name = "bird-" + DateTime.UtcNow.ToString("yyyyMMdd-HHmmss-fff") + ".jsonl";
+            string path = Path.Combine(directory, name);
+            File.WriteAllText(path, capture.ToString());
+            LastCapturePath = path;
+            captureStatus = "Saved " + name + " (" + captureSamples + " samples)";
+            Debug.Log("BIRD_TRACE_SAVED: " + name + " samples=" + captureSamples);
+        }
+        catch (Exception e) { captureStatus = "Could not save recording: " + e.Message; Debug.LogException(e); }
+        capture = null;
+    }
+
+    void OnApplicationPause(bool paused) { if (paused) SaveCapture(); }
 
     public static float Range(float d)
     {
@@ -349,6 +443,6 @@ public sealed class UnityQuestHands : MonoBehaviour
         subscribed = false;
         subsystem = null;
     }
-    void OnDestroy() { Unsubscribe(); Application.onBeforeRender -= UpdateHead; }
+    void OnDestroy() { SaveCapture(); Unsubscribe(); Application.onBeforeRender -= UpdateHead; }
 }
 #endif
