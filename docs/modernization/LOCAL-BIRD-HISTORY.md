@@ -52,7 +52,7 @@ The recovered SampleScene (Unity 2020.3.33f1) contains 21 menu references:
 
 - An upward passage through RootMenuTrigger opens MainFrame; downward passage closes it.
 - Point-through highlights MainFrame controls. SelectBehind opens ColorBoopMenu or MapBoopMenu.
-- ColorBoopMenu summons twelve FireButton instances laid out by DodecahedronGenerator.
+- ColorBoopMenu summons twelve FireButton instances laid out by DodecahedronGenerator. Their surrounding sphere drives RotateWithBird, allowing free spherical flick scrolling with momentum; Dana specifically endorses this feel. See [spherical-scroll behavior](SPHERICAL-SCROLL.md).
 - MapBoopMenu exposes Bird-driven scaling and rotation.
 - Serialized events include Close, StartScaling, StopScaling, ResetToInitialPositions and EnableLines.
 

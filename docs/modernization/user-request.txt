@@ -93,3 +93,7 @@ it's possible that all was developed on my partner's computer & I don't have a c
 
 --- Implementation style, 2026-09-26 ---
 great. again, please do try to get the flavor but not the development style, I am not a unity developer at all and I just improvised this. I'd like the real implementation to feel familiar and politely conforming to convention to experienced unity people.
+
+
+--- Spherical-scroll color selector clarification, 2026-09-26 ---
+regarding that stuff about the dodecahedron color selector, you can see that source in RotateWithBird.cs (that was particularly successful, felt awesome) and DodecahedronGenerator.cs for how it was used, not that that script is much different from anything you'd expect. basically one gameobject had a sphere collider and a dodecahedron gameobject, which itself had 12 pretty particle-effect fireballs of different colors, and you could "spherically scroll" the dodecahedron by pointing through it with the bird and flicking it, it would roll around with momentum, to easily get the one you want.
