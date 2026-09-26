@@ -56,7 +56,7 @@ A sphere diagnostic fades when that fit ceases to define the point.
 ## Experimental depth presentation
 
 Default choices are a **32 mm physical diameter through 4 m**, an inflation
-band from 4 to 20 m reaching 8x diameter, then square-root growth. Beyond that
+band from 4 to 20 m reaching 11x diameter, then square-root growth. Beyond that
 band the solid cursor continues shrinking in apparent size with distance.
 Plain inflation is the default after Dana's physical preference report.
 Three modes still permit comparison: fixed world size, inflation, and inflation with
@@ -64,10 +64,15 @@ Three modes still permit comparison: fixed world size, inflation, and inflation 
 return from enormous range to the palm. The working volume, diameter, inflation
 band/factor, exponent and lag are designer settings.
 
-A separate thin outline locates a distant subpixel core. It can be disabled.
+A separate outline locates a distant subpixel core. It can be disabled.
+Version 0.7 increases its angular diameter to .00525 radians, line width to
+.0012 radians and opacity to .85, with a dark contrast edge. These remain
+presentation settings, and both outline layers disappear in the near volume.
 Each historical trail point receives its own width from its current distance to
 the eye; near trail width is 2 mm, with continuous angular visibility scaling
-outside the working volume. It does not inherit the tip's size or lag.
+outside the working volume. Its far angular width is now .0016 radians, twice
+the previous value; far opacity rises smoothly to .9 while near opacity stays
+.65. It does not inherit the tip's size or lag.
 
 The diagnostic renderer preserves real positions through 100 m, then maps
 display depth continuously into a shell asymptoting to 500 m. Direction and

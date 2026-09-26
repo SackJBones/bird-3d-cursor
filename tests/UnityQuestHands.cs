@@ -98,7 +98,7 @@ public sealed class UnityQuestHands : MonoBehaviour
     [Serializable] public class JointTrace
     {
         public int schema = 1;
-        public string appVersion = "0.6", hand;
+        public string appVersion = "0.7", hand;
         public float time;
         public bool tracked, poseValid;
         // Base/intermediate/distal/tip for thumb, index, middle, ring, little.
@@ -134,7 +134,7 @@ public sealed class UnityQuestHands : MonoBehaviour
             CreateSide(Hand.Chirality.Right, new Color(1, .25f, .65f)) };
         CreateModeControls();
         Application.onBeforeRender += UpdateHead;
-        Debug.Log("BIRD_HANDS_START: v0.6 palm-frame knuckle tilt + house/vista; default Inflate; original Bird.cs reference; real XR Hands; 32mm through 4m; Q=.001 R=270*d^3");
+        Debug.Log("BIRD_HANDS_START: v0.7 closed-hand lever clicks + high overlook; default Inflate; original Bird.cs reference; real XR Hands; 32mm through 4m; Q=.001 R=270*d^3");
     }
 
     Side CreateSide(Hand.Chirality chirality, Color color)
@@ -224,7 +224,7 @@ public sealed class UnityQuestHands : MonoBehaviour
         if (Time.unscaledTime >= nextStatus)
         {
             nextStatus = Time.unscaledTime + 1;
-            string status = "BIRD v0.6 / PALM-FRAME AIM   |   close, reach, flare\n" +
+            string status = "BIRD v0.7 / HIGH OVERLOOK   |   close, reach, flare\n" +
                 "Color: new point | sphere: legacy fit | white: raw | gold: legacy\n" +
                 "32mm through 4m. Green line points out of palm.\n" +
                 "Touch a label below for 0.6s: " + sizeMode + "\n" + CaptureDescription() + "\n";

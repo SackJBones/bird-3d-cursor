@@ -94,6 +94,44 @@ public static class UnityPalmFitChecks
         call("Cancel"); set("smoothing", true); sample(Hand(0));
         Require(Vector3.Distance((Vector3)get("position"), root) > 1e9f, "seed distant filter history");
         sample(Hand(230)); Require((Vector3)get("position") == root, "filtered fist returns exactly from billion-meter history");
+        // Closed-hand pointing is still at the fist, while the index acts as
+        // an independent lever. Include a singular folded fit and both hands.
+        set("smoothing", false); set("clicksAllowed", true); set("closeHandClickReach", .7f);
+        foreach(bool folded in new[]{false,true})
+        foreach(float scale in new[]{.7f,1f,1.3f})
+        foreach(bool mirrored in new[]{false,true})
+        {
+            var closed=Hand(230,0,folded);
+            Vector3 forward=Vector3.Cross(Vector3.forward,closed[12]-closed[3]).normalized;
+            float length=0;
+            for(int j=4;j<16;j+=4) length+=Vector3.Distance(closed[j],closed[j+1])+Vector3.Distance(closed[j+1],closed[j+2])+Vector3.Distance(closed[j+2],closed[j+3]);
+            length=length/3*scale;
+            Quaternion rotation=mirrored ? Quaternion.Euler(173,-24,37) : Quaternion.identity;
+            Vector3 offset=mirrored ? new Vector3(.4f,-.3f,.2f) : Vector3.zero;
+            Vector3 localRoot=root*scale;
+            if(mirrored) { localRoot.x=-localRoot.x; forward.x=-forward.x; }
+            Vector3 testRoot=rotation*localRoot+offset;
+            forward=rotation*forward;
+            for(int j=0;j<closed.Length;j++)
+            { closed[j]*=scale; if(mirrored) closed[j].x=-closed[j].x; closed[j]=rotation*closed[j]+offset; }
+            set("handRoot",testRoot); set("palmNormal",rotation*Vector3.forward); call("Cancel");
+            foreach(float depth in new[]{-.02f,.008f,.006f,.004f})
+            {
+                set("indexTip",closed[3]+forward*(length*.7f-depth)); sample(closed);
+                Require((float)get("fistWeight")==1,"closed click fixture reaches fist endpoint");
+                Require(Mathf.Abs((float)get("clickDepth")-depth)<.00001f,"palm-relative lever depth");
+                Require((Vector3)get("rawPosition")==testRoot,"index lever cannot move closed Bird point");
+                Require((bool)get("selected")== (depth==.008f || depth==.006f),"closed click hysteresis");
+                Require((bool)get("down")== (depth==.008f),"one closed press pulse");
+                Require((bool)get("up")== (depth==.004f),"one closed release pulse");
+            }
+            set("indexTip",closed[3]+forward*(length*.7f-.008f)); sample(closed);
+            set("closeHandClickReach",float.NaN); sample(closed);
+            Require(!(bool)get("selected") && (bool)get("up"),"invalid click policy releases without rejecting geometry");
+            set("closeHandClickReach",.7f); sample(closed); call("Cancel");
+            Require(!(bool)get("selected") && (bool)get("up"),"closed press cancels on loss");
+        }
+        set("handRoot",root); set("palmNormal",Vector3.forward); set("clicksAllowed",false); set("smoothing",true);
         set("palmNormal", Vector3.zero); call("Step"); Require(!(bool)get("poseValid"), "invalid normal rejected");
         set("palmNormal", Vector3.forward); set("maximumLimitDistance", float.NaN); call("Step"); Require(!(bool)get("poseValid"), "invalid endpoint rejected");
         set("maximumLimitDistance", 2f); var bad = Hand(90); bad[7].x = float.NaN; set("points", bad); call("Step"); Require(!(bool)get("poseValid"), "invalid joint rejected");

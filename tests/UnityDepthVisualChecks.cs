@@ -44,6 +44,12 @@ public sealed class UnityDepthVisualChecks : MonoBehaviour
         float angle20=BirdDepthVisual.TargetDiameter(20,BirdDepthVisual.SizeMode.Inflation)/20;
         float angle200=BirdDepthVisual.TargetDiameter(200,BirdDepthVisual.SizeMode.Inflation)/200;
         Require(angle200<angle20*.4f,"Far core became constant angular size"); checks++;
+        var previousStyle=new BirdDepthStyle { inflationFactor=8, farTrailAngleRadians=.0008f };
+        foreach(float d in new[]{20f,100f,1000f,1e6f})
+        {
+            Require(BirdDepthVisual.TargetDiameter(d,BirdDepthVisual.SizeMode.Inflation)>1.3f*BirdDepthVisual.TargetDiameter(d,BirdDepthVisual.SizeMode.Inflation,previousStyle),"Far cursor not more salient"); checks++;
+            Require(BirdDepthVisual.TrailWidth(d)>1.9f*BirdDepthVisual.TrailWidth(d,previousStyle),"Far trail not thicker"); checks++;
+        }
         // Closed-form response to T(t)=initial*exp(rate*t), checked across
         // uniform and irregular partitions. This reference does not step the
         // implementation's recurrence or approximate its interpolation.

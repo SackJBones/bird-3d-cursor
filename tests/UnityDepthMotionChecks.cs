@@ -80,6 +80,9 @@ public sealed class UnityDepthMotionChecks : MonoBehaviour
                     {
                         maxNearDiameter = Mathf.Max(maxNearDiameter, physicalDiameter);
                         Require(Mathf.Abs(physicalDiameter - .032f) < .000001f, "Oversize near cursor after return/selection");
+                        Require(!visual.transform.Find("Far locator outline").GetComponent<LineRenderer>().enabled &&
+                            !visual.transform.Find("Far locator contrast edge").GetComponent<LineRenderer>().enabled,
+                            "Far locator remained active in the working volume");
                     }
                     var filter = visual.transform.Find("Depth-aware ribbon").GetComponent<MeshFilter>();
                     Vector3[] vertices = filter.sharedMesh.vertices;
@@ -124,6 +127,7 @@ public sealed class UnityDepthMotionChecks : MonoBehaviour
                 // Loss/recovery must not reconnect a new near stroke to far history.
                 visual.Draw(new Vector3(0, 0, 1e9f), camera, false, 3, 1f / fps);
                 visual.Clear();
+                Require(!visual.transform.Find("Far locator contrast edge").GetComponent<LineRenderer>().enabled,"Clear retained far contrast edge");
                 visual.Draw(camera.transform.position + Vector3.forward * .4f, camera, true, 4, 1f / fps);
                 Require(!visual.transform.Find("Depth-aware ribbon").GetComponent<Renderer>().enabled,
                     "Recovery connected to stale trail history");

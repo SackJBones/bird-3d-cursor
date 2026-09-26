@@ -9,13 +9,17 @@ namespace Bird3DCursor.Presentation
         [Min(.001f)] public float nearDiameter = .032f;
         [Min(.01f)] public float workingDistance = 4f;
         [Min(1.01f)] public float inflationEndRatio = 5f;
-        [Min(1f)] public float inflationFactor = 8f;
+        [Min(1f)] public float inflationFactor = 11f;
         [Range(0f, .95f)] public float farGrowthExponent = .5f;
         [Min(.001f)] public float growthLagSeconds = .22f;
         [Min(.0001f)] public float nearTrailWidth = .002f;
-        [Min(.0001f)] public float farTrailAngleRadians = .0008f;
+        [Min(.0001f)] public float farTrailAngleRadians = .0016f;
         public bool showFarLocator = true;
-        [Min(.0001f)] public float locatorAngleRadians = .0035f;
+        [Min(.0001f)] public float locatorAngleRadians = .00525f;
+        [Min(.0001f)] public float locatorLineAngleRadians = .0012f;
+        [Range(0f,1f)] public float locatorOpacity = .85f;
+        [Range(0f,1f)] public float locatorOutlineOpacity = .75f;
+        [Range(0f,1f)] public float farTrailOpacity = .9f;
     }
 
     /// <summary>Visual-only long-range cursor and trail. Logical interaction
@@ -45,6 +49,7 @@ namespace Bird3DCursor.Presentation
         bool ready;
         Transform core;
         LineRenderer halo;
+        LineRenderer haloBackdrop;
         Mesh ribbon;
         Renderer ribbonRenderer;
         Material coreMaterial, lineMaterial;
@@ -69,6 +74,13 @@ namespace Bird3DCursor.Presentation
             halo.loop = true;
             halo.useWorldSpace = true;
             halo.startColor = halo.endColor = new Color(tint.r, tint.g, tint.b, .55f);
+            haloBackdrop = new GameObject("Far locator contrast edge").AddComponent<LineRenderer>();
+            haloBackdrop.transform.SetParent(transform, false);
+            haloBackdrop.sharedMaterial = lineMaterial;
+            haloBackdrop.positionCount = 40;
+            haloBackdrop.loop = true;
+            haloBackdrop.useWorldSpace = true;
+            haloBackdrop.sortingOrder = -1;
             var trail = new GameObject("Depth-aware ribbon");
             trail.transform.SetParent(transform, false);
             ribbon = new Mesh { name = "Bird visual trail" };
@@ -174,12 +186,16 @@ namespace Bird3DCursor.Presentation
             float locatorAngle = style.locatorAngleRadians;
             float haloBlend = 1-Mathf.Clamp01((coreAngle-.0015f)/.003f);
             halo.enabled = style.showFarLocator && d > style.workingDistance && haloBlend > 0;
-            halo.startColor = halo.endColor = new Color(tint.r,tint.g,tint.b,.55f*haloBlend);
-            halo.startWidth = halo.endWidth = renderD*.0008f;
+            halo.startColor = halo.endColor = new Color(tint.r,tint.g,tint.b,style.locatorOpacity*haloBlend);
+            halo.startWidth = halo.endWidth = renderD*style.locatorLineAngleRadians;
+            haloBackdrop.enabled = halo.enabled && style.locatorOutlineOpacity>0;
+            haloBackdrop.startColor = haloBackdrop.endColor = new Color(.015f,.025f,.04f,style.locatorOutlineOpacity*haloBlend);
+            haloBackdrop.startWidth = haloBackdrop.endWidth = halo.startWidth*2.4f;
             for (int i = 0; i < 40; i++)
             {
                 float a = i*Mathf.PI*2/40;
                 halo.SetPosition(i, projected + renderD*locatorAngle*.5f*(view.transform.right*Mathf.Cos(a)+view.transform.up*Mathf.Sin(a)));
+                haloBackdrop.SetPosition(i, halo.GetPosition(i));
             }
 
             while (count > 0 && time-times[0] > .7f) RemoveOldest();
@@ -217,7 +233,9 @@ namespace Bird3DCursor.Presentation
                 width *= RenderDistance(pointD)/pointD * (.25f+.75f*age);
                 vertices[i*2] = transform.InverseTransformPoint(p-sideways*width*.5f);
                 vertices[i*2+1] = transform.InverseTransformPoint(p+sideways*width*.5f);
-                colors[i*2] = colors[i*2+1] = new Color(tint.r,tint.g,tint.b,age*.65f);
+                float farBlend=Mathf.Clamp01(Mathf.Log(Mathf.Max(1,pointD/Mathf.Max(.01f,style.workingDistance)))/Mathf.Log(Mathf.Max(1.01f,style.inflationEndRatio)));
+                float opacity=Mathf.Lerp(.65f,style.farTrailOpacity,farBlend*farBlend*(3-2*farBlend));
+                colors[i*2] = colors[i*2+1] = new Color(tint.r,tint.g,tint.b,age*opacity);
             }
             ribbon.vertices = vertices;
             ribbon.colors = colors;
@@ -225,7 +243,7 @@ namespace Bird3DCursor.Presentation
         }
 
         void RemoveOldest() { count--; for (int i=0;i<count;i++) { history[i]=history[i+1]; times[i]=times[i+1]; } }
-        public void Clear() { count=0; lastSampleTime=0; sizeHistoryValid=false; diameter=style != null ? style.nearDiameter : NearDiameter; if (ready) { ribbonRenderer.enabled=false; halo.enabled=false; } }
+        public void Clear() { count=0; lastSampleTime=0; sizeHistoryValid=false; diameter=style != null ? style.nearDiameter : NearDiameter; if (ready) { ribbonRenderer.enabled=false; halo.enabled=false; haloBackdrop.enabled=false; } }
         void OnDestroy() { if (ribbon!=null) Destroy(ribbon); if(coreMaterial!=null)Destroy(coreMaterial); if(lineMaterial!=null)Destroy(lineMaterial); }
     }
 }

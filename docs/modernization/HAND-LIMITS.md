@@ -11,6 +11,10 @@ law, based only on the palm frame. Dana supplied a usable recording and prefers
 plain Inflate. See [recorded replay and the house/vista](QUEST-VISTA.md) for
 current direction, evidence and presentation; the v0.5 law below is its baseline.
 
+Dana now reports that v0.6 range transitions feel very good. Version 0.7 keeps
+that point math and restores clicking in the closing region using a separate
+[index-lever interaction policy](CLOSED-HAND-CLICKS.md).
+
 ## Two laws, plus a closed endpoint
 
 `BirdSphereFit` again only fits a sphere. It also reports a continuous
@@ -42,7 +46,9 @@ These are heuristic pose measures, not a claim of anatomical calibration.
 - A separate closing weight shrinks the range-input vector to zero between
   140 and 210 degrees, or as mean chord/chain ratio falls from .55 to .35.
   A fully closed classified fist returns exactly to the weighted hand root.
-  It also clears distant Kalman history at that endpoint and releases clicks.
+  It also clears distant Kalman history at that endpoint. The v0.5/v0.6 code
+  forcibly released clicks here; v0.7 removes that restriction and evaluates
+  the independent index-lever policy instead.
 
 Blending happens before the polynomial, avoiding the enormous displacement
 that even a tiny linear weight on a billion-meter output would introduce.

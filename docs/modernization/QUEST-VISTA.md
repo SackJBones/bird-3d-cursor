@@ -1,5 +1,32 @@
 # Knuckle-directed reach and a scale-reference setting
 
+## Current v0.7 arrangement
+
+Dana reports that the v0.6 range transition feels very good. Its hand-only
+45-degree tilt, point geometry, polynomial and filtering are preserved.
+The scene now looks out from a high house/terrace over a valley roughly 150 m
+below. A lake, trees and full-scale buildings occupy the valley; nearby
+mountain shoulders frame an open center, with more distant mountain layers.
+The room sits two meters behind the initial eye's horizontal position so the
+user starts closer to the opening. A shorter terrace exposes more lower
+terrain. The nominal 1.65 m floor offset is unchanged. Height labels are gone.
+World far clip is 5000 m and fog is lighter to retain distant silhouettes.
+These are scene changes only; the Bird display shell is still independent.
+
+Far presentation is stronger: 11x rather than 8x inflation, a larger/more
+opaque locator with a dark edge, twice the far trail width and higher far
+trail opacity. Near cursor and trail sizes remain fixed. The controlled
+bright-vista comparison at 1600x1000/80-degree FOV detects 18 high-contrast
+cyan pixels with the new profile versus zero with the old profile, using the
+same scene/trajectory and strict RGB thresholds. Zero does not mean the old
+cursor emitted no pixels; its coverage missed that contrast threshold.
+Eight rendered captures cover the vista, cursor distances, old/new far style,
+furniture and exterior. Inspected the final vista and far-style capture.
+Headset perception and the known shell/world occlusion limitation remain
+separate from this editor evidence.
+
+The sections below preserve the original v0.6 design and replay evidence.
+
 Dana physically tried v0.5, recorded 20 seconds of hand motion, and prefers
 plain **Inflate** over fixed size or Inflate + lag. The full-open palm-normal
 direction demanded an awkward wrist angle to aim forward/up. The requested

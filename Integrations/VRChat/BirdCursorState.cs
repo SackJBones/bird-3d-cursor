@@ -12,6 +12,9 @@ public class BirdCursorState : UdonSharpBehaviour
     public bool tracking;
     public bool smoothing;
     public bool clicksAllowed = true;
+    // Optional interaction policy for the closed-hand end of useHandLimits.
+    // Index-tip reach along the palm replaces the unreliable closed fit.
+    [Range(.1f, 1f)] public float closeHandClickReach = .7f;
     public float rangeDistanceMultiplier = 1;
     public Transform cursorVisual;
     // Optional geometric limit law. Requires Bird's canonical 16 fit points and
@@ -37,8 +40,11 @@ public class BirdCursorState : UdonSharpBehaviour
     [HideInInspector] public bool selected;
     [HideInInspector] public bool down;
     [HideInInspector] public bool up;
+    [HideInInspector] public float clickDepth;
     private bool filterReady;
     private float variance = 1;
+    private Vector3 handForward;
+    private float fingerLength;
 
     // Pulses describe this sample, not a Unity frame. Consumers read after each Step.
     public void Step()
@@ -86,12 +92,26 @@ public class BirdCursorState : UdonSharpBehaviour
         Vector3 selectCenter = (indexTip - fitter.center).sqrMagnitude < (indexTip - candidate).sqrMagnitude ? fitter.center : candidate;
         float depth = fitter.fitValid ? fitter.radius - (indexTip - selectCenter).magnitude : 0;
         if (!Finite(depth)) { Reject(); return; }
+        bool clickUsable = fitter.fitValid;
+        if (useHandLimits && fistWeight > 0)
+        {
+            clickUsable = Finite(closeHandClickReach) && closeHandClickReach >= .1f && closeHandClickReach <= 1;
+            if (clickUsable)
+            {
+                // Interaction only: a poking index retracts toward the palm
+                // when pressed. This never changes fit, range or filtering.
+                float leverDepth = fingerLength * closeHandClickReach - Vector3.Dot(indexTip-points[3], handForward);
+                float blend = fitter.fitValid ? Mathf.Max(fistWeight, 1-fitter.confidence) : 1;
+                depth = depth*(1-blend) + leverDepth*blend;
+            }
+        }
+        clickDepth = depth;
         position = candidate;
         rawPosition = raw;
         variance = nextVariance;
         filterReady = smoothing;
         poseValid = true;
-        if (!clicksAllowed || !fitter.fitValid || fistWeight > 0) { up = selected; selected = false; }
+        if (!clicksAllowed || !clickUsable) { up = selected; selected = false; }
         else
         {
             if (!selected && depth > 0.007f) { selected = true; down = true; }
@@ -158,6 +178,8 @@ public class BirdCursorState : UdonSharpBehaviour
         if (knuckleForward.sqrMagnitude < 0.000000000001f) return false;
         knuckleForward = knuckleForward.normalized;
         if (Vector3.Dot(knuckleForward, forward) < 0) knuckleForward = -knuckleForward;
+        handForward = knuckleForward;
+        fingerLength = length;
         float tilt = flatDirectionDegrees * Mathf.Deg2Rad;
         Vector3 fallback = (normal*Mathf.Cos(tilt) + knuckleForward*Mathf.Sin(tilt)) * fallbackDistance;
         float legacyWeight = fitter.fitValid ? (1-flatWeight) * fitter.confidence : 0;

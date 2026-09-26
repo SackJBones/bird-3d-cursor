@@ -10,6 +10,20 @@ Use `feature/vrchat-modernization` in both repositories. All maintained package 
 
 ## Current priorities, 2026-09-26 UTC
 
+Dana now reports that the installed v0.6 range transition feels very good.
+Preserve that geometric/range/filter baseline. Version 0.7 addresses downstream
+feedback: more salient far cursor/trail, index-lever clicks through the closed
+hand region, and a high overlook over lower terrain with near/far mountains.
+See [closed-hand clicking](CLOSED-HAND-CLICKS.md) and the latest checkpoint.
+The return-filter candidates below remain editor experiments; they have not
+been installed and are not the source of Dana's positive physical report.
+Keep further filter experiments optional while improving the accepted demo.
+
+- [x] Restore closed-hand clicking independently of the geometric point, including singular folded fists, mirrored hands and loss/recovery checks in Unity and compiled Udon.
+- [x] Increase far salience while retaining fixed near size and immediate shrink; inspect real rendered vista comparisons and rapid returns.
+- [x] Rearrange the environment around a high balcony overlooking a valley and mountain layers; remove height labels.
+- [ ] Assess v0.7 close-hand click comfort, far visibility and overlook composition physically; no additional recording is required to continue independent work.
+
 Dana physically tested v0.5 and supplied a 20-second joint recording. A full
 open palm-normal aim required awkward wrist angles. Version 0.6 adds a 45-degree
 knuckle-directed tilt using only the palm frame, preserving ordinary poses and

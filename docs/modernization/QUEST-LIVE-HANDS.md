@@ -32,7 +32,17 @@ Version 0.6 tilts fully open reach 45 degrees toward the knuckles, entirely
 within the hand frame. Plain Inflate is the new default. A simple open-front
 house, furniture, terrace, lake and full-size distant buildings provide scale
 references. Dana's v0.5 recording has been retrieved and replayed locally; see
-[the vista and replay notes](QUEST-VISTA.md). Physical v0.6 feel remains pending.
+[the vista and replay notes](QUEST-VISTA.md). Dana subsequently reports that
+the range transition feels very good, but far visibility and closed-hand
+clicking need improvement.
+
+Version 0.7 preserves that range/aim/filter behavior, strengthens far cursor
+and trail presentation, adds a contrasting locator edge, and restores
+[closed-hand index-lever clicks](CLOSED-HAND-CLICKS.md). The house now sits on
+a high overlook, with the valley roughly 150 m below, nearby shoulders and
+distant mountain layers. Height labels are removed. Near cursor/trail sizes
+remain 32 mm/2 mm through 4 m. The separate return-filter experiments are not
+part of this app version.
 
 The runner copies the two production port sources into an ignored generated
 project with `QuestHandsUdonShim.cs`. They execute as ordinary C# MonoBehaviours.
@@ -144,3 +154,5 @@ Version 0.4 is now installed (2026-09-25): integrated outward growth, APK SHA256
 Version 0.5 built and installed successfully (2026-09-26 UTC), replacing the physically problematic sphere cap with the pose-aware two-law experiment and adding optional local joint recording. APK SHA256 1559DDD34617A2300561D1EBCD5251A076FE53D0FA501A3FEB79CBA8CE04C57A. Both actual C# and compiled-Udon hand-limit checks pass; physical v0.5 feel remains pending.
 
 Version 0.6 built and installed successfully (2026-09-26 UTC): hand-frame knuckle tilt, preferred plain Inflate default and house/vista scale references. APK SHA256 C8091C82D5354DB6CA7FEBB74EE2684A13E256831CBB769ECA7CC7D98C313D05. Private v0.5 replay, C#/Udon geometry checks and six editor render captures pass; physical v0.6 feel remains to be assessed.
+
+Version 0.7 built and installed successfully (2026-09-26 UTC): restored closed-hand lever clicks, stronger far visuals and a high overlook; accepted v0.6 point/range/filter math retained. APK SHA256 6159DB04B06BB8533AC66AD0FD2B4F67F9CC03EB11CA563A77D53F9FAE4CF8CA. Real C#/compiled-Udon checks, eight vista renders and rapid-return checks pass. Physical v0.7 assessment is pending.
