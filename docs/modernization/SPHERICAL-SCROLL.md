@@ -172,8 +172,9 @@ The Windows player also passes actual frame-driven LateUpdate selection, scroll,
 coast and cancellation checks, with a separate camera capture. Its requested
 60 Hz loop is not a measured performance claim.
 
-The maintained UI is ordinary Unity C#. It is not yet an Udon implementation and
-must not be dropped into a VRChat world expecting these MonoBehaviours to execute.
+The package UI is ordinary Unity C#. VRChat uses the separate maintained
+`BirdUiSphericalScroll` Udon counterpart and local station in [UI-UDON.md](UI-UDON.md);
+the package MonoBehaviours themselves do not execute as world Udon.
 Deployment/build outcomes are recorded separately in CHECKPOINT.md and
 QUEST-LIVE-HANDS.md. Physical comparison with the endorsed legacy flick feel,
 mixed-cadence input, moving layout transforms and multiplayer remain pending.

@@ -1,4 +1,18 @@
-# VRChat hand-data feasibility probe
+# Bird VRChat integration
+
+The integration includes caller-fed geometry, experimental avatar input, and
+local Udon menu/spherical interaction components. The latest authored example is
+`BirdWorld/Assets/BirdWorld/Scenes/BirdUiDemo.unity` in the heavy repository.
+It offers nested color selection, back-surface flick/coast, Back/Close and Reset.
+Its labeled desktop input is a demonstration source; avatar-pose calibration and
+physical hand input remain separate work.
+
+See [Udon UI setup and contracts](../../docs/modernization/UI-UDON.md). Run
+`tests/Invoke-UnityUdonUiChecks.ps1` to restore source/meta pairs and exercise the
+compiled station in ClientSim; optional world builds use the SDK's build-only API.
+Existing probe, synthetic-cursor and avatar-preview notes follow below.
+
+## Hand-data feasibility probe
 
 `BirdHandDataProbe.cs` is a separate UdonSharp diagnostic for a Worlds SDK project. It does not adapt or enable the ordinary Bird MonoBehaviour package in VRChat, and does not implement sphere fitting or clicking.
 

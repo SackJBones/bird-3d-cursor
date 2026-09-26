@@ -1,5 +1,18 @@
 # Focused checks
 
+## VRChat UI station
+
+`Invoke-UnityUdonUiChecks.ps1 -UnityEditor <2022.3.22f1 executable> -ProjectPath
+<BirdWorld>` restores integration sources/metas, compiles Udon and reopens the
+saved station under ClientSim. It tests real backing-Udon events and normal
+LateUpdate routing, captures the scene and rejects stale results/runtime errors.
+`-BuildWorld` adds a Windows SDK bundle; `-BuildAndroidWorld` adds SDK Android
+define setup and a separate Android bundle. Neither uploads or launches VRChat.
+`-Generate` creates a missing scene and refuses an existing one. See
+[Udon UI](../docs/modernization/UI-UDON.md) for setup, boundaries and results.
+
+## Core and package checks
+
 Run `pwsh -NoProfile -File tests/Test-OpenXRHand.ps1` from the repo root in a fresh PowerShell process.
 
 This compiles the actual Hand, HandFactory and OpenXRHand source with BIRD_OPENXR_ENABLED against deliberately small API doubles. It checks both hands, startup without a subsystem, valid/failed pose reads, shutdown, restart and tracking loss. Pose is a value type, so the original null comparison fails compilation. A failing TryGetPose deliberately returns nonzero data to detect incorrectly consuming its output.

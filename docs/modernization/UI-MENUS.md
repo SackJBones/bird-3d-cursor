@@ -142,5 +142,7 @@ Udon/VRChat action adapter or new Unity 2020 compatibility result is claimed.
 The first flat menu slice did not change Quest v0.8. The subsequent v0.9 harness
 connects the spherical example to both accepted live point/click streams; see
 SPHERICAL-SCROLL.md and QUEST-LIVE-HANDS.md for its separate build/deployment
-evidence. Supported VRChat-world actions still need an Udon adapter and compiled
-Udon/ClientSim checks. The ordinary Unity scripts are not executable VRChat Udon.
+evidence. The subsequent [Udon integration](UI-UDON.md) supplies separate local
+menu/spherical components, a saved color station and compiled ClientSim checks.
+The ordinary Unity scripts are not executable VRChat Udon. Map controls, richer
+animation authoring and physical input validation remain separate milestones.

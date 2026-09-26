@@ -34,10 +34,12 @@ the recovered capabilities are sufficient and the launcher is not a blocker.
 - [x] Preserve selected custom source and scene/prefab references with original bytes, GUIDs, SHA256 and chronology notes; no bulk project sync.
 - [x] Build the first working UI slice: directional open, point-through highlighting, select action, child/background focus and back/close; 57 real Unity assertions, seven editor captures and a standalone desktop player smoke/capture pass. See [UI-MENUS.md](UI-MENUS.md).
 - [x] Connect both accepted live point/click streams to the spherical UI in Quest v0.9; 400 binding samples and loss/recovery checks pass, Android build/install/UI initialization verified. Physical UI feel remains open.
-- [ ] Reproduce nested color/map affordances and bind supported VRChat-world actions; retain UnityEvents/callbacks for ordinary Unity hosts.
+- [ ] Extend the implemented nested color affordances to map controls and further VRChat-world actions; retain UnityEvents/callbacks for ordinary Unity hosts.
 - [x] Implement [spherical scrolling](SPHERICAL-SCROLL.md) with separate back-surface gate, rotation, dodecahedral layout and color actions; 316 spherical checks, static/motion renders and a frame-driven Windows player pass. Example uses color orbs; particle fireball art remains future presentation work.
 - [ ] Compare the new spherical feel physically with legacy; assess mixed input/render cadences, moving layout frames and headset cost without blocking world work.
-- [ ] Adapt the menu and spherical interaction into supported VRChat Udon components/actions, with compiled VM and ClientSim tests. Do not assume the standalone MonoBehaviours run inside VRChat.
+- [x] Adapt local menu gates/focus/actions and spherical interaction into seven supported Udon components; saved BirdUiDemo station and 441 compiled VM/normal-LateUpdate ClientSim assertions. Windows/Android SDK artifacts pass catalog loading; an internal build-log failure line remains unresolved, and client loading is pending. See [UI-UDON.md](UI-UDON.md).
+- [ ] Extend world UI with map/object rotation and scaling, richer visual-state authoring, and shared manipulation/snapping toward paired Hanoi.
+- [ ] Validate real VRChat hand input, client/mobile runtime, multiplayer policy and physical UI feel; the new station uses explicitly labeled desktop demonstration input.
 
 Preserve the interaction flavor, not the improvised source structure. Dana wants
 conventional Unity components, serialization/Inspector/prefab workflows and clear
