@@ -2,7 +2,7 @@ using UdonSharp;
 using UnityEngine;
 using VRC.Udon;
 
-public enum BirdUiActionKind { OpenPanel, ClosePanel, CloseRoot, SetColor, ResetTransform }
+public enum BirdUiActionKind { OpenPanel, ClosePanel, CloseRoot, SetColor, ResetTransform, SendEvent }
 
 // Local scene actions are separate from contact, layout and scroll ownership.
 [UdonBehaviourSyncMode(BehaviourSyncMode.None)]

@@ -3,8 +3,9 @@
 The ordinary Unity package now contains `Bird3D.Manipulation` and an importable
 **Hanoi Preview** sample. A normal tabletop puzzle and full-size building
 sections share the same grip, work-volume, approach, placement and cancellation
-components. This is a tested Unity prototype toward Bird World; it is not yet an
-Udon implementation or an addition to the installed Quest application.
+components. This is a tested Unity prototype toward Bird World. A separate
+[local Udon adaptation](OBJECT-MANIPULATION-UDON.md) now runs in the authored
+BirdHanoiDemo world scene. Neither version has been added to the installed Quest application.
 
 The geometric point, sphere fit, range, Kalman filter, click policy and accepted
 cursor presentation are unchanged. The module consumes `BirdPointerInput` from
@@ -167,7 +168,8 @@ two rendered captures and generated-object cleanup. Human mouse input was not
 used for this automated run. No additional Unity-version, Udon, VRChat-client,
 Android/headset, multiplayer or subjective-feel claim follows.
 
-Next: adapt this contract deliberately into the maintained local Udon world and
-test through ClientSim, integrate menu/world input arbitration, then assess actual
-hand-driven grip/snapping feel. Preserve the original adoption flow, mandala,
-map/object controls and eventual shared/networked interaction policy.
+The separate local Udon adaptation now adds compiled ClientSim coverage,
+menu/world input arbitration and an authored viewing-area gate. Those additions
+do not change this ordinary Unity module's documented scope. Actual hand-driven
+grip/snapping feel, the original adoption flow, mandala, map/object controls and
+eventual shared/networked interaction policy remain further work.

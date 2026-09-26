@@ -222,3 +222,25 @@ lifecycle/recovery, renderer restoration and a real persistent prefab-event drop
 Generated outputs live in ignored `Validation/Hanoi2022`. See
 [OBJECT-MANIPULATION.md](../docs/modernization/OBJECT-MANIPULATION.md) for details
 and explicit collision, input-arbitration, Udon and physical-testing limits.
+
+### Local Udon manipulation and paired Hanoi
+
+`Invoke-UnityUdonHanoiChecks.ps1 -UnityEditor <Unity.exe> -ProjectPath <BirdWorld> -BuildWorld -BuildAndroidWorld`
+restores integration sources and stable metadata plus the sample surface shader,
+then runs the saved `BirdHanoiDemo` through real compiled Udon in ClientSim. It
+also runs the existing UI regression. `-Generate` creates a missing scene and
+refuses an overwrite. `UnityUdonHanoiChecks.RefineLayout` is an explicit development
+helper for this generated scene, not part of ordinary validation.
+
+Coverage includes both seven-move solutions, authored reset events, normal-frame
+pickup/drop/loss recovery, whole-body/window volume bounds, offset/far-point pickup,
+raw placement intent, lane hysteresis, both hands, callback cancellation, policy
+disable/recovery, foreground-menu ownership and player/workspace separation.
+Synthetic 30/72/120 Hz translation measurements and rendered views are written to
+ignored `Validation/UdonHanoi`; test helpers never execute runtime C# proxy methods.
+
+Optional build steps use the SDK build-only API. Run
+`UnityWorldBundleChecks.AuditHanoiBundles` separately to check both bundle scene
+catalogs. Catalog loading does not instantiate the scene or establish client/mobile
+behavior. See [OBJECT-MANIPULATION-UDON.md](../docs/modernization/OBJECT-MANIPULATION-UDON.md)
+for final evidence, build-log qualifications and remaining limitations.

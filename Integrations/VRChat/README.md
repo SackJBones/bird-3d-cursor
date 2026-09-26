@@ -1,9 +1,11 @@
 # Bird VRChat integration
 
 The integration includes caller-fed geometry, experimental avatar input, and
-local Udon menu/spherical interaction components. The latest authored example is
-`BirdWorld/Assets/BirdWorld/Scenes/BirdUiDemo.unity` in the heavy repository.
-It offers nested color selection, back-surface flick/coast, Back/Close and Reset.
+local Udon menu/spherical and bounded object manipulation components. The latest
+authored example is `BirdWorld/Assets/BirdWorld/Scenes/BirdHanoiDemo.unity` in the
+heavy repository: tabletop and full-size building puzzles share grip/snapping,
+menu arbitration and a viewing-area gate. `BirdUiDemo.unity` remains the focused
+nested color selection, back-surface flick/coast and Back/Close/Reset station.
 Its labeled desktop input is a demonstration source; avatar-pose calibration and
 physical hand input remain separate work.
 
@@ -11,6 +13,11 @@ See [Udon UI setup and contracts](../../docs/modernization/UI-UDON.md). Run
 `tests/Invoke-UnityUdonUiChecks.ps1` to restore source/meta pairs and exercise the
 compiled station in ClientSim; optional world builds use the SDK's build-only API.
 Existing probe, synthetic-cursor and avatar-preview notes follow below.
+
+For paired Hanoi, use `tests/Invoke-UnityUdonHanoiChecks.ps1`. It also restores the
+surface shader from the ordinary Unity sample, runs compiled Hanoi and existing
+UI checks, and supports optional Windows/Android SDK builds. See
+[Udon object authoring and limits](../../docs/modernization/OBJECT-MANIPULATION-UDON.md).
 
 ## Hand-data feasibility probe
 

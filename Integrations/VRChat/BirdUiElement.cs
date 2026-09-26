@@ -61,6 +61,7 @@ public class BirdUiElement : UdonSharpBehaviour
         { through=true; hitDistance=hit.distance; }
         else if(through) hitDistance=0;
         hovered|=through; pressing|=through && pointer.pressed;
+        if(through) pointer.uiConsumed=true;
         bool prior=wasThrough[slot]; wasThrough[slot]=through;
         if (!fresh) return false;
         if (activation==BirdUiActivation.SelectAtPoint) return contains && pointer.pressedThisSample;
@@ -78,6 +79,7 @@ public class BirdUiElement : UdonSharpBehaviour
     public void Invoke(BirdUiPointer pointer)
     {
         if(!Accepts(pointer)) return;
+        pointer.uiConsumed=true;
         lastPointer=pointer;
         if(actionTarget!=null && !string.IsNullOrEmpty(actionEvent)) actionTarget.SendCustomEvent(actionEvent);
     }

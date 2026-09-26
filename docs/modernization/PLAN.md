@@ -38,7 +38,7 @@ the recovered capabilities are sufficient and the launcher is not a blocker.
 - [x] Implement [spherical scrolling](SPHERICAL-SCROLL.md) with separate back-surface gate, rotation, dodecahedral layout and color actions; 316 spherical checks, static/motion renders and a frame-driven Windows player pass. Example uses color orbs; particle fireball art remains future presentation work.
 - [ ] Compare the new spherical feel physically with legacy; assess mixed input/render cadences, moving layout frames and headset cost without blocking world work.
 - [x] Adapt local menu gates/focus/actions and spherical interaction into seven supported Udon components; saved BirdUiDemo station and 441 compiled VM/normal-LateUpdate ClientSim assertions. Windows/Android SDK artifacts pass catalog loading; an internal build-log failure line remains unresolved, and client loading is pending. See [UI-UDON.md](UI-UDON.md).
-- [ ] Extend world UI with map/object rotation and scaling, richer visual-state authoring, and shared manipulation/snapping toward paired Hanoi.
+- [ ] Extend world UI with map/object rotation and scaling and richer visual-state authoring; local shared manipulation/snapping now drives the paired Hanoi scene.
 - [ ] Validate real VRChat hand input, client/mobile runtime, multiplayer policy and physical UI feel; the new station uses explicitly labeled desktop demonstration input.
 
 Preserve the interaction flavor, not the improvised source structure. Dana wants
@@ -92,11 +92,12 @@ in the recurring-task prompt.
 - [x] Guide a nearby approach segment softly with candidate hysteresis and visible cues; release commits an allowed exact position only when raw intent and the visible piece are close enough. Physical distant-noise usability remains unassessed.
 - [x] Build an importable ordinary Unity paired Hanoi prototype at 0.2 m and 75 m per unit, with shared behaviors and top-piece/larger-on-smaller restrictions; both seven-move solutions pass.
 - [x] Validate cancellation, invalid drop rollback, tracking loss, bounded return, scale/frame changes and both instance sizes in Unity: 1216 assertions, six editor captures and a Windows build/frame-driven player/render pass.
-- [ ] Adapt the manipulation/Hanoi contract into local Udon and the authored VRChat world; add menu/world input arbitration and explicit player/workspace separation.
+- [x] Adapt the manipulation/Hanoi contract into nine local Udon components and authored BirdHanoiDemo; compiled ClientSim checks cover menu/world arbitration and an explicit viewing-area/workspace gate. See [OBJECT-MANIPULATION-UDON.md](OBJECT-MANIPULATION-UDON.md).
 - [ ] Assess actual hand-driven grip/snapping, collision/lift policy and headset performance; define multiplayer reservations before claiming shared interaction.
 
-The ordinary Unity prototype is implemented; VRChat-world adaptation and physical
-feel remain pending. UI and interaction integration remain the immediate priority. Historical entries
+The ordinary Unity prototype and local Udon adaptation are implemented. Real VRChat
+hand input, client loading, physical feel and shared/network policy remain pending.
+UI and interaction integration remain the immediate priority. Historical entries
 below remain a chronological record.
 
 ## Inventory, 2026-09-19

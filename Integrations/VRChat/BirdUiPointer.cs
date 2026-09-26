@@ -13,6 +13,7 @@ public class BirdUiPointer : UdonSharpBehaviour
     [HideInInspector] public bool sampleTracked, samplePressed;
     [HideInInspector] public Vector3 origin, position, previousPosition;
     [HideInInspector] public bool tracked, pressed, pressedThisSample, hasHistory;
+    [HideInInspector] public bool uiConsumed;
     [HideInInspector] public int revision;
     private string previousUser = "LocalUser";
 
@@ -33,10 +34,10 @@ public class BirdUiPointer : UdonSharpBehaviour
             !FiniteVector(samplePosition) || !Finite((samplePosition-sampleOrigin).sqrMagnitude)) { Cancel(); return; }
         hasHistory=IsTracked(); previousPosition=hasHistory ? position : samplePosition;
         pressedThisSample=hasHistory && !pressed && samplePressed;
-        origin=sampleOrigin; position=samplePosition; pressed=samplePressed; tracked=true;
+        origin=sampleOrigin; position=samplePosition; pressed=samplePressed; tracked=true; uiConsumed=false;
         Advance();
     }
-    public void Cancel() { tracked=pressed=pressedThisSample=hasHistory=false; Advance(); }
+    public void Cancel() { tracked=pressed=pressedThisSample=hasHistory=uiConsumed=false; Advance(); }
     private void OnDisable() { Cancel(); }
     private void Advance() { revision=revision==int.MaxValue ? 0 : revision+1; }
     private bool Finite(float v) { return !float.IsNaN(v) && !float.IsInfinity(v); }

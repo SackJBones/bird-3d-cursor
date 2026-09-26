@@ -23,12 +23,16 @@ public static class UnityWorldBundleChecks
     public static void Run() { BuildScene("BirdAvatarPreview",BuildTarget.StandaloneWindows64); }
     public static void RunUi() { BuildScene("BirdUiDemo",BuildTarget.StandaloneWindows64); }
     public static void RunUiAndroid() { BuildScene("BirdUiDemo",BuildTarget.Android); }
-    public static void AuditUiBundles()
+    public static void RunHanoi() { BuildScene("BirdHanoiDemo",BuildTarget.StandaloneWindows64); }
+    public static void RunHanoiAndroid() { BuildScene("BirdHanoiDemo",BuildTarget.Android); }
+    public static void AuditUiBundles() { AuditBundles("BirdUiDemo","world-ui-bundle-audit-result.txt"); }
+    public static void AuditHanoiBundles() { AuditBundles("BirdHanoiDemo","world-hanoi-bundle-audit-result.txt"); }
+    private static void AuditBundles(string sceneName,string resultFile)
     {
         try
         {
-            string result="PASS: Unity loaded both generated UI bundle catalogs.";
-            foreach(string name in new[]{"BirdUiDemo","BirdUiDemo_Android"})
+            string result="PASS: Unity loaded both generated "+sceneName+" bundle catalogs.";
+            foreach(string name in new[]{sceneName,sceneName+"_Android"})
             {
                 string path=Path.GetFullPath(Path.Combine(Application.dataPath,"../../Validation/WorldBuild/"+name+".vrcw"));
                 if(!File.Exists(path)) throw new Exception("Missing bundle "+path);
@@ -38,13 +42,13 @@ public static class UnityWorldBundleChecks
                 if(bundle==null) throw new Exception("Unity could not read bundle catalog: "+path);
                 string[] scenes=bundle.GetAllScenePaths();
                 bundle.Unload(true);
-                if(scenes.Length!=1 || !scenes[0].EndsWith("BirdUiDemoBuildValidation.unity",StringComparison.OrdinalIgnoreCase)) throw new Exception("Unexpected scene catalog: "+string.Join(",",scenes));
+                if(scenes.Length!=1 || !scenes[0].EndsWith(sceneName+"BuildValidation.unity",StringComparison.OrdinalIgnoreCase)) throw new Exception("Unexpected scene catalog: "+string.Join(",",scenes));
                 result+="\n"+name+": "+new FileInfo(path).Length+" bytes, scene="+scenes[0];
             }
-            File.WriteAllText("world-ui-bundle-audit-result.txt",result+"\nCatalog loading is not scene instantiation, client loading or runtime validation.");
+            File.WriteAllText(resultFile,result+"\nCatalog loading is not scene instantiation, client loading or runtime validation.");
             EditorApplication.Exit(0);
         }
-        catch(Exception e) { File.WriteAllText("world-ui-bundle-audit-result.txt","FAIL: "+e); EditorApplication.Exit(1); }
+        catch(Exception e) { File.WriteAllText(resultFile,"FAIL: "+e); EditorApplication.Exit(1); }
     }
     private static async void BuildScene(string sceneName,BuildTarget target)
     {

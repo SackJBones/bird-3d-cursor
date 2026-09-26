@@ -141,7 +141,11 @@ Compiled execution, editor rendering and bundle catalog loading remain separate
 from VRChat-client, Android runtime,
 multiplayer, physical hand input and subjective legacy-feel validation. The
 station is one world-development slice; the original adoption flow, mandala,
-paired tabletop/building Hanoi and complete world arrangement remain planned.
+and complete world arrangement remain planned. The later
+[BirdHanoiDemo station](OBJECT-MANIPULATION-UDON.md) now combines the same menu
+and selector with tabletop/building manipulation. `BirdUiPointer.uiConsumed`
+reserves accepted UI samples before world gripping, including a control that
+closes its panel. The standalone UI regression remains applicable.
 
 SDK references: [UdonSharp language and component model](https://creators.vrchat.com/worlds/udon/udonsharp/)
 and [editor proxies and backing behaviours](https://udonsharp.docs.vrchat.com/editor-scripting/).
