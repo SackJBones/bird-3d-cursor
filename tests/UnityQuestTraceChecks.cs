@@ -3,6 +3,8 @@ using System;
 using System.IO;
 using System.Reflection;
 using Bird3DCursor;
+using Bird3DCursor.UI;
+using Bird3DCursor.Presentation;
 using UnityEngine;
 
 // Exercise actual capture/snapshot/pause-save code with injected joint data.
@@ -29,6 +31,11 @@ public static class UnityQuestTraceChecks
             sideType.GetField("name").SetValue(side, "Left");
             sideType.GetField("hand").SetValue(side, hand);
             sideType.GetField("port").SetValue(side, port);
+            var input=go.AddComponent<BirdPointerInput>(); input.Submit(Vector3.zero,Vector3.forward,true,true);
+            sideType.GetField("uiInput").SetValue(side,input);
+            var visual=new GameObject("Trace fixture visuals"); visual.transform.SetParent(go.transform,false);
+            sideType.GetField("visual").SetValue(side,visual);
+            sideType.GetField("depthVisual").SetValue(side,visual.AddComponent<BirdDepthVisual>());
             sideType.GetField("jointTracking").SetValue(side, true);
             var sides = Array.CreateInstance(sideType, 1); sides.SetValue(side, 0);
             const BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic;
@@ -43,12 +50,13 @@ public static class UnityQuestTraceChecks
             sideType.GetField("jointTracking").SetValue(side, false);
             type.GetMethod("CaptureJoints", flags).Invoke(app, null);
             type.GetMethod("OnApplicationPause", flags).Invoke(app, new object[] { true });
+            if (input.IsTracked || input.IsPressed || visual.activeSelf) throw new Exception("Pause retained live UI/hand state");
             if (type.GetField("capture", flags).GetValue(app) != null || string.IsNullOrEmpty(app.LastCapturePath)) throw new Exception("Pause failed to save/stop capture");
             string[] lines = File.ReadAllLines(app.LastCapturePath);
             if (lines.Length != 2) throw new Exception("Trace row count mismatch");
             var first = JsonUtility.FromJson<UnityQuestHands.JointTrace>(lines[0]);
             var second = JsonUtility.FromJson<UnityQuestHands.JointTrace>(lines[1]);
-            if (first.schema != 1 || first.appVersion != "0.8" || first.hand != "Left" || first.joints.Length != 20 ||
+            if (first.schema != 1 || first.appVersion != "0.9" || first.hand != "Left" || first.joints.Length != 20 ||
                 first.joints[0] != new Vector3(0,.2f,.3f) || second.joints[0] != Vector3.one || !first.tracked || second.tracked ||
                 first.root != port.handRoot || first.palmNormal != Vector3.forward || first.time < 0)
                 throw new Exception("Saved joint snapshot/schema/loss information differs");

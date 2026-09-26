@@ -72,5 +72,108 @@ o angular jump on hand transfer or tracking recovery; offset/scaled pivots;
 Use actual rendered motion plus later physical assessment. Dana's endorsement
 of the legacy interaction does not validate a new implementation automatically.
 
-This is a documented behavior target. No new scrolling runtime is active in
-the installed Quest v0.8 application yet.
+## Maintained components, 2026-09-26
+
+`Bird3D.UI` now contains three independent pieces:
+
+- `BirdSphereContact` computes the far intersection from the finite origin-to-point
+  segment. It honors collider center and the maximum absolute world scale, checks
+  finite inputs, rejects tangents, and has no 1000/2000 m reversal/cast limit.
+  Closest-approach arithmetic uses doubles to avoid the large squared-distance
+  subtraction in the naive quadratic formula. World positions still have Unity's
+  float precision.
+- `BirdSphericalScroll` owns one active pointer, rotates an assigned target around
+  the collider's world center and exposes Started/Stopped UnityEvents. A 3 mm
+  entry margin avoids repeated initial activation immediately on the back surface;
+  crossing back inside disengages immediately. No click level is inspected.
+- `BirdDodecahedronLayout` places an explicit array of twelve items along unit
+  face normals, with an actual center-to-item radius. It does not rotate, select,
+  spawn particles or decide color behavior.
+
+Keep the sphere outside the rotating content hierarchy, so an offset collider
+does not change its center when the target rotates. Assign both hands to one scroll
+component; the active pointer retains control while eligible. A different pointer
+gets a fresh contact baseline and no inherited throw. An optional panel limits
+interaction to its owner while Open. Closing/backgrounding that panel, invalid
+geometry, source loss/user change/destruction, disable or a pause over 250 ms
+cancels angular velocity. Ordinary withdrawal retains inertia. Reacquisition
+rebases contact without an orientation jump; stationary input smoothly brakes.
+Loss/recovery occurring between two scroll frames also rebases safely.
+
+Input-following rate defaults to 10/s and damping to 0.99/s, corresponding to the
+recovered scene's approximate continuous rates. The angular-velocity input is the
+axis-angle between successive back-contact normals divided by the update interval.
+It uses atan2 rather than asin(sine velocity * dt), remains finite for large
+angles, and is limited to 720 degrees/s. Exactly antipodal contacts have no unique
+axis and rebase without inventing a spin. The integrated model is:
+
+```
+driving: d(angularVelocity)/dt = response * (inputVelocity - angularVelocity)
+                                - damping * angularVelocity
+coasting: d(angularVelocity)/dt = -damping * angularVelocity
+```
+
+The end velocity and integrated angle use the exponential solution within each
+interval. Fixed-axis constant-rate input therefore agrees across update rates;
+curved multi-axis paths still have sampling/rotation-composition error. This is
+an adaptation of the legacy feel, not a claim of identical discrete trajectories.
+Submit once before each scroll LateUpdate, or call Process with the matching
+sample interval. Repeated revisions do not repeat the last angular displacement.
+Mixed input/render cadences have not yet been measured. The producer must cancel
+when data stops. On rotation, physics transforms are synchronized so child hit
+volumes agree with the displayed content on the next query; device cost remains
+to be measured.
+
+## Example and validation
+
+Import Menu Preview and attach `BirdSphericalSelectorPreview` in an empty scene.
+It creates twelve independently selectable color orbs on a 30-edge dodecahedron,
+inside a larger three-circle sphere guide. Its separate Color Selected UnityEvent
+changes a result sphere by default. The particle fireball artwork is still a later
+presentation step. `Initialize(inputs)` embeds it without creating a camera or
+synthetic input. The Quest v0.9 host binds both accepted port points through this
+path, without changing the fit/range/filter/click laws or using marker projection.
+The embedded example faces the initial viewer, with dark label backings separated
+from the text by 2 cm. A separate Play Mode check renders forward and facing views
+against the actual bright Quest vista, and verifies external-input color selection
+without scrolling (`UnityQuestUiRenderChecks.Run` in the generated Quest project).
+These are real Unity camera renders, not XR stereo or headset perception evidence.
+
+The menu test runner now includes spherical checks and camera captures:
+
+```powershell
+./tests/Invoke-UnityMenuChecks.ps1 `
+  -UnityEditor 'C:/Program Files/Unity/Hub/Editor/2022.3.22f1/Editor/Unity.exe' `
+  -ProjectPath '../bird-3d-cursor-projects/Validation/Menu2022'
+```
+
+The checks exercise the actual components in Unity Play Mode: front/interior
+nonactivation, far thresholds, 1e12 m logical reach, Unity reverse-ray contact
+agreement for offset/rotated/nonuniform/negative-scale spheres, coasting, both
+hands, transfer/recovery, pause/disable/destruction, reentrant callbacks, panel
+focus, layout geometry and interior color selection independent of scroll drive.
+Constant-axis and reversing multi-axis trajectories run at 30/72/120 Hz. Generated
+CSV measurements, static captures and a timed rendered sequence live under
+ignored `Validation/Menu2022/MenuCaptures`; these are synthetic timestamps and
+real Unity rendering, not device frame pacing or a physical feel assessment.
+
+Current result: **316 spherical assertions**, in addition to 57 menu assertions.
+The fixed-axis drive/coast endpoint is 84.28236 / 84.2822647 / 84.28227 degrees at
+120/72/30 Hz, versus 84.28226 degrees analytically. The multi-axis trajectory's
+final angular difference from 120 Hz is 0.004876 degrees at 72 Hz and 0.042053
+degrees at 30 Hz. These use a small-angle atan2 measurement instead of Unity's
+Quaternion.Angle cutoff. See [saved measurements](measurements/spherical-scroll-rates.csv).
+The upside-down rigid-frame comparison and offset target orbit also pass.
+
+Four static sphere states and 120 camera-rendered frames cover free interior
+movement, drive, withdrawal/coast and stationary reacquisition. Encode the sequence
+with `python tests/render_spherical_motion.py <MenuCaptures>` (Pillow required).
+The Windows player also passes actual frame-driven LateUpdate selection, scroll,
+coast and cancellation checks, with a separate camera capture. Its requested
+60 Hz loop is not a measured performance claim.
+
+The maintained UI is ordinary Unity C#. It is not yet an Udon implementation and
+must not be dropped into a VRChat world expecting these MonoBehaviours to execute.
+Deployment/build outcomes are recorded separately in CHECKPOINT.md and
+QUEST-LIVE-HANDS.md. Physical comparison with the endorsed legacy flick feel,
+mixed-cadence input, moving layout transforms and multiplayer remain pending.

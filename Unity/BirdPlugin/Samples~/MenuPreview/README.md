@@ -44,7 +44,27 @@ your own action. Set a child panel's Parent explicitly. Register all elements,
 including inactive children, on one interactor with both pointer inputs. Its
 **Refresh Child Menu Elements** context command fills the element list.
 
-The sample is a flat nested menu, not the recovered spherical selector. That
-selector requires its own back-surface scrolling gate; ordinary point-through
-highlighting here must not be reused as a scroll trigger. Live-hand connection,
+## Spherical selector
+
+For the spherical example, attach `BirdSphericalSelectorPreview` in a separate
+empty scene instead. Mouse movement aims, the wheel changes reach, and a click
+chooses a color the logical point reaches through. Move the point beyond the
+**back** of the larger wire sphere to scroll, then withdraw inside to let the
+choices coast. Movement through the front or inside the sphere never drives
+rotation. No click or hold is needed for scrolling.
+
+This example has twelve color orbs, a dodecahedral wireframe and an oversized
+interaction sphere. Particle fireball art is not yet reproduced. Rotation uses
+`BirdSphericalScroll`, placement uses `BirdDodecahedronLayout`, and color actions
+use ordinary `BirdMenuElement` events. The example's **Color Selected** UnityEvent
+can connect to another experience; its default action changes the result sphere.
+
+To embed the selector in a live host, call `Initialize(pointerInputs)` before its
+Start callback. This supplies externally owned logical inputs, disables desktop
+input, and creates no camera or extra Bird marker. The example uses local scene
+coordinates; position/rotate its root for the desired placement. Supply both hands
+with a shared user ID. The Quest comparison host now uses this path directly.
+
+Ordinary point-through highlighting is distinct from the back-surface scrolling
+gate. The reusable scroll component also accepts an optional owning menu panel.
 Udon/VRChat action dispatch and headset usability remain separate integration work.

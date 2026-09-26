@@ -96,10 +96,11 @@ precision. The current menu policy queries registered controls individually; it
 does not impose opaque-world occlusion. A future host can add a separate world
 occlusion policy without changing the geometric point.
 
-This is not spherical scrolling. The [spherical selector](SPHERICAL-SCROLL.md)
-requires an oversized sphere and **back-surface** activation, leaving free movement
-and selection inside it. Its scroll interaction, dodecahedral layout and selection
-must remain separate. Ordinary front/segment menu contact must not drive rotation.
+Spherical scrolling is supplied separately by `BirdSphericalScroll`. The
+[spherical selector](SPHERICAL-SCROLL.md) uses an oversized sphere and
+**back-surface** activation, leaving free movement and selection inside it. Its
+scroll interaction, dodecahedral layout and selection are separate components.
+Ordinary front/segment menu contact does not drive rotation.
 
 ## Reproduction and evidence
 
@@ -138,6 +139,8 @@ leaving an orphan branch; the final guarded replacement passes that regression.
 Generated scenes, builds, logs and PNGs remain in the ignored heavy validation
 project. No physical input, headset, alternate graphics pipeline, multiplayer,
 Udon/VRChat action adapter or new Unity 2020 compatibility result is claimed.
-The installed Quest v0.8 app is unchanged by this menu slice. Next connect real
-Bird input, develop the back-surface spherical interaction, and port supported
-actions into the maintained VRChat world with compiled Udon/ClientSim checks.
+The first flat menu slice did not change Quest v0.8. The subsequent v0.9 harness
+connects the spherical example to both accepted live point/click streams; see
+SPHERICAL-SCROLL.md and QUEST-LIVE-HANDS.md for its separate build/deployment
+evidence. Supported VRChat-world actions still need an Udon adapter and compiled
+Udon/ClientSim checks. The ordinary Unity scripts are not executable VRChat Udon.

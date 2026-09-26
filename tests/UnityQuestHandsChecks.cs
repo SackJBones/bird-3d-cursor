@@ -2,6 +2,7 @@
 using System;
 using System.Reflection;
 using Bird3DCursor;
+using Bird3DCursor.UI;
 using UnityEngine;
 
 // Preflight runs with real Unity vectors/matrices and the exact production math
@@ -27,6 +28,7 @@ public static class UnityQuestHandsChecks
         try
         {
             var port = go.AddComponent<BirdCursorState>();
+            var uiInput = go.AddComponent<BirdPointerInput>();
             port.fitter = go.AddComponent<BirdSphereFit>();
             port.smoothing = true;
             var hand = new SampleHand();
@@ -78,6 +80,9 @@ public static class UnityQuestHandsChecks
                 else expectedPort = portFilter.Update(port.rawPosition, null, 270 * portD * portD * portD);
                 maxFilter = Mathf.Max(maxFilter, Vector3.Distance(expectedPort, port.position));
                 if (maxFilter > .00001f) throw new Exception("Port Kalman recurrence mismatch");
+                UnityQuestHands.PublishUiSample(uiInput,port);
+                if (!uiInput.IsTracked || uiInput.Origin != port.handRoot || uiInput.Position != port.position || uiInput.IsPressed != port.selected)
+                    throw new Exception("UI binding must preserve the logical point/origin/press at sample " + frame);
             }
             port.Cancel();
             port.Step();
@@ -87,8 +92,19 @@ public static class UnityQuestHandsChecks
                 (name, value) => typeof(BirdCursorState).GetField(name).SetValue(port, value),
                 name => typeof(BirdCursorState).GetField(name).GetValue(port),
                 name => typeof(BirdCursorState).GetMethod(name).Invoke(port, null));
+            port.tracking=true; port.poseValid=true; port.position=new Vector3(1,2,1000000); port.selected=false;
+            UnityQuestHands.PublishUiSample(uiInput,port);
+            if (uiInput.Position!=port.position) throw new Exception("UI binding projected or capped far point");
+            port.selected=true; UnityQuestHands.PublishUiSample(uiInput,port);
+            if (!uiInput.PressedThisSample) throw new Exception("UI binding lost click edge");
+            port.poseValid=false; UnityQuestHands.PublishUiSample(uiInput,port);
+            if (uiInput.IsTracked || uiInput.IsPressed) throw new Exception("Invalid port pose retained UI input");
+            port.poseValid=true; UnityQuestHands.PublishUiSample(uiInput,port);
+            if (!uiInput.IsTracked || uiInput.PressedThisSample) throw new Exception("UI binding recovery invented a press");
+            port.tracking=false; UnityQuestHands.PublishUiSample(uiInput,port);
+            if (uiInput.IsTracked) throw new Exception("UI binding ignored tracking loss");
             return string.Format(System.Globalization.CultureInfo.InvariantCulture,
-                "PASS: 400 moving noisy sphere samples; original/port center max={0:F6}mm raw max={1:F6}mm; port Kalman reference max={2:F6}mm; recovery seed verified\n{3}", maxFit * 1000, maxRaw * 1000, maxFilter * 1000, palmChecks);
+                "PASS: 400 moving noisy sphere samples; original/port center max={0:F6}mm raw max={1:F6}mm; port Kalman reference max={2:F6}mm; recovery seed verified; live-host UI binding preserves 400 samples, far logical point, click/loss/recovery\n{3}", maxFit * 1000, maxRaw * 1000, maxFilter * 1000, palmChecks);
         }
         finally { UnityEngine.Object.DestroyImmediate(go); }
     }

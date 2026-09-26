@@ -19,6 +19,9 @@ public sealed class UnityMenuChecks : MonoBehaviour
     {
         File.WriteAllText("menu-result.txt","PENDING");
         EditorSceneManager.NewScene(NewSceneSetup.EmptyScene,NewSceneMode.Single);
+        new GameObject("Bird Spherical Selector Preview").AddComponent<BirdSphericalSelectorPreview>();
+        EditorSceneManager.SaveScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene(),"Assets/SphericalSelector.unity");
+        EditorSceneManager.NewScene(NewSceneSetup.EmptyScene,NewSceneMode.Single);
         var preview = new GameObject("Bird Menu Preview").AddComponent<BirdMenuPreview>();
         EditorSceneManager.SaveScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene(),"Assets/MenuPreview.unity");
         preview.desktopInput = false;
@@ -105,7 +108,10 @@ public sealed class UnityMenuChecks : MonoBehaviour
             HitAndLifecycleChecks();
             InteractionBoundaryChecks();
             SerializationChecks();
+            demo.enabled=false;
+            string spherical=UnitySphericalScrollChecks.Run();
             string result="PASS: "+checks+" actual Unity menu assertions; "+captures+" camera captures; directional open, point-through highlight, selection, nested/back/close, two-hand user focus, loss/recovery, precise collider hits, distant reach, callback reentrancy and Inspector UnityEvent prefab roundtrip. GPU="+SystemInfo.graphicsDeviceType+". Synthetic input; not live-hand, Udon or headset validation.";
+            result+=" "+spherical;
             File.WriteAllText("menu-result.txt",result); Debug.Log(result);
             SessionState.SetBool(Active,false); EditorApplication.Exit(0);
         }

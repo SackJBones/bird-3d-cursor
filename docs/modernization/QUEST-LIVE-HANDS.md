@@ -1,5 +1,10 @@
 # Quest live hand comparison
 
+Current UI checkpoint: **v0.9** is built, installed and startup-verified. It adds
+a twelve-color spherical selector driven by both accepted Bird points. Physical
+UI feel is not yet assessed; deployment details and instructions are below.
+
+
 This standalone `Bird Live Hands` app feeds real Quest finger joints into the
 existing Unity `Bird.cs` core and into the port's `BirdSphereFit` and
 `BirdCursorState` sources. Both receive the **same original 16 fit points**, root
@@ -135,7 +140,7 @@ See the architecture note for numerical and far-world occlusion limitations.
   requires finite, nonzero data for all 18 needed positions before accepting a
   hand; index intermediate/distal are visual-only. This avoids feeding missing
   joints at the origin into the fit. No substitute fingertips are synthesized.
-- This display visualizes selection; it has no interactive tool actions.
+- Versions through v0.8 visualize selection; v0.9 adds the spherical color UI.
   Missing hands hide their diagnostics. Frame rate, runtime tracking quality,
   comfort and subjective feel need actual headset feedback.
 
@@ -166,3 +171,43 @@ unchanged. APK 20,081,200 bytes, SHA256
 `13F86D5A590552AD84A4FB7580E64F1531F36023955F1D0E1B292B0425B85C91`.
 Package v0.8/arm64 and app/OpenXR Hands startup verified; no physical v0.8
 assessment yet. See CHECKPOINT.md and DEPTH-STEREO-OCCLUSION.md for render evidence.
+
+
+### v0.9 live spherical UI checkpoint
+
+Built and installed 2026-09-26. APK **25,652,412 bytes**, SHA256
+`16AEC1EB2E7D84E2265853FCF38C0742FED2351F5217DE3D647E6AFCABC826FD`.
+Package inspection confirms v0.9 / arm64-v8a; Android accepted the launch.
+Scoped startup logs confirm BIRD_UI_READY (both logical input bindings and all
+12 choices constructed) and OpenXR Hands running at approximately 72 Dynamic
+samples/s. Both hands were 0/18 while unattended. The selector is prepared while
+hidden and awaits valid tracked-head placement; its on-headset view, interaction
+feel and performance have not been assessed.
+
+When the vista anchors, the selector appears to its right, at eye height. Reach
+through a color and click to change the separate result orb. Push the Bird point
+past the BACK of the larger wire sphere, then sweep/flick to rotate the choices.
+Withdraw inside to stop driving; momentum coasts. No click/hold is needed to
+scroll. These are plain color orbs and wireframe geometry for interaction testing,
+not the final fireball artwork or VRChat world presentation.
+
+The UI source copies `handRoot`, logical filtered `position`, valid pose/tracking
+and the current `selected` level after the port's Dynamic update. It does not use
+render-proxy coordinates and never steps the solver a second time. Disable,
+pause, subsystem replacement and pose loss cancel the UI, while pause still saves
+an in-progress recording. The 400-sample preflight verifies exact input mapping,
+far reach and click/loss/recovery; the existing 5549 hand-limit and 123 visual
+checks plus capture persistence also pass. Optional private replay was not rerun
+because this cycle changes no fit/range/filter/click law.
+
+The same selector passes actual Windows player LateUpdate selection, drive,
+coast and cancellation checks, plus real Unity rendering. That supplements
+Android compilation/startup; it does not establish physical headset usability.
+See SPHERICAL-SCROLL.md for parameters, numerical measurements and reproduction.
+
+The selector faces the initial viewer. Dark label backings keep instructions
+legible against the sky, with 2 cm separation to avoid coplanar text/backing
+surfaces. `UnityQuestUiRenderChecks.Run` uses the same placement helper and the
+actual vista, renders forward/facing views, and exercises the external-input color
+action. Its two D3D11 camera captures pass visual inspection; this is still a
+synthetic camera check, not a physical or stereo assessment.

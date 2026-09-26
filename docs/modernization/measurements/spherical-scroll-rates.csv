@@ -1,0 +1,4 @@
+hz,drive_end_radians_per_second,coast_end_degrees,analytic_end_degrees,curved_difference_degrees
+120,0.95284766,84.28236,84.28226,0
+72,0.95284766,84.2822647,84.28226,0.00487620477
+30,0.952847064,84.28227,84.28226,0.0420527942

@@ -21,11 +21,13 @@ $package = (Join-Path $repo 'Unity/BirdPlugin').Replace('\','/')
 $manifest = @{ dependencies = @{ 'com.bird3d.cursor' = "file:$package"; 'com.unity.modules.imageconversion' = '1.0.0' } }
 $manifest | ConvertTo-Json -Depth 3 | Set-Content -LiteralPath (Join-Path $project 'Packages/manifest.json')
 Copy-Item -LiteralPath (Join-Path $repo 'Unity/BirdPlugin/Samples~/MenuPreview/BirdMenuPreview.cs') -Destination (Join-Path $project 'Assets/BirdMenuPreview.cs')
+Copy-Item -LiteralPath (Join-Path $repo 'Unity/BirdPlugin/Samples~/MenuPreview/BirdSphericalSelectorPreview.cs') -Destination (Join-Path $project 'Assets/BirdSphericalSelectorPreview.cs')
 New-Item -ItemType Directory -Force (Join-Path $project 'Assets/Resources') | Out-Null
 foreach ($name in @('BirdMenuPreviewSurface.mat', 'BirdMenuPreviewSurface.mat.meta')) {
     Copy-Item -LiteralPath (Join-Path $repo "Unity/BirdPlugin/Samples~/MenuPreview/Resources/$name") -Destination (Join-Path $project "Assets/Resources/$name")
 }
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityMenuChecks.cs') -Destination (Join-Path $project 'Assets/UnityMenuChecks.cs')
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnitySphericalScrollChecks.cs') -Destination (Join-Path $project 'Assets/UnitySphericalScrollChecks.cs')
 $result = Join-Path $project 'menu-result.txt'
 $log = Join-Path $project 'menu-checks.log'
 Set-Content -LiteralPath $result -Value 'PENDING: Unity has not completed this run.'

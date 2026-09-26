@@ -5,6 +5,8 @@ using System.IO;
 using System.Text;
 using Bird3DCursor;
 using Bird3DCursor.Presentation;
+using Bird3DCursor.UI;
+using Bird3DCursor.Samples;
 using UnityEngine;
 using UnityEngine.XR;
 using UnityEngine.XR.Hands;
@@ -56,6 +58,7 @@ public sealed class UnityQuestHands : MonoBehaviour
         public CapturedHand hand;
         public Bird bird;
         public BirdCursorState port;
+        public BirdPointerInput uiInput;
         public BirdDepthVisual depthVisual;
         public LineRenderer palmLine;
         public GameObject visual;
@@ -78,6 +81,8 @@ public sealed class UnityQuestHands : MonoBehaviour
     Side[] sides;
     Camera view;
     GameObject vista;
+    BirdSphericalSelectorPreview selector;
+    bool appPaused;
     TextMesh label;
     Transform labelBackdrop;
     float nextStatus;
@@ -98,7 +103,7 @@ public sealed class UnityQuestHands : MonoBehaviour
     [Serializable] public class JointTrace
     {
         public int schema = 1;
-        public string appVersion = "0.8", hand;
+        public string appVersion = "0.9", hand;
         public float time;
         public bool tracked, poseValid;
         // Base/intermediate/distal/tip for thumb, index, middle, ring, little.
@@ -132,9 +137,10 @@ public sealed class UnityQuestHands : MonoBehaviour
         backdrop.GetComponent<Renderer>().sharedMaterial = new Material(Shader.Find("Sprites/Default")) { color=new Color(.008f,.018f,.03f,.8f) };
         sides = new[] { CreateSide(Hand.Chirality.Left, new Color(.1f, .9f, 1)),
             CreateSide(Hand.Chirality.Right, new Color(1, .25f, .65f)) };
+        CreateSelector();
         CreateModeControls();
         Application.onBeforeRender += UpdateHead;
-        Debug.Log("BIRD_HANDS_START: v0.8 logical world depth + stable vista; default Inflate; original Bird.cs reference; real XR Hands; 32mm through 4m; Q=.001 R=270*d^3");
+        Debug.Log("BIRD_HANDS_START: v0.9 live spherical selector; accepted point/depth math unchanged; default Inflate; real XR Hands; 32mm through 4m; Q=.001 R=270*d^3");
     }
 
     Side CreateSide(Hand.Chirality chirality, Color color)
@@ -143,6 +149,8 @@ public sealed class UnityQuestHands : MonoBehaviour
         side.bird = new Bird(side.hand);
         var math = new GameObject(side.name + " port math comparison");
         side.port = math.AddComponent<BirdCursorState>();
+        side.uiInput = new GameObject(side.name + " logical UI input").AddComponent<BirdPointerInput>();
+        side.uiInput.transform.SetParent(transform,false);
         side.port.fitter = math.AddComponent<BirdSphereFit>();
         side.port.smoothing = true;
         side.port.useHandLimits = true;
@@ -190,6 +198,7 @@ public sealed class UnityQuestHands : MonoBehaviour
 
     void Update()
     {
+        if (appPaused) return;
         UpdateHead();
         if (vista == null)
         {
@@ -204,12 +213,14 @@ public sealed class UnityQuestHands : MonoBehaviour
             {
                 view.transform.SetPositionAndRotation(headPosition,headRotation);
                 vista = UnityQuestVista.Create(view);
+                PlaceSelector(selector,view);
                 Debug.Log("BIRD_VISTA_READY: tracked-head anchor; 1.65m nominal eye height; 30/100/300m landmarks");
             }
         }
         if (subsystem == null || !subsystem.running)
         {
             Unsubscribe();
+            CancelUiAndHands();
             SubsystemManager.GetSubsystems(subsystems);
             foreach (var candidate in subsystems)
                 if (candidate.running) { subsystem = candidate; break; }
@@ -224,7 +235,7 @@ public sealed class UnityQuestHands : MonoBehaviour
         if (Time.unscaledTime >= nextStatus)
         {
             nextStatus = Time.unscaledTime + 1;
-            string status = "BIRD v0.8 / WORLD DEPTH   |   close, reach, flare\n" +
+            string status = "BIRD v0.9 / SPHERICAL UI   |   close, reach, flare\n" +
                 "Color: new point | sphere: legacy fit | white: raw | gold: legacy\n" +
                 "32mm through 4m. Green line points out of palm.\n" +
                 "Touch a label below for 0.6s: " + sizeMode + "\n" + CaptureDescription() + "\n";
@@ -247,6 +258,7 @@ public sealed class UnityQuestHands : MonoBehaviour
 
     void OnHands(XRHandSubsystem source, XRHandSubsystem.UpdateSuccessFlags flags, XRHandSubsystem.UpdateType type)
     {
+        if (appPaused || !isActiveAndEnabled) return;
         // Kalman is sample-dependent: never update it again for BeforeRender.
         if (type != XRHandSubsystem.UpdateType.Dynamic) return;
         dynamicSamples++;
@@ -283,6 +295,7 @@ public sealed class UnityQuestHands : MonoBehaviour
             side.filterGap = Vector3.Distance(side.bird.GetPosition(), side.port.position);
             // The point law remains usable even when no sphere exists at the limit.
             if (!side.port.poseValid || !Finite(side.rawPosition)) { Lose(side); continue; }
+            PublishUiSample(side.uiInput,side.port);
             side.accepted++;
             Draw(side);
         }
@@ -338,12 +351,53 @@ public sealed class UnityQuestHands : MonoBehaviour
 
     void Lose(Side side)
     {
+        side.uiInput.Cancel();
         side.hand.valid = false;
         side.port.Cancel();
         side.visual.SetActive(false);
         side.visible = false;
         side.depthVisual.Clear();
     }
+
+    // Host binding consumes the accepted logical point, never the projected marker transform.
+    public static void PublishUiSample(BirdPointerInput input, BirdCursorState state)
+    {
+        if (input == null) return;
+        if (state == null) { input.Cancel(); return; }
+        input.Submit(state.handRoot,state.position,state.tracking && state.poseValid,state.selected);
+    }
+
+    void CreateSelector()
+    {
+        if (selector != null) return;
+        var go=new GameObject("Live Bird spherical selector");
+        go.SetActive(false); // Build independently of head pose; show once the vista is anchored.
+        selector=go.AddComponent<BirdSphericalSelectorPreview>();
+        selector.Initialize(new[]{sides[0].uiInput,sides[1].uiInput});
+        selector.ColorSelected.AddListener(color=>Debug.Log("BIRD_UI_COLOR: "+ColorUtility.ToHtmlStringRGB(color)));
+        Debug.Log("BIRD_UI_READY: two live logical inputs; 12 colors; back-surface spherical scroll; awaiting tracked-head placement");
+    }
+
+    public static void PlaceSelector(BirdSphericalSelectorPreview target, Camera camera)
+    {
+        Vector3 forward=Vector3.ProjectOnPlane(camera.transform.forward,Vector3.up);
+        if (forward.sqrMagnitude < .01f) forward=Vector3.forward;
+        else forward.Normalize();
+        Vector3 right=Vector3.Cross(Vector3.up,forward);
+        Vector3 center=camera.transform.position+forward*2.4f+right*1.45f;
+        target.transform.SetPositionAndRotation(center-Vector3.up*1.4f,Quaternion.LookRotation(center-camera.transform.position,Vector3.up));
+        target.gameObject.SetActive(true);
+        Physics.SyncTransforms();
+        Debug.Log("BIRD_UI_PLACED: selector anchored right of the overlook, at eye height");
+    }
+
+    void CancelUiAndHands()
+    {
+        if (sides != null) foreach(var side in sides) Lose(side);
+        if (selector != null) selector.Scroll.Cancel();
+    }
+
+    void OnDisable() { Unsubscribe(); CancelUiAndHands(); }
 
     string Describe(Side s)
     {
@@ -455,7 +509,11 @@ public sealed class UnityQuestHands : MonoBehaviour
         capture = null;
     }
 
-    void OnApplicationPause(bool paused) { if (paused) SaveCapture(); }
+    void OnApplicationPause(bool paused)
+    {
+        appPaused=paused;
+        if (paused) { SaveCapture(); CancelUiAndHands(); }
+    }
 
     public static float Range(float d)
     {
@@ -469,6 +527,6 @@ public sealed class UnityQuestHands : MonoBehaviour
         subscribed = false;
         subsystem = null;
     }
-    void OnDestroy() { SaveCapture(); Unsubscribe(); Application.onBeforeRender -= UpdateHead; }
+    void OnDestroy() { SaveCapture(); Unsubscribe(); Application.onBeforeRender -= UpdateHead; if(selector != null) Destroy(selector.gameObject); }
 }
 #endif
