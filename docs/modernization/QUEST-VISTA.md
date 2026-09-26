@@ -31,6 +31,11 @@ legacy contribution is complete, preserved flat-pose range, and rotated/upside-
 down input equivariance. It does not reproduce unknown pre-recording filter
 history, infer intended user motion or claim physical v0.6 validation.
 
+A separate [temporal audit](HAND-RETURN-FILTER.md) now measures the recording's
+filter history and return delays. It confirms severe lingering far-state on
+ordinary returns; the numerical geometry passes below do not resolve that
+behavior.
+
 Measured in actual Unity:
 
 - 1442 usable recorded samples; 661 with full legacy contribution, 560 fully

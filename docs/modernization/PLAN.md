@@ -20,6 +20,15 @@ Continue physical feel/direction tuning and replay work without making optional
 recordings or headset availability blockers. Do not infer aim from the torso,
 head or world up. Keep the existing mandala and Hanoi milestones below.
 
+The temporal audit now confirms severe distant-history carryover in the
+recorded v0.5 filter and the v0.6 replay: raw returns inside 4 m can leave the
+filtered point millions of meters away. See [return-filter baseline](HAND-RETURN-FILTER.md).
+Next investigate a return-aware filtering policy confined to limiting-range
+history, preserving ordinary legacy behavior, the closed-fist endpoint and
+hand-frame invariance. Compare on the recorded transitions and synthetic
+ordinary/rapid-return cases before changing the installed build. Keep v0.6's
+45-degree aiming and plain Inflate while awaiting physical feedback.
+
 Bird specifies a geometric point; keep interaction and optional presentation
 downstream. Preserve constant physical marker size through the natural working
 volume and enormous logical reach. The known far-world occlusion issue remains
