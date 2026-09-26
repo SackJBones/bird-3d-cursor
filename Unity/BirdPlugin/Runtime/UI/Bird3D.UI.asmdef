@@ -1,0 +1,6 @@
+{
+    "name": "Bird3D.UI",
+    "rootNamespace": "Bird3DCursor.UI",
+    "references": [],
+    "autoReferenced": true
+}

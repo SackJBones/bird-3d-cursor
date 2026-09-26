@@ -32,7 +32,8 @@ the recovered capabilities are sufficient and the launcher is not a blocker.
 
 - [x] Explore local Bird/Unity history with three bounded read-only agents; distinguish newer uncommitted UI from historical repo copies and sparse checkout omissions.
 - [x] Preserve selected custom source and scene/prefab references with original bytes, GUIDs, SHA256 and chronology notes; no bulk project sync.
-- [ ] Build the first working UI slice: directional open, point-through highlighting, select action, child/background focus and back/close; validate deterministic lifecycle and real rendering before live-hand integration.
+- [x] Build the first working UI slice: directional open, point-through highlighting, select action, child/background focus and back/close; 57 real Unity assertions, seven editor captures and a standalone desktop player smoke/capture pass. See [UI-MENUS.md](UI-MENUS.md).
+- [ ] Connect the menu components to live Bird input, retaining logical-point hit testing; validate the adapter and then integrate into the appropriate Quest/world host.
 - [ ] Reproduce nested color/map affordances and bind supported VRChat-world actions; retain UnityEvents/callbacks for ordinary Unity hosts.
 - [ ] Preserve the successful [spherical-scroll color selector](SPHERICAL-SCROLL.md): move freely among twelve colored fireballs inside a larger sphere; only reaching beyond its back surface drives flick scrolling with momentum; keep scroll interaction, dodecahedral layout and selection separate.
 

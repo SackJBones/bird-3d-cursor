@@ -24,6 +24,11 @@
         "displayName": "Desktop Preview",
         "description": "Two synthetic Bird cursors with pose, radius and selection controls. No tracking SDK or headset required.",
         "path": "Samples~/DesktopPreview"
+      },
+      {
+        "displayName": "Menu Preview",
+        "description": "Directional opening, point-through highlighting, color selection and nested menus driven by synthetic Bird input.",
+        "path": "Samples~/MenuPreview"
       }
     ],
     "dependencies": {
