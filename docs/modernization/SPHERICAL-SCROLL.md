@@ -27,12 +27,20 @@ Reference source is byte-preserved in
   are local scene settings, not universal Bird constants or verified final
   world dimensions. It has twelve FireButton prefab children.
 
-The scene uses the **far-side** sphere intersection: the reverse cast hits the
-back surface and the logical Bird must extend beyond it. This depth threshold
-is part of the recovered scroll behavior. It can allow reaching through to spin
-and withdrawing toward a color to stop driving rotation. That affordance is an
-inference from the source/scene; the user explicitly confirms the overall
-spherical-scroll feel, not an isolated test of this threshold.
+Dana explicitly confirms the **larger sphere and far-side activation boundary**
+are essential. The sphere surrounds the smaller dodecahedral selector, leaving
+space to wave Bird among the twelve colors without driving the selector's
+rotation. Entering the front surface, moving among the fireballs, or moving
+between the dodecahedron and the far sphere surface must not start scrolling.
+The logical Bird point must extend past the sphere's **back** surface before
+ray motion drives spherical scrolling. Withdrawing back inside disengages that
+drive; existing momentum can still coast and decay. This is now a user-confirmed
+design requirement, not merely an inference from the archived code.
+
+The implementation uses the far-side sphere intersection, compared with Bird's
+logical range. No click/hold is needed and front-surface intersection alone is
+insufficient. Keep the outer interaction sphere independent from the visual
+selector size so this free interior working region survives layout changes.
 
 The script's public default momentum is .5, but the actual scene uses .01.
 Its damping multiplies velocity by approximately `1 - dt*(1-momentum)`, and
@@ -57,7 +65,8 @@ world position as a missing-hit sentinel. Do not silently add a drag-button
 requirement or turn this into only horizontal carousel scrolling.
 
 Focused checks should cover slow sweeps and flicks in multiple axes; front/far
-surface range thresholds; release/coast/stationary reacquisition; rapid reversals;
+surface range thresholds (including no activation at front entry or anywhere
+inside the larger sphere, and activation beyond the back); release/coast/stationary reacquisition; rapid reversals;
 o angular jump on hand transfer or tracking recovery; offset/scaled pivots;
 30/72/120 Hz trajectories; and selection without accidental scroll activation.
 Use actual rendered motion plus later physical assessment. Dana's endorsement
