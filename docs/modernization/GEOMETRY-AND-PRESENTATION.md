@@ -92,6 +92,12 @@ coordinates also retain floating-point precision limits.
 
 ## Evidence and remaining experiments
 
+The [stereo and occlusion probe](DEPTH-STEREO-OCCLUSION.md) now quantifies the
+shared shell: under 0.13 pixel extra disparity in its controlled camera setup,
+but two confirmed cases of a distant cursor showing through an opaque wall.
+Logical world occlusion remains unsolved; the successful probe is measurement
+evidence, not an occlusion pass or a headset stereo result.
+
 The shared palm fixture runs in actual Unity C# and compiled Udon: 1601 noisy
 curvature sweep samples, 801 billion-meter reach samples, mirrored hands, rigid
 transforms, fresh flat input, original-fit preservation, invalid input and
