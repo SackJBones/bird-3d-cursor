@@ -1,3 +1,49 @@
+# Logical depth for the optional Bird renderer
+
+## Version 0.8: world occlusion corrected
+
+Dana's physical v0.7 report exposed the visible consequence of the measured
+shell bug: Bird seemed unable to reach the mountains. The geometric point
+already travels beyond them; the display previously tested depth at its
+compressed position, always closer than 500 m. No range/filter/hand law was
+changed to address this.
+
+`BirdLogicalDepth.shader` keeps shell vertex positions for clipping/rasterization
+and supplies logical fragment depth via `SV_Depth`. The core and locator use a
+uniform logical/rendered distance ratio. Each pair of trail vertices carries its
+own ratio in UV2. Perspective interpolation of `(1/ratio, renderedViewDepth)`,
+then division in the fragment, gives screen-linear inverse logical depth across
+a ribbon whose endpoints have different distances. Inverting Unity's
+`LinearEyeDepth` handles both conventional and reversed depth. Points beyond
+the world far plane use far depth: visible against sky, hidden by opaque world.
+The core renders after opaque objects AND the skybox (queue 2501), before
+transparent trail/locator layers. The sphere writes depth; the lines do not.
+
+This is a Built-in pipeline, perspective-camera presentation policy, independent
+of Bird geometry and interaction. It is not a general transparency solver;
+transparent scene surfaces still follow Unity's normal sorting/depth behavior.
+The shared shell retains its small binocular-position approximation. Huge
+logical coordinates retain floating-point limitations. `SV_Depth` can reduce
+early-depth GPU optimization; no headset performance claim follows from the
+editor checks. Unity documents [fragment depth semantics](https://docs.unity3d.com/2022.3/Documentation/Manual/SL-ShaderSemantics.html),
+[depth parameters](https://docs.unity3d.com/2022.3/Documentation/Manual/SL-UnityShaderVariables.html)
+and the [single-pass instancing macros](https://docs.unity3d.com/2022.3/Documentation/Manual/SinglePassInstancing.html)
+used here. The APK builder explicitly retains the shader.
+
+Real Unity 2022.3.22f1 renders now pass on both Direct3D11 (reversed depth) and
+OpenGLCore (conventional depth): 24 stereo configurations, 28 captures, 11
+occlusion controls, **zero of five incorrect wall cases**. Additional controls
+cover partial silhouette masking, a trail crossing a 600 m wall with endpoints
+at 400/1000 m, a fully hidden far trail and a beyond-clip core against a skybox.
+Near clip in the current fixture is 0.05 m. Maximum extra disparity remains
+0.127686 px at 1024/60 degrees, identity through 100 m. These parallel mono-eye
+cameras do not establish headset stereo comfort or actual OpenXR rendering.
+
+The sections below preserve the earlier failing baseline; their v0.4 statements
+are historical. Current evidence is saved with the v0.8 measurements.
+
+---
+
 # Shared display depth: stereo and occlusion probe
 
 This checkpoint measures the current optional presentation. It does not change

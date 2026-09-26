@@ -45,7 +45,7 @@ public static class UnityQuestHandsBuild
             EditorUtility.SetDirty(hands); EditorUtility.SetDirty(quest); EditorUtility.SetDirty(touch); EditorUtility.SetDirty(xr);
             PlayerSettings.companyName = "Bird3D";
             PlayerSettings.productName = "Bird Live Hands";
-            PlayerSettings.bundleVersion = "0.7";
+            PlayerSettings.bundleVersion = "0.8";
             PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.Android, "org.bird3d.livehands");
             PlayerSettings.SetScriptingBackend(BuildTargetGroup.Android, ScriptingImplementation.IL2CPP);
             PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
@@ -65,7 +65,7 @@ public static class UnityQuestHandsBuild
             File.WriteAllText("hands-math-result.txt", checks);
             Debug.Log(checks);
             new GameObject("Bird live hands comparison").AddComponent<UnityQuestHands>();
-            foreach (string shaderName in new[] { "Unlit/Color", "Sprites/Default", "Standard" })
+            foreach (string shaderName in new[] { "Unlit/Color", "Sprites/Default", "Standard", "Bird/LogicalDepth" })
             {
                 string path = "Assets/" + shaderName.Replace('/', '-') + ".mat";
                 var material = AssetDatabase.LoadAssetAtPath<Material>(path);

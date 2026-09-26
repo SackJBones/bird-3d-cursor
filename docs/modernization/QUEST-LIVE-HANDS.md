@@ -156,3 +156,13 @@ Version 0.5 built and installed successfully (2026-09-26 UTC), replacing the phy
 Version 0.6 built and installed successfully (2026-09-26 UTC): hand-frame knuckle tilt, preferred plain Inflate default and house/vista scale references. APK SHA256 C8091C82D5354DB6CA7FEBB74EE2684A13E256831CBB769ECA7CC7D98C313D05. Private v0.5 replay, C#/Udon geometry checks and six editor render captures pass; physical v0.6 feel remains to be assessed.
 
 Version 0.7 built and installed successfully (2026-09-26 UTC): restored closed-hand lever clicks, stronger far visuals and a high overlook; accepted v0.6 point/range/filter math retained. APK SHA256 6159DB04B06BB8533AC66AD0FD2B4F67F9CC03EB11CA563A77D53F9FAE4CF8CA. Real C#/compiled-Udon checks, eight vista renders and rapid-return checks pass. Physical v0.7 assessment is pending.
+
+
+### v0.8 rendering checkpoint
+
+Built and installed 2026-09-26: logical world depth, disjoint vista surfaces,
+5 cm camera near clip, inflation reduced to 9.5x. Accepted geometry/click/filter
+unchanged. APK 20,081,200 bytes, SHA256
+`13F86D5A590552AD84A4FB7580E64F1531F36023955F1D0E1B292B0425B85C91`.
+Package v0.8/arm64 and app/OpenXR Hands startup verified; no physical v0.8
+assessment yet. See CHECKPOINT.md and DEPTH-STEREO-OCCLUSION.md for render evidence.

@@ -9,7 +9,7 @@ namespace Bird3DCursor.Presentation
         [Min(.001f)] public float nearDiameter = .032f;
         [Min(.01f)] public float workingDistance = 4f;
         [Min(1.01f)] public float inflationEndRatio = 5f;
-        [Min(1f)] public float inflationFactor = 11f;
+        [Min(1f)] public float inflationFactor = 9.5f;
         [Range(0f, .95f)] public float farGrowthExponent = .5f;
         [Min(.001f)] public float growthLagSeconds = .22f;
         [Min(.0001f)] public float nearTrailWidth = .002f;
@@ -24,7 +24,7 @@ namespace Bird3DCursor.Presentation
 
     /// <summary>Visual-only long-range cursor and trail. Logical interaction
     /// coordinates are never modified. Reprojects astronomical positions into
-    /// a bounded render shell; hosts must account for far-world occlusion.</summary>
+    /// a bounded render shell while testing against logical world depth.</summary>
     public sealed class BirdDepthVisual : MonoBehaviour
     {
         public enum SizeMode { Fixed, Inflation, InflationWithLag }
@@ -40,6 +40,7 @@ namespace Bird3DCursor.Presentation
         readonly float[] times = new float[Capacity];
         readonly Vector3[] vertices = new Vector3[Capacity*2];
         readonly Color[] colors = new Color[Capacity*2];
+        readonly Vector2[] depthScales = new Vector2[Capacity*2];
         int count;
         float lastSampleTime;
         float diameter = NearDiameter;
@@ -52,7 +53,7 @@ namespace Bird3DCursor.Presentation
         LineRenderer haloBackdrop;
         Mesh ribbon;
         Renderer ribbonRenderer;
-        Material coreMaterial, lineMaterial;
+        Material coreMaterial, lineMaterial, trailMaterial;
         public float CurrentDiameter { get { return diameter; } }
 
         void EnsureReady()
@@ -63,10 +64,19 @@ namespace Bird3DCursor.Presentation
             Destroy(dot.GetComponent<Collider>());
             core = dot.transform;
             core.SetParent(transform, false);
-            coreMaterial = new Material(Shader.Find("Unlit/Color"));
+            var shader = Shader.Find("Bird/LogicalDepth");
+            coreMaterial = new Material(shader);
+            coreMaterial.SetFloat("_ZWrite", 1);
+            // Follow opaque geometry AND the skybox: a point beyond the
+            // world clip writes far depth and must not be painted over by sky.
+            coreMaterial.renderQueue = 2501;
             coreMaterial.color = tint;
             dot.GetComponent<Renderer>().sharedMaterial = coreMaterial;
-            lineMaterial = new Material(Shader.Find("Sprites/Default"));
+            lineMaterial = new Material(shader);
+            lineMaterial.SetFloat("_UseVertexColor", 1);
+            trailMaterial = new Material(shader);
+            trailMaterial.SetFloat("_UseVertexColor", 1);
+            trailMaterial.SetFloat("_UseVertexDepthScale", 1);
             halo = new GameObject("Far locator outline").AddComponent<LineRenderer>();
             halo.transform.SetParent(transform, false);
             halo.sharedMaterial = lineMaterial;
@@ -87,7 +97,7 @@ namespace Bird3DCursor.Presentation
             ribbon.MarkDynamic();
             trail.AddComponent<MeshFilter>().sharedMesh = ribbon;
             ribbonRenderer = trail.AddComponent<MeshRenderer>();
-            ribbonRenderer.sharedMaterial = lineMaterial;
+            ribbonRenderer.sharedMaterial = trailMaterial;
             var triangles = new int[(Capacity-1)*6];
             for (int i = 0; i < Capacity-1; i++)
             {
@@ -179,6 +189,8 @@ namespace Bird3DCursor.Presentation
             core.position = projected;
             core.localScale = Vector3.one*(diameter*renderD/d);
             coreMaterial.color = selected ? Color.Lerp(tint, Color.white, .65f) : tint;
+            coreMaterial.SetFloat("_BirdDepthScale", d/renderD);
+            lineMaterial.SetFloat("_BirdDepthScale", d/renderD);
 
             // A separate thin locator survives when the honest shrinking core
             // gets subpixel. It is not the solid cursor's physical size.
@@ -226,6 +238,7 @@ namespace Bird3DCursor.Presentation
                 Vector3 sideways = Vector3.Cross(next-previous, p-eye).normalized;
                 if (sideways.sqrMagnitude < .5f) sideways = view.transform.right;
                 float pointD = Mathf.Max(.001f,(history[i]-eye).magnitude);
+                depthScales[i*2] = depthScales[i*2+1] = new Vector2(pointD/RenderDistance(pointD),0);
                 float age = Mathf.Clamp01(1-(time-times[i])/.7f);
                 // Every historical point owns its width; a far tip never widens
                 // the nearby part of the ribbon. Trail widths have no time lag.
@@ -239,11 +252,12 @@ namespace Bird3DCursor.Presentation
             }
             ribbon.vertices = vertices;
             ribbon.colors = colors;
+            ribbon.uv2 = depthScales;
             ribbon.RecalculateBounds();
         }
 
         void RemoveOldest() { count--; for (int i=0;i<count;i++) { history[i]=history[i+1]; times[i]=times[i+1]; } }
         public void Clear() { count=0; lastSampleTime=0; sizeHistoryValid=false; diameter=style != null ? style.nearDiameter : NearDiameter; if (ready) { ribbonRenderer.enabled=false; halo.enabled=false; haloBackdrop.enabled=false; } }
-        void OnDestroy() { if (ribbon!=null) Destroy(ribbon); if(coreMaterial!=null)Destroy(coreMaterial); if(lineMaterial!=null)Destroy(lineMaterial); }
+        void OnDestroy() { if (ribbon!=null) Destroy(ribbon); if(coreMaterial!=null)Destroy(coreMaterial); if(lineMaterial!=null)Destroy(lineMaterial); if(trailMaterial!=null)Destroy(trailMaterial); }
     }
 }

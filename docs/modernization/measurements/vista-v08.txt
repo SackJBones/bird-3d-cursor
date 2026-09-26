@@ -1,0 +1,1 @@
+PASS: actual Unity high-overlook rendering; eight captures; table/building scale, lower terrain and absent labels checked. Stable moving-camera ground/window samples 48. Far cyan coverage 0 -> 17 pixels. Not headset comfort/performance validation.

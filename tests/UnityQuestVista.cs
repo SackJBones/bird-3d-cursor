@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -14,7 +15,7 @@ public static class UnityQuestVista
         if (heading.sqrMagnitude<.01f) heading=Vector3.forward;
         root.transform.position-=heading.normalized*2;
         root.transform.rotation=Quaternion.LookRotation(heading,Vector3.up);
-        view.farClipPlane=5000;
+        view.nearClipPlane=.05f; view.farClipPlane=5000;
         view.backgroundColor=new Color(.58f,.75f,.86f);
         RenderSettings.ambientMode=AmbientMode.Flat;
         RenderSettings.ambientLight=new Color(.58f,.65f,.7f);
@@ -65,9 +66,7 @@ public static class UnityQuestVista
         // The eye stays at ordinary room height; the landscape falls away.
         // This scene placement is never an input to Bird's hand geometry.
         Box(root,"Clifftop foundation",new Vector3(0,-75,-4),new Vector3(18,149.7f,19),hill);
-        Box(root,"Valley floor",new Vector3(0,-151,950),new Vector3(3600,4,2900),grass);
-        Box(root,"Valley lake",new Vector3(0,-148.8f,540),new Vector3(430,.2f,530),water);
-        Box(root,"Valley road",new Vector3(-245,-148.9f,520),new Vector3(5,.05f,1050),floor);
+        Valley(root,grass,water,floor);
         Box(root,"Terrace handrail",new Vector3(0,.95f,5.5f),new Vector3(10,.07f,.07f),timber);
         foreach(float x in new[]{-4.8f,-2.4f,0,2.4f,4.8f})
             Box(root,"Terrace rail post",new Vector3(x,.48f,5.5f),new Vector3(.07f,.96f,.07f),timber);
@@ -107,9 +106,62 @@ public static class UnityQuestVista
 
     static void Tower(GameObject root,Vector3 p,float width,float height,Material wall,Material glass,string name)
     {
-        Box(root,name.Replace("/","-"),p+Vector3.up*height*.5f,new Vector3(width,height,width*.65f),wall);
-        for (int i=1;i<Mathf.FloorToInt(height/3);i++)
-            Box(root,"Landmark window band",p+new Vector3(0,i*3,-width*.325f-.03f),new Vector3(width*.72f,1.2f,.06f),glass);
+        var go=new GameObject(name); go.transform.SetParent(root.transform,false);
+        go.transform.localPosition=p+Vector3.up*height*.5f;
+        go.transform.localScale=new Vector3(width,height,width*.65f);
+        var vertices=new List<Vector3>(); var walls=new List<int>(); var windows=new List<int>();
+        // Five closed faces; the front is partitioned into wall/window cells.
+        // No backing wall exists under a window, even at kilometer distances.
+        Quad(vertices,walls,new Vector3(-.5f,-.5f,.5f),new Vector3(-.5f,.5f,.5f),new Vector3(-.5f,.5f,-.5f),new Vector3(-.5f,-.5f,-.5f));
+        Quad(vertices,walls,new Vector3(.5f,-.5f,-.5f),new Vector3(.5f,.5f,-.5f),new Vector3(.5f,.5f,.5f),new Vector3(.5f,-.5f,.5f));
+        Quad(vertices,walls,new Vector3(.5f,-.5f,.5f),new Vector3(.5f,.5f,.5f),new Vector3(-.5f,.5f,.5f),new Vector3(-.5f,-.5f,.5f));
+        Quad(vertices,walls,new Vector3(-.5f,.5f,-.5f),new Vector3(-.5f,.5f,.5f),new Vector3(.5f,.5f,.5f),new Vector3(.5f,.5f,-.5f));
+        Quad(vertices,walls,new Vector3(-.5f,-.5f,.5f),new Vector3(-.5f,-.5f,-.5f),new Vector3(.5f,-.5f,-.5f),new Vector3(.5f,-.5f,.5f));
+        var levels=new List<float> { 0 };
+        for(int i=1;i<Mathf.FloorToInt(height/3);i++) { levels.Add(i*3-.6f); levels.Add(i*3+.6f); }
+        levels.Add(height);
+        float[] columns={-.5f,-.36f,.36f,.5f};
+        for(int y=0;y<levels.Count-1;y++) for(int x=0;x<3;x++)
+        {
+            float bottom=levels[y]/height-.5f, top=levels[y+1]/height-.5f;
+            Quad(vertices,x==1 && y%2==1 ? windows : walls,
+                new Vector3(columns[x],bottom,-.5f),new Vector3(columns[x],top,-.5f),
+                new Vector3(columns[x+1],top,-.5f),new Vector3(columns[x+1],bottom,-.5f));
+        }
+        SurfaceMesh(go,vertices,new[]{walls,windows},new[]{wall,glass});
+    }
+    static void Valley(GameObject root,Material grass,Material water,Material road)
+    {
+        var go=new GameObject("Valley floor"); go.transform.SetParent(root.transform,false);
+        go.transform.localPosition=Vector3.down*149;
+        var vertices=new List<Vector3>();
+        var regions=new[]{new List<int>(),new List<int>(),new List<int>()};
+        float[] xs={-1800,-247.5f,-242.5f,-215,215,1800};
+        float[] zs={-500,-5,275,805,1045,2400};
+        for(int z=0;z<zs.Length-1;z++) for(int x=0;x<xs.Length-1;x++)
+        {
+            float mx=(xs[x]+xs[x+1])*.5f, mz=(zs[z]+zs[z+1])*.5f;
+            int region=mx>-215 && mx<215 && mz>275 && mz<805 ? 1 :
+                mx>-247.5f && mx<-242.5f && mz>-5 && mz<1045 ? 2 : 0;
+            Quad(vertices,regions[region],new Vector3(xs[x],0,zs[z]),new Vector3(xs[x],0,zs[z+1]),
+                new Vector3(xs[x+1],0,zs[z+1]),new Vector3(xs[x+1],0,zs[z]));
+        }
+        SurfaceMesh(go,vertices,regions,new[]{grass,water,road});
+    }
+    static void Quad(List<Vector3> vertices,List<int> triangles,Vector3 a,Vector3 b,Vector3 c,Vector3 d)
+    {
+        int n=vertices.Count; vertices.Add(a); vertices.Add(b); vertices.Add(c); vertices.Add(d);
+        triangles.Add(n); triangles.Add(n+1); triangles.Add(n+2);
+        triangles.Add(n); triangles.Add(n+2); triangles.Add(n+3);
+    }
+    static void SurfaceMesh(GameObject go,List<Vector3> vertices,List<int>[] triangles,Material[] materials)
+    {
+        var mesh=new Mesh { name=go.name }; mesh.SetVertices(vertices); mesh.subMeshCount=triangles.Length;
+        for(int i=0;i<triangles.Length;i++) mesh.SetTriangles(triangles[i],i);
+        mesh.RecalculateNormals(); mesh.RecalculateBounds();
+        go.AddComponent<MeshFilter>().sharedMesh=mesh;
+        var renderer=go.AddComponent<MeshRenderer>(); renderer.sharedMaterials=materials;
+        renderer.shadowCastingMode=ShadowCastingMode.Off; renderer.receiveShadows=false;
     }
     static Material Surface(string name,Color color)
     {

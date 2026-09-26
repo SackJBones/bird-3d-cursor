@@ -56,7 +56,7 @@ A sphere diagnostic fades when that fit ceases to define the point.
 ## Experimental depth presentation
 
 Default choices are a **32 mm physical diameter through 4 m**, an inflation
-band from 4 to 20 m reaching 11x diameter, then square-root growth. Beyond that
+band from 4 to 20 m reaching 9.5x diameter (v0.8, reduced from v0.7's 11x), then square-root growth. Beyond that
 band the solid cursor continues shrinking in apparent size with distance.
 Plain inflation is the default after Dana's physical preference report.
 Three modes still permit comparison: fixed world size, inflation, and inflation with
@@ -78,18 +78,20 @@ The diagnostic renderer preserves real positions through 100 m, then maps
 display depth continuously into a shell asymptoting to 500 m. Direction and
 angular size use the original logical distance. This avoids the demo's previous
 20 m hide threshold without feeding false coordinates to interactions.
-It needs a camera far clip beyond that shell. It is **not a complete solution
-for occlusion against distant world geometry**: a host must supply a suitable
-overlay/depth policy, or use an appropriate world renderer. Very large logical
-coordinates also retain floating-point precision limits.
+It needs a camera far clip beyond that shell. Version 0.8 supplies logical
+fragment depth for the core, locator and each trail point, so opaque scenery
+can hide a cursor behind distant mountains without clamping Bird's point.
+See the [depth policy and actual render evidence](DEPTH-STEREO-OCCLUSION.md).
+Very large logical coordinates retain floating-point precision limits.
 
 ## Evidence and remaining experiments
 
-The [stereo and occlusion probe](DEPTH-STEREO-OCCLUSION.md) now quantifies the
-shared shell: under 0.13 pixel extra disparity in its controlled camera setup,
-but two confirmed cases of a distant cursor showing through an opaque wall.
-Logical world occlusion remains unsolved; the successful probe is measurement
-evidence, not an occlusion pass or a headset stereo result.
+The stereo/depth fixture now passes on reversed Direct3D11 and conventional
+OpenGL depth, including partial and mixed-trail occlusion. The shared display
+shell still adds under 0.13 pixel disparity in that controlled camera setup;
+this is not proof of headset stereo comfort, GPU performance or exact binocular
+registration. Built-in perspective cameras and opaque scene occlusion are the
+current supported presentation case.
 
 The shared hand fixture now tests articulated finger chains, including flat,
 closed and planar folded inputs, ordinary legacy parity at shipped parameters,

@@ -47,7 +47,7 @@ public sealed class UnityDepthVisualChecks : MonoBehaviour
         var previousStyle=new BirdDepthStyle { inflationFactor=8, farTrailAngleRadians=.0008f };
         foreach(float d in new[]{20f,100f,1000f,1e6f})
         {
-            Require(BirdDepthVisual.TargetDiameter(d,BirdDepthVisual.SizeMode.Inflation)>1.3f*BirdDepthVisual.TargetDiameter(d,BirdDepthVisual.SizeMode.Inflation,previousStyle),"Far cursor not more salient"); checks++;
+            Require(BirdDepthVisual.TargetDiameter(d,BirdDepthVisual.SizeMode.Inflation)>1.1f*BirdDepthVisual.TargetDiameter(d,BirdDepthVisual.SizeMode.Inflation,previousStyle),"Far cursor not more salient"); checks++;
             Require(BirdDepthVisual.TrailWidth(d)>1.9f*BirdDepthVisual.TrailWidth(d,previousStyle),"Far trail not thicker"); checks++;
         }
         // Closed-form response to T(t)=initial*exp(rate*t), checked across

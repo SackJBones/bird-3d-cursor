@@ -1,0 +1,6 @@
+logical_m,wall_m,expected_visible,observed_visible,cyan_pixels
+2,1,False,False,0
+1000,300,False,False,0
+1000,600,False,False,0
+1000,1500,True,True,32
+1000000,600,False,False,0

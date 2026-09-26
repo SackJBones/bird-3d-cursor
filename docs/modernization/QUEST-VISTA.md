@@ -115,3 +115,28 @@ physical scale references. Pictures establish scene composition, not headset
 comfort or device performance. The previously measured far-shell occlusion
 limitation still applies against distant world geometry and remains a separate
 task; the environment does not fix it.
+
+
+## v0.8: scenery depth and calmer inflation
+
+The Quest scale harness remains a test environment, explicitly not the intended
+VRChat Bird World. Preserve the accepted high-overlook arrangement while fixing
+its rendering. Ground, lake and road now partition one planar mesh into disjoint
+material regions; window bands replace facade cells rather than overlap a backing
+wall. The camera near plane moves from 5 mm to 5 cm (world far remains 5 km),
+improving ordinary depth precision by roughly tenfold at distant landmarks.
+A mere centimeter offset would not reliably separate conventional-depth surfaces
+hundreds of meters away with the old clip ratio. No extra height labels.
+
+The optional marker inflation factor decreases 11 -> 9.5 (about 14% smaller at
+and beyond 20 m). Far trail/locator salience remains; near 32 mm/2 mm sizes through
+4 m and immediate return shrink remain. Logical-depth rendering lets Bird pass
+behind the landscape; hiding its appearance does not move its geometric point.
+
+Eight actual vista images and 48 moving-camera diagnostic color samples pass on
+both D3D11 and OpenGLCore. The samples probe grass, lake, road and a building
+window away from silhouette edges. No competing material appeared. Far salience
+comparison was moved into visible sky because a correctly occluded cursor behind
+the mountain must not count as a visibility failure. Old v0.6/new v0.8 profiles
+yield 0/17 high-contrast cyan pixels in that specific fixture. This threshold is
+not total emitted pixels or a perceptual study. Headset feel remains separate.

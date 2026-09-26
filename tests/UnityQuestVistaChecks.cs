@@ -51,7 +51,7 @@ public sealed class UnityQuestVistaChecks : MonoBehaviour
                 cursor.style=variant==0 ? new BirdDepthStyle { inflationFactor=8,farTrailAngleRadians=.0008f,locatorAngleRadians=.0035f,locatorLineAngleRadians=.0008f,locatorOpacity=.55f,locatorOutlineOpacity=0,farTrailOpacity=.65f } : new BirdDepthStyle();
                 for(int frame=0;frame<32;frame++)
                 {
-                    Vector3 direction=new Vector3((frame-16)*.003f,.025f*Mathf.Sin(frame*.2f)-.07f,1).normalized;
+                    Vector3 direction=new Vector3((frame-16)*.003f,.025f*Mathf.Sin(frame*.2f)+.20f,1).normalized;
                     cursor.Draw(camera.transform.position+direction*1e6f,camera,false,3+frame/72f,1f/72);
                 }
                 Capture(camera,texture,pixels,variant==0 ? "far-before" : "far-after");
@@ -62,11 +62,38 @@ public sealed class UnityQuestVistaChecks : MonoBehaviour
             Capture(camera,texture,pixels,"furniture");
             camera.transform.position=new Vector3(10,5,16); camera.transform.LookAt(new Vector3(0,1.5f,0));
             Capture(camera,texture,pixels,"house-exterior");
+            int stableSamples=CheckSurfaceStability(camera,texture,pixels,root);
             camera.targetTexture=null; RenderTexture.active=null; texture.Release(); Destroy(texture); Destroy(pixels);
-            File.WriteAllText("vista-result.txt","PASS: actual Unity high-overlook rendering; eight captures; table/building scale, lower terrain and absent labels checked. Far cyan coverage "+salientPixels[0]+" -> "+salientPixels[1]+" pixels. Not headset comfort/performance validation.");
+            File.WriteAllText("vista-result.txt","PASS: actual Unity high-overlook rendering; eight captures; table/building scale, lower terrain and absent labels checked. Stable moving-camera ground/window samples "+stableSamples+". Far cyan coverage "+salientPixels[0]+" -> "+salientPixels[1]+" pixels. Not headset comfort/performance validation.");
             SessionState.SetBool(Active,false); EditorApplication.Exit(0);
         }
         catch(Exception e) { File.WriteAllText("vista-result.txt","FAIL: "+e); SessionState.SetBool(Active,false); EditorApplication.Exit(1); }
+    }
+    static int CheckSurfaceStability(Camera camera,RenderTexture target,Texture2D readback,GameObject root)
+    {
+        // Distinct diagnostic colors expose a backing surface winning the depth
+        // test. Probe well inside each region while translating the camera;
+        // lighting, fog and edge antialiasing cannot masquerade as flicker.
+        RenderSettings.fog=false;
+        var valley=root.transform.Find("Valley floor").GetComponent<Renderer>();
+        var tower=root.transform.Find("Lakeside building").GetComponent<Renderer>();
+        Color[] ground={Color.green,Color.blue,Color.red}, facade={Color.yellow,Color.magenta};
+        for(int i=0;i<3;i++) { valley.sharedMaterials[i].shader=Shader.Find("Unlit/Color"); valley.sharedMaterials[i].color=ground[i]; }
+        for(int i=0;i<2;i++) { tower.sharedMaterials[i].shader=Shader.Find("Unlit/Color"); tower.sharedMaterials[i].color=facade[i]; }
+        Vector3[] localPoints={new Vector3(250,-149,250),new Vector3(0,-149,540),new Vector3(-245,-149,80),new Vector3(65,-134,326.75f)};
+        Color[] expected={Color.green,Color.blue,Color.red,Color.magenta}; int samples=0;
+        for(int point=0;point<localPoints.Length;point++) for(int frame=0;frame<12;frame++)
+        {
+            camera.transform.position=new Vector3(.02f*Mathf.Sin(frame),1.65f+.005f*Mathf.Cos(frame),6);
+            camera.transform.LookAt(root.transform.TransformPoint(localPoints[point]));
+            camera.Render(); RenderTexture.active=target;
+            readback.ReadPixels(new Rect(0,0,1600,1000),0,0); readback.Apply();
+            Color actual=readback.GetPixel(800,500);
+            float error=Mathf.Abs(actual.r-expected[point].r)+Mathf.Abs(actual.g-expected[point].g)+Mathf.Abs(actual.b-expected[point].b);
+            if(error>.05f) throw new Exception("Surface flicker/coverage at region "+point+" frame "+frame+": "+actual);
+            samples++;
+        }
+        return samples;
     }
     static void Capture(Camera camera,RenderTexture target,Texture2D readback,string name)
     {

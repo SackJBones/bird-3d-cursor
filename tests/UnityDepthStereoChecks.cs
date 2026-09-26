@@ -8,7 +8,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
-// Measures the shared display shell; explicitly reports known wrong occlusion.
+// Measures the shared display shell and logical world-depth occlusion.
 // Parallel mono eye cameras are a geometry probe, not a headset stereo test.
 public sealed class UnityDepthStereoChecks : MonoBehaviour
 {
@@ -19,7 +19,7 @@ public sealed class UnityDepthStereoChecks : MonoBehaviour
     RenderTexture texture;
     Texture2D readback;
     int captures, controls;
-    struct Measurement { public int cyanPixels; public float centerX; }
+    struct Measurement { public int cyanPixels; public float centerX; public int maxX; }
 
     public static void Run()
     {
@@ -102,8 +102,8 @@ public sealed class UnityDepthStereoChecks : MonoBehaviour
                 Measurement m = Capture(center, "occlusion-" + i);
                 bool observedVisible = m.cyanPixels > 0;
                 if (expectedVisible != observedVisible) wrong++;
-                // Controls: near wall, wall in front of shell, wall behind target.
-                if (i == 0 || i == 1 || i == 3)
+                // Every world-depth case must agree, including beyond the shell.
+                if (true)
                 {
                     Require(observedVisible == expectedVisible, "Occlusion control failed");
                     controls++;
@@ -127,10 +127,36 @@ public sealed class UnityDepthStereoChecks : MonoBehaviour
             wall.SetActive(false);
             Require(Capture(center, "direct-world-no-wall").cyanPixels > 0, "Direct-world reference marker missing");
             controls += 2;
+            reference.SetActive(false); visual.gameObject.SetActive(true);
+            visual.Clear(); visual.Draw(Vector3.forward*1000,center,false,1,1f/72);
+            int whole=Capture(center,"partial-control").cyanPixels;
+            wall.SetActive(true); wall.transform.position=new Vector3(45,0,600);
+            int half=Capture(center,"partial-occlusion").cyanPixels;
+            Require(half>whole*.2f && half<whole*.8f,"Partial silhouette must occlude only covered fragments"); controls++;
+            visual.Clear(); visual.showTrail=true; visual.style.showFarLocator=false;
+            // One ribbon span crosses the 600m wall: independently, perspective
+            // 1/z interpolation crosses at x=515px (400m -> 1000m endpoints).
+            wall.transform.position=Vector3.forward*600;
+            visual.Draw(new Vector3(-12,0,400),center,false,2,.02f);
+            visual.Draw(new Vector3(30,0,1000),center,false,2.02f,.02f);
+            var mixed=Capture(center,"mixed-depth-trail");
+            Require(mixed.cyanPixels>5 && mixed.centerX<510 && mixed.maxX<=517,
+                "Trail did not preserve separate logical depths: "+mixed.cyanPixels+" / "+mixed.centerX+" / "+mixed.maxX); controls++;
+            // A complete far ribbon, outline and body must all disappear.
+            visual.Clear(); visual.style.showFarLocator=true;
+            for(int n=0;n<20;n++) visual.Draw(new Vector3((n-10)*3,0,1000),center,false,3+n*.02f,.02f);
+            Require(Capture(center,"far-trail-hidden").cyanPixels==0,"Far trail leaked through world"); controls++;
+            wall.SetActive(false); visual.Clear(); visual.showTrail=false;
+            visual.style=new BirdDepthStyle { nearDiameter=2,showFarLocator=false };
+            RenderSettings.skybox=new Material(Shader.Find("Skybox/Procedural"));
+            center.clearFlags=CameraClearFlags.Skybox;
+            visual.Draw(Vector3.forward*1e6f,center,false,4,.02f);
+            Require(Capture(center,"beyond-clip-against-sky").cyanPixels>3,"Skybox painted over beyond-clip core"); controls++;
+            Require(wrong==0,"World occlusion mismatch");
             File.WriteAllText(Folder + "/occlusion.csv", occlusion.ToString());
             string result = string.Format(Invariant,
-                "MEASURED: 24 stereo configurations, max excess disparity={0:F6}px at 1024px/60deg, identity through 100m; {1} real Unity captures; {2} occlusion controls passed; {3}/5 logical-occlusion mismatches. Shared-shell depth is NOT world-correct. Parallel mono-eye geometry only; no headset stereo/perception claim.",
-                maxError, captures, controls, wrong);
+                "PASS: 24 stereo configurations, max excess disparity={0:F6}px at 1024px/60deg, identity through 100m; {1} real Unity captures; {2} occlusion controls passed; {3}/5 logical-occlusion mismatches. Logical fragment depth agrees with opaque world controls, partial silhouettes and mixed-depth trails. GPU={4}; reversedZ={5}. Parallel mono-eye geometry only; no headset stereo/perception claim.",
+                maxError, captures, controls, wrong, SystemInfo.graphicsDeviceType, SystemInfo.usesReversedZBuffer);
             File.WriteAllText("depth-stereo-result.txt", result);
             Debug.Log(result);
             SessionState.SetBool(Active, false);
@@ -151,7 +177,7 @@ public sealed class UnityDepthStereoChecks : MonoBehaviour
         camera.enabled = false;
         camera.stereoTargetEye = StereoTargetEyeMask.None;
         camera.transform.position = new Vector3(x, 0, 0);
-        camera.nearClipPlane = .005f;
+        camera.nearClipPlane = .05f;
         camera.farClipPlane = 2000;
         camera.fieldOfView = 60;
         camera.clearFlags = CameraClearFlags.SolidColor;
@@ -170,7 +196,7 @@ public sealed class UnityDepthStereoChecks : MonoBehaviour
         readback.Apply();
         Color32[] data = readback.GetPixels32();
         double weightedX = 0, total = 0;
-        int count = 0;
+        int count = 0, maxX = -1;
         for (int i = 0; i < data.Length; i++)
         {
             Color32 c = data[i];
@@ -178,11 +204,11 @@ public sealed class UnityDepthStereoChecks : MonoBehaviour
             if (strength < 20) continue;
             weightedX += (i % Pixels + .5) * strength;
             total += strength;
-            count++;
+            count++; maxX=Math.Max(maxX,i%Pixels);
         }
         File.WriteAllBytes(Folder + "/" + name + ".png", readback.EncodeToPNG());
         captures++;
-        return new Measurement { cyanPixels = count, centerX = total > 0 ? (float)(weightedX / total) : -1 };
+        return new Measurement { cyanPixels = count, maxX=maxX, centerX = total > 0 ? (float)(weightedX / total) : -1 };
     }
 
     static void Require(bool condition, string message) { if (!condition) throw new Exception(message); }

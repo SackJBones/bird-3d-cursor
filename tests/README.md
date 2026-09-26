@@ -170,3 +170,23 @@ Temporal recording audit: UnityQuestTemporalChecks.cs lives in the generated han
 Filter candidate comparison: UnityQuestFilterExperiments.Run is editor-only and uses UnityQuestTemporalChecks.ReturnMetrics. The runner copies both helpers to Assets/Editor. Use the temporal audit invocation but change the executeMethod to UnityQuestFilterExperiments.Run. It measures legacy, log-radial and flat-influence elastic history on private recorded input and 30/72/120 Hz synthetic trajectories, checking ordinary behavior, outward reach, transforms, onset, fist and recovery. It exits itself and writes filter-experiments-result.txt plus a private per-event CSV. No candidate changes runtime or the APK; see docs/modernization/FILTER-CANDIDATES.md for the measured tradeoff and remaining validation.
 
 Quest v0.7: shared UnityPalmFitChecks adds closed-hand index-lever press/hold/release with singular fists, mirrored/rigid/three-scale cases and cancellation (5549 total hand assertions in C# and compiled Udon). UnityQuestVistaChecks now renders eight high-overlook views, verifies lower terrain/absent labels, and compares old/new far style against the same bright background using strict cyan coverage. UnityDepthMotionChecks also verifies far locator/contrast-edge hiding and clearing on return. See CLOSED-HAND-CLICKS.md and QUEST-VISTA.md for scope and physical-testing limits.
+
+
+### Logical depth and stable surfaces (v0.8)
+
+After staging current Quest helper sources with the live-hands build runner,
+run `UnityDepthStereoChecks.Run` in the generated Quest project with graphics
+on, once with `-force-d3d11`, once with `-force-glcore`. Do not pass `-quit`;
+the Play Mode fixture exits itself. Use separate `-logFile` paths and preserve
+`depth-stereo-result.txt` between runs. PASS now requires zero logical wall
+mismatches plus partial silhouettes, per-point mixed-depth trail, completely
+hidden trail and beyond-clip core over skybox. This replaces the historical
+MEASURED report that accepted two known failures. Parallel mono eyes do not
+validate actual XR single-pass rendering or perception.
+
+`UnityQuestVistaChecks.Run` also checks 48 moving-camera diagnostic material
+samples in grass/lake/road/window interiors; test on both APIs. The far salience
+comparison is deliberately in sky to avoid treating correct mountain occlusion
+as a missing-marker failure. `UnityDepthMotionChecks.Run` checks near/return
+behavior. The Android builder retains Bird/LogicalDepth explicitly; inspect
+GLES3 compilation in the build log. Actual device performance remains separate.

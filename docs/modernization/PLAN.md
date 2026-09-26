@@ -4,25 +4,33 @@
 
 The verbatim initial request is [user-request.txt](user-request.txt). Keep Bird free, easy to try, expressive, and easy to integrate. The adoption journey is: see someone using Bird, visit Bird World, immediately try it, keep using it socially, then optionally become a developer. Do not silently reduce this to a conventional ray pointer.
 
-Work in small passes every two hours, approximately 10–15 minutes of active work per pass, one coherent checkpoint. This is a pacing guideline, not a guaranteed usage cap. Commit and push meaningful work each pass; never force-push. Stop inventing work when the acceptance criteria are met. Report completion once. Record blocked gates honestly and continue independent work without repeatedly reporting unchanged blockers.
+Work every two hours in substantial passes, approximately 45–60 minutes of active work per pass, finishing coherent checkpoints and their verification. Dana explicitly requested longer cycles on 2026-09-26. This is a pacing guideline, not a guaranteed usage cap. Commit and push meaningful work each pass; never force-push. Stop inventing work when the acceptance criteria are met. Report completion once. Record blocked gates honestly and continue independent work without repeatedly reporting unchanged blockers.
 
 Use `feature/vrchat-modernization` in both repositories. All maintained package code belongs in `SackJBones/bird-3d-cursor`; full projects, large scenes and assets belong in `SackJBones/bird-3d-cursor-projects`. Pin dependencies to reproducible revisions. Create eventual review PRs; do not merge unfinished work. Later engine integrations branch off this feature branch, with separate large demo repositories where necessary.
 
 ## Current priorities, 2026-09-26 UTC
 
-Dana now reports that the installed v0.6 range transition feels very good.
-Preserve that geometric/range/filter baseline. Version 0.7 addresses downstream
-feedback: more salient far cursor/trail, index-lever clicks through the closed
-hand region, and a high overlook over lower terrain with near/far mountains.
-See [closed-hand clicking](CLOSED-HAND-CLICKS.md) and the latest checkpoint.
-The return-filter candidates below remain editor experiments; they have not
-been installed and are not the source of Dana's positive physical report.
-Keep further filter experiments optional while improving the accepted demo.
+Dana physically likes v0.7 and the accepted range transition. Version 0.8
+corrects logical-world visual depth, replaces competing ground/window surfaces,
+and modestly reduces inflation. It has built, installed and started on Quest;
+actual physical v0.8 feel remains separate. Preserve the v0.6 hand geometry,
+polynomial and filtering plus v0.7 closed-hand click policy. The return-filter
+candidates below remain optional editor experiments.
 
 - [x] Restore closed-hand clicking independently of the geometric point, including singular folded fists, mirrored hands and loss/recovery checks in Unity and compiled Udon.
-- [x] Increase far salience while retaining fixed near size and immediate shrink; inspect real rendered vista comparisons and rapid returns.
-- [x] Rearrange the environment around a high balcony overlooking a valley and mountain layers; remove height labels.
-- [ ] Assess v0.7 close-hand click comfort, far visibility and overlook composition physically; no additional recording is required to continue independent work.
+- [x] Retain far trail/locator salience, reduce excessive 11x inflation to 9.5x, preserve fixed near size and immediate shrink.
+- [x] Correct the 500 m display-shell/world-depth mismatch; verify full/partial/trail occlusion on D3D11 and OpenGL and compile the GLES3 shader into the APK.
+- [x] Replace lake/road/window overlaps and improve camera depth precision; verify stable moving-camera surface coverage.
+- [ ] Assess v0.8 on-headset depth/visibility/performance physically; do not block independent work.
+
+Dana's latest direction is to prioritize working Bird UI in upcoming cycles.
+Explore local Unity history, especially MIT Dropbox/Dana Gretton/Unity, before
+recreating existing interactions. Recover the newer BaseMenuElement family and
+the main menu that launches demo scenes, establish approximate chronology and
+preserve readable custom source with provenance. Then adapt the existing design
+into the maintained package and VRChat world. The overlook is a standalone scale
+test harness, explicitly not the intended final Bird World. Keep the original
+adoption flow, mandala and paired Hanoi milestones.
 
 Dana physically tested v0.5 and supplied a 20-second joint recording. A full
 open palm-normal aim required awkward wrist angles. Version 0.6 adds a 45-degree
@@ -50,8 +58,8 @@ while awaiting physical feedback.
 
 Bird specifies a geometric point; keep interaction and optional presentation
 downstream. Preserve constant physical marker size through the natural working
-volume and enormous logical reach. The known far-world occlusion issue remains
-open. Physical feel must be reported separately from synthetic checks.
+volume and enormous logical reach. Opaque world occlusion now passes the controlled render probes; actual
+headset behavior and transparent-world policies remain separate. Physical feel must be reported separately from synthetic checks.
 
 ### Proposed paired Towers of Hanoi demo and shared object interaction
 
@@ -70,7 +78,7 @@ in the recurring-task prompt.
 - [ ] Validate cancellation, invalid drop rollback, tracking loss, safe return, scale changes and both instance sizes; assess physical usability separately.
 
 This is an approved proposed demo/framework milestone, not an implemented Hanoi
-scene. Finish the hand-limit correction and validation first. Historical entries
+scene. UI recovery and interaction integration are the immediate main-plan priority. Historical entries
 below remain a chronological record.
 
 ## Inventory, 2026-09-19
