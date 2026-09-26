@@ -40,7 +40,8 @@ the recovered capabilities are sufficient and the launcher is not a blocker.
 - [x] Adapt local menu gates/focus/actions and spherical interaction into seven supported Udon components; saved BirdUiDemo station and 441 compiled VM/normal-LateUpdate ClientSim assertions. Windows/Android SDK artifacts pass catalog loading; an internal build-log failure line remains unresolved, and client loading is pending. See [UI-UDON.md](UI-UDON.md).
 - [x] Add separate map rotation/range scaling and an authored BirdMapDemo alongside colors and paired Hanoi; range law, reentry, mode actions and compiled normal-frame checks pass.
 - [x] Add separate five-state artwork authoring with fixed hit geometry, conventional serialized styles, finite-duration retargeting and restoration in Unity and Udon; see [UI-VISUAL-STATES.md](UI-VISUAL-STATES.md).
-- [ ] Extend placement-aware object rotation/scaling and useful live-hand manipulation testing; retain explicit collision/lift and shared-reservation work.
+- [x] Extend ordinary Unity grabbing with opt-in bounded rotation/uniform scaling, pose-aware docks and full-pose rollback; 5989 pose assertions, a two-scale preview and standalone player pass. See [OBJECT-POSE.md](OBJECT-POSE.md).
+- [ ] Adapt the pose contract into local Udon and an intentional Bird gesture/mode; assess useful live-hand manipulation independently. Retain explicit collision/lift and shared-reservation work.
 - [ ] Validate real VRChat hand input, client/mobile runtime, multiplayer policy and physical UI feel; the new station uses explicitly labeled desktop demonstration input.
 
 Preserve the interaction flavor, not the improvised source structure. Dana wants

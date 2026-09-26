@@ -3,7 +3,9 @@
 The ordinary Unity package now contains `Bird3D.Manipulation` and an importable
 **Hanoi Preview** sample. A normal tabletop puzzle and full-size building
 sections share the same grip, work-volume, approach, placement and cancellation
-components. This is a tested Unity prototype toward Bird World. A separate
+components. Optional [held rotation/scaling and full-pose docks](OBJECT-POSE.md)
+now extend the same ordinary Unity transaction; Hanoi leaves those options off.
+This is a tested Unity prototype toward Bird World. A separate
 [local Udon adaptation](OBJECT-MANIPULATION-UDON.md) now runs in the authored
 BirdHanoiDemo world scene. Neither version has been added to the installed Quest application.
 
@@ -73,8 +75,9 @@ Attach these components through the Inspector or configure them before input
 starts. Register both pointers and all selectable objects with one interactor;
 do not give separate controllers the same input stream expecting shared arbitration.
 The target's box must be on it or a descendant and enclose all relevant geometry.
-The sample boxes also enclose the projecting windows. Targets are translation-only
-kinematic objects; no Rigidbody is required. The destination transform represents
+The sample boxes also enclose the projecting windows. Targets default to translation-only
+kinematic objects; opt in to pose controls as described in OBJECT-POSE.md. No
+Rigidbody is required. The destination transform represents
 the object's **pivot**, not the bottom of its box. Approach/capture distances use
 workspace-local units, so uniformly scaled experiences retain the same behavior.
 
@@ -94,8 +97,9 @@ Hanoi repositions three shared candidate slots when a piece is reserved. It neve
 removes a piece from the committed stack while it is held. Reset is refused while
 any piece is held or returning; the sample's reset command cancels first.
 
-Scene reconfiguration belongs between transactions. Frame, parent, shape, scale
-or rotation changes during a grip abort movement. This does not promise restoration
+Scene reconfiguration belongs between transactions. External frame, parent, shape, scale
+or rotation changes during a grip abort movement; pose requests go through the
+controller's optional constrained path. This does not promise restoration
 of externally edited geometry or the old world pose after the workspace itself
 has moved. Do not concurrently animate/physically simulate the owned transform.
 Optional feedback owns `_Color` while enabled and restores the captured property
@@ -119,12 +123,13 @@ players' walk/teleport areas outside the building workspace or add an explicit
 occupied-space policy.
 
 This slice does not prevent pieces passing through other pieces during free
-dragging, automatically lift over obstacles, rotate/scale held objects, allow
+dragging, automatically lift over obstacles, allow
 arbitrary free-space final drops, or synchronize multiple clients. Those policies
 belong above geometric Bird and should be deliberate follow-on work. A host that
 also runs a foreground menu must arbitrate that input or disable world gripping
 while the menu owns it; these independent consumers do not share a global click
-consumption mechanism. Map controls and richer general state animations remain open.
+consumption mechanism. Optional pose controls are documented separately; map controls
+and richer UI state artwork now have their own maintained components.
 
 The preview uses simple shaded boxes and dark window blocks with
 separated surfaces, shared instanced materials, visual guides and status text.
@@ -171,5 +176,5 @@ Android/headset, multiplayer or subjective-feel claim follows.
 The separate local Udon adaptation now adds compiled ClientSim coverage,
 menu/world input arbitration and an authored viewing-area gate. Those additions
 do not change this ordinary Unity module's documented scope. Actual hand-driven
-grip/snapping feel, the original adoption flow, mandala, map/object controls and
+grip/snapping feel, the original adoption flow, mandala, live object gestures and
 eventual shared/networked interaction policy remain further work.

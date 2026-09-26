@@ -1,5 +1,21 @@
 # Focused checks
 
+## Optional held pose and docking
+
+`Invoke-UnityPoseChecks.ps1 -UnityEditor <2022.3.22f1 executable> -ProjectPath
+<new-or-marked validation directory> -BuildPlayer` imports the real package and
+complete BirdPosePreview/material, then runs 5989 assertions, four editor captures
+and a Windows standalone normal-frame command/place/loss/cleanup check with two
+captures. Most assertions are repeated whole-box corner checks, including
+transformed/mirrored frames and both scene scales. Results reset per process;
+watchdogs reject incomplete runs. Normal player launch is interactive; its test
+driver requires `-birdPoseResult`.
+
+This extends the ordinary grab runtime, so the existing Hanoi runner was also
+rerun: 1216 assertions plus its build/player/render checks pass. Udon pose parity
+and physical hand input are separate. See
+[pose contracts and measurements](../docs/modernization/OBJECT-POSE.md).
+
 ## Menu visual states
 
 `Invoke-UnityVisualChecks.ps1 -UnityEditor <2022.3.22f1 executable> -ProjectPath

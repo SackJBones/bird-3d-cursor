@@ -5,7 +5,7 @@ using Bird3DCursor.UI;
 
 namespace Bird3DCursor.Manipulation
 {
-    /// <summary>One local transaction at a time, selected by either hand. Translation only; kinematic volumes.</summary>
+    /// <summary>One local kinematic transaction, with optional constrained rotation and uniform scaling.</summary>
     [AddComponentMenu("Bird/Manipulation/Grab Interactor")]
     [DefaultExecutionOrder(120)]
     public sealed class BirdGrabInteractor : MonoBehaviour
@@ -22,6 +22,10 @@ namespace Bird3DCursor.Manipulation
         public bool ReadyToPlace { get; private set; }
         public bool IsReturning { get; private set; }
         public Vector3 RawDesired { get; private set; }
+        public Quaternion RequestedLocalRotation { get; private set; }=Quaternion.identity;
+        public float RequestedScaleFactor { get; private set; }=1;
+        public float CurrentScaleFactor { get; private set; }=1;
+        public bool PoseLimited { get; private set; }
         readonly Dictionary<BirdPointerInput,uint> revisions=new Dictionary<BirdPointerInput,uint>();
         BirdPlacementRegion region;
         BirdPlacementRule rule;
@@ -29,8 +33,13 @@ namespace Bird3DCursor.Manipulation
         Vector3 home,anchor,previousDesired,returnStart,shapeCenter,shapeSize;
         Quaternion rotation;
         Vector3 scale;
+        Quaternion homeRotation,returnRotation,poseStartRotation;
+        Vector3 homeScale,returnScale,referenceScale;
+        float homeFactor,minimumFactor,maximumFactor;
+        bool poseRotation,poseScaling,hasReferenceScale;
         Transform parent;
-        Matrix4x4 frame;
+        Matrix4x4 frame,parentFrame;
+        double poseResponseIntegral,poseStartLogScale;
         Bounds allowed;
         float returnElapsed;
         bool processing;
@@ -63,6 +72,7 @@ namespace Bird3DCursor.Manipulation
                     Vector3 raw=home+(region.transform.InverseTransformPoint(p.Position)-anchor);
                     if(!BirdPlacementRegion.Finite(raw)) { Cancel(); Seed(); return; }
                     RawDesired=raw;
+                    AdvancePose(dt);
                     Vector3 desired=Guide(raw);
                     float rate=BirdPlacementRegion.Finite(followRate)?Mathf.Max(.01f,followRate):18;
                     Vector3 current=region.transform.InverseTransformPoint(ActiveTarget.transform.position);
@@ -115,13 +125,23 @@ namespace Bird3DCursor.Manipulation
         {
             Bounds bounds;
             if(!item.Region.TryPivotBounds(item.transform,item.Volume,out bounds)) return;
+            float factor=1;
+            bool knownScale=item.TryScaleFactor(item.transform.localScale,out factor);
+            if(item.AllowScaling && (!knownScale || !item.AllowsFactor(factor))) return;
+            if(!knownScale) factor=1;
             Vector3 start=item.Region.transform.InverseTransformPoint(item.transform.position);
             if((BirdPlacementRegion.Clamp(bounds,start)-start).sqrMagnitude>1e-8f) return;
             if(item.Rule!=null && !item.Rule.TryBegin(item)) return;
             ActiveTarget=item; ActivePointer=pointer; region=item.Region; rule=item.Rule; owner=pointer.UserId;
             home=previousDesired=start; anchor=region.transform.InverseTransformPoint(pointer.Position);
             parent=item.transform.parent; rotation=item.transform.localRotation; scale=item.transform.localScale;
-            frame=region.transform.localToWorldMatrix; allowed=bounds;
+            homeRotation=RequestedLocalRotation=rotation; homeScale=scale;
+            homeFactor=CurrentScaleFactor=RequestedScaleFactor=factor; PoseLimited=false;
+            poseStartRotation=rotation; poseStartLogScale=Math.Log(factor); poseResponseIntegral=0;
+            poseRotation=item.AllowRotation; poseScaling=item.AllowScaling; referenceScale=item.PoseReferenceScale;
+            hasReferenceScale=knownScale;
+            minimumFactor=item.MinimumScaleFactor; maximumFactor=item.MaximumScaleFactor;
+            frame=region.transform.localToWorldMatrix; parentFrame=parent!=null?parent.localToWorldMatrix:Matrix4x4.identity; allowed=bounds;
             shapeCenter=item.Volume.center; shapeSize=item.Volume.size;
             RawDesired=home; Candidate=null; ReadyToPlace=false; IsReturning=false; item.Owner=this;
             item.Grabbed.Invoke();
@@ -134,10 +154,80 @@ namespace Bird3DCursor.Manipulation
                 region!=null && region.isActiveAndEnabled && t.Region==region && t.Rule==rule &&
                 (rule==null || rule.isActiveAndEnabled) && region.transform.localToWorldMatrix==frame &&
                 t.transform.parent==parent && t.transform.localRotation==rotation && t.transform.localScale==scale &&
+                (parent!=null?parent.localToWorldMatrix:Matrix4x4.identity)==parentFrame &&
+                t.AllowRotation==poseRotation && t.AllowScaling==poseScaling && t.PoseReferenceScale==referenceScale &&
+                t.MinimumScaleFactor==minimumFactor && t.MaximumScaleFactor==maximumFactor &&
                 t.Volume.center==shapeCenter && t.Volume.size==shapeSize &&
                 (t.Volume.attachedRigidbody==null || t.Volume.attachedRigidbody.isKinematic) &&
                 region.TryPivotBounds(t.transform,t.Volume,out currentBounds) &&
                 (currentBounds.min-allowed.min).sqrMagnitude<1e-7f && (currentBounds.max-allowed.max).sqrMagnitude<1e-7f;
+        }
+        /// <summary>Request an absolute local orientation and authored-reference scale factor. Does not mutate the target until Process.</summary>
+        public bool TrySetHeldPose(Quaternion localRotation,float factor)
+        {
+            Quaternion unit; Bounds bounds;
+            if(!isActiveAndEnabled || ActiveTarget==null || IsReturning) return false;
+            if(!BirdPlacementRegion.Normalize(localRotation,out unit) || !PoseAllowed(unit,factor,out bounds))
+            { StopPoseRequest(); return false; }
+            if(unit.x!=RequestedLocalRotation.x || unit.y!=RequestedLocalRotation.y || unit.z!=RequestedLocalRotation.z || unit.w!=RequestedLocalRotation.w || factor!=RequestedScaleFactor)
+            { poseStartRotation=rotation; poseStartLogScale=Math.Log(CurrentScaleFactor); poseResponseIntegral=0; }
+            RequestedLocalRotation=unit; RequestedScaleFactor=factor; PoseLimited=false; return true;
+        }
+        public void ResetHeldPose() { TrySetHeldPose(homeRotation,homeFactor); }
+        bool PoseAllowed(Quaternion orientation,float factor,out Bounds bounds)
+        {
+            bounds=new Bounds();
+            if(ActiveTarget==null || region==null || !BirdPlacementRegion.Finite(factor) || factor<=0 ||
+                (!poseRotation && Quaternion.Angle(orientation,homeRotation)>.001f) ||
+                (poseScaling?!ActiveTarget.AllowsFactor(factor):Mathf.Abs(factor-homeFactor)>1e-6f)) return false;
+            return region.TryPivotBounds(ActiveTarget.transform,ActiveTarget.Volume,orientation,poseScaling?referenceScale*factor:homeScale,out bounds);
+        }
+        void AdvancePose(float dt)
+        {
+            if(!poseRotation && !poseScaling) return;
+            float rate=BirdPlacementRegion.Finite(followRate)?Mathf.Max(.01f,followRate):18;
+            poseResponseIntegral+=rate*(double)dt;
+            double response=1-Math.Exp(-poseResponseIntegral);
+            // Evaluate from this request's anchor, avoiding repeated small-angle slerp drift.
+            Quaternion nextRotation=Quaternion.Slerp(poseStartRotation,RequestedLocalRotation,(float)response);
+            float nextFactor=(float)Math.Exp(poseStartLogScale+(Math.Log(RequestedScaleFactor)-poseStartLogScale)*response);
+            Bounds bounds;
+            if(!PoseAllowed(nextRotation,nextFactor,out bounds))
+            {
+                // A feasible end orientation can have an infeasible intermediate swept box.
+                // Stop this request at the last valid sampled pose rather than forcing an invalid box.
+                StopPoseRequest(); return;
+            }
+            rotation=nextRotation; CurrentScaleFactor=nextFactor; scale=poseScaling?referenceScale*nextFactor:homeScale;
+            ActiveTarget.transform.localRotation=rotation; ActiveTarget.transform.localScale=scale; allowed=bounds;
+        }
+        void StopPoseRequest()
+        {
+            RequestedLocalRotation=poseStartRotation=rotation; RequestedScaleFactor=CurrentScaleFactor;
+            poseStartLogScale=Math.Log(CurrentScaleFactor); poseResponseIntegral=0;
+            PoseLimited=true; ReadyToPlace=false;
+        }
+        bool DestinationPose(BirdSnapTarget slot,out Quaternion orientation,out float factor,out Bounds bounds)
+        {
+            orientation=rotation; factor=CurrentScaleFactor; bounds=allowed;
+            if(PoseLimited) return false;
+            if(slot.matchRotation)
+            {
+                if(!BirdPlacementRegion.Finite(slot.rotationCaptureDegrees) || slot.rotationCaptureDegrees<0 || slot.rotationCaptureDegrees>180) return false;
+                Quaternion desired=parent!=null?Quaternion.Inverse(parent.rotation)*slot.transform.rotation:slot.transform.rotation;
+                if(!BirdPlacementRegion.Normalize(desired,out orientation) ||
+                    Quaternion.Angle(RequestedLocalRotation,orientation)>slot.rotationCaptureDegrees ||
+                    Quaternion.Angle(rotation,orientation)>slot.rotationCaptureDegrees) return false;
+            }
+            if(slot.matchScale)
+            {
+                if(!hasReferenceScale) return false;
+                factor=slot.scaleFactor;
+                if(!BirdPlacementRegion.Finite(factor) || factor<=0 || !BirdPlacementRegion.Finite(slot.scaleCaptureRatio) || slot.scaleCaptureRatio<0) return false;
+                float tolerance=Mathf.Log(1+slot.scaleCaptureRatio);
+                if(Mathf.Abs(Mathf.Log(RequestedScaleFactor/factor))>tolerance || Mathf.Abs(Mathf.Log(CurrentScaleFactor/factor))>tolerance) return false;
+            }
+            return PoseAllowed(orientation,factor,out bounds);
         }
         Vector3 Guide(Vector3 raw)
         {
@@ -160,8 +250,10 @@ namespace Bird3DCursor.Manipulation
             {
                 desired=guided;
                 // Never qualify a drop using the clamped or magnetically guided pose.
+                Quaternion finalRotation; float finalFactor; Bounds finalBounds;
                 ReadyToPlace=Vector3.Distance(raw,end)<=Candidate.captureRadius &&
-                    (BirdPlacementRegion.Clamp(allowed,end)-end).sqrMagnitude<1e-8f;
+                    DestinationPose(Candidate,out finalRotation,out finalFactor,out finalBounds) &&
+                    (BirdPlacementRegion.Clamp(finalBounds,end)-end).sqrMagnitude<1e-8f;
             }
             return BirdPlacementRegion.Clamp(allowed,desired);
         }
@@ -173,7 +265,11 @@ namespace Bird3DCursor.Manipulation
         void FinishDrop()
         {
             var item=ActiveTarget; var slot=Candidate;
-            if(!ReadyToPlace || slot==null || !Eligible(slot) || (rule!=null && !rule.TryCommit(item,slot))) { Cancel(); return; }
+            Quaternion finalRotation; float finalFactor; Bounds finalBounds;
+            if(!ReadyToPlace || slot==null || !Eligible(slot) || !DestinationPose(slot,out finalRotation,out finalFactor,out finalBounds) ||
+                (rule!=null && !rule.TryCommit(item,slot))) { Cancel(); return; }
+            if(poseRotation) item.transform.localRotation=finalRotation;
+            if(poseScaling) item.transform.localScale=referenceScale*finalFactor;
             Move(region.transform.InverseTransformPoint(slot.transform.position));
             Clear(); item.Placed.Invoke();
         }
@@ -190,6 +286,7 @@ namespace Bird3DCursor.Manipulation
             if(rule!=null) rule.Cancel(item);
             Candidate=null; ReadyToPlace=false; ActivePointer=null; IsReturning=true; returnElapsed=0;
             returnStart=region!=null?region.transform.InverseTransformPoint(item.transform.position):home;
+            returnRotation=item.transform.localRotation; returnScale=item.transform.localScale;
             item.Cancelled.Invoke();
         }
         void AdvanceReturn(float dt)
@@ -198,7 +295,19 @@ namespace Bird3DCursor.Manipulation
             returnElapsed+=dt;
             float duration=BirdPlacementRegion.Finite(returnDuration)?Mathf.Max(.01f,returnDuration):.25f;
             float t=Mathf.Clamp01(returnElapsed/duration);
-            Move(Vector3.Lerp(returnStart,home,t*t*(3-2*t)));
+            float weight=t*t*(3-2*t);
+            Vector3 point=Vector3.Lerp(returnStart,home,weight);
+            if(poseRotation || poseScaling)
+            {
+                Quaternion turn=poseRotation?Quaternion.Slerp(returnRotation,homeRotation,weight):ActiveTarget.transform.localRotation;
+                Vector3 size=poseScaling?Vector3.Lerp(returnScale,homeScale,weight):ActiveTarget.transform.localScale;
+                Bounds bounds;
+                if(!region.TryPivotBounds(ActiveTarget.transform,ActiveTarget.Volume,turn,size,out bounds))
+                { RestoreHomePose(); Move(home); Clear(); return; }
+                ActiveTarget.transform.localRotation=turn; ActiveTarget.transform.localScale=size;
+                point=BirdPlacementRegion.Clamp(bounds,point);
+            }
+            Move(point);
             if(t>=1) Clear();
         }
         public void CancelImmediately()
@@ -207,12 +316,19 @@ namespace Bird3DCursor.Manipulation
             if(ActiveTarget==null) { Clear(); return; }
             var item=ActiveTarget; bool notify=!IsReturning;
             if(rule!=null) rule.Cancel(item);
-            Move(home); Clear(); if(notify) item.Cancelled.Invoke();
+            RestoreHomePose(); Move(home); Clear(); if(notify) item.Cancelled.Invoke();
+        }
+        void RestoreHomePose()
+        {
+            if(ActiveTarget==null) return;
+            if(poseRotation) ActiveTarget.transform.localRotation=homeRotation;
+            if(poseScaling) ActiveTarget.transform.localScale=homeScale;
         }
         void Clear()
         {
             if(ActiveTarget!=null && ActiveTarget.Owner==this) ActiveTarget.Owner=null;
             ActiveTarget=null; ActivePointer=null; Candidate=null; HoveredTarget=null; ReadyToPlace=false; IsReturning=false; region=null; rule=null;
+            RequestedLocalRotation=Quaternion.identity; RequestedScaleFactor=CurrentScaleFactor=1; PoseLimited=false;
         }
     }
 }

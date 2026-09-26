@@ -12,6 +12,14 @@ namespace Bird3DCursor.Manipulation
         [Range(0,1)] public float attraction=.85f;
         [Min(1)] public float exitMultiplier=1.4f;
         public Vector3 localApproachDirection=Vector3.up;
+        [Header("Optional final pose")]
+        [Tooltip("Use this target's world orientation. No automatic rotational attraction is applied.")]
+        public bool matchRotation;
+        public bool matchScale;
+        [Min(.0001f)] public float scaleFactor=1;
+        [Range(0,180)] public float rotationCaptureDegrees=12;
+        [Tooltip("Relative scale tolerance, e.g. 0.08 allows an 8 percent ratio in either direction.")]
+        [Min(0)] public float scaleCaptureRatio=.08f;
 
         public bool Evaluate(BirdPlacementRegion region,Vector3 raw,out Vector3 end,out Vector3 guided,out float distance)
         {

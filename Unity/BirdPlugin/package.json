@@ -32,7 +32,7 @@
       },
       {
         "displayName": "Hanoi Preview",
-        "description": "Paired tabletop and full-scale building puzzles sharing bounded grip, approach guidance, placement and cancellation. Desktop or caller-fed logical input.",
+        "description": "Paired tabletop/building puzzles and optional rotation/size-aware pose docks sharing bounded grip and cancellation. Desktop or caller-fed logical input.",
         "path": "Samples~/HanoiPreview"
       }
     ],

@@ -37,10 +37,39 @@ configure outside an active transaction.
 This is translation and allowed-destination placement, not physical collision
 avoidance or an automatically networked puzzle. Pieces can pass through one
 another while moving. The host must keep the user's movement area outside a
-distant building workspace. Menu and world input arbitration, rotation/scaling,
-Udon adaptation, VRChat-client and physical hand testing remain future work.
+distant building workspace. A separate local Udon adaptation includes menu/world
+arbitration and a viewing-area gate; it does not run these ordinary MonoBehaviours.
+VRChat-client and physical hand testing remain separate work.
 
 Measured on Unity 2022.3.22f1 / D3D11: 1216 editor assertions, six camera captures,
 and a Windows standalone build/runtime/render pass with synthetic input. See the
 repository's `docs/modernization/OBJECT-MANIPULATION.md` for contracts, limitations
 and the reproducible test runner. This sample is not installed on Quest by importing it.
+
+## Optional pose docking
+
+Attach `BirdPosePreview` in a separate empty scene to try rotation and size-aware
+docks at tabletop and building scale. Hold left mouse to move as above; **Q/E**
+rotate 15 degrees, **minus/plus** resize, **R** requests the acquired orientation
+and size, and right mouse/Escape cancels the whole placement. The second outline
+requires a 90-degree turn and 1.25x size. Position alone cannot qualify the drop.
+
+On your own `BirdGrabTarget`, enable Allow Rotation/Allow Scaling, capture the
+authored Pose Reference Scale through its context menu and set factor limits.
+That reference persists across placements. A `BirdSnapTarget` can require its
+world rotation and an exact reference factor, with explicit capture tolerances.
+Leave these options off for translation-only pieces such as Hanoi.
+
+`BirdHeldPoseControls` exposes float-valued UnityEvent commands for rotation and
+resizing. A gesture adapter can instead call `BirdGrabInteractor.TrySetHeldPose`
+with an absolute local quaternion and reference factor. This requests a bounded
+pose; do not write the held Transform concurrently. Rotation/size gestures are
+experience choices, separate from Bird's geometric point and press input.
+
+Normal rollback restores position, orientation and size. A narrow workspace with
+an impossible return orientation falls back to the committed pose immediately.
+These are per-frame volume limits, not swept collision avoidance. See maintained
+`docs/modernization/OBJECT-POSE.md` for full ownership, timing and capture contracts.
+This pose extension currently belongs to ordinary Unity; Udon pose parity and
+live-hand integration remain pending. The example accepts the same external input
+and camera options as the Hanoi preview and cleans up its generated hierarchy.
