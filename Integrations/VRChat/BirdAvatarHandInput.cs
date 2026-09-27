@@ -107,7 +107,10 @@ public class BirdAvatarHandInput : UdonSharpBehaviour
         }
         normal = Vector3.Cross(bonePositions[4]-bonePositions[1], bonePositions[13]-bonePositions[1]);
         if (!FiniteVector(normal) || normal.sqrMagnitude < .000000000001f) return;
-        normal = normal.normalized * (rightHand ? 1 : -1);
+        // Ordered thumb/index/little winding faces the BACK of a right hand.
+        // Unlike the OpenXR host, avatar input has no tracked palm rotation to
+        // repair a reversed sign. Keep this anatomical handedness explicit.
+        normal = normal.normalized * (rightHand ? -1 : 1);
         dataReady = true;
     }
 
@@ -177,8 +180,12 @@ public class BirdAvatarHandInput : UdonSharpBehaviour
             (!calibrated ? "Awaiting calibration" : !dataReady ? "Paused / SET retained" : cursor != null && cursor.poseValid ? "Bird active" : "No valid Bird point")+"\n"+
             (calibrated && !dataReady ? "Waiting for usable avatar bones." : calibrationMessage);
         if (calibrated && cursor != null && cursor.poseValid)
+        {
             status.text += "\nCurl "+cursor.bendDegrees.ToString("F0")+" deg / desired "+RangeLabel((cursor.rawPosition-cursor.handRoot).magnitude)+
                 " / shown "+RangeLabel((cursor.position-cursor.handRoot).magnitude);
+            status.text += cursor.fitter.fitValid ? "\nFit radius "+cursor.fitter.radius.ToString("F3")+" m / cond. "+cursor.fitter.confidence.ToString("F2") : "\nFit singular: using hand-limit law";
+            status.text += " / limit "+(cursor.limitWeight*100).ToString("F0")+"%";
+        }
     }
     private string RangeLabel(float value)
     {

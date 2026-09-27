@@ -15,7 +15,7 @@ explicitly calibrated avatar-finger adapter, estimated fingertips, Bird point
 and point-through target. See [avatar input](AVATAR-HAND-INPUT.md) for controls,
 assumptions and checks. It does not record hand data or modify the player.
 
-Current Lab 04 adds a native **Point / FILTERED** control to compare RAW output,
+Lab 04 added a native **Point / FILTERED** control to compare RAW output,
 retains SET calibration across invalid samples, and starts fresh filter history
 after missing data or a sampling pause. Avatar changes still require SET. The
 comparison shares one solver and presentation; it does not promote a new filter.
@@ -23,6 +23,15 @@ The diagnostic panel distinguishes desired and shown range. Synthetic compiled
 Udon reproduces severe legacy lag after a far pose, but the physical missing-Bird
 report remains unresolved. The new bundle is transferred and hash-verified on
 Quest; the headset was asleep before its view could be confirmed.
+
+Lab 05 responds to Dana confirming visible joint markers but RAW rays pointing
+out of the backs of the hands. It corrects the adapter's palm-normal winding
+sign and starts RAW. **Geometry / ON** exposes the actual fitted sphere and
+center in gold, the palm normal in green, and the resulting Bird ray/diamond
+in the hand's color. This optional X-ray layer changes no solver input. A singular
+fit hides its gold geometry and is reported in the hand panel; it is never
+replaced with a fictitious fitted sphere. See the avatar-input document for the
+render-shell distinction and the latest checkpoint for deployment evidence.
 
 In lab v0.2, all 34 markers update every `PostLateUpdate`, after avatar IK.
 Only text refresh is limited to 5 Hz. There is no marker smoothing, deliberate

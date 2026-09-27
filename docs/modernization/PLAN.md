@@ -19,7 +19,8 @@ Dana prioritizes a normal Android Build and Test world inside VRChat, even befor
 - [x] Connect an experimental 16-point avatar adapter, explicit estimated-tip calibration and a logical point-through target in the authored lab. Compiled Udon/ClientSim checks pass; see AVATAR-HAND-INPUT.md.
 - [x] Load Lab 03 in actual Quest VRChat and accept physical SET calibration; Dana calibrated both hands but could not identify nearby Bird.
 - [x] Add Lab 04 RAW/FILTERED comparison, calibration retention during invalid input, fresh history after sampling gaps and readable saved diagnostic labels; compiled-Udon and SDK checks pass, Quest transfer hash matches.
-- [ ] Physically validate Lab 04 palm orientation, tip estimates and Bird feel; this revision transferred while the headset was asleep. Missing nearby Bird remains unresolved. Click fidelity remains separate.
+- [x] Correct anatomical palm winding, render actual fitted sphere/center and separate resulting Bird ray, and validate Lab 05 with 13682 compiled-Udon assertions over 300 frames plus actual point render checks.
+- [ ] Physically validate Lab 05 corrected palm normal, sphere geometry overlay, tip estimates and Bird feel. Dana confirmed joint markers visible but RAW rays pointed out the backs of the hands; the winding sign is corrected. Actual usability and click fidelity remain separate.
 - [ ] Later publish the same scene privately using normal account eligibility, metadata and SDK upload. Add PC under the same blueprint ID for PC guests.
 
 See [TRACKING-LAB.md](TRACKING-LAB.md) for reproduction and the publication path. This takes precedence over further feature expansion below.

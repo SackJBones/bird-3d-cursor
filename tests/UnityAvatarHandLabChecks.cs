@@ -25,7 +25,9 @@ public class UnityAvatarHandLabChecks : MonoBehaviour
     static readonly Dictionary<HumanBodyBones,Quaternion> rotations=new Dictionary<HumanBodyBones,Quaternion>();
     static readonly string[] suffix={"Hand","ThumbProximal","ThumbIntermediate","ThumbDistal","IndexProximal","IndexIntermediate","IndexDistal","MiddleProximal","MiddleIntermediate","MiddleDistal","RingProximal","RingIntermediate","RingDistal","LittleProximal","LittleIntermediate","LittleDistal"};
     static readonly Vector3[,] expectedTips=new Vector3[2,5];
+    static Vector3 expectedPalmNormal;
     readonly UdonBehaviour[] inputs=new UdonBehaviour[2], cursors=new UdonBehaviour[2], views=new UdonBehaviour[2];
+    readonly UdonBehaviour[] geometry=new UdonBehaviour[2], fitters=new UdonBehaviour[2];
     readonly Vector3[] previousRaw=new Vector3[2];
     UdonBehaviour target;
     IEnumerator sequence;
@@ -60,7 +62,9 @@ public class UnityAvatarHandLabChecks : MonoBehaviour
                 foreach(var source in authored)
                 {
                     int side=source.rightHand?1:0; inputs[side]=VM(source); cursors[side]=VM(source.cursor);
+                    fitters[side]=VM(source.cursor.fitter);
                     foreach(var view in FindObjectsOfType<BirdLabPointView>()) if(view.input==source) views[side]=VM(view);
+                    foreach(var view in FindObjectsOfType<BirdLabGeometryView>()) if(view.input==source) geometry[side]=VM(view);
                 }
                 target=VM(FindObjectOfType<BirdLabPointTarget>()); sequence=Scenarios();
             }
@@ -72,12 +76,15 @@ public class UnityAvatarHandLabChecks : MonoBehaviour
     IEnumerator Scenarios()
     {
         CheckDiagnosticRendering();
+        Require(!Get<bool>(VM(FindObjectOfType<BirdLabFilterControl>()),"filtered"),"Saved lab starts in RAW for input diagnosis");
         for(int side=0;side<2;side++)
         {
+            Require(!Get<bool>(cursors[side],"smoothing"),"Authored cursor starts without filtered history");
             Require(Get<int>(inputs[side],"available")==16,"ClientSim supplies all 16 avatar origins");
             var sampled=Get<Vector3[]>(inputs[side],"bonePositions");
             for(int i=0;i<16;i++) Near(sampled[i],Networking.LocalPlayer.GetBonePosition(Bone(side,i)),.00001f,"Real SDK source binding");
             Require(!Get<bool>(inputs[side],"calibrated") && !Get<bool>(cursors[side],"poseValid"),"No automatic calibration");
+            Require(geometry[side]!=null && !Get<LineRenderer>(geometry[side],"birdRay").enabled,"Uncalibrated geometry stays hidden");
             inputs[side].SendCustomEvent("CalibrateOpenHand");
             realBaseline+=(side==0?"Left":"Right")+" default-avatar open-pose calibration="+Get<bool>(inputs[side],"calibrated")+"; ";
             cursors[side].SetProgramVariable("smoothing",false);
@@ -110,9 +117,11 @@ public class UnityAvatarHandLabChecks : MonoBehaviour
         CalibrateControls(); yield return null;
         CheckHands("open",0,1);
         for(int side=0;side<2;side++) Require(Range(side)>1e9f,"Unclamped far endpoint");
+        CheckActualPointRendering("far");
         foreach(float bend in new[]{-5f,0,5,15,30,45,60,90,120,150,180,210,230})
         {
             SetHands(bend,1,Quaternion.identity); yield return null; CheckHands("articulation",bend,1);
+            if(bend==90) CheckActualPointRendering("near");
             if(bend>=210) for(int side=0;side<2;side++) Near(Get<Vector3>(cursors[side],"rawPosition"),Get<Vector3>(cursors[side],"handRoot"),.00001f,"Fist stays at palm");
         }
         foreach(float bend in new[]{0f,30,60,90,150,230})
@@ -132,6 +141,17 @@ public class UnityAvatarHandLabChecks : MonoBehaviour
             SetHands(55+frame,1,Quaternion.Euler(frame,frame*2,0)); yield return null; CheckHands("cadence",55+frame,1);
         }
         SetHands(75,1,Quaternion.identity); yield return null;
+        var geometryToggle=VM(GameObject.Find("Bird geometry toggle").GetComponent<BirdLabToggle>());
+        var beforeGeometryToggle=Get<Vector3>(cursors[0],"rawPosition");
+        Require(geometryToggle.RunEvent("_interact"),"Native geometry toggle off"); yield return null;
+        Require(!Get<LineRenderer>(geometry[0],"birdRay").gameObject.activeInHierarchy,"Geometry toggle hides its ray");
+        Near(Get<Vector3>(cursors[0],"rawPosition"),beforeGeometryToggle,.00001f,"Geometry cannot change solver output");
+        Require(Get<Renderer>(views[0],"core").enabled,"Geometry is independent of ordinary point view");
+        Require(geometryToggle.RunEvent("_interact"),"Native geometry toggle on");
+        // The SDK drains PostLateUpdate registrations after dispatching that
+        // frame, so reactivation joins the following dispatch, not the queued one.
+        yield return null; yield return null;
+        Require(Get<LineRenderer>(geometry[0],"birdRay").enabled,"Geometry resumes after SDK post-IK re-registration");
         var origin=Get<Vector3>(cursors[0],"handRoot"); var point=Get<Vector3>(cursors[0],"position");
         target.transform.position=Vector3.Lerp(origin,point,.5f); yield return null;
         Require(Get<bool>(target,"highlighted"),"Logical point-through target highlights");
@@ -193,6 +213,7 @@ public class UnityAvatarHandLabChecks : MonoBehaviour
             Require(!Get<bool>(inputs[side],"dataReady") && Get<bool>(inputs[side],"calibrated") && !Get<bool>(cursors[side],"poseValid"),"Invalid bone pauses source/solver and retains calibration "+fault);
             Require(!Get<Renderer>(views[side],"core").enabled,"Loss hides point");
             Require(!Get<LineRenderer>(views[side],"directionGuide").enabled,"Loss hides guide");
+            Require(!Get<LineRenderer>(geometry[side],"birdRay").enabled && !Get<Renderer>(geometry[side],"fitCenter").enabled,"Loss hides geometry and fitted center");
             foreach(var marker in Get<Transform[]>(views[side],"tipMarkers")) Require(!marker.gameObject.activeSelf,"Loss hides estimated tip");
             Require(Get<bool>(inputs[1-side],"calibrated") && Get<bool>(cursors[1-side],"poseValid"),"Other hand survives fault");
             SetHands(90,1,Quaternion.identity); yield return null;
@@ -242,6 +263,8 @@ public class UnityAvatarHandLabChecks : MonoBehaviour
         SetHands(75,1,Quaternion.Euler(0,180,0)); yield return null;
         Capture("bird-station",new Vector3(-1.3f,1.7f,-4.5f),new Vector3(-1.7f,1.5f,0));
         Capture("bird-calibration",new Vector3(-.5f,1.65f,-4.5f),new Vector3(-3.35f,1.55f,-1.2f));
+        SetHands(90,1,Quaternion.identity); yield return null;
+        Capture("bird-geometry",new Vector3(-.22f,1.5f,-1.62f),new Vector3(-.22f,1.43f,-2));
         for(int side=0;side<2;side++) VM(GameObject.Find(side==0?"RESET LEFT":"RESET RIGHT").GetComponent<BirdLabHandControl>()).RunEvent("_interact");
         yield return null;
         for(int side=0;side<2;side++) Require(!Get<bool>(cursors[side],"poseValid") && !Get<Renderer>(views[side],"core").enabled,"Native reset hides Bird");
@@ -265,11 +288,24 @@ public class UnityAvatarHandLabChecks : MonoBehaviour
             var tips=Get<Vector3[]>(inputs[side],"estimatedTips");
             for(int f=0;f<5;f++) Near(tips[f],expectedTips[side,f],.0001f,"Distal orientation and calibrated local axis "+f);
             var points=Get<Vector3[]>(cursors[side],"points"); Require(points.Length==16,"Canonical fit count");
+            Near(Get<Vector3>(inputs[side],"normal"),expectedPalmNormal,.0001f,"Anatomical palm-facing normal; independent of flexion and wrist orientation");
+            var fitVm=fitters[side];
+            bool valid=Get<bool>(fitVm,"fitValid"); Vector3 center=Get<Vector3>(fitVm,"center"); float radius=Get<float>(fitVm,"radius");
+            Require(Get<Renderer>(geometry[side],"fitCenter").enabled==valid,"Center visibility reports actual fit validity");
+            foreach(var ring in Get<LineRenderer[]>(geometry[side],"sphereRings"))
+            {
+                Require(ring.enabled==valid,"No invented sphere for singular fit");
+                if(valid) for(int j=0;j<ring.positionCount;j+=8) Require(Mathf.Abs(Vector3.Distance(ring.GetPosition(j),center)-radius)<.0001f,"Wire sphere uses actual fitted radius and center");
+            }
+            if(valid) Near(Get<Renderer>(geometry[side],"fitCenter").transform.position,center,.00001f,"Actual fitted center marker");
             Near(points[0],positions[Bone(side,2)],.00001f,"Thumb intermediate mapping"); Near(points[1],positions[Bone(side,3)],.00001f,"Thumb distal mapping");
             Near(points[2],expectedTips[side,0],.0001f,"Thumb endpoint mapping"); Near(points[3],positions[Bone(side,4)],.00001f,"Index proximal mapping");
             for(int f=2;f<5;f++) for(int j=0;j<4;j++) Near(points[4+(f-2)*4+j],j==3?expectedTips[side,f]:positions[Bone(side,1+f*3+j)],.0001f,"Fit finger mapping");
             Vector3 raw=Get<Vector3>(cursors[side],"rawPosition"); Require(!float.IsNaN(raw.sqrMagnitude) && !float.IsInfinity(raw.sqrMagnitude),"Finite logical range");
             var core=Get<Renderer>(views[side],"core"); Require(core.enabled,"Point view enabled same frame");
+            var birdRay=Get<LineRenderer>(geometry[side],"birdRay");
+            Near(birdRay.GetPosition(0),Get<Vector3>(cursors[side],"handRoot"),.00001f,"Bird ray starts at root");
+            Near(birdRay.GetPosition(1),core.transform.position,.0001f,"Bird ray ends at actual displayed Bird");
             var guide=Get<LineRenderer>(views[side],"directionGuide");
             Vector3 root=Get<Vector3>(cursors[side],"handRoot"), filtered=Get<Vector3>(cursors[side],"position");
             Near(guide.GetPosition(0),root,.00001f,"Guide starts at logical root");
@@ -284,10 +320,15 @@ public class UnityAvatarHandLabChecks : MonoBehaviour
     static void SetHands(float bend,float scale,Quaternion rig)
     {
         positions.Clear(); rotations.Clear();
+        expectedPalmNormal=rig*Vector3.back;
         for(int side=0;side<2;side++)
         {
             Vector3 offset=new Vector3(side==0?-.22f:.22f,1.4f,-2);
-            Func<Vector3,Vector3> mirror=p=>new Vector3(side==0?-p.x:p.x,p.y,p.z);
+            // These fingers flex toward -Z: that is the independently specified
+            // palm side. A right hand with this orientation has its thumb on +X.
+            // The old fixture reversed anatomy AND the adapter normal together,
+            // so synthetic curl tests masked the palm-backward bug.
+            Func<Vector3,Vector3> mirror=p=>new Vector3(side==0?p.x:-p.x,p.y,p.z);
             Func<Vector3,Vector3> point=p=>offset+rig*mirror(p)*scale;
             positions[Bone(side,0)]=point(new Vector3(-.02f,-.07f,0)); rotations[Bone(side,0)]=rig;
             for(int f=0;f<5;f++)
@@ -341,6 +382,51 @@ public class UnityAvatarHandLabChecks : MonoBehaviour
         temporal.Add(string.Format(System.Globalization.CultureInfo.InvariantCulture,"{0},{1},{2},{3:R},{4:R},{5},{6}",
             phase,frames,side,Range(side),(Get<Vector3>(cursors[side],"position")-Get<Vector3>(cursors[side],"handRoot")).magnitude,
             Get<bool>(inputs[side],"calibrated"),Get<bool>(inputs[side],"dataReady")));
+    }
+    void CheckActualPointRendering(string phase)
+    {
+        // Inspect the actual compiled-Udon view, not a substitute sphere/material.
+        // Isolate its layer while retaining its transforms, property blocks and halo.
+        var head=Networking.LocalPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Head);
+        var camera=new GameObject("Actual Bird render check").AddComponent<Camera>();
+        camera.transform.position=head.position; camera.fieldOfView=60;
+        camera.nearClipPlane=.01f; camera.farClipPlane=1000; camera.cullingMask=1<<31;
+        camera.clearFlags=CameraClearFlags.SolidColor; camera.backgroundColor=Color.black;
+        var render=new RenderTexture(1024,1024,24){antiAliasing=4}; camera.targetTexture=render;
+        var pixels=new Texture2D(1024,1024,TextureFormat.RGB24,false);
+        var wall=GameObject.CreatePrimitive(PrimitiveType.Cube); wall.layer=31;
+        var black=new Material(Shader.Find("Unlit/Color")){color=Color.black}; wall.GetComponent<Renderer>().sharedMaterial=black;
+        try
+        {
+            for(int side=0;side<2;side++)
+            {
+                var core=Get<Renderer>(views[side],"core"); var halo=Get<LineRenderer>(views[side],"halo");
+                int coreLayer=core.gameObject.layer,haloLayer=halo.gameObject.layer;
+                core.gameObject.layer=halo.gameObject.layer=31;
+                try
+                {
+                    camera.transform.LookAt(core.transform.position);
+                    float range=Vector3.Distance(head.position,Get<Vector3>(cursors[side],"position"));
+                    wall.transform.position=head.position+camera.transform.forward*Mathf.Min(20,range*.5f);
+                    wall.transform.rotation=camera.transform.rotation; wall.transform.localScale=new Vector3(30,30,.01f);
+                    for(int occluded=0;occluded<2;occluded++)
+                    {
+                        wall.SetActive(occluded==1); camera.Render(); RenderTexture.active=render;
+                        pixels.ReadPixels(new Rect(0,0,1024,1024),0,0); pixels.Apply(); RenderTexture.active=null;
+                        int colored=0;
+                        foreach(var color in pixels.GetPixels32()) if(side==0?color.g>60 && color.b>60 && color.r<30:color.r>60 && color.b>30 && color.g<color.r*.65f) colored++;
+                        Require(occluded==0?colored>=5:colored==0,"Actual "+phase+" Bird "+side+" render occluded="+occluded+" colored pixels="+colored);
+                        if(occluded==0) File.WriteAllBytes("../Validation/TrackingLab/bird-visible-"+phase+"-"+side+".png",pixels.EncodeToPNG());
+                    }
+                }
+                finally { core.gameObject.layer=coreLayer; halo.gameObject.layer=haloLayer; }
+            }
+        }
+        finally
+        {
+            RenderTexture.active=null; camera.targetTexture=null; render.Release();
+            DestroyImmediate(camera.gameObject); DestroyImmediate(wall); DestroyImmediate(black); DestroyImmediate(pixels); DestroyImmediate(render);
+        }
     }
     void CheckDiagnosticRendering()
     {

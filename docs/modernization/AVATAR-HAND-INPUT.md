@@ -1,4 +1,4 @@
-# Experimental avatar Bird in Tracking Lab 04
+# Experimental avatar Bird in Tracking Lab 05
 
 This is the first 16-point avatar-input experiment in the authored VRChat lab.
 It uses the existing `BirdSphereFit` and `BirdCursorState`, including the accepted
@@ -25,13 +25,31 @@ reference spheres compare the Bird material with an ordinary material. A gray sp
 of the bench turns green when the logical hand-to-Bird segment passes through it.
 No click is required or synthesized in this first input test.
 
-**Point / FILTERED** is a native VRChat control below the mirror switch. Press it
+**Point / RAW** is a native VRChat control below the mirror switch. Press it
 to compare **RAW** and **FILTERED** using identical hand input, geometry and
 presentation. Each mode change seeds fresh filter history without recalibrating.
-FILTERED remains the default; RAW is a diagnostic comparison, not a new solver.
+Lab 05 starts RAW so known extreme-range filter history cannot obscure the input
+test. FILTERED remains available for comparison; the filter equations are unchanged.
 If desired range is near but shown range remains far, compare RAW before changing
 the calibration. If both ranges remain far while curling, inspect the joint/tip
 dots and curl readout instead.
+
+**Geometry / ON** toggles a separate X-ray overlay, initially on:
+
+- Gold: three great circles at the actual fitted sphere radius and center, a
+  9 mm center marker, and the hand-root-to-center line.
+- Green: the palm-facing normal, drawn 8 cm long.
+- Cyan/pink: a line ending at the displayed Bird point and an X-ray diamond
+  there. The ordinary depth-tested Bird remains present underneath this diagnostic.
+
+The gold fit is neither reflected nor clamped to look plausible. It disappears
+when the fitter rejects a singular/ill-conditioned point set; the hand panel
+reports that case explicitly. It also shows fitted radius, conditioning and the
+hand-limit blend. The final Bird may leave the fit-center ray when the limit law
+contributes; these are distinct quantities. At extreme distances, the colored ray
+and diamond use the same render-shell endpoint as the point view, rather than
+claiming that a billion-meter line is drawn literally. Ordinary near geometry
+stays at its actual world position. Toggling this overlay changes no solver input.
 
 Compare white dots against the ends of the avatar fingers, then open/curl the
 hand and turn the wrist. A successful calibration only establishes usable data
@@ -60,6 +78,16 @@ head/torso/world-up extrapolation. The calibration-only open-pose check uses the
 wrist-to-knuckle direction; a lateral thumb base would reject wide straight hands.
 The normal's physical orientation and the humanoid bone correspondence still
 need on-headset verification for a given avatar.
+
+Lab 05 corrects the anatomical winding sign: the ordered thumb/index/little cross
+product faces the back of a right hand, so the palm sign is right -1 / left +1.
+Dana observed RAW rays pointing out the backs of the hands. An aggregate check
+of the earlier private OpenXR recording found the old sign opposite the host's
+palm-orientation-corrected normal in all 1,442 tracked samples (1,440 right, two
+left). The standalone host already corrected winding from tracked palm rotation;
+the VRChat adapter omitted that correction. The original synthetic fixture had
+reversed left/right anatomy and masked this bug. The corrected fixture asserts
+an independently specified palm-facing normal through flexion and rigid rotation.
 
 Mean middle/ring/little finger length normalizes range input to an authored 9 cm
 reference. The limit-law endpoint is expressed in the same units, preserving its
@@ -114,7 +142,7 @@ control; it preserves the other demo scenes.
 Sources and shader GUIDs restore into ignored `BirdGenerated`; authored scene,
 materials and Udon program metadata live in the heavy repository.
 
-Compiled-Udon checks pass 7,704 assertions over 296 normal frames. Both default
+Compiled-Udon checks pass 13,682 assertions over 300 normal frames. Both default
 ClientSim robot hands calibrate and run Bird; their inferred mean finger length
 is about 0.11645 m and their near-flat pose selects the far limit. Actual SDK
 avatar scaling to 0.5x/1.5x/restored size preserves normalized range. Controlled
@@ -134,7 +162,14 @@ Rendered controls also verify normal material occlusion, X-ray visibility
 through an opaque object, and the Bird point material at a known visible
 position. The short guide is checked against the logical point and its 40 cm
 bound. Saved/reloaded UI label anchors are checked against their backing panels;
-camera renders are inspected. Final SDK build evidence is in CHECKPOINT.md.
+camera renders are inspected. Lab 05 also checks corrected anatomical normals,
+actual sphere-center/radius agreement, singular-fit hiding, the displayed Bird
+ray endpoint and geometry-toggle isolation. The native toggle test allows the
+SDK's queued PostLateUpdate re-registration before requiring resumed updates.
+Isolated camera checks render the actual Udon point/halo at near and extreme
+ranges, and verify that a foreground wall occludes the ordinary point view.
+The geometry inspection overlay is deliberately X-ray. Final SDK build evidence
+is in CHECKPOINT.md.
 Lab 03 was subsequently loaded through normal SDK Android BuildAndTest. An
 actual stereo device capture shows the console running, 16/16 bone availability,
 left-hand calibration accepted and Bird active, with the right hand awaiting
@@ -148,4 +183,11 @@ the next normal frame. See [synthetic temporal measurements](measurements/avatar
 This establishes a possible contributor to an absent nearby point, not the cause
 of Dana's physical report. The filter equations remain unchanged. Lab 04 passed
 normal Android SDK BuildAndTest; its 167,798-byte bundle hash matches the Quest
-copy. The headset was asleep, so this revision's in-client view is unconfirmed.
+copy. Dana later confirmed the joint markers visible; Bird was still absent and
+RAW rays pointed out the backs of the hands, motivating Lab 05's sign fix and
+requested geometry overlay.
+
+Lab 05 passed normal Android SDK BuildAndTest; the 178,385-byte bundle hash
+matches the Quest copy. The headset was asleep during deployment, so its live
+geometry view and corrected physical response remain unconfirmed. Reload and
+SET each open hand before assessing the sphere while curling.

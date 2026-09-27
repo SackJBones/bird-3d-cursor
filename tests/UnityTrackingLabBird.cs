@@ -14,7 +14,7 @@ public static class UnityTrackingLabBird
     const string Folder="Assets/BirdWorld/TrackingLab/";
     static void EnsurePrograms()
     {
-        foreach(string name in new[]{"BirdAvatarHandInput","BirdLabHandControl","BirdLabPointView","BirdLabPointTarget","BirdLabFilterControl"})
+        foreach(string name in new[]{"BirdAvatarHandInput","BirdLabHandControl","BirdLabPointView","BirdLabPointTarget","BirdLabFilterControl","BirdLabGeometryView"})
         {
             string path="Assets/BirdWorld/Programs/"+name+".asset";
             var source=AssetDatabase.LoadAssetAtPath<MonoScript>("Assets/BirdGenerated/Runtime/"+name+".cs");
@@ -48,7 +48,7 @@ public static class UnityTrackingLabBird
                 var input=go.AddUdonSharpComponent<BirdAvatarHandInput>(); inputs[side]=input; input.rightHand=side==1;
                 input.cursor=new GameObject(hand+" Bird solver").AddUdonSharpComponent<BirdCursorState>(); input.cursor.transform.SetParent(root.transform);
                 input.cursor.fitter=new GameObject(hand+" sphere fit").AddUdonSharpComponent<BirdSphereFit>(); input.cursor.fitter.transform.SetParent(root.transform);
-                input.cursor.smoothing=true; input.cursor.clicksAllowed=false; input.cursor.useHandLimits=true;
+                input.cursor.smoothing=false; input.cursor.clicksAllowed=false; input.cursor.useHandLimits=true;
                 input.status=Board(hand+" Bird status",new Vector3(-3.35f,side==0?2.2f:1.45f,-1.2f),2.7f,.65f,40,hand+" / Open hand, then SET with the other hand");
                 var view=new GameObject(hand+" optional Bird presentation").AddUdonSharpComponent<BirdLabPointView>(); view.transform.SetParent(root.transform); view.input=input;
                 view.tint=side==0?Color.cyan:new Color(1,.25f,.6f);
@@ -82,6 +82,7 @@ public static class UnityTrackingLabBird
             }
             AddPointDiagnostics();
             AddFilterControl();
+            AddGeometryView();
             EditorSceneManager.SaveScene(scene); AssetDatabase.SaveAssets(); UnityTrackingLab.Finish("lab-bird-author",true,"Authored explicit avatar calibration, separate long-range point presentation and logical point-through target.");
         }
         catch(Exception e) { UnityTrackingLab.Finish("lab-bird-author",false,e.ToString()); }
@@ -95,6 +96,7 @@ public static class UnityTrackingLabBird
             FaceCalibrationConsole();
             AddPointDiagnostics();
             AddFilterControl();
+            AddGeometryView();
             foreach(var control in UnityEngine.Object.FindObjectsOfType<BirdLabHandControl>()) UdonSharpEditorUtility.GetBackingUdonBehaviour(control).proximity=5;
             EditorSceneManager.SaveScene(scene); AssetDatabase.SaveAssets(); UnityTrackingLab.Finish("lab-bird-layout",true,"Calibration console faces the spawn and target clears instructions.");
         }
@@ -173,6 +175,12 @@ public static class UnityTrackingLabBird
         }
         // A lower front row leaves the existing bench controls and diagnostic
         // boards readable from spawn, rather than masking them with close panels.
+        // Establish input fidelity without the known extreme-range filter lag.
+        // The existing native button keeps the legacy filter available for comparison.
+        control.filtered=false;
+        control.label.text="Point / RAW\nPress for FILTERED";
+        foreach(var cursor in control.cursors) { cursor.smoothing=false; UdonSharpEditorUtility.CopyProxyToUdon(cursor); }
+        UdonSharpEditorUtility.CopyProxyToUdon(control);
         control.transform.position=new Vector3(-.65f,.9f,-.6f);
         PlaceLabel(control.label.transform.parent.gameObject,new Vector3(-.65f,.9f,-.675f));
         GameObject.Find("Bird material reference").transform.position=new Vector3(-.8f,.55f,-.6f);
@@ -180,15 +188,51 @@ public static class UnityTrackingLabBird
         PlaceLabel(GameObject.Find("Material reference hint"),new Vector3(-.65f,.35f,-.6f));
         GameObject.Find("Material reference hint backing").transform.position=new Vector3(-.65f,.35f,-.575f);
         GameObject.Find("Bird point-through target").transform.position=new Vector3(1,1.15f,-.6f);
-        var hint=GameObject.Find("Bird target hint"); PlaceLabel(hint,new Vector3(1,.72f,-.6f));
+        var hint=GameObject.Find("Bird target hint"); PlaceLabel(hint,new Vector3(1,.35f,-.6f));
         var label=hint.GetComponentInChildren<Text>(); label.rectTransform.sizeDelta=new Vector2(550,125); label.fontSize=26;
         label.text="Point through: green\nNo click needed";
-        var backing=GameObject.Find("Bird target hint backing"); backing.transform.position=new Vector3(1,.72f,-.575f); backing.transform.localScale=new Vector3(1.18f,.33f,.02f);
+        var backing=GameObject.Find("Bird target hint backing"); backing.transform.position=new Vector3(1,.35f,-.575f); backing.transform.localScale=new Vector3(1.18f,.33f,.02f);
         foreach(var text in UnityEngine.Object.FindObjectsOfType<Text>(true))
         {
-            if(text.transform.parent.name=="Welcome") text.text="BIRD / TRACKING LAB 04\nAvatar Bird / raw and filtered comparison";
-            if(text.transform.parent.name=="Directions") text.text="SET LEFT / RIGHT: hold that hand straight; press with the other.\nOrange = hand origins. Small colored dots = joints, visible through skin.\nBird is the larger point; its short line shows direction. Curl to bring it near.\nPoint FILTERED / RAW compares smoothing. White tips are estimates.";
+            if(text.transform.parent.name=="Welcome") text.text="BIRD / TRACKING LAB 05\nInspect the fitted sphere and resulting Bird";
+            if(text.transform.parent.name=="Directions") text.text="SET LEFT / RIGHT: hold that hand straight; press with the other. Starts RAW.\nGold = fitted sphere, center and fit ray. Green = palm normal.\nCyan / pink ray and diamond = resulting Bird. Geometry is X-ray; toggle below.\nWhite tips are estimates. Singular fits hide the gold sphere, not Bird.";
         }
+    }
+    static void AddGeometryView()
+    {
+        if(GameObject.Find("Bird geometry diagnostics")!=null) return;
+        var root=new GameObject("Bird geometry diagnostics");
+        var shader=Shader.Find("Bird/Lab X-ray joints");
+        var gold=Material("FitWire",shader,new Color(1,.72f,.15f,.65f));
+        var center=Material("FitCenter",shader,new Color(1,.72f,.15f,1));
+        var normal=Material("PalmNormal",shader,new Color(.25f,1,.3f,.9f));
+        foreach(var view in UnityEngine.Object.FindObjectsOfType<BirdLabPointView>())
+        {
+            string hand=view.input.rightHand?"Right":"Left";
+            var go=new GameObject(hand+" Bird geometry"); go.transform.SetParent(root.transform);
+            var geometry=go.AddUdonSharpComponent<BirdLabGeometryView>(); geometry.input=view.input; geometry.pointView=view;
+            var tint=Material(hand+"Geometry",shader,new Color(view.tint.r,view.tint.g,view.tint.b,.8f));
+            geometry.sphereRings=new LineRenderer[3];
+            for(int i=0;i<3;i++) geometry.sphereRings[i]=DiagnosticLine(hand+" fit ring "+i,go.transform,gold,64,true,.0009f);
+            geometry.fitCenter=Primitive(hand+" fitted center",PrimitiveType.Sphere,Vector3.zero,Vector3.one*.009f,center,go.transform).GetComponent<Renderer>();
+            geometry.fitCenter.enabled=false;
+            geometry.fitRay=DiagnosticLine(hand+" fit ray",go.transform,gold,2,false,.0012f);
+            geometry.birdRay=DiagnosticLine(hand+" resulting Bird ray",go.transform,tint,2,false,.0012f);
+            geometry.birdMarker=DiagnosticLine(hand+" resulting Bird diamond",go.transform,tint,4,true,.0015f);
+            geometry.palmNormal=DiagnosticLine(hand+" palm normal",go.transform,normal,2,false,.002f);
+            UdonSharpEditorUtility.CopyProxyToUdon(geometry);
+        }
+        var button=Primitive("Bird geometry toggle",PrimitiveType.Cube,new Vector3(.65f,.9f,-.6f),new Vector3(1.15f,.30f,.12f),AssetDatabase.LoadAssetAtPath<Material>(Folder+"Ink.mat"),null,true);
+        var control=button.AddUdonSharpComponent<BirdLabToggle>(); control.target=root; control.initiallyEnabled=true; control.title="Geometry";
+        control.label=Label("Bird geometry label",new Vector3(.65f,.9f,-.675f),1.1f,.28f,36,"Geometry / ON");
+        UdonSharpEditorUtility.CopyProxyToUdon(control);
+        var vm=UdonSharpEditorUtility.GetBackingUdonBehaviour(control); vm.interactText="Toggle fitted Bird geometry"; vm.proximity=5;
+    }
+    static LineRenderer DiagnosticLine(string name,Transform parent,Material material,int count,bool loop,float width)
+    {
+        var line=new GameObject(name).AddComponent<LineRenderer>(); line.transform.SetParent(parent);
+        line.sharedMaterial=material; line.positionCount=count; line.loop=loop; line.useWorldSpace=true;
+        line.startWidth=line.endWidth=width; line.enabled=false; return line;
     }
     static Material Material(string name,Shader shader,Color color)
     { var m=new Material(shader){color=color}; AssetDatabase.CreateAsset(m,Folder+name+".mat"); return m; }
