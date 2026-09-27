@@ -26,12 +26,30 @@ Dana prioritizes a normal Android Build and Test world inside VRChat, even befor
 - [x] Add Lab 07's optional raw-range adaptive filter, retaining RAW default and original FILTERED mode. Both targets pass 47074 compiled-Udon assertions and normal SDK exports; see RANGE-ADAPTIVE-FILTER.md. Build-only; Lab 05 remains deployed, and physical feel is pending.
 - [x] Add Lab 08's optional intrinsic sphere-vector filter with unchanged reference range law. Both targets pass 106641 compiled-Udon assertions, including SE(3) symmetry and post-IK lifecycle checks, and normal SDK exports. See SPHERE-FILTER-LAB.md. Subsequently deployed at Dana's request: device hash and actual VRChat stereo rendering verified; physical feel pending.
 - [x] Restore the tracked BirdWorld into a fresh project through pinned VPM dependencies, regenerate sources/bytecode with the maintained runner, and pass the full lab checks plus normal SDK exports on Windows and Android. Source/layout/Udon/network records match the normal project; this is not client or physical validation.
-- [ ] Physically validate Lab 05 corrected palm normal, sphere geometry overlay, tip estimates and Bird feel. Dana confirmed joint markers visible but RAW rays pointed out the backs of the hands; the winding sign is corrected. Actual usability and click fidelity remain separate.
+- [x] Physically compare corrected palm geometry and ray origin through Labs 09/10. Dana sees the fitted geometry, says PALM feels much better and the behavior is familiar; ADAPTIVE also seems good. This is not broad acceptance of SPHERE, fingertip fidelity or clicks.
+- [x] Physically compare Lab 11 far-only knuckle-axis correction: Dana approves the 45-degree vector but rejects general far locking because it removes finger-pose steering.
+- [ ] Validate Lab 12 sphere-center aim at every range with only behind-palm/singular correction; save ADAPTIVE/PALM and remove their comparison buttons.
+- [ ] Remove mandatory SET LEFT / SET RIGHT through automatic avatar fingertip estimation; retain explicit calibration as an optional correction and cover startup, bone axes, avatar swaps and history cancellation.
 - [ ] Later publish the same scene privately using normal account eligibility, metadata and SDK upload. Add PC under the same blueprint ID for PC guests.
 
 See [TRACKING-LAB.md](TRACKING-LAB.md) for reproduction and the publication path. This takes precedence over further feature expansion below.
 
 ## Latest VRChat feel feedback, 2026-09-27 UTC
+
+Newest direction report: palm-up opening sends Bird sideways in RAW on both hands.
+Lab 09 tests a wrist/knuckle palm normal, zero authored tilt and a visible marker
+at the unchanged reference root. See [PALM-DIRECTION.md](PALM-DIRECTION.md).
+Dana then inspected the white cross and requested a pinky contribution to move
+the origin into the palm. Lab 10 adds a 30/30/40 index/pinky/thumb origin with a
+native classic-origin comparison and decouples the limit palm frame from root
+selection. Dana confirms PALM feels much better and ADAPTIVE seems good; SPHERE
+was barely tried. Dana approves Lab 11's 45-degree knuckle-axis fallback vector
+but rejects using it generally at long range. Lab 12 must keep the ray through
+the sphere center at every range except behind-palm/singular cases; separate
+direction from the existing radial continuation. ADAPTIVE/PALM are now required
+defaults, with both comparison buttons removed. Check the latest CHECKPOINT for
+deployment and physical feedback before retuning. Removing mandatory SET
+calibration is the next setup priority.
 
 Dana identifies the current problem as VRChat lab **FILTERED**; RAW responds
 quickly but is too noisy. Sphere size/center must remain the only measure of

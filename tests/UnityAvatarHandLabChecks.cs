@@ -76,10 +76,16 @@ public partial class UnityAvatarHandLabChecks : MonoBehaviour
     IEnumerator Scenarios()
     {
         CheckDiagnosticRendering();
-        Require(!Get<bool>(VM(FindObjectOfType<BirdLabFilterControl>()),"filtered"),"Saved lab starts in RAW for input diagnosis");
+        var defaults=VM(FindObjectOfType<BirdLabFilterControl>());
+        Require(Get<bool>(defaults,"filtered") && Get<bool>(defaults,"adaptive"),"Saved lab starts ADAPTIVE");
+        Require(Get<UnityEngine.UI.Text>(defaults,"label")==null && defaults.GetComponent<Collider>()==null && defaults.GetComponent<Renderer>()==null,"Filter comparison button removed");
+        var origins=VM(FindObjectOfType<BirdLabRootControl>());
+        Require(Get<bool>(origins,"centered") && Get<UnityEngine.UI.Text>(origins,"label")==null && origins.GetComponent<Collider>()==null && origins.GetComponent<Renderer>()==null,"PALM default with comparison button removed");
+        for(int side=0;side<2;side++) Require(Get<bool>(cursors[side],"smoothing") && Get<UdonBehaviour>(cursors[side],"adaptiveFilter")!=null && Get<float>(inputs[side],"littleFingerRootShare")==.5f,"Saved per-hand defaults are adaptive/palm");
+        defaults.SendCustomEvent("SetRaw");
         for(int side=0;side<2;side++)
         {
-            Require(!Get<bool>(cursors[side],"smoothing"),"Authored cursor starts without filtered history");
+            Require(!Get<bool>(cursors[side],"smoothing"),"Regression RAW mode clears filtered history");
             Require(Get<int>(inputs[side],"available")==16,"ClientSim supplies all 16 avatar origins");
             var sampled=Get<Vector3[]>(inputs[side],"bonePositions");
             for(int i=0;i<16;i++) Near(sampled[i],Networking.LocalPlayer.GetBonePosition(Bone(side,i)),.00001f,"Real SDK source binding");
@@ -270,6 +276,8 @@ public partial class UnityAvatarHandLabChecks : MonoBehaviour
         for(int side=0;side<2;side++) Require(!Get<bool>(cursors[side],"poseValid") && !Get<Renderer>(views[side],"core").enabled,"Native reset hides Bird");
         var adaptive=AdaptiveScenarios(); while(adaptive.MoveNext()) yield return null;
         var sphere=SphereScenarios(); while(sphere.MoveNext()) yield return null;
+        var direction=DirectionScenarios(); while(direction.MoveNext()) yield return null;
+        var centerDirection=CenterDirectionScenarios(); while(centerDirection.MoveNext()) yield return null;
         var ui=UiScenarios(); while(ui.MoveNext()) yield return null;
         Restore();
     }

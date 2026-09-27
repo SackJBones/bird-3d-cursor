@@ -201,6 +201,12 @@ public partial class UnityAvatarHandLabChecks
         Require(!Get<bool>(pointers[0],"hasHistory"),"Sphere round trip within one observed frame rebases contact");
         filter.RunEvent("_interact");yield return null;
         Require(!Get<bool>(filter,"filtered") && !Get<bool>(pointers[0],"hasHistory"),"Sphere to RAW rebases cleanly");
+        var originControl=VM(FindObjectOfType<BirdLabRootControl>());
+        originControl.SendCustomEvent("SetClassic");yield return null;
+        Require(!Get<bool>(pointers[0],"hasHistory") && Get<bool>(inputs[0],"calibrated"),"Origin change rebases contact and preserves calibration");
+        originControl.SendCustomEvent("SetPalm");yield return null;yield return null;
+        originControl.SendCustomEvent("SetClassic");originControl.SendCustomEvent("SetPalm");yield return null;
+        Require(!Get<bool>(pointers[0],"hasHistory"),"Origin round trip within one observed frame cannot synthesize contact");
         SetHands(0,1,Quaternion.identity);yield return null;CalibrateControls();yield return null;
         for(int side=0;side<2;side++) Require(!Get<bool>(pointers[side],"hasHistory"),"Explicit SET rebases UI even when no invalid sample is observed");
         // A stale source cannot be reused, even if a renderer remains visible.

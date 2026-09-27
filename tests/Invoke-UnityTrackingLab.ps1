@@ -10,6 +10,9 @@ param(
     [switch]$RefineUi,
     [switch]$AddAdaptive,
     [switch]$AddSphereFilter,
+    [switch]$RefinePalmDirection,
+    [switch]$AddRootControl,
+    [switch]$RefineSphereDirection,
     [switch]$Check,
     [switch]$CheckBird,
     [switch]$SkipBuild,
@@ -30,6 +33,8 @@ Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityAvatarHandLabChecks.cs') -
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityAvatarUiLabChecks.cs') -Destination $runtime
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityAvatarFilterLabChecks.cs') -Destination $runtime
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnitySphereFilterLabChecks.cs') -Destination $runtime
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityPalmDirectionLabChecks.cs') -Destination $runtime
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityCenterDirectionLabChecks.cs') -Destination $runtime
 foreach($helper in @('UnityTrackingLab.cs','UnityTrackingLabBird.cs','UnityTrackingLabUi.cs','UnityTrackingLabBuildAudit.cs','UnityWorldBundleChecks.cs')) { Copy-Item -LiteralPath (Join-Path $PSScriptRoot $helper) -Destination $editor }
 $presentation=Join-Path $project 'Assets/BirdGenerated/Presentation'
 New-Item -ItemType Directory -Force $presentation | Out-Null
@@ -47,6 +52,11 @@ function Invoke-LabUnity([string]$Method,[string]$Stem,[string]$Target) {
     Copy-Item -LiteralPath $log -Destination (Join-Path $project ($Stem+'-'+$Target+'.log'))
 }
 $targets=if($Platform -eq 'Both') { @('StandaloneWindows64','Android') } elseif($Platform -eq 'Windows') { @('StandaloneWindows64') } else { @('Android') }
+# Retire the earlier experimental test helper from generated-only output.
+foreach($name in @('UnityFarTiltLabChecks.cs','UnityFarTiltLabChecks.cs.meta')) {
+    $old=Join-Path $runtime $name
+    if(Test-Path -LiteralPath $old) { Remove-Item -LiteralPath $old }
+}
 $author=$true
 foreach($target in $targets) {
     Invoke-LabUnity 'UnityWorldSdkSetup.Run' 'world-sdk-setup' $target
@@ -59,6 +69,9 @@ foreach($target in $targets) {
         if($RefineUi) { Invoke-LabUnity 'UnityTrackingLabUi.RefineUi' 'lab-ui-layout' $target }
         if($AddAdaptive) { Invoke-LabUnity 'UnityTrackingLabBird.AddAdaptive' 'lab-filter-author' $target }
         if($AddSphereFilter) { Invoke-LabUnity 'UnityTrackingLabBird.AddSphereFilter' 'lab-sphere-filter-author' $target }
+        if($RefinePalmDirection) { Invoke-LabUnity 'UnityTrackingLabBird.RefinePalmDirection' 'lab-palm-direction-author' $target }
+        if($AddRootControl) { Invoke-LabUnity 'UnityTrackingLabBird.AddRootControl' 'lab-root-author' $target }
+        if($RefineSphereDirection) { Invoke-LabUnity 'UnityTrackingLabBird.RefineSphereDirection' 'lab-center-direction-author' $target }
         $author=$false
     }
     if($Check) { Invoke-LabUnity 'UnityTrackingLabChecks.Run' 'lab-check' $target }

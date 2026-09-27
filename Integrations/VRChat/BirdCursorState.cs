@@ -27,8 +27,16 @@ public class BirdCursorState : UdonSharpBehaviour
     // a caller-verified normal facing OUT of the palm. No rendering assumptions.
     public bool useHandLimits;
     public Vector3 palmNormal;
+    [Tooltip("Supply the actual thumb base when the ray origin differs from the classic weighted index/thumb root.")]
+    public bool useExplicitThumbBase;
+    public Vector3 thumbBase;
     // Rotate within the palm frame toward the knuckles. Zero restores v0.5.
     public float flatDirectionDegrees = 45;
+    [Tooltip("Keep the ray through the fitted sphere center. Correct only behind-palm centers; singular fits use the palm-frame fallback.")]
+    public bool useSphereDirection;
+    [Tooltip("Normal depth / center distance behind the palm at which the fallback direction fully takes over.")]
+    [Range(.01f,1)] public float insideOutFullBlend = .25f;
+    [HideInInspector] public float insideOutWeight;
     public float flatBlendStartDegrees = 45;
     public float flatBlendEndDegrees = 15;
     public float fistBlendStartDegrees = 140;
@@ -78,7 +86,7 @@ public class BirdCursorState : UdonSharpBehaviour
         fitter.points = points;
         fitter.Fit();
         Vector3 pointing = fitter.center - handRoot;
-        flatWeight = fistWeight = limitWeight = 0;
+        flatWeight = fistWeight = limitWeight = insideOutWeight = 0;
         if (useHandLimits)
         {
             if (!HandLimits()) { Reject(); return; }
@@ -185,16 +193,18 @@ public class BirdCursorState : UdonSharpBehaviour
     {
         if (points == null || points.Length != 16 || !FiniteVector(palmNormal) || palmNormal.sqrMagnitude < 0.000000000001f ||
             !Finite(flatDirectionDegrees) || flatDirectionDegrees < 0 || flatDirectionDegrees > 90 ||
+            (useSphereDirection && (!Finite(insideOutFullBlend) || insideOutFullBlend<=0 || insideOutFullBlend>1)) ||
             !Finite(maximumLimitDistance) || maximumLimitDistance <= 0 ||
             !Finite(flatBlendEndDegrees) || !Finite(flatBlendStartDegrees) || !Finite(fistBlendStartDegrees) || !Finite(fistBlendEndDegrees) ||
             flatBlendEndDegrees < 0 || flatBlendStartDegrees <= flatBlendEndDegrees ||
             fistBlendStartDegrees <= flatBlendStartDegrees || fistBlendEndDegrees <= fistBlendStartDegrees) return false;
         for (int i = 0; i < 16; i++) if (!FiniteVector(points[i])) return false;
         Vector3 normal = palmNormal.normalized;
-        // Recover the thumb base from Bird's canonical weighted root. A stable
-        // palm axis avoids reversing the curl sign when an MCP crosses 90 deg.
-        Vector3 thumbBase = (handRoot - .6f*points[3]) / .4f;
-        Vector3 forward = (points[3]+points[4]+points[8]+points[12])*.25f - thumbBase;
+        // The palm frame is independent of a configurable ray origin. Legacy
+        // callers can still recover the thumb from the canonical weighted root.
+        Vector3 baseOfThumb = useExplicitThumbBase ? thumbBase : (handRoot - .6f*points[3]) / .4f;
+        if(!FiniteVector(baseOfThumb)) return false;
+        Vector3 forward = (points[3]+points[4]+points[8]+points[12])*.25f - baseOfThumb;
         forward -= normal*Vector3.Dot(forward, normal);
         if (forward.sqrMagnitude < 0.000000000001f) return false;
         Vector3 flexAxis = Vector3.Cross(forward, normal);
@@ -237,7 +247,7 @@ public class BirdCursorState : UdonSharpBehaviour
         if (Vector3.Dot(knuckleForward, forward) < 0) knuckleForward = -knuckleForward;
         handForward = knuckleForward;
         fingerLength = length;
-        float tilt = flatDirectionDegrees * Mathf.Deg2Rad;
+        float tilt = (useSphereDirection?0:flatDirectionDegrees) * Mathf.Deg2Rad;
         Vector3 fallback = (normal*Mathf.Cos(tilt) + knuckleForward*Mathf.Sin(tilt)) * fallbackDistance;
         float legacyWeight = fitter.fitValid ? (1-flatWeight) * fitter.confidence : 0;
         limitWeight = 1 - legacyWeight;
@@ -245,7 +255,48 @@ public class BirdCursorState : UdonSharpBehaviour
         // directly would pull even a tiny blend weight out of the working volume.
         Vector3 legacy = fitter.fitValid ? fitter.center-handRoot : Vector3.zero;
         rangeInput = (legacy*legacyWeight + fallback*(1-legacyWeight)) * (1-fistWeight);
+        if(useSphereDirection)
+        {
+            // Keep the accepted scalar range continuation, independently of aim.
+            // Range/conditioning/opening never pull a valid front-side ray away
+            // from the actual sphere center, so finger reshaping still steers it.
+            float inputLength=rangeInput.magnitude;
+            float fallbackTilt=flatDirectionDegrees*Mathf.Deg2Rad;
+            Vector3 fallbackDirection=normal*Mathf.Cos(fallbackTilt)+knuckleForward*Mathf.Sin(fallbackTilt);
+            Vector3 direction=fallbackDirection;
+            insideOutWeight=1;
+            float centerDistance=legacy.magnitude;
+            if(fitter.fitValid && centerDistance>0)
+            {
+                direction=legacy/centerDistance;
+                float behind=-Vector3.Dot(direction,normal);
+                insideOutWeight=Smooth(behind/insideOutFullBlend);
+                if(insideOutWeight>0)
+                    direction=BlendDirection(direction,fallbackDirection,insideOutWeight,normal,knuckleForward);
+            }
+            rangeInput=direction*inputLength;
+        }
         return FiniteVector(rangeInput);
+    }
+
+    private Vector3 BlendDirection(Vector3 from,Vector3 to,float weight,Vector3 normal,Vector3 forward)
+    {
+        if(weight>=1) return to;
+        // Intrinsic unit-sphere interpolation; the fallback tangent at an exact
+        // antipode comes from the hand, preserving rigid/mirror symmetry.
+        Vector3 cross=Vector3.Cross(from,to);
+        float cosine=Mathf.Clamp(Vector3.Dot(from,to),-1,1);
+        Vector3 tangent=Vector3.Cross(cross,from);
+        float tangentLength=tangent.magnitude;
+        if(tangentLength<.000001f)
+        {
+            if(cosine>=0) return from;
+            tangent=normal-from*Vector3.Dot(normal,from);
+            if(tangent.sqrMagnitude<.000000000001f) tangent=forward-from*Vector3.Dot(forward,from);
+            tangentLength=tangent.magnitude;
+        }
+        float turn=weight*Mathf.Atan2(cross.magnitude,cosine);
+        return (from*Mathf.Cos(turn)+tangent*(Mathf.Sin(turn)/tangentLength)).normalized;
     }
 
     private float Smooth(float value) { float t = Mathf.Clamp01(value); return t*t*(3 - 2*t); }

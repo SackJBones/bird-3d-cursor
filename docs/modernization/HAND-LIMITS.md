@@ -1,5 +1,26 @@
 # Pose-aware limits after physical feedback
 
+Latest correction: Lab 12 separates direction from the radial continuation.
+At every range, valid front-side sphere centers determine the raw ray exactly.
+Only behind-palm/singular cases use the 45-degree knuckle-axis correction.
+Dana explicitly rejects the earlier far-direction lock because fingers must
+remain able to steer without wrist rotation. ADAPTIVE/PALM are defaults with
+their comparison buttons removed. See PALM-DIRECTION.md for the current contract;
+the existing bend-based radial heuristics below are unchanged and historical.
+
+Latest VRChat direction feedback (2026-09-27): Dana reports sideways motion
+with palm-up opening in RAW on both hands. Predictability takes priority over
+the earlier tilt request. Lab 09 preserved the classic ray
+origin and fit, removed authored tilt for a controlled comparison, and replaced
+the avatar thumb-dependent normal with a wrist/knuckle palm frame. Dana then
+inspected the origin cross and requested a pinky contribution; Lab 10 adds a
+30/30/40 index/pinky/thumb origin with a native classic-origin comparison. Dana clarifies
+that a 45-degree tilt may be useful later **only in the far field**; nearby Bird
+should behave like the reference. Any future tilt weighting must come from
+sphere geometry, not a new openness classifier. Keep cause/effect isolated and
+do not reinstate tilt before assessing this comparison. See latest CHECKPOINT
+for test and deployment status; the implementation notes below are historical.
+
 Dana tried the previous continuation and reported a sudden size cap and a
 closed fist producing the maximum sphere. Those are failures of that design,
 despite the earlier synthetic paraboloid tests passing. Version 0.5 replaces
@@ -20,9 +41,12 @@ that point math and restores clicking in the closing region using a separate
 `BirdSphereFit` again only fits a sphere. It also reports a continuous
 conditioning confidence; it never invents a maximum sphere for an invalid
 hand. `BirdCursorState.useHandLimits` defaults off. Opting in requires the
-canonical 16 Bird fit points, the original `.6*indexBase + .4*thumbBase` root,
-and a verified palm-outward normal. The Quest adapter supplies these. The
-unverified VRChat avatar adapter keeps the option off.
+canonical 16 Bird fit points and a verified palm-outward normal. Legacy callers
+use the original `.6*indexBase + .4*thumbBase` root; custom roots must supply
+`useExplicitThumbBase=true` and the actual `thumbBase`, so the palm frame does
+not depend on origin selection. The Quest host uses the legacy path; the
+16-point VRChat adapter supplies the explicit base. The older 12-origin
+avatar adapter leaves this policy off.
 
 The classifier uses signed MCP elevation and PIP/DIP flexion of the middle,
 ring and little fingers. Index motion remains reserved for interaction.

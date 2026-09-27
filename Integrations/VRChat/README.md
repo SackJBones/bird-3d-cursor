@@ -1,13 +1,26 @@
 # Bird VRChat integration
 
+Lab 12 preserves sphere-center aim at every range, correcting only behind-palm
+or singular fits toward the accepted 45-degree knuckleward direction. ADAPTIVE
+and PALM are saved defaults; both comparison buttons are removed. Radial range
+remains independent of direction. This supersedes Lab 11's far-direction lock.
+See `docs/modernization/PALM-DIRECTION.md` and the latest checkpoint for checks
+and headset state. Removing mandatory SET calibration is the next setup task.
+
+Lab 09 updates the avatar palm frame and removes tilt for a controlled comparison.
+Lab 10 adds a pinky-weighted palm origin with a native classic-origin comparison;
+the white cross follows the selected origin. See [palm direction](../../docs/modernization/PALM-DIRECTION.md).
+See the latest checkpoint for headset deployment and physical feedback.
+
 Lab 08 adds optional `BirdSphereSpaceFilter` before-polynomial direction/length
 filtering with the original range law. RAW, original FILTERED and ADAPTIVE remain
 available. Restore **all** maintained runtime source/meta pairs, including both
 filter classes even when their references are null; the tracking-lab runner does
 this automatically. See [sphere filter lab](../../docs/modernization/SPHERE-FILTER-LAB.md)
 for lifecycle, reproduction and the distinction between build checks and physical
-feel. Lab 08 is now loaded in Quest VRChat at Dana's request; transfer and stereo
-rendering are verified, with physical filter comparison pending.
+feel. Lab 08's earlier Quest deployment was verified by transfer and stereo
+rendering. Later physical feedback favors ADAPTIVE; SPHERE was barely tried.
+See the latest checkpoint for the currently deployed scene.
 
 Lab 07 adds an explicitly optional `BirdRangeAdaptiveFilter` comparison. RAW
 remains the saved default; the original filter remains selectable. Restore the
@@ -168,4 +181,4 @@ Restore BirdSphereFit, BirdCursorState, BirdAvatarInput and BirdAvatarControl so
 
 ## Optional pose-aware limits (v0.5)
 
-The previous opt-in sphere cap is withdrawn after physical feedback. BirdSphereFit remains an unconstrained solver and reports a conditioning confidence. BirdCursorState.useHandLimits (default false) requires the canonical 16 points, original weighted root and verified palm-outward normal. It preserves ordinary fits, blends a separate flat-hand point law, and returns the point to the root for a classified full fist. This is an experimental geometric policy, separate from presentation. The avatar adapter does not enable it. See [hand limits](../../docs/modernization/HAND-LIMITS.md) for inputs, thresholds, migration from the removed fitter fields and synthetic-versus-physical validation. UnityUdonCursorChecks now requires UnityPalmFitChecks in the generated runtime directory.
+The previous opt-in sphere cap is withdrawn after physical feedback. BirdSphereFit remains an unconstrained solver and reports a conditioning confidence. BirdCursorState.useHandLimits (default false) requires the canonical 16 points and a verified palm-outward normal. By default it recovers the thumb base from the original weighted root; callers with custom ray origins must set useExplicitThumbBase and supply thumbBase independently. It preserves ordinary fits, blends a separate flat-hand point law, and returns the point to the root for a classified full fist. This is an experimental geometric policy, separate from presentation. The 16-point BirdAvatarHandInput enables it; the older 12-origin BirdAvatarInput does not. See [hand limits](../../docs/modernization/HAND-LIMITS.md) for inputs, thresholds, migration from the removed fitter fields and synthetic-versus-physical validation. UnityUdonCursorChecks now requires UnityPalmFitChecks in the generated runtime directory.

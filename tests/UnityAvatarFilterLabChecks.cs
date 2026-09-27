@@ -150,7 +150,7 @@ public partial class UnityAvatarHandLabChecks
         Require(vm.RunEvent("_interact"),"Native RAW -> original filter");yield return null;
         Require(Get<bool>(vm,"filtered") && !Get<bool>(vm,"adaptive"),"Original filter retained");
         Require(vm.RunEvent("_interact"),"Native original -> adaptive");yield return null;
-        Require(Get<bool>(vm,"adaptive") && Get<UnityEngine.UI.Text>(vm,"label").text.Contains("ADAPTIVE"),"Adaptive choice is visible");
+        Require(Get<bool>(vm,"adaptive"),"Adaptive policy selected");
         for(int side=0;side<2;side++)
         {
             Require(Get<bool>(cursors[side],"poseValid") && !Get<bool>(cursors[side],"clicksAllowed"),"Adaptive mode keeps valid avatar sample and disables inferred clicks");

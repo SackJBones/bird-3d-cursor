@@ -14,7 +14,7 @@ public static class UnityTrackingLabBird
     const string Folder="Assets/BirdWorld/TrackingLab/";
     static void EnsurePrograms()
     {
-        foreach(string name in new[]{"BirdAvatarHandInput","BirdLabHandControl","BirdLabPointView","BirdLabPointTarget","BirdLabFilterControl","BirdLabGeometryView","BirdRangeAdaptiveFilter","BirdSphereSpaceFilter"})
+        foreach(string name in new[]{"BirdAvatarHandInput","BirdLabHandControl","BirdLabPointView","BirdLabPointTarget","BirdLabFilterControl","BirdLabGeometryView","BirdRangeAdaptiveFilter","BirdSphereSpaceFilter","BirdLabRootControl"})
         {
             string path="Assets/BirdWorld/Programs/"+name+".asset";
             var source=AssetDatabase.LoadAssetAtPath<MonoScript>("Assets/BirdGenerated/Runtime/"+name+".cs");
@@ -155,6 +155,106 @@ public static class UnityTrackingLabBird
             UnityTrackingLab.Finish("lab-sphere-filter-author",true,"Added per-hand sphere-vector policies; original range law and RAW default retained.");
         }
         catch(Exception e) { UnityTrackingLab.Finish("lab-sphere-filter-author",false,e.ToString()); }
+    }
+    public static void RefinePalmDirection()
+    {
+        try
+        {
+            EnsurePrograms();
+            var scene=EditorSceneManager.OpenScene(UnityTrackingLab.ScenePath);
+            var geometries=UnityEngine.Object.FindObjectsOfType<BirdLabGeometryView>(true);
+            if(geometries.Length!=2) throw new Exception("Restore the authored two-hand lab first");
+            var material=AssetDatabase.LoadAssetAtPath<Material>(Folder+"XRayTips.mat");
+            if(material==null) throw new Exception("Restore the existing white X-ray diagnostic material");
+            foreach(var geometry in geometries)
+            {
+                // The user's later predictability requirement supersedes the
+                // earlier experimental knuckleward tilt for this avatar lab.
+                geometry.input.cursor.flatDirectionDegrees=0;
+                UdonSharpEditorUtility.CopyProxyToUdon(geometry.input.cursor);
+                if(geometry.rootMarker==null)
+                    geometry.rootMarker=DiagnosticLine((geometry.input.rightHand?"Right":"Left")+" Bird ray origin",geometry.transform,material,5,false,.0015f);
+                UdonSharpEditorUtility.CopyProxyToUdon(geometry);
+            }
+            foreach(var text in UnityEngine.Object.FindObjectsOfType<Text>(true))
+            {
+                if(text.transform.parent.name=="Welcome") text.text="BIRD / TRACKING LAB 09\nPalm direction + visible ray origin";
+                if(text.transform.parent.name=="Directions") text.text="SET LEFT / RIGHT: hold that hand straight; press with the other. Starts RAW.\nWhite cross = ray origin. Gold = actual fitted sphere, center and ray.\nGreen = palm normal. Cyan / pink = resulting Bird. Toggle Geometry below.\nFlat-hand limit follows the palm. White fingertip dots are estimates.";
+            }
+            EditorSceneManager.SaveScene(scene); AssetDatabase.SaveAssets();
+            UnityTrackingLab.Finish("lab-palm-direction-author",true,"Palm-normal far direction, unchanged reference root and visible white root crosses.");
+        }
+        catch(Exception e) { UnityTrackingLab.Finish("lab-palm-direction-author",false,e.ToString()); }
+    }
+    public static void AddRootControl()
+    {
+        try
+        {
+            EnsurePrograms();var scene=EditorSceneManager.OpenScene(UnityTrackingLab.ScenePath);
+            if(UnityEngine.Object.FindObjectOfType<BirdLabRootControl>(true)!=null) throw new Exception("Refusing to overwrite authored root comparison");
+            var inputs=UnityEngine.Object.FindObjectsOfType<BirdAvatarHandInput>(true);
+            if(inputs.Length!=2) throw new Exception("Restore the authored two-hand lab first");
+            var position=new Vector3(0,.53f,-.6f);
+            // Use the clear console center, between the existing point/geometry rows.
+            var button=Primitive("Bird origin control",PrimitiveType.Cube,position,new Vector3(.85f,.24f,.12f),AssetDatabase.LoadAssetAtPath<Material>(Folder+"Ink.mat"),null,true);
+            var control=button.AddUdonSharpComponent<BirdLabRootControl>();control.inputs=inputs;control.centered=true;
+            control.label=Label("Bird origin label",position-Vector3.forward*.075f,.8f,.22f,30,"Origin / PALM\nPress for CLASSIC");
+            foreach(var input in inputs)
+            { input.littleFingerRootShare=.5f; UdonSharpEditorUtility.CopyProxyToUdon(input); }
+            UdonSharpEditorUtility.CopyProxyToUdon(control);
+            var vm=UdonSharpEditorUtility.GetBackingUdonBehaviour(control);vm.interactText="Compare palm / classic Bird ray origin";vm.proximity=5;
+            foreach(var text in UnityEngine.Object.FindObjectsOfType<Text>(true))
+            {
+                if(text.transform.parent.name=="Welcome") text.text="BIRD / TRACKING LAB 10\nPalm direction + adjustable ray origin";
+                if(text.transform.parent.name=="Directions") text.text="SET LEFT / RIGHT: hold that hand straight; press with the other. Starts RAW.\nOrigin / PALM includes pinky knuckle. CLASSIC uses index + thumb only.\nWhite cross = origin. Gold = sphere / fit ray. Green = palm normal.\nCyan / pink = resulting Bird. Use Point / SPHERE to compare smoothing.";
+            }
+            EditorSceneManager.SaveScene(scene);AssetDatabase.SaveAssets();UnityTrackingLab.Finish("lab-root-author",true,"Palm origin 30% index / 30% pinky / 40% thumb; native classic comparison preserves calibration.");
+        }
+        catch(Exception e) { UnityTrackingLab.Finish("lab-root-author",false,e.ToString()); }
+    }
+    public static void RefineSphereDirection()
+    {
+        try
+        {
+            EnsurePrograms();var scene=EditorSceneManager.OpenScene(UnityTrackingLab.ScenePath);
+            var inputs=UnityEngine.Object.FindObjectsOfType<BirdAvatarHandInput>(true);
+            if(inputs.Length!=2) throw new Exception("Restore two authored hands first");
+            foreach(var input in inputs)
+            {
+                input.littleFingerRootShare=.5f;
+                input.cursor.useSphereDirection=true;input.cursor.flatDirectionDegrees=45;input.cursor.insideOutFullBlend=.25f;
+                UdonSharpEditorUtility.CopyProxyToUdon(input);UdonSharpEditorUtility.CopyProxyToUdon(input.cursor);
+            }
+            var filter=UnityEngine.Object.FindObjectOfType<BirdLabFilterControl>(true);
+            var origin=UnityEngine.Object.FindObjectOfType<BirdLabRootControl>(true);
+            if(filter==null || origin==null) throw new Exception("Restore the lab policy components first");
+            filter.filtered=filter.adaptive=true;filter.sphere=false;origin.centered=true;
+            foreach(var input in inputs)
+            {
+                int side=input.rightHand?1:0;
+                input.cursor.smoothing=true;input.cursor.adaptiveFilter=filter.adaptiveFilters[side];input.cursor.sphereFilter=null;
+                UdonSharpEditorUtility.CopyProxyToUdon(input.cursor);
+            }
+            if(filter.label!=null) UnityEngine.Object.DestroyImmediate(filter.label.transform.parent.gameObject);
+            if(origin.label!=null) UnityEngine.Object.DestroyImmediate(origin.label.transform.parent.gameObject);
+            filter.label=null;origin.label=null;
+            foreach(var go in new[]{filter.gameObject,origin.gameObject})
+            {
+                foreach(var collider in go.GetComponents<Collider>()) UnityEngine.Object.DestroyImmediate(collider);
+                foreach(var renderer in go.GetComponents<Renderer>()) UnityEngine.Object.DestroyImmediate(renderer);
+                foreach(var mesh in go.GetComponents<MeshFilter>()) UnityEngine.Object.DestroyImmediate(mesh);
+            }
+            filter.gameObject.name="Bird point settings";origin.gameObject.name="Bird origin settings";
+            UdonSharpEditorUtility.CopyProxyToUdon(filter);UdonSharpEditorUtility.CopyProxyToUdon(origin);
+            foreach(var text in UnityEngine.Object.FindObjectsOfType<Text>(true))
+            {
+                if(text.transform.parent.name=="Welcome") text.text="BIRD / TRACKING LAB 12\nSphere-directed aim + palm origin";
+                if(text.transform.parent.name=="Directions") text.text="SET LEFT / RIGHT: hold that hand straight; press with the other.\nAdaptive smoothing and palm origin are on by default.\nWhite cross = origin. Gold = sphere / fit ray. Green = palm normal.\nBird follows the sphere center; inside-out fits blend to a safe direction.";
+            }
+            EditorSceneManager.SaveScene(scene);AssetDatabase.SaveAssets();
+            UnityTrackingLab.Finish("lab-center-direction-author",true,"Sphere-center aim independent of range; behind-palm correction only; ADAPTIVE/PALM defaults; both comparison buttons removed.");
+        }
+        catch(Exception e) { UnityTrackingLab.Finish("lab-center-direction-author",false,e.ToString()); }
     }
     static void FaceCalibrationConsole()
     {

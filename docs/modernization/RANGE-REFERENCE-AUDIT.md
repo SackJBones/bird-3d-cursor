@@ -17,7 +17,11 @@ range polynomial and constants:
 Here `s` is **distance from the weighted hand root to the fitted sphere center**,
 not the radius and not a finger-opening percentage. Sphere radius and center
 distance are related, but should not silently be substituted for one another.
-The root remains 60% index base / 40% thumb base. The canonical 16 fit points
+The reference and audited Lab 08 root use 60% index base / 40% thumb base.
+Lab 10 subsequently adds Dana's requested 30/30/40 index/pinky/thumb origin,
+with CLASSIC available; see [PALM-DIRECTION.md](PALM-DIRECTION.md). This changes
+the sphere-center distance supplied to the same polynomial, not its constants.
+The canonical 16 fit points
 likewise retain the original thumb/intermediate/distal/tip, index base and
 middle/ring/little chains. Input correspondence and inferred tips are distinct
 from matching that list conceptually.

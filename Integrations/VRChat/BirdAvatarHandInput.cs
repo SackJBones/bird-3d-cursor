@@ -16,6 +16,8 @@ public class BirdAvatarHandInput : UdonSharpBehaviour
     [Range(.2f, 1.5f)] public float tipLengthRatio = .8f;
     [Tooltip("Normalize the mean middle/ring/little finger length before the original range law.")]
     public float referenceFingerLength = .09f;
+    [Tooltip("Pinky share of the 60% knuckle contribution to the ray origin. 0 = classic index/thumb; .5 = 30% index, 30% pinky, 40% thumb.")]
+    [Range(0, 1)] public float littleFingerRootShare;
     [HideInInspector] public bool calibrated, dataReady;
     [HideInInspector] public int available, sampledFrame = -1;
     [HideInInspector] public int calibrationRevision;
@@ -28,6 +30,7 @@ public class BirdAvatarHandInput : UdonSharpBehaviour
     private Vector3[] tipAxes = new Vector3[5];
     private bool calibratedSide;
     private float calibratedRatio, calibratedReference, nextText;
+    private float boundRootShare;
     private float lastSampleTime = -1;
     private string calibrationMessage = "Open this hand, then SET with the other hand.";
     private int[] bones = new int[] {
@@ -61,6 +64,10 @@ public class BirdAvatarHandInput : UdonSharpBehaviour
         }
         lastSampleTime = now;
         ReadBones();
+        // Origin selection changes geometry, not fingertip calibration. Rebase
+        // temporal and contact history so it cannot become a gesture sweep.
+        if(boundRootShare!=littleFingerRootShare)
+        { boundRootShare=littleFingerRootShare; if(cursor!=null) cursor.Cancel(); }
         // Calibration describes this avatar's bone-local axes. A missing sample
         // pauses output, but does not change those axes or require another SET.
         if (calibrated && (calibratedSide != rightHand || calibratedRatio != tipLengthRatio || calibratedReference != referenceFingerLength))
@@ -73,7 +80,9 @@ public class BirdAvatarHandInput : UdonSharpBehaviour
             {
                 BuildPoints();
                 cursor.points = fitPoints;
-                cursor.handRoot = bonePositions[4] * .6f + bonePositions[1] * .4f;
+                cursor.handRoot = (bonePositions[4]*(1-littleFingerRootShare)+bonePositions[13]*littleFingerRootShare)*.6f+bonePositions[1]*.4f;
+                cursor.useExplicitThumbBase=true;
+                cursor.thumbBase=bonePositions[1];
                 cursor.indexTip = estimatedTips[1];
                 cursor.palmNormal = normal;
                 cursor.useHandLimits = true;
@@ -92,7 +101,8 @@ public class BirdAvatarHandInput : UdonSharpBehaviour
         available = 0; dataReady = false;
         VRCPlayerApi player = Networking.LocalPlayer;
         if (!Utilities.IsValid(player) || !Positive(referenceFingerLength) || referenceFingerLength > 1 ||
-            !Positive(tipLengthRatio) || tipLengthRatio < .2f || tipLengthRatio > 1.5f) return;
+            !Positive(tipLengthRatio) || tipLengthRatio < .2f || tipLengthRatio > 1.5f ||
+            !Finite(littleFingerRootShare) || littleFingerRootShare<0 || littleFingerRootShare>1) return;
         int start = rightHand ? 16 : 0;
         for (int i = 0; i < 16; i++)
         {
@@ -112,9 +122,13 @@ public class BirdAvatarHandInput : UdonSharpBehaviour
             if (!Finite(sq) || sq < .5f || sq > 1.5f) return;
             distalRotations[f] = Quaternion.Normalize(q);
         }
-        normal = Vector3.Cross(bonePositions[4]-bonePositions[1], bonePositions[13]-bonePositions[1]);
+        // Use the rigid palm, not the opposable thumb, to define its normal.
+        // Thumb motion still contributes to the reference sphere and root; it
+        // must not independently rotate the far-limit reference frame.
+        Vector3 knuckles=(bonePositions[4]+bonePositions[7]+bonePositions[10]+bonePositions[13])*.25f;
+        normal = Vector3.Cross(knuckles-bonePositions[0], bonePositions[13]-bonePositions[4]);
         if (!FiniteVector(normal) || normal.sqrMagnitude < .000000000001f) return;
-        // Ordered thumb/index/little winding faces the BACK of a right hand.
+        // Ordered wrist/knuckle winding faces the BACK of a right hand.
         // Unlike the OpenXR host, avatar input has no tracked palm rotation to
         // repair a reversed sign. Keep this anatomical handedness explicit.
         normal = normal.normalized * (rightHand ? -1 : 1);

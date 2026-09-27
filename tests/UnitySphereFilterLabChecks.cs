@@ -233,7 +233,7 @@ public partial class UnityAvatarHandLabChecks
         vm.SendCustomEvent("SetRaw");SphereContracts(a,b);
         SetHands(0,1,Quaternion.identity);yield return null;CalibrateControls();yield return null;
         vm.SendCustomEvent("SetSphere");yield return null;
-        Require(Get<bool>(vm,"sphere") && Get<UnityEngine.UI.Text>(vm,"label").text.Contains("SPHERE"),"Sphere choice visible");
+        Require(Get<bool>(vm,"sphere"),"Sphere policy selected");
         for(int side=0;side<2;side++)
         {
             Require(Get<bool>(cursors[side],"poseValid") && !Get<bool>(cursors[side],"clicksAllowed"),"Sphere mode keeps accepted avatar sample and disabled clicks");

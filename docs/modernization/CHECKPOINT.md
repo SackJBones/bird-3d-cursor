@@ -1147,3 +1147,100 @@ Lab 05 as the last verified deployment; historical build-only notes are stale
 for current device state. Leave this scene available while Dana tests; advance
 independent agreed work without repeatedly restarting it. Standalone v0.10,
 account state and headset power settings were not changed. No online upload.
+
+
+## 2026-09-27 22:15 UTC - Palm-centered avatar Bird with sphere-directed aim (Lab 12)
+
+Physical sequence: Dana found palm-up opening sideways in RAW on both hands.
+Lab 09 changed the thumb-dependent palm normal to a wrist/knuckle frame, kept the
+classic origin, exposed its exact location as a white cross, and isolated zero
+flat tilt. Lab 10 added the requested pinky contribution: .3 index + .3 pinky +
+.4 thumb. The core now accepts an explicit thumb base so this origin choice
+cannot silently change the limit palm frame. Dana confirms PALM feels much
+better and familiar; ADAPTIVE seems good, while SPHERE was barely tried.
+
+Lab 11's far-only 45-degree rotation about the index-to-pinky knuckle line was
+built, hash-verified and visibly rendered in Quest VRChat. Dana approves that
+fallback vector but rejects the far-direction lock: reshaping fingers must
+continue to steer Bird even without turning the wrist. That implementation and
+its authoring switch are retired; its measurements are retained as historical
+evidence. Lab 09 passed 110238 assertions/743 frames; Lab 10 passed 110449/779;
+Lab 11 passed 118371/1199 on both targets before that physical correction.
+
+FINAL LAB 12: useSphereDirection separates direction from scalar range. Any
+valid center on/in front of the palm plane determines the raw ray at every
+range, irrespective of flat blend weight or fit confidence. Only a behind-palm
+center blends toward the accepted 45-degree knuckleward vector; normalized
+signed center depth drives a smooth blend with .25 full-correction width.
+Intrinsic sphere interpolation uses hand axes, including antipodal fallback;
+no torso, head, world-up or Euler state. Singular/zero-direction fits use the
+fallback explicitly. Fist return is exactly at the palm. Existing untilted
+radial continuation and original polynomial are retained; older bend-based
+flat/fist heuristics remain, not claimed sphere-only. ADAPTIVE smooths the final
+point, so exact center collinearity describes raw geometry before filtering.
+
+ADAPTIVE and PALM are the saved scene defaults. Both comparison button meshes,
+colliders and labels are removed; nonvisual policy components remain for
+Inspector authoring/regression checks. Origin changes in those APIs still clear
+filter/UI contact history without erasing fingertip calibration. The underlying
+ordinary Unity/standalone installed app is unchanged. New lab authoring switch:
+-RefineSphereDirection; normal reproduction uses the committed authored scene.
+
+Both Android and Windows pass 119338 compiled-Udon assertions over 868 normal
+frames, plus saved-scene cadence/toggle/disable/render checks. The 1754-row
+center-direction CSV is byte-identical across targets. Fixed-palm finger splay
+steers distant Bird by more than three degrees on each hand with all valid
+front-side rays collinear with the fitted center; behind-plane sweeps in four
+orientations and both hands remain continuous, full fists return exactly,
+and invalid settings reject/recover. Maximum measured radial difference from
+the untilted continuation is 1.097e-6 relative, from float arithmetic. An initial
+steering fixture failed its >3-degree coverage requirement because that chosen
+finger motion moved the sphere by only .303 degrees; replaced it with actual
+finger splay after an independent geometric calculation, without changing the
+runtime to satisfy the test. The 114 original cursor/filter and 5549 hand-limit
+assertions over 2401 samples also pass with the optional policy off.
+
+Normal unmodified SDK exports, compressed/uncompressed upload-size gates,
+processed-scene and catalog audits pass on both targets:
+- Android deployed: 270827 bytes; SHA256 56DF58AE27ED2DC95219F4CF7C40349AEE1B5F6CEC58A3EBCABC1442CAC46FD5.
+- Windows build-only: 304220 bytes; SHA256 E2E03D23B7CC90775765E6196B0BE01A4E6AF25092693CC7822A94D2C08F34A8.
+- Runtime sources: 9409775AAE93B22441F2BE2162A2C9E26159BEA553A008CB22E5E79D8F511E85.
+- Layout: 109AB9EA27C41F7DCBB3B2CFAEBB7956C104DE6468F1B2A6705830B342700AA3.
+- Each export: 267 GameObjects, 749 components,
+  46 Udon behaviours, 43 network bindings;
+  zero missing scripts/project MonoBehaviours in the processed scene.
+
+The Android file on Quest matches that SHA256; SDK BuildAndTest requested launch
+and VRChat processes started. The headset was asleep and yielded an empty
+compositor capture even after a normal wake key. Therefore Lab 12 rendering and
+physical feel remain pending; Lab 11's actual stereo capture is not evidence
+for Lab 12. No matched Udon exception appeared in the captured startup slice.
+Device record/log/exported scene are ignored under Validation/TrackingLab/DeviceLab12.
+Do not keep waking/restarting it while idle or block development on its state.
+
+Unity's cached compile graph initially referenced the retired FarTilt test helper
+and emitted CS2001; its automatic additional compile run regenerated the graph
+and succeeded. Final Android SDK export/gates passed. The known internal Unity
+bundle 'Build Finished, Result: Failure.' diagnostic remains qualified by normal
+SDK success and artifact audits; no SDK validation was patched or bypassed.
+
+Next setup priority explicitly requested by Dana: eliminate mandatory SET LEFT /
+SET RIGHT through automatic avatar fingertip estimation; retain manual calibration
+as optional correction. Keep this outside the geometric solver, do not assume
+universal bone axes or learn a closed fist as an open hand, and cover startup,
+avatar swaps, scale, missing samples, both hands and contact/filter history.
+Manual SET is still required in Lab 12. Continue the broader VRChat world/UI plan
+once this setup friction is removed; preserve accepted PALM geometry and the
+sphere-center direction contract. Recurring instructions carry these latest
+requirements ahead of the historical experiments.
+
+Final verification: Unity platform comparison passes source/version, processed layout,
+colliders/spawns, component inventory, all 46 Udon program bindings, all 43 network
+bindings and artifact hashes. Editor restored to Android; project settings are clean.
+All 82 maintained/generated runtime source/meta files match, 315 Asset GUIDs
+are unique, and surviving authored transform poses/parents are unchanged. Relative
+to the prior committed scene, ten filter-button/label blocks are removed and ten
+origin-marker/nonvisual-settings blocks are added. Both platform build logs include
+the automatically recovered stale-helper CS2001 compile attempt described above;
+both subsequent compile graphs and normal SDK exports/gates succeed. No additional
+headset reload was needed for these final checks.

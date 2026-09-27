@@ -73,6 +73,55 @@ off and is limited to 512-pixel resolution. Diagnostics are per-client; visitors
 do not compete for the switches. Bird clicking is unnecessary. A named integration
 root contains the separate input/solver/presentation station.
 
+## Lab 12 sphere-center direction and fixed defaults
+
+Dana approves the 45-degree knuckle-axis fallback but rejects locking the far
+direction to it. The current policy retains sphere-center aim at every range;
+only behind-palm centers blend to that fallback, and singular fits use it when
+no direction exists. Scalar range stays independent. ADAPTIVE and PALM are the
+saved defaults; both comparison buttons and labels are removed. Use
+`-RefineSphereDirection` to author/update this scene. See
+[PALM-DIRECTION.md](PALM-DIRECTION.md) and the latest CHECKPOINT for validation
+and device state. Required SET removal remains the next setup task.
+
+## Historical Lab 11 far knuckle-axis comparison
+
+Lab 11 preserved Lab 10's PALM origin and rotated the far
+limit 45 degrees toward the fingers about the index-to-pinky knuckle line.
+Through four metres and for an unblended healthy fit, geometry is unchanged.
+The range gate smoothly completes at 25 metres and preserves distance. Use
+the historical Lab 11 artifacts for that comparison; its authoring switch and
+policy have been retired. See [PALM-DIRECTION.md](PALM-DIRECTION.md) and the latest CHECKPOINT for
+validation and device status. Dana confirms PALM feels much better and ADAPTIVE
+seems good; this does not accept the barely-tried SPHERE mode. Mandatory SET
+removal is the next setup priority, with manual correction retained.
+
+## Lab 10 origin comparison
+
+Lab 10 started with **Origin / PALM**, adding the pinky knuckle
+to move the ray origin into the palm. Its native switch returned to CLASSIC
+without repeating SET. The white cross marks the chosen origin; fitting and
+the wrist/knuckle palm frame remain independent. Use `-AddRootControl` only
+when adding the comparison to an older scene; it refuses to overwrite an
+existing control. See PALM-DIRECTION.md and latest CHECKPOINT for tests and
+headset status. Lab 10 is now hash-verified and visibly running in Quest VRChat,
+with physical origin preference pending. The lab retains zero tilt for this comparison.
+
+## Lab 09 palm direction comparison
+
+The latest Quest deployment removes the authored flat-hand tilt, uses the
+wrist/knuckles instead of the thumb to define the palm normal, and adds a white
+cross at the unchanged reference ray origin. Dana reported the sideways motion
+in RAW on both hands. See [PALM-DIRECTION.md](PALM-DIRECTION.md) for the comparison,
+measurements and the later far-only tilt idea. The normal SDK transfer hash and
+actual Lab 09 stereo rendering are verified; physical direction feedback is
+pending. Calibrate both straight hands, inspect RAW with Geometry ON, then
+compare SPHERE if useful. The Point cycle remains unchanged.
+
+`-RefinePalmDirection` sets up this comparison on an older authored lab. Normal
+reproduction uses the committed scene. If older layout/refinement switches are
+used together, the runner applies this direction refinement last.
+
 ## Lab 08 sphere-filter comparison
 
 The saved lab now has optional SPHERE following ADAPTIVE on the native Point

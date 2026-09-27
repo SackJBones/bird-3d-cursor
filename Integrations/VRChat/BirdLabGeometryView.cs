@@ -11,7 +11,7 @@ public class BirdLabGeometryView : UdonSharpBehaviour
     public BirdLabPointView pointView;
     public LineRenderer[] sphereRings;
     public Renderer fitCenter;
-    public LineRenderer fitRay, birdRay, birdMarker, palmNormal;
+    public LineRenderer fitRay, birdRay, birdMarker, palmNormal, rootMarker;
 
     public override void PostLateUpdate()
     {
@@ -48,6 +48,17 @@ public class BirdLabGeometryView : UdonSharpBehaviour
             palmNormal.enabled=true; palmNormal.SetPosition(0,cursor.handRoot);
             palmNormal.SetPosition(1,cursor.handRoot+input.normal*.08f);
         }
+        if(rootMarker!=null)
+        {
+            Vector3 across=(input.bonePositions[13]-input.bonePositions[4]).normalized*.007f;
+            Vector3 along=Vector3.Cross(input.normal,across).normalized*.007f;
+            rootMarker.enabled=true;
+            rootMarker.SetPosition(0,cursor.handRoot-across);
+            rootMarker.SetPosition(1,cursor.handRoot+across);
+            rootMarker.SetPosition(2,cursor.handRoot);
+            rootMarker.SetPosition(3,cursor.handRoot-along);
+            rootMarker.SetPosition(4,cursor.handRoot+along);
+        }
         // Same render-shell endpoint as the displayed Bird. At ordinary distances
         // this is the actual point; astronomical ranges preserve its viewing direction.
         Vector3 endpoint=pointView.core.transform.position;
@@ -76,6 +87,7 @@ public class BirdLabGeometryView : UdonSharpBehaviour
         if(birdRay!=null) birdRay.enabled=false;
         if(birdMarker!=null) birdMarker.enabled=false;
         if(palmNormal!=null) palmNormal.enabled=false;
+        if(rootMarker!=null) rootMarker.enabled=false;
     }
     private void OnDisable() { Clear(); }
 }

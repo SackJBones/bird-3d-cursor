@@ -6,6 +6,21 @@ flat/fist limits, polynomial range and optional Kalman recurrence. Its input is
 an avatar approximation, not raw tracked hand joints. The older 12-origin
 `BirdAvatarInput` and its preview scene remain available as separate diagnostics.
 
+## Palm direction and origin comparison
+
+The avatar palm frame now uses wrist and knuckle positions, excluding the
+opposable thumb from its normal. Lab 09 set flat-hand tilt to zero for diagnosis
+and added a white cross at the actual ray origin. Lab 10 adds a native
+Origin control: PALM uses 30% index / 30% pinky / 40% thumb; CLASSIC restores
+60% index / 40% thumb. Switching preserves SET calibration and clears motion
+and contact history. The palm reference is independent of this origin choice.
+See [PALM-DIRECTION.md](PALM-DIRECTION.md) for the user's predictability requirement,
+comparison evidence and Lab 12's sphere-center direction, with a 45-degree
+knuckle-axis fallback only for behind-palm/singular fits. Dana prefers PALM and
+ADAPTIVE; those are now defaults and their comparison buttons are removed.
+Removing required SET is the
+next setup task; automatic fingertip estimates remain separate from Bird geometry.
+
 ## Try the lab
 
 Use VRChat's ordinary interaction on the console to the left. Open and straighten
