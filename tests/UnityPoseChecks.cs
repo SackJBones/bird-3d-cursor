@@ -66,6 +66,7 @@ public sealed class UnityPoseChecks : MonoBehaviour
         try
         {
             BoundsWithoutMutation(); Placement(); Boundaries(); TransformedTransactions(); MirroredDocks(); Lifecycle(); Rates(); Serialization(); Preview();
+            Debug.Log(UnityTwoHandPoseChecks.Run());
             File.WriteAllText("pose-result.txt","PASS: "+checks+" actual Unity pose assertions, four rendered views, two-scale docking, whole-box bounds, pose-intent gates, full-pose rollback and prefab event. Synthetic input; no Udon/client/headset claim.");
             SessionState.SetBool(Active,false); EditorApplication.Exit(0);
         }

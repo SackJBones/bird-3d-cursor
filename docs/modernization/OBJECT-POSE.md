@@ -8,10 +8,11 @@ size. The local Udon components implement the same optional pose contract in
 the separate authored `BirdPoseDemo` world scene described below.
 
 Bird continues to specify a point. The host separately chooses how to request
-orientation and size. The sample uses keyboard commands while a logical Bird
-press holds the object. It does not infer a hand orientation from the point or
-impose a gesture on the geometric solver. Sphere fitting, range, filtering,
-click detection and the installed Quest v0.9 application are unchanged.
+orientation and size. The sample supports keyboard commands and an optional
+[two-hand clutch](TWO-HAND-POSE.md) while a logical Bird press holds the object.
+It does not infer a hand orientation from the point or impose a gesture on the
+geometric solver. Sphere fitting, range, filtering and click detection are unchanged.
+The standalone Quest v0.10 Objects mode integrates the separate clutch.
 
 ## Authoring
 
@@ -168,8 +169,8 @@ No new dependency or custom Inspector is required. The pose runner preserves the
 sample's script GUID and includes its explicit material/shader assets. Generated
 projects, images, players and logs live in ignored heavy-repository Validation.
 
-Next integrate an intentional Bird gesture/interaction mode. Actual live-hand
-feel, mixed changing-input/render
+The subsequent [two-hand gesture and live host](TWO-HAND-POSE.md) integrate the
+ordinary Unity transaction. Actual live-hand feel, mixed changing-input/render
 cadences, moving layouts, physics collision/lift policy, dynamic player exclusion,
 network reservations and VRChat-client/headset validation remain separate work.
 

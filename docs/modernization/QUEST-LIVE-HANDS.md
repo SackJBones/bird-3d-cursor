@@ -1,8 +1,9 @@
 # Quest live hand comparison
 
-Current UI checkpoint: **v0.9** is built, installed and startup-verified. It adds
-a twelve-color spherical selector driven by both accepted Bird points. Physical
-UI feel is not yet assessed; deployment details and instructions are below.
+Current checkpoint: **v0.10** is built, installed and startup-verified. It adds
+an exclusive Objects mode with two-hand rotation/resizing at tabletop and distant
+building scale, alongside the twelve-color spherical selector. Physical UI and
+two-hand feel are not yet assessed; deployment details and instructions are below.
 
 
 This standalone `Bird Live Hands` app feeds real Quest finger joints into the
@@ -62,7 +63,8 @@ Use Unity 2022.3.22f1 with its Android SDK, NDK and OpenJDK modules:
 ```powershell
 ./tests/Invoke-UnityQuestHandsBuild.ps1 `
   -UnityEditor 'C:/Program Files/Unity/Hub/Editor/2022.3.22f1/Editor/Unity.exe' `
-  -ProjectPath '../bird-3d-cursor-projects/Validation/QuestHands2022'
+  -ProjectPath '../bird-3d-cursor-projects/Validation/QuestHands2022' `
+  -CheckObjects
 ```
 
 The directory must be new or carry the exact dedicated generator marker.
@@ -211,3 +213,40 @@ surfaces. `UnityQuestUiRenderChecks.Run` uses the same placement helper and the
 actual vista, renders forward/facing views, and exercises the external-input color
 action. Its two D3D11 camera captures pass visual inspection; this is still a
 synthetic camera check, not a physical or stereo assessment.
+
+
+### v0.10 two-hand object checkpoint
+
+Built, installed and startup-verified 2026-09-27 UTC. APK **25,764,308 bytes**,
+SHA256 `E1CE160AB80417BEF65F3A78CCA296139790D81AA2A35F9D13FAA6DE81416D77`.
+Package inspection confirms v0.10 / arm64-v8a. App-scoped logs show the selector
+and two-scale object stations constructed, active XR and OpenXR Hands running at
+approximately 72 Dynamic samples/s. Both hands were 0/18 while unattended, and
+head-anchored placement was waiting. This proves startup, not an on-headset view
+or the feel of the new gesture. No physical action was requested.
+
+Hold a fingertip on **Objects**, beside Record 20s, for 0.6 seconds. A tabletop
+station appears ahead-left and a building station 650 m into the valley. Hold an
+object with one Bird; point the other through it and press to join. Turning the
+line between your hands rotates it, spreading changes its size. Release the
+second hand to freeze pose; match an outline and release the primary when green
+to place. Either hand can be primary. **Colors** returns to the selector. Move
+away from the label before toggling again. Switching cancels any unfinished move
+and prevents an already-held click from acting in the newly selected experience.
+
+The separate optional adapter uses physical hand-root separation, not distant
+Bird-point separation. It respects the target's pose permissions and full-box
+workspace bounds. Tracking loss cannot convert stale pose intent into a drop.
+See [TWO-HAND-POSE.md](TWO-HAND-POSE.md) for the deliberate 160-degree clutch limit,
+no-twist limitation, authoring, rate measurements and remaining validation.
+The original larger BACK-surface color scrolling behavior is preserved.
+
+Final real Unity checks pass 6015 existing pose and 4863 two-hand assertions,
+plus the Windows normal-frame player/build/render path. The Quest host fixture
+passes 3397 frame/binding assertions in this run (frame-rate-dependent count),
+including exact tabletop docking, a resized/rotated building staying over 450 m
+away on closure, mode-switch full rollback and fresh color actions. Four real
+vista renders were inspected. The Android preflight retains its 400 parity/input,
+5549 hand-limit, 123 visual-math and recording-persistence checks. Optional private
+joint replay was not rerun; accepted geometry/range/filter/click laws are unchanged.
+These host inputs are synthetic, and no gesture Udon/VRChat validation is claimed.

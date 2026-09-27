@@ -82,6 +82,8 @@ public sealed class UnityQuestHands : MonoBehaviour
     Camera view;
     GameObject vista;
     BirdSphericalSelectorPreview selector;
+    BirdPosePreview objects;
+    bool objectsMode,interactionArmed=true;
     bool appPaused;
     TextMesh label;
     Transform labelBackdrop;
@@ -103,7 +105,7 @@ public sealed class UnityQuestHands : MonoBehaviour
     [Serializable] public class JointTrace
     {
         public int schema = 1;
-        public string appVersion = "0.9", hand;
+        public string appVersion = "0.10", hand;
         public float time;
         public bool tracked, poseValid;
         // Base/intermediate/distal/tip for thumb, index, middle, ring, little.
@@ -138,9 +140,10 @@ public sealed class UnityQuestHands : MonoBehaviour
         sides = new[] { CreateSide(Hand.Chirality.Left, new Color(.1f, .9f, 1)),
             CreateSide(Hand.Chirality.Right, new Color(1, .25f, .65f)) };
         CreateSelector();
+        objects=CreateObjects(sides[0].uiInput,sides[1].uiInput);
         CreateModeControls();
         Application.onBeforeRender += UpdateHead;
-        Debug.Log("BIRD_HANDS_START: v0.9 live spherical selector; accepted point/depth math unchanged; default Inflate; real XR Hands; 32mm through 4m; Q=.001 R=270*d^3");
+        Debug.Log("BIRD_HANDS_START: v0.10 colors / two-hand objects; accepted point/depth math unchanged; default Inflate; real XR Hands; 32mm through 4m; Q=.001 R=270*d^3");
     }
 
     Side CreateSide(Hand.Chirality chirality, Color color)
@@ -214,6 +217,8 @@ public sealed class UnityQuestHands : MonoBehaviour
                 view.transform.SetPositionAndRotation(headPosition,headRotation);
                 vista = UnityQuestVista.Create(view);
                 PlaceSelector(selector,view);
+                PlaceObjects(objects,view);
+                SetExperience(selector,objects,objectsMode);
                 Debug.Log("BIRD_VISTA_READY: tracked-head anchor; 1.65m nominal eye height; 30/100/300m landmarks");
             }
         }
@@ -235,7 +240,7 @@ public sealed class UnityQuestHands : MonoBehaviour
         if (Time.unscaledTime >= nextStatus)
         {
             nextStatus = Time.unscaledTime + 1;
-            string status = "BIRD v0.9 / SPHERICAL UI   |   close, reach, flare\n" +
+            string status = "BIRD v0.10 / "+(objectsMode?"OBJECTS":"COLORS")+"   |   close, reach, flare\n" +
                 "Color: new point | sphere: legacy fit | white: raw | gold: legacy\n" +
                 "32mm through 4m. Green line points out of palm.\n" +
                 "Touch a label below for 0.6s: " + sizeMode + "\n" + CaptureDescription() + "\n";
@@ -395,6 +400,33 @@ public sealed class UnityQuestHands : MonoBehaviour
     {
         if (sides != null) foreach(var side in sides) Lose(side);
         if (selector != null) selector.Scroll.Cancel();
+        if (objects != null) { objects.TwoHandPose.Cancel(); objects.Interactor.CancelImmediately(); }
+    }
+
+    public static BirdPosePreview CreateObjects(BirdPointerInput left,BirdPointerInput right)
+    {
+        var go=new GameObject("Live Bird object stations"); go.SetActive(false);
+        var value=go.AddComponent<BirdPosePreview>(); value.desktopInput=false; value.createCamera=false; value.createEnvironment=false;
+        value.externalLeft=left; value.externalRight=right;
+        value.tabletopPosition=new Vector3(-1.25f,.8f,1.6f); value.buildingPosition=new Vector3(0,-148,650);
+        value.Initialize();
+        Debug.Log("BIRD_OBJECTS_READY: two accepted point/press/hand-root streams; bounded two-scale pose stations; second-hand clutch; awaiting head placement");
+        return value;
+    }
+    public static void PlaceObjects(BirdPosePreview target,Camera camera)
+    {
+        Vector3 heading=Vector3.ProjectOnPlane(camera.transform.forward,Vector3.up);
+        if(heading.sqrMagnitude<.01f) heading=Vector3.forward;
+        target.transform.SetPositionAndRotation(camera.transform.position-Vector3.up*1.65f,Quaternion.LookRotation(heading.normalized,Vector3.up));
+        // Keep mode selection separate from placing the authored environment.
+        Physics.SyncTransforms();
+        Debug.Log("BIRD_OBJECTS_PLACED: tabletop ahead-left; 69m building in valley 650m forward");
+    }
+    public static void SetExperience(BirdSphericalSelectorPreview colors,BirdPosePreview poses,bool showObjects)
+    {
+        if(colors!=null && colors.gameObject.activeSelf==showObjects) colors.gameObject.SetActive(!showObjects);
+        if(poses!=null && poses.gameObject.activeSelf!=showObjects) poses.gameObject.SetActive(showObjects);
+        // OnDisable rolls back a grip; OnEnable consumes existing revisions so held clicks cannot transfer.
     }
 
     void OnDisable() { Unsubscribe(); CancelUiAndHands(); }
@@ -411,13 +443,13 @@ public sealed class UnityQuestHands : MonoBehaviour
 
     void CreateModeControls()
     {
-        modeLabels = new TextMesh[4];
-        string[] names = { "Fixed", "Inflate", "Inflate + lag", "Record 20s" };
-        for (int i=0;i<4;i++)
+        modeLabels = new TextMesh[5];
+        string[] names = { "Fixed", "Inflate", "Inflate + lag", "Record 20s", "Objects" };
+        for (int i=0;i<modeLabels.Length;i++)
         {
             var text = new GameObject("Visual mode " + names[i]).AddComponent<TextMesh>();
             text.transform.SetParent(view.transform,false);
-            text.transform.localPosition = i == 3 ? new Vector3(0,-.28f,.55f) : new Vector3((i-1)*.19f,-.20f,.55f);
+            text.transform.localPosition = i >= 3 ? new Vector3(i==3?-.14f:.14f,-.28f,.55f) : new Vector3((i-1)*.19f,-.20f,.55f);
             text.anchor = TextAnchor.MiddleCenter;
             text.fontSize = 48;
             text.characterSize = .008f;
@@ -430,16 +462,27 @@ public sealed class UnityQuestHands : MonoBehaviour
     {
         if (modeLabels == null) return;
         int touching = -1;
-        for (int i=0;i<4;i++)
+        for (int i=0;i<modeLabels.Length;i++)
         {
-            modeLabels[i].color = i == 3 ? (capture != null ? Color.red : Color.white) : (int)sizeMode == i ? Color.cyan : Color.gray;
+            modeLabels[i].color = i == 4 ? Color.white : i == 3 ? (capture != null ? Color.red : Color.white) : (int)sizeMode == i ? Color.cyan : Color.gray;
+            if(i==4) modeLabels[i].text=objectsMode?"Colors":"Objects";
             foreach (var side in sides)
                 if (side.hand.valid && (side.hand.joints[7]-modeLabels[i].transform.position).magnitude < .045f) touching=i;
         }
         if (touching != 3) captureArmed = true;
+        if (touching != 4) interactionArmed = true;
         if (touching != touchMode) { touchMode=touching; touchSince=Time.unscaledTime; }
         if (touching >= 0 && Time.unscaledTime-touchSince > .6f && Time.unscaledTime > nextModeChange)
         {
+            if(touching==4)
+            {
+                if(interactionArmed && vista!=null)
+                {
+                    interactionArmed=false; objectsMode=!objectsMode; SetExperience(selector,objects,objectsMode);
+                    nextModeChange=Time.unscaledTime+1; Debug.Log("BIRD_EXPERIENCE: "+(objectsMode?"Objects":"Colors"));
+                }
+                return;
+            }
             if (touching == 3)
             {
                 if (capture == null && captureArmed)

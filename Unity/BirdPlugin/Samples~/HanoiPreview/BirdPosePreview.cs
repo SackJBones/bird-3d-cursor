@@ -10,15 +10,18 @@ namespace Bird3DCursor.Samples
     public sealed class BirdPosePreview : MonoBehaviour
     {
         public bool desktopInput=true,createCamera=true;
+        public bool createEnvironment=true;
+        public Vector3 tabletopPosition=new Vector3(0,.78f,-1.1f),buildingPosition=new Vector3(0,-12,420);
         public BirdPointerInput externalLeft,externalRight;
         public BirdGrabInteractor Interactor { get; private set; }
         public BirdHeldPoseControls Controls { get; private set; }
+        public BirdTwoHandPose TwoHandPose { get; private set; }
         public BirdPointerInput Pointer { get; private set; }
         public BirdPointerInput OtherPointer { get; private set; }
         public BirdGrabTarget[] Items { get; private set; }
         public Camera View { get; private set; }
         public Transform Generated { get { return generated; } }
-        Transform generated,marker;
+        Transform generated,marker,statusBackdrop;
         TextMesh status;
         Material surface;
         readonly List<Material> materials=new List<Material>();
@@ -37,7 +40,8 @@ namespace Bird3DCursor.Samples
             OtherPointer=externalRight!=null?externalRight:Child("Synthetic right",generated).gameObject.AddComponent<BirdPointerInput>();
             Interactor=generated.gameObject.AddComponent<BirdGrabInteractor>();
             Controls=generated.gameObject.AddComponent<BirdHeldPoseControls>(); Controls.interactor=Interactor;
-            Items=new[]{Station("TABLETOP",new Vector3(0,.78f,-1.1f),.3f),Station("BUILDING",new Vector3(0,-12,420),75)};
+            TwoHandPose=generated.gameObject.AddComponent<BirdTwoHandPose>(); TwoHandPose.interactor=Interactor; TwoHandPose.first=Pointer; TwoHandPose.second=OtherPointer;
+            Items=new[]{Station("TABLETOP",tabletopPosition,.3f),Station("BUILDING",buildingPosition,75)};
             Interactor.Configure(new[]{Pointer,OtherPointer},Items);
             foreach(var item in Items)
             {
@@ -52,14 +56,18 @@ namespace Bird3DCursor.Samples
                 View.nearClipPlane=.08f; View.farClipPlane=2200; View.fieldOfView=52;
                 View.clearFlags=CameraClearFlags.SolidColor; View.backgroundColor=new Color(.12f,.22f,.3f);
             }
-            Box("Terrace",generated,new Vector3(0,-.08f,0),new Vector3(12,.16f,10),new Color(.1f,.16f,.2f));
-            Box("Table",generated,new Vector3(0,.7f,-1.1f),new Vector3(1.7f,.14f,1),new Color(.24f,.3f,.33f));
-            Box("Far foundation",generated,new Vector3(0,-18,420),new Vector3(410,12,240),new Color(.2f,.28f,.3f));
-            Box("Valley",generated,new Vector3(0,-40,700),new Vector3(1800,12,1700),new Color(.15f,.24f,.22f));
-            for(int i=0;i<7;i++) Box("Scale landmark",generated,new Vector3((i-3)*150,-12,780+(i%2)*130),new Vector3(35,70+(i%3)*25,40),new Color(.24f,.34f,.4f));
-            Label("BIRD / POSE DOCKING",generated,new Vector3(0,4.4f,5.5f),.031f,Color.white);
-            Label("Match the outline. Release when the piece turns green.",generated,new Vector3(0,4,5.5f),.018f,new Color(.75f,.9f,1));
-            status=Label("",generated,new Vector3(-1.2f,1.35f,-.8f),.0065f,Color.white); status.anchor=TextAnchor.UpperLeft; status.alignment=TextAlignment.Left;
+            Box("Table",generated,tabletopPosition+Vector3.down*.08f,new Vector3(1.7f,.14f,1),new Color(.24f,.3f,.33f));
+            Box("Far foundation",generated,buildingPosition+Vector3.down*6,new Vector3(410,12,240),new Color(.2f,.28f,.3f));
+            if(createEnvironment)
+            {
+                Box("Terrace",generated,new Vector3(0,-.08f,0),new Vector3(12,.16f,10),new Color(.1f,.16f,.2f));
+                Box("Valley",generated,new Vector3(0,-40,700),new Vector3(1800,12,1700),new Color(.15f,.24f,.22f));
+                for(int i=0;i<7;i++) Box("Scale landmark",generated,new Vector3((i-3)*150,-12,780+(i%2)*130),new Vector3(35,70+(i%3)*25,40),new Color(.24f,.34f,.4f));
+                Label("BIRD / POSE DOCKING",generated,new Vector3(0,4.4f,5.5f),.031f,Color.white);
+                Label("Match the outline. Release when the piece turns green.",generated,new Vector3(0,4,5.5f),.018f,new Color(.75f,.9f,1));
+            }
+            status=Label("",generated,tabletopPosition+new Vector3(-1.2f,.57f,.3f),.0065f,Color.white); status.anchor=TextAnchor.UpperLeft; status.alignment=TextAlignment.Left;
+            if(externalLeft!=null) statusBackdrop=Box("Instructions backing",generated,Vector3.zero,Vector3.one,new Color(.02f,.035f,.05f));
             marker=Box("Desktop logical point",generated,Vector3.zero,Vector3.one*.025f,Color.cyan); marker.gameObject.SetActive(false);
         }
         BirdGrabTarget Station(string name,Vector3 position,float size)
@@ -136,7 +144,15 @@ namespace Bird3DCursor.Samples
         {
             foreach(var cue in feedback) cue.Refresh();
             string action=Interactor.ActiveTarget==null?"POINT / HOLD TO PICK UP":Interactor.IsReturning?"RETURNING":Interactor.ReadyToPlace?"RELEASE TO PLACE":Interactor.PoseLimited?"POSE LIMIT / ADJUST OR RESET":"ALIGN WITH OUTLINE";
-            status.text=action+"\n\nDesktop input\nMouse aim / wheel reach\nHold left mouse to move\nQ / E rotate 15 deg\n- / + change size\nR restore held pose\nRight / Esc cancel";
+            status.text=action+(externalLeft!=null?
+                "\n\nHold with one Bird to move.\nPoint the other Bird through it and click.\nWhile both hold: turn / spread your hands.\nRelease the second hand to freeze pose.\nMatch the outline, then release to place.":
+                "\n\nDesktop input\nMouse aim / wheel reach\nHold left mouse to move\nQ / E rotate 15 deg\n- / + change size\nR restore held pose\nRight / Esc cancel");
+            if(statusBackdrop!=null)
+            {
+                Bounds text=status.GetComponent<Renderer>().localBounds;
+                statusBackdrop.localPosition=status.transform.localPosition+text.center+Vector3.forward*.02f;
+                statusBackdrop.localScale=new Vector3(text.size.x+.05f,text.size.y+.05f,.01f);
+            }
         }
         void OnDisable() { if(Interactor!=null) Interactor.CancelImmediately(); if(generated!=null) generated.gameObject.SetActive(false); }
         void OnEnable() { if(generated!=null) generated.gameObject.SetActive(true); }

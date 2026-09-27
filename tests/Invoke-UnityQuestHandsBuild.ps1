@@ -1,7 +1,8 @@
 param(
     [Parameter(Mandatory = $true)][string]$UnityEditor,
     [Parameter(Mandatory = $true)][string]$ProjectPath,
-    [string]$JointTracePath
+    [string]$JointTracePath,
+    [switch]$CheckObjects
 )
 $ErrorActionPreference = 'Stop'
 $repo = Split-Path $PSScriptRoot -Parent
@@ -45,20 +46,30 @@ function Invoke-BirdUnity([string]$Method, [string]$Log, [bool]$Quit) {
     $process.Refresh()
     if ($process.ExitCode -ne 0) { throw "Unity failed; see $Log" }
 }
-foreach ($name in @('UnityQuestHands.cs','UnityQuestVista.cs','UnityQuestVistaChecks.cs','UnityQuestUiRenderChecks.cs','QuestHandsUdonShim.cs','UnityDepthVisualChecks.cs','UnityDepthMotionChecks.cs','UnityDepthStereoChecks.cs')) { Copy-Item (Join-Path $PSScriptRoot $name) (Join-Path $project "Assets/$name") }
+foreach ($name in @('UnityQuestHands.cs','UnityQuestVista.cs','UnityQuestVistaChecks.cs','UnityQuestUiRenderChecks.cs','UnityQuestObjectChecks.cs','QuestHandsUdonShim.cs','UnityDepthVisualChecks.cs','UnityDepthMotionChecks.cs','UnityDepthStereoChecks.cs')) { Copy-Item (Join-Path $PSScriptRoot $name) (Join-Path $project "Assets/$name") }
 foreach ($name in @('UnityQuestHandsBuild.cs','UnityQuestHandsChecks.cs','UnityPalmFitChecks.cs','UnityQuestTraceChecks.cs','UnityQuestReplayChecks.cs','UnityQuestTemporalChecks.cs','UnityQuestFilterExperiments.cs')) { Copy-Item (Join-Path $PSScriptRoot $name) (Join-Path $project "Assets/Editor/$name") }
 # Migrate the earlier generated helper: a Play Mode component must live outside Editor.
 $oldHelper = Join-Path $project 'Assets/Editor/UnityDepthVisualChecks.cs'
 if (Test-Path -LiteralPath $oldHelper) { Remove-Item -LiteralPath $oldHelper }
 foreach ($name in @('BirdSphereFit.cs','BirdCursorState.cs')) { Copy-Item (Join-Path $repo "Integrations/VRChat/$name") (Join-Path $project "Assets/$name") }
 Copy-Item (Join-Path $repo 'Unity/BirdPlugin/Samples~/MenuPreview/BirdSphericalSelectorPreview.cs') (Join-Path $project 'Assets/BirdSphericalSelectorPreview.cs')
+foreach($name in @('BirdPosePreview.cs','BirdPosePreview.cs.meta')) { Copy-Item -LiteralPath (Join-Path $repo "Unity/BirdPlugin/Samples~/HanoiPreview/$name") -Destination (Join-Path $project "Assets/$name") }
 New-Item -ItemType Directory -Force (Join-Path $project 'Assets/Resources') | Out-Null
+foreach($name in @('BirdHanoiSurface.mat','BirdHanoiSurface.mat.meta','BirdHanoiSurface.shader','BirdHanoiSurface.shader.meta')) { Copy-Item -LiteralPath (Join-Path $repo "Unity/BirdPlugin/Samples~/HanoiPreview/Resources/$name") -Destination (Join-Path $project "Assets/Resources/$name") }
 foreach ($name in @('BirdMenuPreviewSurface.mat','BirdMenuPreviewSurface.mat.meta')) {
     Copy-Item (Join-Path $repo "Unity/BirdPlugin/Samples~/MenuPreview/Resources/$name") (Join-Path $project "Assets/Resources/$name")
 }
 Set-Content (Join-Path $project 'hands-build-result.txt') 'PENDING'
 Set-Content (Join-Path $project 'hands-math-result.txt') 'PENDING'
 Invoke-BirdUnity 'BirdHandsBootstrap.Run' 'hands-configure.log' $true
+if($CheckObjects) {
+    Set-Content -LiteralPath (Join-Path $project 'objects-result.txt') -Value 'PENDING'
+    $objectCheckArguments=@('-batchmode','-buildTarget','Android','-projectPath',('"'+$project+'"'),'-executeMethod','UnityQuestObjectChecks.Run','-logFile',('"'+(Join-Path $project 'objects.log')+'"'))
+    $check=Start-Process -FilePath $UnityEditor -ArgumentList $objectCheckArguments -WindowStyle Hidden -PassThru
+    if(!$check.WaitForExit(300000)) { $check.Kill(); throw 'Object host check timeout.' }
+    $check.Refresh(); $summary=Get-Content -Raw -LiteralPath (Join-Path $project 'objects-result.txt'); Write-Output $summary
+    if($check.ExitCode -ne 0 -or !$summary.StartsWith('PASS:')) { throw 'Object host checks failed; inspect objects.log.' }
+}
 Invoke-BirdUnity 'UnityQuestHandsBuild.Run' 'hands-build.log' $false
 $result = Get-Content -Raw (Join-Path $project 'hands-build-result.txt')
 Write-Output $result

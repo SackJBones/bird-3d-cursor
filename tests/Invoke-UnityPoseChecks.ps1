@@ -16,7 +16,7 @@ $package=(Join-Path $repo 'Unity/BirdPlugin').Replace('\','/')
 @{dependencies=@{'com.bird3d.cursor'="file:$package";'com.unity.modules.imageconversion'='1.0.0'}} | ConvertTo-Json -Depth 3 | Set-Content -LiteralPath (Join-Path $project 'Packages/manifest.json')
 foreach ($name in @('BirdPosePreview.cs','BirdPosePreview.cs.meta')) { Copy-Item -LiteralPath (Join-Path $repo "Unity/BirdPlugin/Samples~/HanoiPreview/$name") -Destination (Join-Path $project "Assets/$name") }
 foreach ($name in @('BirdHanoiSurface.mat','BirdHanoiSurface.mat.meta','BirdHanoiSurface.shader','BirdHanoiSurface.shader.meta')) { Copy-Item -LiteralPath (Join-Path $repo "Unity/BirdPlugin/Samples~/HanoiPreview/Resources/$name") -Destination (Join-Path $project "Assets/Resources/$name") }
-foreach ($name in @('UnityPoseChecks.cs','UnityPosePlayerSmoke.cs')) { Copy-Item -LiteralPath (Join-Path $PSScriptRoot $name) -Destination (Join-Path $project "Assets/$name") }
+foreach ($name in @('UnityPoseChecks.cs','UnityTwoHandPoseChecks.cs','UnityPosePlayerSmoke.cs')) { Copy-Item -LiteralPath (Join-Path $PSScriptRoot $name) -Destination (Join-Path $project "Assets/$name") }
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityPosePlayerBuild.cs') -Destination (Join-Path $project 'Assets/Editor/UnityPosePlayerBuild.cs')
 function Invoke-PoseUnity([string]$Method,[string]$Stem) {
     $result=Join-Path $project ($Stem+'-result.txt'); $log=Join-Path $project ($Stem+'.log')
@@ -27,7 +27,10 @@ function Invoke-PoseUnity([string]$Method,[string]$Stem) {
     $proc.Refresh(); $summary=Get-Content -Raw -LiteralPath $result; Write-Output $summary
     if($proc.ExitCode -ne 0 -or !$summary.StartsWith('PASS:')) { throw "Pose check failed: $log" }
 }
+Set-Content -LiteralPath (Join-Path $project 'two-hand-result.txt') -Value 'PENDING'
 Invoke-PoseUnity 'UnityPoseChecks.Run' 'pose'
+$gestureSummary=Get-Content -Raw -LiteralPath (Join-Path $project 'two-hand-result.txt'); Write-Output $gestureSummary
+if(!$gestureSummary.StartsWith('PASS:')) { throw 'Two-hand pose checks failed; inspect pose.log.' }
 if($BuildPlayer) {
     Invoke-PoseUnity 'UnityPosePlayerBuild.Run' 'pose-build'
     $result=Join-Path $project 'pose-player-result.txt'; $log=Join-Path $project 'pose-player.log'

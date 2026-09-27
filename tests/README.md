@@ -318,3 +318,26 @@ The optional Windows SDK build and catalog audit are separate from client loadin
 Captures, logs and the rate CSV live under ignored `Validation/UdonPose` or
 BirdWorld. See [OBJECT-POSE.md](../docs/modernization/OBJECT-POSE.md) for evidence
 and limitations. No physical-hand, multiplayer or VRChat-client claim follows.
+
+
+### Two-hand pose and Quest object host
+
+The ordinary `Invoke-UnityPoseChecks.ps1 -BuildPlayer` runner now also executes
+`UnityTwoHandPoseChecks` in real Unity, writing `two-hand-result.txt` and
+`PoseCaptures/two-hand-rates.csv`. It checks fresh secondary point-through presses,
+both primary roles, turn/size permissions, freeze/re-clutch, paired revisions,
+staleness, rejected intent, degenerate/antipodal spans and loss/disable/destruction.
+Most assertion counts are individual box corners along trajectories. The Windows
+player uses the actual two-hand adapter through normal frame ordering for docking.
+
+`Invoke-UnityQuestHandsBuild.ps1 -CheckObjects` adds the graphics-enabled
+`UnityQuestObjectChecks.Run` before its usual Android build. This drives the real
+Quest host factory/placement, accepted-state binding and exclusive mode helpers
+through normal frames with synthetic tracked states. It covers tabletop docking,
+the distant full-volume boundary, mode-switch rollback, no held-click transfer
+and restored color actions inside the larger sphere. Read `objects-result.txt`,
+`objects.log` and four `VistaCaptures/objects-*.png` / `colors-restored.png` views.
+Per-frame assertion counts vary with editor frame rate. The runner copies the
+pose sample plus its Resources material/shader and stable metadata. This is not
+physical XR tracking, headset perception or VRChat validation. See
+[TWO-HAND-POSE.md](../docs/modernization/TWO-HAND-POSE.md).

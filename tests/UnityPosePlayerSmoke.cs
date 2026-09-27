@@ -11,6 +11,7 @@ public sealed class UnityPosePlayerSmoke : MonoBehaviour
     Vector3 home,anchor,origin,end;
     string path;
     int phase;
+    bool secondaryPrepared;
     float elapsed;
     Transform generated;
     void Start()
@@ -40,10 +41,19 @@ public sealed class UnityPosePlayerSmoke : MonoBehaviour
                 case 1: Feed(anchor,true); Next(); break;
                 case 2:
                     Require(demo.Interactor.ActiveTarget==item,"Normal-frame pickup"); Feed(end,true);
-                    if(elapsed>.6f) { Require(!demo.Interactor.ReadyToPlace,"Position alone cannot commit wrong pose"); for(int i=0;i<6;i++) demo.TurnRight(); demo.Grow(); Next(); } break;
-                case 3: Feed(end,true); if(elapsed>.7f) Next(); break;
+                    if(elapsed>.6f)
+                    {
+                        Require(!demo.Interactor.ReadyToPlace,"Position alone cannot commit wrong pose");
+                        demo.OtherPointer.Submit(origin+Vector3.right*.4f,item.Volume.transform.TransformPoint(item.Volume.center),true,secondaryPrepared);
+                        if(secondaryPrepared) Next(); else secondaryPrepared=true;
+                    } break;
+                case 3:
+                    Require(demo.TwoHandPose.IsEngaged,"Normal frame second-hand clutch"); Feed(end,true);
+                    demo.OtherPointer.Submit(origin+Quaternion.Euler(0,90,0)*Vector3.right*.5f,item.Volume.transform.TransformPoint(item.Volume.center),true,true);
+                    if(elapsed>.7f) Next(); break;
                 case 4:
-                    Require(demo.Interactor.ReadyToPlace,"Normal-frame pose readiness"); Capture("pose-player-ready.png"); Feed(end,false); Next(); break;
+                    Require(demo.Interactor.ReadyToPlace,"Normal-frame two-hand pose readiness"); Capture("pose-player-ready.png");
+                    demo.OtherPointer.Submit(origin+Quaternion.Euler(0,90,0)*Vector3.right*.5f,item.Volume.transform.TransformPoint(item.Volume.center),true,false); Feed(end,false); Next(); break;
                 case 5:
                     Require(demo.Interactor.ActiveTarget==null,"Full pose committed");
                     Require(Quaternion.Angle(item.transform.localRotation,item.Destinations[1].transform.localRotation)<.001f && Vector3.Distance(item.transform.localScale,Vector3.one*1.25f)<1e-6f,"Exact pose after release");
@@ -56,7 +66,7 @@ public sealed class UnityPosePlayerSmoke : MonoBehaviour
                 case 9:
                     if(elapsed>.5f) { Require(demo.Interactor.ActiveTarget==null,"Loss completes rollback"); Require(Vector3.Distance(item.transform.position,home)<.001f && Vector3.Distance(item.transform.localScale,Vector3.one)<1e-6f && Quaternion.Angle(item.transform.localRotation,Quaternion.identity)<.001f,"Loss restores entire building pose"); Destroy(demo); Next(); } break;
                 case 10:
-                    Require(generated==null,"Sample cleans up owned hierarchy"); File.WriteAllText(path,"PASS: Windows player normal-frame pose commands, gated exact placement, full-volume distant boundary, loss rollback, two renders and owned-object cleanup. Synthetic input; no hardware claim."); enabled=false; Application.Quit(0); break;
+                    Require(generated==null,"Sample cleans up owned hierarchy"); File.WriteAllText(path,"PASS: Windows player normal-frame second-hand clutch/rotation/resize, gated exact placement, full-volume distant boundary, loss rollback, two renders and owned-object cleanup. Synthetic input; no hardware claim."); enabled=false; Application.Quit(0); break;
             }
         }
         catch(Exception e) { File.WriteAllText(path,"FAIL: "+e); Debug.LogException(e); enabled=false; Application.Quit(1); }

@@ -42,7 +42,9 @@ the recovered capabilities are sufficient and the launcher is not a blocker.
 - [x] Add separate five-state artwork authoring with fixed hit geometry, conventional serialized styles, finite-duration retargeting and restoration in Unity and Udon; see [UI-VISUAL-STATES.md](UI-VISUAL-STATES.md).
 - [x] Extend ordinary Unity grabbing with opt-in bounded rotation/uniform scaling, pose-aware docks and full-pose rollback; 5989 pose assertions, a two-scale preview and standalone player pass. See [OBJECT-POSE.md](OBJECT-POSE.md).
 - [x] Adapt optional pose constraints, full-pose docking and rollback into local Udon; authored BirdPoseDemo and 13332 VM assertions pass, alongside existing Hanoi/map regressions. Correct mirrored authored-rotation matching in both runtimes. See [OBJECT-POSE.md](OBJECT-POSE.md).
-- [ ] Add an intentional Bird gesture/mode and assess useful live-hand manipulation independently. Retain explicit collision/lift and shared-reservation work.
+- [x] Add an optional ordinary Unity two-hand pose clutch and exclusive accepted-live-input Objects mode in Quest v0.10; 4863 gesture assertions, normal-frame Windows/Quest-host checks, Android build/install/startup pass. See [TWO-HAND-POSE.md](TWO-HAND-POSE.md).
+- [ ] Adapt the deliberate gesture to local Udon with explicit mode/input ownership, then advance useful real VRChat hand input independently of headset feedback.
+- [ ] Assess physical two-hand feel, mixed device cadences and performance; retain collision/lift, dynamic occupancy and shared-reservation work.
 - [ ] Validate real VRChat hand input, client/mobile runtime, multiplayer policy and physical UI feel; the new station uses explicitly labeled desktop demonstration input.
 
 Preserve the interaction flavor, not the improvised source structure. Dana wants

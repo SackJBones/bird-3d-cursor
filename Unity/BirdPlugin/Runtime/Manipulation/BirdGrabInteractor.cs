@@ -203,9 +203,15 @@ namespace Bird3DCursor.Manipulation
         }
         void StopPoseRequest()
         {
+            StopHeldPose(true);
+        }
+        /// <summary>Freeze at the displayed pose. Preserve a prior limit; optionally mark newly invalid intent.</summary>
+        public void StopHeldPose(bool blocked=false)
+        {
+            if(ActiveTarget==null || IsReturning) return;
             RequestedLocalRotation=poseStartRotation=rotation; RequestedScaleFactor=CurrentScaleFactor;
             poseStartLogScale=Math.Log(CurrentScaleFactor); poseResponseIntegral=0;
-            PoseLimited=true; ReadyToPlace=false;
+            PoseLimited=PoseLimited || blocked; ReadyToPlace=false;
         }
         bool DestinationPose(BirdSnapTarget slot,out Quaternion orientation,out float factor,out Bounds bounds)
         {

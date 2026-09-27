@@ -98,5 +98,12 @@ sections 420 m away, driven by the same components at two scales. Conventional
 Inspector references and UnityEvents remain separate from the sample Hanoi rules.
 See [object manipulation](../../../docs/modernization/OBJECT-MANIPULATION.md) for
 input/ownership contracts, authoring, tests and known limits. This slice passes
-Unity 2022.3.22f1 editor and Windows player checks; Udon/VRChat and physical hand
-validation remain separate future work.
+Unity 2022.3.22f1 editor and Windows player checks; a separate local Udon adaptation
+is documented there. Physical hand and VRChat-client validation remain separate.
+
+The optional **BirdPosePreview** demonstrates bounded rotation/uniform scaling
+and pose-aware docks. `BirdTwoHandPose` can translate two accepted hand-root streams
+into relative turn/size requests while the existing grip owns the object. It is
+separate from the geometric point and target rules, with ordinary Inspector
+references and UnityEvents. See [two-hand pose](../../../docs/modernization/TWO-HAND-POSE.md)
+for input origins, fresh-click clutching, freeze/loss behavior and Quest integration.

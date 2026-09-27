@@ -70,6 +70,18 @@ Normal rollback restores position, orientation and size. A narrow workspace with
 an impossible return orientation falls back to the committed pose immediately.
 These are per-frame volume limits, not swept collision avoidance. See maintained
 `docs/modernization/OBJECT-POSE.md` for full ownership, timing and capture contracts.
-This pose extension currently belongs to ordinary Unity; Udon pose parity and
-live-hand integration remain pending. The example accepts the same external input
-and camera options as the Hanoi preview and cleans up its generated hierarchy.
+The separate local Udon pose transaction is documented there; the gesture adapter
+below currently belongs to ordinary Unity. The example accepts the same external
+input and camera options as the Hanoi preview and cleans up its generated hierarchy.
+
+With both external pointers assigned, `BirdTwoHandPose` adds an optional clutch:
+hold an object with one Bird, then point the other through it and make a fresh
+press. Turn/spread the tracked hand roots to rotate/resize; release the secondary
+to freeze the displayed pose while continuing translation. Input origins must be
+hand roots in world meters. A head-based synthetic ray producer is unsuitable for
+this gesture. Either hand can be primary. No point/range/filter law changes.
+
+Disable Create Environment to share a host's setting; Tabletop Position and
+Building Position configure the two stations. Camera/desktop producers are also
+optional. The Quest harness uses these options in its exclusive Objects mode.
+See `docs/modernization/TWO-HAND-POSE.md` for limits, loss, ownership and evidence.
