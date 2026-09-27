@@ -52,6 +52,13 @@ namespace Bird3DCursor.Manipulation
         }
         public static bool Finite(Vector3 v) { return Finite(v.x)&&Finite(v.y)&&Finite(v.z); }
         public static bool Finite(float v) { return !float.IsNaN(v)&&!float.IsInfinity(v); }
+        /// <summary>Compose authored rotations independently of reflected/sheared scale matrices.</summary>
+        public static Quaternion AuthoredRotation(Transform value)
+        {
+            Quaternion result=Quaternion.identity;
+            while(value!=null) { result=value.localRotation*result; value=value.parent; }
+            return result;
+        }
         public static bool Normalize(Quaternion value,out Quaternion unit)
         {
             unit=Quaternion.identity;

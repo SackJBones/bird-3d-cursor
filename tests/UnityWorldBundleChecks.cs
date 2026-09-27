@@ -26,9 +26,11 @@ public static class UnityWorldBundleChecks
     public static void RunHanoi() { BuildScene("BirdHanoiDemo",BuildTarget.StandaloneWindows64); }
     public static void RunHanoiAndroid() { BuildScene("BirdHanoiDemo",BuildTarget.Android); }
     public static void RunMap() { BuildScene("BirdMapDemo",BuildTarget.StandaloneWindows64); }
+    public static void RunPose() { BuildScene("BirdPoseDemo",BuildTarget.StandaloneWindows64); }
     public static void AuditUiBundles() { AuditBundles("BirdUiDemo","world-ui-bundle-audit-result.txt"); }
     public static void AuditHanoiBundles() { AuditBundles("BirdHanoiDemo","world-hanoi-bundle-audit-result.txt"); }
     public static void AuditMapBundle() { AuditBundles("BirdMapDemo","world-map-bundle-audit-result.txt",false); }
+    public static void AuditPoseBundle() { AuditBundles("BirdPoseDemo","world-pose-bundle-audit-result.txt",false); }
     private static void AuditBundles(string sceneName,string resultFile,bool includeAndroid=true)
     {
         try

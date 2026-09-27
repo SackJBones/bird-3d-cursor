@@ -6,6 +6,10 @@ places a tabletop puzzle on a viewing terrace and full-size building sections
 420 m away. Both use the same grip, workspace and snap-target programs. The
 existing nested menu and back-surface color selector remain available to the left.
 
+The same transaction now supports optional [held rotation/scaling and exact-pose
+docks](OBJECT-POSE.md), demonstrated separately in `BirdPoseDemo`. Hanoi leaves
+those permissions off. Its original translation-focused contracts follow below.
+
 The scene currently uses **labeled desktop demonstration input**. It does not
 enable the experimental avatar-bone adapter, claim usable VRChat finger input,
 or update the standalone Quest app. Geometry, range, filtering, clicking and

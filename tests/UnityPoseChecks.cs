@@ -65,7 +65,7 @@ public sealed class UnityPoseChecks : MonoBehaviour
         if(wait++<2) return; enabled=false;
         try
         {
-            BoundsWithoutMutation(); Placement(); Boundaries(); TransformedTransactions(); Lifecycle(); Rates(); Serialization(); Preview();
+            BoundsWithoutMutation(); Placement(); Boundaries(); TransformedTransactions(); MirroredDocks(); Lifecycle(); Rates(); Serialization(); Preview();
             File.WriteAllText("pose-result.txt","PASS: "+checks+" actual Unity pose assertions, four rendered views, two-scale docking, whole-box bounds, pose-intent gates, full-pose rollback and prefab event. Synthetic input; no Udon/client/headset claim.");
             SessionState.SetBool(Active,false); EditorApplication.Exit(0);
         }
@@ -227,6 +227,26 @@ public sealed class UnityPoseChecks : MonoBehaviour
             rows.Add(hz+","+angle.ToString("R",System.Globalization.CultureInfo.InvariantCulture)+","+f.grip.CurrentScaleFactor.ToString("R",System.Globalization.CultureInfo.InvariantCulture)+","+Quaternion.Angle(Quaternion.identity,iterative).ToString("R",System.Globalization.CultureInfo.InvariantCulture));
         }
         Directory.CreateDirectory("PoseCaptures"); File.WriteAllLines("PoseCaptures/pose-rates.csv",rows);
+    }
+    static void MirroredDocks()
+    {
+        foreach(bool nested in new[]{false,true}) using(var f=new Fixture())
+        {
+            f.root.transform.rotation=Quaternion.Euler(23,62,34); f.root.transform.localScale=new Vector3(-1.3f,.7f,1.6f);
+            if(nested)
+            {
+                var frame=new GameObject("Independent authored parent").transform; frame.SetParent(f.root.transform,false); frame.localRotation=Quaternion.Euler(0,15,0);
+                f.item.transform.SetParent(frame,false); f.item.transform.localRotation=Quaternion.Euler(0,-15,0);
+            }
+            f.item.transform.localScale=new Vector3(-1,.8f,1.1f); f.item.ConfigurePose(true,true); f.Pick();
+            for(int i=0;i<6;i++) f.commands.RotateAroundWorkspaceUp(15); f.commands.ResizeBy(1.25f);
+            Quaternion expected=Quaternion.Euler(0,nested?75:90,0);
+            Assert(Quaternion.Angle(f.grip.RequestedLocalRotation,expected)<.02f,"Pose commands use authored axes through mirrored hierarchy");
+            f.Hold(f.slot.transform.localPosition); Assert(f.grip.ReadyToPlace,"Matching authored dock works with mirrored/nonuniform parent and reference");
+            f.Feed(f.slot.transform.localPosition,false);
+            Assert(f.grip.ActiveTarget==null && Quaternion.Angle(f.item.transform.localRotation,expected)<.02f,"Mirrored dock commits exact local orientation");
+            Near(f.item.transform.localScale,new Vector3(-1,.8f,1.1f)*1.25f,.00001f,"Mirrored dock preserves reference proportions"); Inside(f.item);
+        }
     }
     static void Serialization()
     {

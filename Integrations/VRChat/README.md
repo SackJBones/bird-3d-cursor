@@ -2,8 +2,9 @@
 
 The integration includes caller-fed geometry, experimental avatar input, and
 local Udon menu/spherical and bounded object manipulation components. The latest
-authored example is `BirdWorld/Assets/BirdWorld/Scenes/BirdMapDemo.unity` in the
-heavy repository: a map rotation/zoom branch joins colors and paired Hanoi.
+authored example is `BirdWorld/Assets/BirdWorld/Scenes/BirdPoseDemo.unity` in the
+heavy repository: paired rotation/size docking stations join the existing map,
+color selector and paired Hanoi. `BirdMapDemo.unity` retains the map-focused scene.
 `BirdHanoiDemo.unity` retains the focused paired puzzle: tabletop and full-size building puzzles share grip/snapping,
 menu arbitration and a viewing-area gate. `BirdUiDemo.unity` remains the focused
 nested color selection, back-surface flick/coast and Back/Close/Reset station.
@@ -34,6 +35,13 @@ animated body/label children. Restore and validate with
 accepts `-BuildWorld` for a Windows artifact/catalog check. `-Author` is an explicit
 one-time scene migration, unnecessary for the committed scene. See
 [visual-state authoring](../../docs/modernization/UI-VISUAL-STATES.md).
+
+For optional held pose and exact-pose docks, use `BirdObjectTarget` permissions,
+`BirdObjectGrip` requests and `BirdObjectSnapTarget` matching settings. The separate
+`BirdObjectPoseControls` provides named rotation/resize/reset events and opt-in
+desktop keys. Run `tests/Invoke-UnityUdonPoseChecks.ps1 -Regressions -BuildWorld`
+with the same editor/project arguments. See
+[pose contracts and authoring](../../docs/modernization/OBJECT-POSE.md).
 
 ## Hand-data feasibility probe
 

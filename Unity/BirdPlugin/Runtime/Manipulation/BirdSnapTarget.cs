@@ -13,7 +13,7 @@ namespace Bird3DCursor.Manipulation
         [Min(1)] public float exitMultiplier=1.4f;
         public Vector3 localApproachDirection=Vector3.up;
         [Header("Optional final pose")]
-        [Tooltip("Use this target's world orientation. No automatic rotational attraction is applied.")]
+        [Tooltip("Match this target's composed authored rotation, independent of reflected scale. No automatic rotational attraction is applied.")]
         public bool matchRotation;
         public bool matchScale;
         [Min(.0001f)] public float scaleFactor=1;

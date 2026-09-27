@@ -1,7 +1,8 @@
+using System;
 using UdonSharp;
 using UnityEngine;
 
-/// <summary>One local transaction at a time, selected by either hand. Translation only; kinematic volumes.</summary>
+/// <summary>One local transaction at a time, selected by either hand. Optional bounded pose; kinematic volumes.</summary>
 [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
 [DefaultExecutionOrder(120)]
 public class BirdObjectGrip : UdonSharpBehaviour
@@ -18,6 +19,14 @@ public class BirdObjectGrip : UdonSharpBehaviour
     [HideInInspector] public bool ReadyToPlace;
     [HideInInspector] public bool IsReturning;
     [HideInInspector] public Vector3 RawDesired;
+    [HideInInspector] public Quaternion RequestedLocalRotation=Quaternion.identity;
+    [HideInInspector] public float RequestedScaleFactor=1,CurrentScaleFactor=1;
+    [HideInInspector] public bool PoseLimited;
+    // Set these arguments and send RequestPose from another Udon program or test harness.
+    [HideInInspector] public Quaternion poseRequestRotation=Quaternion.identity;
+    [HideInInspector] public float poseRequestFactor=1;
+    [HideInInspector] public bool poseRequestAccepted;
+    public void RequestPose() { poseRequestAccepted=TrySetHeldPose(poseRequestRotation,poseRequestFactor); }
     private int[] revisions=new int[0];
     public BirdUiPanel[] menuPanels=new BirdUiPanel[0];
     public BirdObjectPlayArea playArea;
@@ -28,8 +37,13 @@ public class BirdObjectGrip : UdonSharpBehaviour
     Vector3 home,anchor,previousDesired,returnStart,shapeCenter,shapeSize;
     Quaternion rotation;
     Vector3 scale;
+    Quaternion homeRotation,returnRotation,poseStartRotation;
+    Vector3 homeScale,returnScale,referenceScale;
+    float homeFactor,minimumFactor,maximumFactor;
+    bool poseRotation,poseScaling,hasReferenceScale;
     Transform parent;
-    Matrix4x4 frame;
+    Matrix4x4 frame,parentFrame;
+    double poseResponseIntegral,poseStartLogScale;
     Bounds allowed;
     float returnElapsed;
     bool processing;
@@ -63,6 +77,7 @@ public class BirdObjectGrip : UdonSharpBehaviour
             Vector3 raw=home+(region.transform.InverseTransformPoint(p.position)-anchor);
             if(!FiniteVector(raw)) { Cancel(); Seed(); processing=false; return; }
             RawDesired=raw;
+            AdvancePose(dt);
             Vector3 desired=Guide(raw);
             float rate=Finite(followRate)?Mathf.Max(.01f,followRate):18;
             Vector3 current=region.transform.InverseTransformPoint(ActiveTarget.transform.position);
@@ -115,13 +130,24 @@ public class BirdObjectGrip : UdonSharpBehaviour
     {
         if(!item.region.TryPivotBounds(item.transform,item.volume)) return;
         Bounds bounds=item.region.pivotBounds;
+        float factor=1;
+        bool knownScale=item.TryScaleFactor(item.transform.localScale);
+        factor=item.evaluatedScaleFactor;
+        if(item.allowScaling && (!knownScale || !item.AllowsFactor(factor))) return;
+        if(!knownScale) factor=1;
         Vector3 start=item.region.transform.InverseTransformPoint(item.transform.position);
         if((item.region.Clamp(bounds,start)-start).sqrMagnitude>1e-8f) return;
         if(item.policy!=null && !item.policy.Query(BirdObjectOperation.Begin,item,null)) return;
         ActiveTarget=item; ActivePointer=pointer; region=item.region; rule=item.policy; owner=pointer.userId;
         home=previousDesired=start; anchor=region.transform.InverseTransformPoint(pointer.position);
         parent=item.transform.parent; rotation=item.transform.localRotation; scale=item.transform.localScale;
-        frame=region.transform.localToWorldMatrix; allowed=bounds;
+        homeRotation=RequestedLocalRotation=rotation; homeScale=scale;
+        homeFactor=CurrentScaleFactor=RequestedScaleFactor=factor; PoseLimited=false;
+        poseStartRotation=rotation; poseStartLogScale=Math.Log(factor); poseResponseIntegral=0;
+        poseRotation=item.allowRotation; poseScaling=item.allowScaling; referenceScale=item.poseReferenceScale;
+        hasReferenceScale=knownScale;
+        minimumFactor=item.minimumScaleFactor; maximumFactor=item.maximumScaleFactor;
+        frame=region.transform.localToWorldMatrix; parentFrame=parent!=null?parent.localToWorldMatrix:Matrix4x4.identity; allowed=bounds;
         shapeCenter=item.volume.center; shapeSize=item.volume.size;
         RawDesired=home; Candidate=null; ReadyToPlace=false; IsReturning=false; item.owner=this;
         item.Notify(0);
@@ -129,15 +155,85 @@ public class BirdObjectGrip : UdonSharpBehaviour
     bool ValidHeld()
     {
         var t=ActiveTarget;
-
         return t!=null && t.enabled && t.gameObject.activeInHierarchy && t.volume!=null && t.volume.enabled && t.volume.gameObject.activeInHierarchy &&
             region!=null && region.enabled && region.gameObject.activeInHierarchy && t.region==region && t.policy==rule &&
             (rule==null || rule.enabled && rule.gameObject.activeInHierarchy) && region.transform.localToWorldMatrix==frame &&
             t.transform.parent==parent && t.transform.localRotation==rotation && t.transform.localScale==scale &&
+            (parent!=null?parent.localToWorldMatrix:Matrix4x4.identity)==parentFrame &&
+            t.allowRotation==poseRotation && t.allowScaling==poseScaling && t.poseReferenceScale==referenceScale &&
+            t.minimumScaleFactor==minimumFactor && t.maximumScaleFactor==maximumFactor &&
             t.volume.center==shapeCenter && t.volume.size==shapeSize &&
             (t.volume.attachedRigidbody==null || t.volume.attachedRigidbody.isKinematic) &&
             region.TryPivotBounds(t.transform,t.volume) &&
             (region.pivotBounds.min-allowed.min).sqrMagnitude<1e-7f && (region.pivotBounds.max-allowed.max).sqrMagnitude<1e-7f;
+    }
+    /// <summary>Request an absolute local orientation and authored-reference scale factor. Does not mutate the target until Process.</summary>
+    public bool TrySetHeldPose(Quaternion localRotation,float factor)
+    {
+        Quaternion unit; Bounds bounds;
+        if((!enabled || !gameObject.activeInHierarchy) || ActiveTarget==null || IsReturning) return false;
+        if(!Normalize(localRotation,out unit) || !PoseAllowed(unit,factor,out bounds))
+        { StopPoseRequest(); return false; }
+        if(unit.x!=RequestedLocalRotation.x || unit.y!=RequestedLocalRotation.y || unit.z!=RequestedLocalRotation.z || unit.w!=RequestedLocalRotation.w || factor!=RequestedScaleFactor)
+        { poseStartRotation=rotation; poseStartLogScale=Math.Log(CurrentScaleFactor); poseResponseIntegral=0; }
+        RequestedLocalRotation=unit; RequestedScaleFactor=factor; PoseLimited=false; return true;
+    }
+    public void ResetHeldPose() { TrySetHeldPose(homeRotation,homeFactor); }
+    bool PoseAllowed(Quaternion orientation,float factor,out Bounds bounds)
+    {
+        bounds=new Bounds();
+        if(ActiveTarget==null || region==null || !Finite(factor) || factor<=0 ||
+            (!poseRotation && Quaternion.Angle(orientation,homeRotation)>.001f) ||
+            (poseScaling?!ActiveTarget.AllowsFactor(factor):Mathf.Abs(factor-homeFactor)>1e-6f)) return false;
+        if(!region.TryPoseBounds(ActiveTarget.transform,ActiveTarget.volume,orientation,poseScaling?referenceScale*factor:homeScale)) return false;
+        bounds=region.pivotBounds; return true;
+    }
+    void AdvancePose(float dt)
+    {
+        if(!poseRotation && !poseScaling) return;
+        float rate=Finite(followRate)?Mathf.Max(.01f,followRate):18;
+        poseResponseIntegral+=rate*(double)dt;
+        double response=1-Math.Exp(-poseResponseIntegral);
+        // Evaluate from this request's anchor, avoiding repeated small-angle slerp drift.
+        Quaternion nextRotation=Quaternion.Slerp(poseStartRotation,RequestedLocalRotation,(float)response);
+        float nextFactor=(float)Math.Exp(poseStartLogScale+(Math.Log(RequestedScaleFactor)-poseStartLogScale)*response);
+        Bounds bounds;
+        if(!PoseAllowed(nextRotation,nextFactor,out bounds))
+        {
+            // A feasible end orientation can have an infeasible intermediate swept box.
+            // Stop this request at the last valid sampled pose rather than forcing an invalid box.
+            StopPoseRequest(); return;
+        }
+        rotation=nextRotation; CurrentScaleFactor=nextFactor; scale=poseScaling?referenceScale*nextFactor:homeScale;
+        ActiveTarget.transform.localRotation=rotation; ActiveTarget.transform.localScale=scale; allowed=bounds;
+    }
+    void StopPoseRequest()
+    {
+        RequestedLocalRotation=poseStartRotation=rotation; RequestedScaleFactor=CurrentScaleFactor;
+        poseStartLogScale=Math.Log(CurrentScaleFactor); poseResponseIntegral=0;
+        PoseLimited=true; ReadyToPlace=false;
+    }
+    bool DestinationPose(BirdObjectSnapTarget slot,out Quaternion orientation,out float factor,out Bounds bounds)
+    {
+        orientation=rotation; factor=CurrentScaleFactor; bounds=allowed;
+        if(PoseLimited) return false;
+        if(slot.matchRotation)
+        {
+            if(!Finite(slot.rotationCaptureDegrees) || slot.rotationCaptureDegrees<0 || slot.rotationCaptureDegrees>180) return false;
+            Quaternion desired=Quaternion.Inverse(region.AuthoredRotation(parent))*region.AuthoredRotation(slot.transform);
+            if(!Normalize(desired,out orientation) ||
+                Quaternion.Angle(RequestedLocalRotation,orientation)>slot.rotationCaptureDegrees ||
+                Quaternion.Angle(rotation,orientation)>slot.rotationCaptureDegrees) return false;
+        }
+        if(slot.matchScale)
+        {
+            if(!hasReferenceScale) return false;
+            factor=slot.scaleFactor;
+            if(!Finite(factor) || factor<=0 || !Finite(slot.scaleCaptureRatio) || slot.scaleCaptureRatio<0) return false;
+            float tolerance=Mathf.Log(1+slot.scaleCaptureRatio);
+            if(Mathf.Abs(Mathf.Log(RequestedScaleFactor/factor))>tolerance || Mathf.Abs(Mathf.Log(CurrentScaleFactor/factor))>tolerance) return false;
+        }
+        return PoseAllowed(orientation,factor,out bounds);
     }
     Vector3 Guide(Vector3 raw)
     {
@@ -160,8 +256,10 @@ public class BirdObjectGrip : UdonSharpBehaviour
         {
             desired=Candidate.guided;
             // Never qualify a drop using the clamped or magnetically guided pose.
+            Quaternion finalRotation; float finalFactor; Bounds finalBounds;
             ReadyToPlace=Vector3.Distance(raw,Candidate.end)<=Candidate.captureRadius &&
-                (region.Clamp(allowed,Candidate.end)-Candidate.end).sqrMagnitude<1e-8f;
+                DestinationPose(Candidate,out finalRotation,out finalFactor,out finalBounds) &&
+                (region.Clamp(finalBounds,Candidate.end)-Candidate.end).sqrMagnitude<1e-8f;
         }
         return region.Clamp(allowed,desired);
     }
@@ -173,7 +271,10 @@ public class BirdObjectGrip : UdonSharpBehaviour
     void FinishDrop()
     {
         var item=ActiveTarget; var slot=Candidate;
-        if(!ReadyToPlace || slot==null || !Eligible(slot) || (rule!=null && !rule.Query(BirdObjectOperation.Commit,item,slot))) { Cancel(); return; }
+        Quaternion finalRotation; float finalFactor; Bounds finalBounds;
+        if(!ReadyToPlace || slot==null || !Eligible(slot) || !DestinationPose(slot,out finalRotation,out finalFactor,out finalBounds) || (rule!=null && !rule.Query(BirdObjectOperation.Commit,item,slot))) { Cancel(); return; }
+        if(poseRotation) item.transform.localRotation=finalRotation;
+        if(poseScaling) item.transform.localScale=referenceScale*finalFactor;
         Move(region.transform.InverseTransformPoint(slot.transform.position));
         Clear(); item.Notify(1);
     }
@@ -191,6 +292,7 @@ public class BirdObjectGrip : UdonSharpBehaviour
         if(rule!=null) rule.Query(BirdObjectOperation.Cancel,item,null);
         Candidate=null; ReadyToPlace=false; ActivePointer=null; IsReturning=true; returnElapsed=0;
         returnStart=region!=null?region.transform.InverseTransformPoint(item.transform.position):home;
+        returnRotation=item.transform.localRotation; returnScale=item.transform.localScale;
         item.Notify(2);
     }
     void AdvanceReturn(float dt)
@@ -199,7 +301,18 @@ public class BirdObjectGrip : UdonSharpBehaviour
         returnElapsed+=dt;
         float duration=Finite(returnDuration)?Mathf.Max(.01f,returnDuration):.25f;
         float t=Mathf.Clamp01(returnElapsed/duration);
-        Move(Vector3.Lerp(returnStart,home,t*t*(3-2*t)));
+        float weight=t*t*(3-2*t);
+        Vector3 point=Vector3.Lerp(returnStart,home,weight);
+        if(poseRotation || poseScaling)
+        {
+            Quaternion turn=poseRotation?Quaternion.Slerp(returnRotation,homeRotation,weight):ActiveTarget.transform.localRotation;
+            Vector3 size=poseScaling?Vector3.Lerp(returnScale,homeScale,weight):ActiveTarget.transform.localScale;
+            if(!region.TryPoseBounds(ActiveTarget.transform,ActiveTarget.volume,turn,size))
+            { RestoreHomePose(); Move(home); Clear(); return; }
+            ActiveTarget.transform.localRotation=turn; ActiveTarget.transform.localScale=size;
+            point=region.Clamp(region.pivotBounds,point);
+        }
+        Move(point);
         if(t>=1) Clear();
     }
     [RecursiveMethod]
@@ -209,12 +322,19 @@ public class BirdObjectGrip : UdonSharpBehaviour
         if(ActiveTarget==null) { Clear(); return; }
         var item=ActiveTarget; bool notify=!IsReturning;
         if(rule!=null) rule.Query(BirdObjectOperation.Cancel,item,null);
-        Move(home); Clear(); if(notify) item.Notify(2);
+        RestoreHomePose(); Move(home); Clear(); if(notify) item.Notify(2);
+    }
+    void RestoreHomePose()
+    {
+        if(ActiveTarget==null) return;
+        if(poseRotation) ActiveTarget.transform.localRotation=homeRotation;
+        if(poseScaling) ActiveTarget.transform.localScale=homeScale;
     }
     void Clear()
     {
         if(ActiveTarget!=null && ActiveTarget.owner==this) ActiveTarget.owner=null;
         ActiveTarget=null; ActivePointer=null; Candidate=null; HoveredTarget=null; ReadyToPlace=false; IsReturning=false; region=null; rule=null;
+        RequestedLocalRotation=Quaternion.identity; RequestedScaleFactor=CurrentScaleFactor=1; PoseLimited=false; poseRequestAccepted=false;
     }
     private bool Registered(BirdObjectSnapTarget slot)
     {
@@ -230,4 +350,12 @@ public class BirdObjectGrip : UdonSharpBehaviour
     private bool Finite(float v) { return !float.IsNaN(v) && !float.IsInfinity(v); }
     private bool FiniteVector(Vector3 v) { return Finite(v.x)&&Finite(v.y)&&Finite(v.z); }
 
+    private bool Normalize(Quaternion value,out Quaternion unit)
+    {
+        unit=Quaternion.identity;
+        if(!Finite(value.x)||!Finite(value.y)||!Finite(value.z)||!Finite(value.w)) return false;
+        double length=System.Math.Sqrt((double)value.x*value.x+(double)value.y*value.y+(double)value.z*value.z+(double)value.w*value.w);
+        if(length<1e-12) return false;
+        unit=new Quaternion((float)(value.x/length),(float)(value.y/length),(float)(value.z/length),(float)(value.w/length)); return true;
+    }
 }

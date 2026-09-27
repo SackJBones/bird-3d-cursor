@@ -214,7 +214,7 @@ namespace Bird3DCursor.Manipulation
             if(slot.matchRotation)
             {
                 if(!BirdPlacementRegion.Finite(slot.rotationCaptureDegrees) || slot.rotationCaptureDegrees<0 || slot.rotationCaptureDegrees>180) return false;
-                Quaternion desired=parent!=null?Quaternion.Inverse(parent.rotation)*slot.transform.rotation:slot.transform.rotation;
+                Quaternion desired=Quaternion.Inverse(BirdPlacementRegion.AuthoredRotation(parent))*BirdPlacementRegion.AuthoredRotation(slot.transform);
                 if(!BirdPlacementRegion.Normalize(desired,out orientation) ||
                     Quaternion.Angle(RequestedLocalRotation,orientation)>slot.rotationCaptureDegrees ||
                     Quaternion.Angle(rotation,orientation)>slot.rotationCaptureDegrees) return false;

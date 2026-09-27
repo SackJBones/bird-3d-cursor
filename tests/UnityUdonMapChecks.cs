@@ -24,7 +24,12 @@ public class UnityUdonMapChecks : MonoBehaviour
     Quaternion released;
     public static void Run()
     {
-        File.WriteAllText("udon-map-result.txt","PENDING"); Compile(); EditorSceneManager.OpenScene(ScenePath);
+        RunScene(ScenePath);
+    }
+    public static void RunPose() { RunScene("Assets/BirdWorld/Scenes/BirdPoseDemo.unity"); }
+    static void RunScene(string path)
+    {
+        File.WriteAllText("udon-map-result.txt","PENDING"); Compile(); EditorSceneManager.OpenScene(path);
         SessionState.SetBool(Active,true); EditorApplication.isPlaying=true;
     }
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]

@@ -8,6 +8,10 @@ public class BirdObjectSnapTarget : UdonSharpBehaviour
     [Min(.001f)] public float influenceRadius=.35f,captureRadius=.16f;
     [Range(0,1)] public float attraction=.85f;
     [Min(1)] public float exitMultiplier=1.4f;
+    public bool matchRotation,matchScale;
+    [Min(.0001f)] public float scaleFactor=1;
+    [Range(0,180)] public float rotationCaptureDegrees=12;
+    [Min(0)] public float scaleCaptureRatio=.08f;
     public Vector3 localApproachDirection=Vector3.up;
     [HideInInspector] public Vector3 end,guided;
     [HideInInspector] public float distance;

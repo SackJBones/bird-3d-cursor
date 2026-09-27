@@ -11,8 +11,8 @@ namespace Bird3DCursor.Manipulation
         {
             if(!isActiveAndEnabled || interactor==null || interactor.ActiveTarget==null || !BirdPlacementRegion.Finite(degrees)) return;
             Transform item=interactor.ActiveTarget.transform;
-            Quaternion parent=item.parent!=null?item.parent.rotation:Quaternion.identity;
-            Quaternion delta=Quaternion.AngleAxis(degrees,interactor.ActiveTarget.Region.transform.up);
+            Quaternion parent=BirdPlacementRegion.AuthoredRotation(item.parent);
+            Quaternion delta=Quaternion.AngleAxis(degrees,BirdPlacementRegion.AuthoredRotation(interactor.ActiveTarget.Region.transform)*Vector3.up);
             interactor.TrySetHeldPose(Quaternion.Inverse(parent)*delta*parent*interactor.RequestedLocalRotation,interactor.RequestedScaleFactor);
         }
         public void ResizeBy(float multiplier)

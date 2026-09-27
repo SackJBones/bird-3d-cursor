@@ -300,3 +300,21 @@ Optional build steps use the SDK build-only API. Run
 catalogs. Catalog loading does not instantiate the scene or establish client/mobile
 behavior. See [OBJECT-MANIPULATION-UDON.md](../docs/modernization/OBJECT-MANIPULATION-UDON.md)
 for final evidence, build-log qualifications and remaining limitations.
+
+### Local Udon held pose and exact docks
+
+`Invoke-UnityUdonPoseChecks.ps1 -UnityEditor <Unity.exe> -ProjectPath <BirdWorld> -Regressions -BuildWorld`
+restores sources/metas and shader, then runs the saved `BirdPoseDemo` through
+actual compiled Udon. `-Generate` refuses an existing authored scene. Normal
+Update/LateUpdate checks exercise pickup, named rotation/resize commands, full
+pose docking, the distant whole-volume limit and tracking-loss restoration.
+Manual VM contracts cover both raw-pose gates, rejected intent, size/reference
+limits, whole-box corners along trajectories, transformed/offset child volumes,
+rollback fallback, lifecycle, cross-program callbacks and 30/72/120 Hz requests.
+Test code never substitutes runtime C# proxy execution for the Udon VM.
+
+`-Regressions` runs existing Hanoi and map fixtures on this new combined scene.
+The optional Windows SDK build and catalog audit are separate from client loading.
+Captures, logs and the rate CSV live under ignored `Validation/UdonPose` or
+BirdWorld. See [OBJECT-POSE.md](../docs/modernization/OBJECT-POSE.md) for evidence
+and limitations. No physical-hand, multiplayer or VRChat-client claim follows.

@@ -4,8 +4,8 @@ The ordinary Unity manipulation module now supports opt-in rotation and uniform
 scaling within the existing grab transaction. Hanoi leaves both options off.
 The new **BirdPosePreview** in the Hanoi Preview sample demonstrates two docks
 at tabletop and building scale: the second requires a 90-degree turn and 1.25x
-size. This is an ordinary Unity checkpoint; the existing Udon world components
-still implement the earlier translation contract.
+size. The local Udon components implement the same optional pose contract in
+the separate authored `BirdPoseDemo` world scene described below.
 
 Bird continues to specify a point. The host separately chooses how to request
 orientation and size. The sample uses keyboard commands while a logical Bird
@@ -37,8 +37,14 @@ It transforms the eight configured corners into workspace coordinates, including
 child offsets. The normal overload evaluates the current pose. This is a bounds
 query for the configured volume, not a physics sweep or dynamic obstacle test.
 
-On a `BirdSnapTarget`, **Match Rotation** uses that transform's Unity world
-orientation. **Match Scale** uses its factor relative to the grabbed item's
+On a `BirdSnapTarget`, **Match Rotation** uses its authored orientation relative
+to the item's parent: compose the hierarchy's local quaternions, then remove the
+parent's composed rotation. This keeps orientation independent of reflected or
+sheared scale matrices. Objects sharing a parent match their local quaternions;
+nested parents work by the same rule. Unity world-rotation getters can disagree
+with this composition under mirrored/nonuniform scale, so they are not used for
+pose matching or the command adapter's workspace axes. **Match Scale** uses its
+factor relative to the grabbed item's
 authored reference. The destination position continues to represent the item's
 pivot. Capture tolerances are degrees and a symmetric scale ratio: 0.08 accepts
 ratios between 1/1.08 and 1.08. Position capture and approach guidance use the
@@ -162,7 +168,99 @@ No new dependency or custom Inspector is required. The pose runner preserves the
 sample's script GUID and includes its explicit material/shader assets. Generated
 projects, images, players and logs live in ignored heavy-repository Validation.
 
-Next integrate the same pose contract with local Udon and an intentional Bird
-gesture/interaction mode. Actual live-hand feel, mixed changing-input/render
+Next integrate an intentional Bird gesture/interaction mode. Actual live-hand
+feel, mixed changing-input/render
 cadences, moving layouts, physics collision/lift policy, dynamic player exclusion,
 network reservations and VRChat-client/headset validation remain separate work.
+
+## Local Udon authoring
+
+`BirdObjectTarget` exposes `allowRotation`, `allowScaling`, `poseReferenceScale`
+and factor limits. Assign the reference in the Inspector after sizing the object,
+or send `CapturePoseReference` between transactions. `BirdObjectSnapTarget`
+exposes the same optional matching flags and tolerances. Defaults keep existing
+Hanoi pieces translation-only. Existing policy queries, notifications, menu
+arbitration and protected viewing-area checks remain part of the transaction.
+
+`BirdObjectGrip.TrySetHeldPose` accepts an absolute local quaternion and reference
+factor from another Udon program. For an event-oriented bridge, set
+`poseRequestRotation` and `poseRequestFactor`, send `RequestPose`, and read
+`poseRequestAccepted`. `ResetHeldPose` restores the acquisition request. The grip
+owns the displayed Transform; do not add a competing rotation or scale writer.
+These are local host commands, not network-authoritative requests.
+
+`BirdObjectRegion.TryPoseBounds` writes its `pivotBounds` output on success.
+Always check the boolean result. It performs the same mutation-free corner query;
+the implementation explicitly assigns a new Bounds because exposed struct
+instance mutations are unreliable in Udon. Cross-program calls use output fields
+instead of C# out parameters. Private same-program helpers retain out arguments.
+
+`BirdObjectPoseControls` is optional. Its named events `RotateLeft`, `RotateRight`,
+`Grow`, `Shrink` and `ResetPose` can be connected to experience-owned controls.
+The configured defaults turn 15 degrees about workspace up and resize by 1.25
+or its reciprocal. `desktopInput` is off by default; the example enables it for
+Q/E, minus/plus and R. It does not read keyboard commands for a VR player. An
+optional Text reference reports held/limited/ready/returning state. This adapter
+does not define a hand gesture or override the active grip pointer.
+
+The heavy repository's `BirdWorld/Assets/BirdWorld/Scenes/BirdPoseDemo.unity`
+adds paired pose stations to a copy of the current map/menu/Hanoi scene. All
+eight movable objects register with one grip; the new distant region also joins
+the viewing-area gate. The near pose workspace is at (2, 0.78, 2.4), 0.3 m/unit;
+the far one is at (400, -12, 500), 75 m/unit. Building height is 69 m initially,
+86.25 m at the second dock. Green feedback indicates a permitted drop; the wire
+outline shows the required orientation/size. Windows sit clear of the facade.
+The previous focused scenes are retained.
+
+Run `tests/Invoke-UnityUdonPoseChecks.ps1 -UnityEditor <Unity.exe>
+-ProjectPath <BirdWorld> -Regressions -BuildWorld`. It restores source/meta pairs
+and shader assets, compiles actual Udon, drives backing VMs in ClientSim and
+captures rendered views. `-Regressions` runs the existing Hanoi and map suites
+against the new combined scene. `-Generate` only creates a missing scene; it
+refuses to overwrite an authored scene. `-RefineLayout` is an explicit development
+helper for label placement, never an automatic validation step. `-BuildWorld` uses the SDK build-only
+API and independently checks the Windows artifact's scene catalog. A readable
+catalog does not establish scene instantiation or VRChat-client behavior.
+
+
+## Udon checkpoint and mirrored-dock correction, 2026-09-27 UTC
+
+The compiled-Udon pose fixture passes **13332 assertions**, most of them eight
+individual box-corner checks at each trajectory sample. Four rendered views cover
+the normal-frame tabletop dock, a rotated/resized distant building held at the
+near limit, restoration and the final scene. Both scales commit exact poses and
+retain the authored size on re-grip. Invalid requests, raw-versus-displayed intent,
+permissions, narrow-volume stopping/return fallback, loss/pause/disable, menu
+consumption, changed policy/frame, cross-program commands, offset child boxes and
+mirrored/nonuniform frames are covered. Runtime checks use backing VMs, including
+normal Update/LateUpdate sequences, rather than calling the C# proxies.
+
+This exposed an ordinary/Udon shared edge case: a matching 90-degree local pose
+under a mirrored nonuniform parent could be misread as -90 degrees by inverse
+parent-world rotation. Both implementations now compose local authored
+quaternions. Ordinary Unity now passes **6015 pose assertions**, including new
+mirrored same-parent and independent-parent command/dock cases, plus its Windows
+x64 Mono build and normal-frame player/capture/cleanup checks. The preceding
+ordinary evidence above is the historical 5989-assertion checkpoint.
+
+The new combined Udon scene also passes the existing **877 Hanoi** and **61 map**
+assertions, preserving both seven-move puzzles, menu focus/arbitration, reset,
+protected viewing-area behavior, zoom and back-surface flick/coast. The existing
+focused UI scene passes **441 assertions** with the new grip runtime.
+[Compiled pose timing measurements](measurements/udon-manipulation-pose-rates.csv)
+match the ordinary response at printed precision: 30/72/120 Hz produce
+89.3935852 degrees and reference factor 1.79288518 after a half-second request.
+This is synthetic timing, not device performance or changing-input equivalence.
+
+The new Udon pose scene still uses explicit local desktop input. Actual Bird
+hand-gesture pose commands, VRChat client/mobile execution, multiplayer ownership,
+physics/lift policy and subjective feel remain open. Quest v0.9 is unchanged.
+
+
+The final Windows SDK build-only artifact is 305832 bytes, SHA256
+`6F7A1674D3D46E7AF9D78A9F4E8AB0266CAB6C56D0831DD9084EE4BD658A7FB0`.
+Independent Unity loading reads its expected BirdPoseDemoBuildValidation scene
+catalog. The SDK still prints the unexplained internal `Build Finished, Result:
+Failure.` line despite API completion and a fresh readable artifact. Catalog
+loading is not scene instantiation or VRChat-client runtime validation. No Android
+build, upload, account, client launch or headset operation occurred this cycle.
