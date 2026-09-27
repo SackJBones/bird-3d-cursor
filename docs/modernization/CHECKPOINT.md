@@ -1000,3 +1000,110 @@ deployment, account or standalone change occurred. Lab 05 remains the last
 recorded deployed lab, Lab 07 build-only. Next isolate a bounded optional filter
 comparison in VRChat and validate it before changing defaults. The recurring
 brief now gives the sphere-only requirement precedence over older notes.
+
+
+## Intrinsic sphere filtering and reference range audit, 2026-09-27 20:02 UTC cycle
+
+Lab 08 adds an optional per-hand BirdSphereSpaceFilter, selected after ADAPTIVE
+by the native Point control. RAW remains the saved default; original FILTERED
+and ADAPTIVE remain available. Reach interaction is saved off and avatar clicks
+remain disabled. The geometric solver, limit law, range constants and visuals
+are unchanged. Source restoration includes the new dependency for BirdWorld
+and the standalone runner, without enabling it in or rebuilding the standalone.
+
+The policy filters the existing normalized sphere-center-minus-root vector
+before applying the exact reference polynomial. It uses intrinsic S2 Log/Exp
+for direction and scalar length with one common adaptive gain, avoiding angular
+contraction and giving locally isotropic first-order response at fixed gain.
+There is no Euler-angle representation, azimuth/elevation chart or additional
+openness signal. Motion adaptation comes from incoming sphere-vector samples,
+not the delayed cursor. Unlike the earlier Python study, current palm rotation
+does not transport history and pass its noise through. The hand root still
+translates output directly, so root translation noise and physical small-motion
+feel remain explicit limitations. Exact zero returns to the hand; antipodal
+ambiguity uses only current hand-derived axes. Invalid/lifecycle/settings/mode
+changes reset history and propagate to UI contact cancellation.
+
+Dana explicitly requested smoothing to commute with arbitrary SE(3) transforms.
+The intrinsic construction is equivariant in exact arithmetic. Compiled-Udon
+checks cover 32 transforms x 144 samples, including uniform SO(3), explicit
+up/down, coordinate poles, half-turns, mixed 30/72/120 Hz, moving roots, near/far
+inputs and translations up to roughly a kilometre. Maximum sphere-vector
+relative error is 5.12e-7; reconstructed logical-point relative error 2.01e-6;
+gain error 1.79e-7; nearby absolute error 5.9 micrometres. A separate 8 x 96
+sample test includes subtraction of transformed absolute centers/roots and
+measures at most 34.4 micrometres in the working volume. These are finite float
+tolerances, not a promise of bitwise identity for all transforms. Mirror checks
+also pass. SPHERE-FILTER-LAB.md gives the construction and measurement scales.
+
+Actual Unity 2022.3.22f1 / Worlds SDK 3.10.5 tests PASS on BOTH editor targets:
+106641 compiled-Udon assertions over 499 normal frames per platform, including
+existing avatar/filter/UI tests and new policy contracts. Saved-scene marker
+cadence, native controls, support and rendering pass separately on both. The
+original cursor/hand-limit regression also passed on Android this cycle:
+114 original cursor/range/click/filter assertions and 5549 limit assertions over
+2401 articulated samples. No physical tracking/latency claim is implied.
+
+At 72 Hz, 90/170/180-degree turns reach 90% in one sample (13.9 ms), independent
+of tested pre-polynomial range; one-degree turns take seven samples (97.2 ms).
+Pure turns retain range within 1.5 parts per million across the tested rates.
+An ordinary extreme-to-near return displays 5.4-7.8 cm in its first sample at
+30/72/120 Hz. Synthetic angular RMS falls from .0482 to .0198 degrees. At sphere
+distances 2/7/12 cm, synthetic radial RMS falls from .662 mm/53.4 mm/.771 m to
+.274 mm/22.1 mm/.319 m. Long-range radial sensitivity remains substantial; no
+claim of optimal or physically accepted feel. Both platform measurement CSVs
+are identical and the maintained aggregate is committed.
+
+Dana asked to re-examine the reference polynomial before replacing it. Direct
+comparison of historical Bird.cs at 346e017 (2024-08-23), current package and
+VRChat confirms F(s)=s+s^2/.02+.02*(s/.03)^6. Its input is sphere-center distance
+from the weighted hand root, not sphere radius. It is zero with unit initial
+slope, monotonic and unbounded; 3/6/8/12 cm become .095/1.52/7.59/82.76 m.
+VRChat changes its input through inferred avatar tips, the conditioned fit,
+existing flat/fist limit blend and 9 cm / finger-length normalization. That
+normalization alone multiplies the sixth-power term by k^6: 3.63x in the
+synthetic 7.26 cm fixture, .213x in the 11.645 cm ClientSim default avatar.
+Neither is a measurement of Dana's actual avatar. These effects must be
+isolated before blaming avatar anatomy or the polynomial. Prefer the original
+two-characteristic-scale family as a configurable baseline; no range constant
+or new openness feature was introduced. RANGE-REFERENCE-AUDIT.md, the stdlib
+study_reference_range.py and retained curve/normalization CSVs record the audit.
+
+Final normal unmodified SDK exports, compressed/uncompressed upload-size gates,
+independent bundle catalogs and cross-platform structural audit PASS. Each
+processed lab contains 266 GameObjects, 751 components, 45 compiled Udon
+behaviours, 42 network bindings and no missing scripts or surviving project
+MonoBehaviours. Source/editor/SDK, scene/blueprint, layout/colliders/spawns,
+component/Udon/network identities match. Blueprint remains empty, launch false.
+
+| Platform | Bytes | SHA256 |
+| --- | ---: | --- |
+| Windows | 296763 | `7DF780D25DBA2D9F5062C7706FD4DBEA3FD0ACE18B3BF2468120FDDCBC9F54BB` |
+| Android | 262663 | `6EFBEA1F21503864FD5246C3C3CE04465428CB01FF58C44007A7F498EF1F1781` |
+
+Initial exports after adding the new class showed transient type-resolution
+errors before SDK success; logs remain ignored under Lab08-InitialExports.
+Subsequent settled exports and the final S2 implementation have no C# compile,
+shader or Udon execution errors. The pre-existing internal Unity bundle
+'Build Finished, Result: Failure.' line remains once per export despite SDK
+completion and readable, audited artifacts. Preserve this qualification;
+no SDK source or validation was altered or bypassed.
+
+All 80 runtime source/meta files and ten lab helpers match generated copies;
+310 Asset GUIDs are unique. All 1055 original scene YAML blocks are retained,
+with eight new helper blocks and eight changed original blocks; every existing
+transform pose/parent is unchanged. SDK project settings match the starting
+tracked state; final editor platform is Android. Rendered Lab 08 comparison
+label/geometry were inspected. Bytecode, builds, logs and captures stay ignored.
+
+Lab 05 remains the last recorded headset deployment; Lab 08 is build-only.
+No account, upload, client launch, headset or standalone installation operation
+occurred. Keep the filter optional pending physical comparison; first audit
+actual sphere/limit/normalization values when tuning range, use original-family
+parameters as the baseline, and avoid prolonged filter research displacing the
+agreed VRChat world. World-design references, independent critic iteration when
+world building and free-asset provenance/credit requirements remain in force.
+
+Final audit: recurring instructions updated in place and verified byte-for-byte
+against the saved prompt, preserving the active two-hour schedule and task.
+Both repositories pass whitespace checks.

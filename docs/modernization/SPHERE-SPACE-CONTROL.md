@@ -1,5 +1,14 @@
 # Sphere-derived range and responsive direction
 
+Runtime follow-up: [Lab 08's optional sphere-vector filter](SPHERE-FILTER-LAB.md)
+uses a common radial/angular gain and filters wrist turns rather than carrying
+the latest palm rotation through unfiltered. It retains the **original** range
+polynomial; the ninth-power curve below remains an illustrative study only.
+The [reference audit](RANGE-REFERENCE-AUDIT.md) confirms that the original
+polynomial already has the desired qualitative progression and is the baseline
+for future tuning. Input normalization and limit blending warrant investigation
+before replacing that curve.
+
 Design study, 2026-09-27. No production filter, scene, device or default changed.
 The latest physical feedback concerns **VRChat lab, FILTERED**, not standalone
 Quest. Dana reports RAW is responsive but too noisy. Lab 05 remains the last

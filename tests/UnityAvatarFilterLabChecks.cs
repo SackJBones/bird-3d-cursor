@@ -182,8 +182,10 @@ public partial class UnityAvatarHandLabChecks
         Near(Get<Vector3>(cursors[0],"position"),Get<Vector3>(cursors[0],"rawPosition"),.00001f,"Direct adaptive resume seeds fresh");
         vm.SendCustomEvent("SetAdaptive");Require(Get<bool>(cursors[0],"poseValid"),"Idempotent mode request preserves sample");
         Capture("bird-adaptive-control",new Vector3(0,1.65f,-3),new Vector3(0,1.4f,1));
-        Require(vm.RunEvent("_interact"),"Native adaptive -> RAW");yield return null;
-        Require(!Get<bool>(vm,"filtered"),"Native three-mode cycle returns to RAW");
+        Require(vm.RunEvent("_interact"),"Native adaptive -> sphere");yield return null;
+        Require(Get<bool>(vm,"sphere"),"Sphere experiment follows adaptive");
+        Require(vm.RunEvent("_interact"),"Native sphere -> RAW");yield return null;
+        Require(!Get<bool>(vm,"filtered"),"Native four-mode cycle returns to RAW");
     }
 }
 #endif

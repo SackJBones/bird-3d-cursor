@@ -269,6 +269,7 @@ public partial class UnityAvatarHandLabChecks : MonoBehaviour
         yield return null;
         for(int side=0;side<2;side++) Require(!Get<bool>(cursors[side],"poseValid") && !Get<Renderer>(views[side],"core").enabled,"Native reset hides Bird");
         var adaptive=AdaptiveScenarios(); while(adaptive.MoveNext()) yield return null;
+        var sphere=SphereScenarios(); while(sphere.MoveNext()) yield return null;
         var ui=UiScenarios(); while(ui.MoveNext()) yield return null;
         Restore();
     }

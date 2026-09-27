@@ -13,6 +13,8 @@ public class BirdCursorState : UdonSharpBehaviour
     public bool smoothing;
     [Tooltip("Optional experimental policy used only while smoothing. Null preserves the original recurrence.")]
     public BirdRangeAdaptiveFilter adaptiveFilter;
+    [Tooltip("Optional sphere-vector experiment. Assign at most one filter policy per cursor.")]
+    public BirdSphereSpaceFilter sphereFilter;
     [HideInInspector] public float sampleDeltaTime=1f/72;
     [HideInInspector] public int historyRevision;
     public bool clicksAllowed = true;
@@ -47,6 +49,9 @@ public class BirdCursorState : UdonSharpBehaviour
     [HideInInspector] public float clickDepth;
     private bool filterReady;
     private BirdRangeAdaptiveFilter boundAdaptive;
+    private BirdSphereSpaceFilter boundSphere;
+    private int boundSphereRevision;
+    private float boundSphereMultiplier;
     private int boundPolicyRevision;
     private float variance = 1;
     private Vector3 handForward;
@@ -62,6 +67,13 @@ public class BirdCursorState : UdonSharpBehaviour
             Cancel(); boundAdaptive=policy;
             if(boundAdaptive!=null) boundAdaptive.Cancel();
         }
+        BirdSphereSpaceFilter spherePolicy=smoothing?sphereFilter:null;
+        if(boundSphere!=spherePolicy || (spherePolicy!=null && boundSphereMultiplier!=rangeDistanceMultiplier))
+        {
+            Cancel(); boundSphere=spherePolicy; boundSphereMultiplier=rangeDistanceMultiplier;
+            if(boundSphere!=null) boundSphere.Cancel();
+        }
+        if(policy!=null && spherePolicy!=null) { Reject(); return; }
         if (!tracking || fitter == null || !FiniteVector(handRoot) || !FiniteVector(indexTip)) { Reject(); return; }
         fitter.points = points;
         fitter.Fit();
@@ -87,7 +99,27 @@ public class BirdCursorState : UdonSharpBehaviour
         if (!FiniteVector(candidate)) { Reject(); return; }
         Vector3 raw = candidate;
         float nextVariance = 1;
-        if(smoothing && adaptiveFilter!=null)
+        if(smoothing && sphereFilter!=null)
+        {
+            sphereFilter.sampleVector=pointing*rangeDistanceMultiplier;
+            sphereFilter.sampleDeltaTime=sampleDeltaTime;
+            sphereFilter.sampleNormal=palmNormal;
+            // Existing palm axis, used only for an otherwise ambiguous half-turn.
+            sphereFilter.sampleForward=useHandLimits?handForward:Vector3.zero;
+            sphereFilter.Step();
+            if(!sphereFilter.valid) { Reject(); return; }
+            if(boundSphereRevision!=sphereFilter.historyRevision)
+            {
+                AdvanceHistory(); boundSphereRevision=sphereFilter.historyRevision;
+            }
+            Vector3 filteredVector=sphereFilter.vector;
+            float d=filteredVector.magnitude;
+            float n=d/.02f, f=d/.03f;
+            float filteredRange=(n+n*n+f*f*f*f*f*f)*.02f;
+            candidate=d>0?handRoot+filteredVector/d*filteredRange:handRoot;
+            if(!FiniteVector(candidate)) { Reject(); return; }
+        }
+        else if(smoothing && adaptiveFilter!=null)
         {
             adaptiveFilter.sampleRoot=handRoot; adaptiveFilter.samplePosition=raw;
             adaptiveFilter.sampleNoise=270f*mappedDistance*mappedDistance*mappedDistance;
@@ -232,6 +264,7 @@ public class BirdCursorState : UdonSharpBehaviour
         poseValid = false;
         filterReady = false;
         if(boundAdaptive!=null) boundAdaptive.Cancel();
+        if(boundSphere!=null) boundSphere.Cancel();
         up = selected;
         selected = false;
         if (cursorVisual != null) cursorVisual.gameObject.SetActive(false);

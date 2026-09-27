@@ -24,6 +24,7 @@ Dana prioritizes a normal Android Build and Test world inside VRChat, even befor
 - [x] Author an optional native-toggle reach/highlight/spin station in Lab 06, saved off and clear of geometry diagnostics; pass 14375 compiled-Udon lab assertions, UI/map regressions and normal Android SDK build. Lab 06 is build-only; Lab 05 remains deployed for physical sphere inspection.
 - [x] Add normal Windows/Android lab export and processed-scene parity checks for source versions, layout, colliders, spawns, Udon bindings and network IDs; preserve single-platform Android BuildAndTest as the default. See TRACKING-LAB.md and the latest build checkpoint.
 - [x] Add Lab 07's optional raw-range adaptive filter, retaining RAW default and original FILTERED mode. Both targets pass 47074 compiled-Udon assertions and normal SDK exports; see RANGE-ADAPTIVE-FILTER.md. Build-only; Lab 05 remains deployed, and physical feel is pending.
+- [x] Add Lab 08's optional intrinsic sphere-vector filter with unchanged reference range law. Both targets pass 106641 compiled-Udon assertions, including SE(3) symmetry and post-IK lifecycle checks, and normal SDK exports. See SPHERE-FILTER-LAB.md. Build-only; no headset change.
 - [x] Restore the tracked BirdWorld into a fresh project through pinned VPM dependencies, regenerate sources/bytecode with the maintained runner, and pass the full lab checks plus normal SDK exports on Windows and Android. Source/layout/Udon/network records match the normal project; this is not client or physical validation.
 - [ ] Physically validate Lab 05 corrected palm normal, sphere geometry overlay, tip estimates and Bird feel. Dana confirmed joint markers visible but RAW rays pointed out the backs of the hands; the winding sign is corrected. Actual usability and click fidelity remain separate.
 - [ ] Later publish the same scene privately using normal account eligibility, metadata and SDK upload. Add PC under the same blueprint ID for PC guests.
@@ -38,9 +39,13 @@ opening. The stated 65/80/90 percent ranges are qualitative feel goals, not new
 pose inputs or threshold bands. See [SPHERE-SPACE-CONTROL.md](SPHERE-SPACE-CONTROL.md).
 
 - [x] Record sphere-only requirements and study separate direction/distance filtering before nonlinear range expansion, including angular contraction and nearby gain checks.
-- [ ] Implement a bounded optional VRChat comparison, validate ordinary near-hand behavior and range-independent turning in compiled Udon, then obtain physical feedback. Keep RAW/original comparisons and distinguish filter effects from range-curve changes; the study's illustrative ninth-power curve is not an approved default.
+- [x] Implement a bounded optional VRChat SPHERE comparison with the original range law; validate near-hand local response, range-independent turning, noise attenuation and lifecycle through compiled Udon on both editor targets. See SPHERE-FILTER-LAB.md; original comparisons remain available and the study's ninth-power curve is not adopted.
+- [x] Express direction smoothing through intrinsic S2 log/exp tangent vectors, with no Euler representation; test SE(3) equivariance including up/down pointing, antipodes and floating-point center/root subtraction.
+- [x] Audit the exact reference polynomial and VRChat input differences; see RANGE-REFERENCE-AUDIT.md. Prefer its original two-characteristic-scale family as the range-tuning baseline. Avatar normalization and the existing limit blend must be assessed separately; neither matched formula nor synthetic fixtures prove matched physical feel.
+- [ ] Physically compare SPHERE with RAW/original FILTERED before selecting a default; assess small-angle lag, nearby precision, current-hand-root translation noise and actual avatar data. Separately assess sphere-based range allocation without introducing an openness quantity or making hardware a prerequisite for other agreed work.
 
-The study does not change production code or headset content. Do not treat
+The initial study is now followed by the optional Lab 08 implementation;
+headset content remains unchanged. Do not treat
 numerical noise/response results as physical acceptance or let research displace
 the VRChat delivery plan.
 

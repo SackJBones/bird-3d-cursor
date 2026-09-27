@@ -9,6 +9,7 @@ param(
     [switch]$AddUi,
     [switch]$RefineUi,
     [switch]$AddAdaptive,
+    [switch]$AddSphereFilter,
     [switch]$Check,
     [switch]$CheckBird,
     [switch]$SkipBuild,
@@ -28,6 +29,7 @@ Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityTrackingLabChecks.cs') -De
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityAvatarHandLabChecks.cs') -Destination $runtime
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityAvatarUiLabChecks.cs') -Destination $runtime
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityAvatarFilterLabChecks.cs') -Destination $runtime
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnitySphereFilterLabChecks.cs') -Destination $runtime
 foreach($helper in @('UnityTrackingLab.cs','UnityTrackingLabBird.cs','UnityTrackingLabUi.cs','UnityTrackingLabBuildAudit.cs','UnityWorldBundleChecks.cs')) { Copy-Item -LiteralPath (Join-Path $PSScriptRoot $helper) -Destination $editor }
 $presentation=Join-Path $project 'Assets/BirdGenerated/Presentation'
 New-Item -ItemType Directory -Force $presentation | Out-Null
@@ -56,6 +58,7 @@ foreach($target in $targets) {
         if($AddUi) { Invoke-LabUnity 'UnityTrackingLabUi.AddUi' 'lab-ui-author' $target }
         if($RefineUi) { Invoke-LabUnity 'UnityTrackingLabUi.RefineUi' 'lab-ui-layout' $target }
         if($AddAdaptive) { Invoke-LabUnity 'UnityTrackingLabBird.AddAdaptive' 'lab-filter-author' $target }
+        if($AddSphereFilter) { Invoke-LabUnity 'UnityTrackingLabBird.AddSphereFilter' 'lab-sphere-filter-author' $target }
         $author=$false
     }
     if($Check) { Invoke-LabUnity 'UnityTrackingLabChecks.Run' 'lab-check' $target }

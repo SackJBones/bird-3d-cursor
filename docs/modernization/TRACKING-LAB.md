@@ -73,6 +73,16 @@ off and is limited to 512-pixel resolution. Diagnostics are per-client; visitors
 do not compete for the switches. Bird clicking is unnecessary. A named integration
 root contains the separate input/solver/presentation station.
 
+## Lab 08 sphere-filter comparison
+
+The saved lab now has optional SPHERE following ADAPTIVE on the native Point
+control. RAW stays the default; original FILTERED remains available. The new
+policy filters the existing sphere-center vector's direction and length before
+the original polynomial. See [SPHERE-FILTER-LAB.md](SPHERE-FILTER-LAB.md) for
+contracts, limitations and validation; this is a build-only revision. The
+`-AddSphereFilter` switch is only for an older scene without the new policy;
+it refuses to overwrite one already present.
+
 ## Reproduce and test
 
 From the lightweight repository, with the heavy BirdWorld project beside it:

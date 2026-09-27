@@ -6,6 +6,8 @@ Dana requires sphere size/center to remain the measure of opening, with no new
 openness quantity. See [SPHERE-SPACE-CONTROL.md](SPHERE-SPACE-CONTROL.md) for the
 requirements and bounded numerical study. The standalone feedback below remains
 useful history, not the app identification for this newer report.
+An optional compiled-Udon implementation now follows in
+[SPHERE-FILTER-LAB.md](SPHERE-FILTER-LAB.md), retaining the original range law.
 
 Follow-up: the VRChat lab now has an explicitly optional
 [range-adaptive comparison](RANGE-ADAPTIVE-FILTER.md), with compiled-Udon and

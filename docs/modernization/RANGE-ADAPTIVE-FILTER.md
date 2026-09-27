@@ -1,5 +1,9 @@
 # Optional range-adaptive filter in the VRChat lab
 
+Lab 08 adds a subsequent **SPHERE** choice; see
+[SPHERE-FILTER-LAB.md](SPHERE-FILTER-LAB.md). ADAPTIVE remains unchanged. The
+three-mode sequence below describes its original Lab 07 introduction.
+
 `BirdRangeAdaptiveFilter` is an experimental caller-stepped Udon component,
 separate from the fit, hand-limit law, original polynomial and rendering.
 Lab 07 exposes **RAW -> FILTERED -> ADAPTIVE -> RAW** on the existing native
