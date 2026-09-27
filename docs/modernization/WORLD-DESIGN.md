@@ -1,7 +1,7 @@
 # Bird World architectural direction
 
-Dana supplied a design conversation and two preferred images on 2026-09-27 in
-the workspace's `world design` directory. Both images have been inspected and
+Dana supplied a design conversation and four preferred images on 2026-09-27 in
+the workspace's `world design` directory. All four images have been inspected and
 the conversation read. Originals are preserved, byte-for-byte, in the heavy
 repository at `Reference/WorldDesign20260927`, outside Unity Assets.
 
@@ -33,6 +33,15 @@ is largely a substantial support column with sweeping architecture around it,
 with only a small glimpse of natural coast. Reveal the larger vista later.
 The pictured bird sculpture/pedestal is conceptual reference, not a requirement
 to make literal bird artwork the interaction UI.
+
+The additional circular-opening/steps reference emphasizes the clean full-circle
+threshold, shallow nearby stairs, a substantial branching white support and
+sweeping inhabited structure immediately beyond it. Use this alongside the
+arrival cavern image when composing the first view and traversable route.
+The additional sculptures reference suggests quiet display spaces with warm
+floors, generous separation and pale, folded organic forms on simple plinths.
+It is reference for sculptural form and a comfortable gallery atmosphere;
+specific objects and placements remain editable design choices.
 
 At arrival, visitors can choose a cozy wing to either side or proceed outward.
 The outdoor complex offers additional intimate spaces, including an inviting
@@ -97,8 +106,52 @@ The existing tracking lab and standalone high-overlook vista remain test
 harnesses. Neither is the final Bird World layout. This brief adds direction
 for that world without replacing their current testing role.
 
+## Independent critique across world-building cycles
+
+Dana explicitly requests an independent-review-critic-agent pattern when world
+building begins. Give an independent critic the complete concept conversation,
+all four images, this brief and current scene evidence. The critic should judge
+the implementation against Dana's expressed intent rather than literal image
+matching or the implementer's description of success. Keep development and
+critique separate, revise from concrete findings, and repeat across cycles.
+
+Use a documented 0-10 scale for **aesthetics, navigability, hangout suitability,
+and overall VRChat world quality**. As an initial operational target (not a
+user-specified threshold), aim for at least 8/10 in every category with no
+unresolved major navigation or usability issue. Each score needs evidence,
+remaining weaknesses and prioritized actionable changes. Do not game a score
+by relaxing the rubric or discarding inconvenient observations. Preserve review
+history and hand off unresolved findings to the next cycle.
+
+Assess arrival/threshold reveal, supported vertical coastal massing, visual
+quiet and coherent silhouettes for aesthetics; routes, stairs, clearances,
+wayfinding and access to social/demo spaces for navigation; human-scale cozy
+groups, conversation arrangements, discovery and comfortable views for hanging
+out; and spawn behavior, interaction clarity, scale, collisions, Quest rendering
+cost and everyday VRChat usability for overall quality. Review editable scene
+structure as well as screenshots. Later reviews should include walkthrough and
+runtime evidence, not only flattering fixed-camera images. State what cannot be
+judged without in-headset or multiplayer observation; numerical ratings are
+review judgments, not substitutes for those checks or Dana's feedback.
+
+## Asset sourcing and credits
+
+Dana authorizes fetching useful free assets and packages, with correct credit.
+Check the actual license and its compatibility with the intended Unity/VRChat
+use and any source-repository redistribution before adopting an asset; free
+price alone is not a redistribution license. Record source URL, author,
+version/download date, license text or stable license reference, modifications
+and required attribution. Preserve notices with the asset and maintain the
+world's credits, including in-world attribution when required. If a license
+allows use but not source redistribution, keep the asset out of public Git and
+record a reproducible acquisition step. Prefer maintainable, editable assets
+that suit the Quest budget and design direction; availability alone is not a
+reason to add a dependency.
+
 ## References
 
 - [Preserved conversation and provenance](../../../bird-3d-cursor-projects/Reference/WorldDesign20260927/README.md)
 - [Exterior complex](../../../bird-3d-cursor-projects/Reference/WorldDesign20260927/complex%20lowpoly.png)
 - [Arrival cavern](../../../bird-3d-cursor-projects/Reference/WorldDesign20260927/spawn%20point%20cavern%20lowpoly.png)
+- [Circular opening and steps](../../../bird-3d-cursor-projects/Reference/WorldDesign20260927/circular%20opening%20and%20steps%20reference%20lowpoly.png)
+- [Sculptures and gallery atmosphere](../../../bird-3d-cursor-projects/Reference/WorldDesign20260927/sculptures%20lowpoly.png)

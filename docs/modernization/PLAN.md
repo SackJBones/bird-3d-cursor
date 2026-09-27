@@ -40,8 +40,10 @@ opportunities. Images guide structure/flow rather than exact reproduction.
 The generated floor-plan result was rejected and is not a layout specification.
 Editability for iteration takes precedence over matching a reference rendering.
 
-- [x] Read the supplied conversation, inspect both images and preserve references with provenance.
+- [x] Read the supplied conversation, inspect all four preferred images and preserve references with provenance.
 - [ ] When presentation work is appropriate, develop an editable spatial blockout and evaluate visitor flow before detailed artwork; do not make this a prerequisite for the current hand-input milestone.
+- [ ] During world building, use Dana's requested independent critic agent and iterate across cycles toward high numerical scores for aesthetics, navigability, hangout suitability and overall VRChat quality. Follow the evidence-based rubric in WORLD-DESIGN.md.
+- Free asset/package acquisition is authorized when useful. Check license compatibility and retain source, author, license and required credits; see WORLD-DESIGN.md.
 
 ## Current priorities, 2026-09-26 UTC
 
