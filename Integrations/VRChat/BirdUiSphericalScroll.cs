@@ -19,6 +19,9 @@ public class BirdUiSphericalScroll : UdonSharpBehaviour
     public UdonBehaviour eventTarget;
     public string startedEvent, stoppedEvent;
     public bool automatic=true;
+    [Tooltip("Use after-IK input from BirdAvatarUiInput. Leave off for ordinary LateUpdate producers.")]
+    public bool postLateUpdate;
+    private int automaticFrame=-1;
     [HideInInspector] public float stepDelta=.01666667f;
     [HideInInspector] public BirdUiPointer activePointer;
     [HideInInspector] public Vector3 angularVelocity, contactNormal, contactPoint;
@@ -37,7 +40,13 @@ public class BirdUiSphericalScroll : UdonSharpBehaviour
     private float previousRadius;
     private bool hasSphereHistory;
 
-    private void LateUpdate() { if(automatic) { stepDelta=Time.unscaledDeltaTime; Process(); } }
+    private void LateUpdate() { if(!postLateUpdate) AutomaticStep(); }
+    public override void PostLateUpdate() { if(postLateUpdate) AutomaticStep(); }
+    private void AutomaticStep()
+    {
+        if(!automatic || automaticFrame==Time.frameCount) return;
+        automaticFrame=Time.frameCount; stepDelta=Time.unscaledDeltaTime; Process();
+    }
     private void OnDisable() { Cancel(); }
     public void Cancel()
     {

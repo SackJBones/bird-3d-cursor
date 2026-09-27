@@ -194,7 +194,8 @@ public static class UnityTrackingLabBird
         var backing=GameObject.Find("Bird target hint backing"); backing.transform.position=new Vector3(1,.35f,-.575f); backing.transform.localScale=new Vector3(1.18f,.33f,.02f);
         foreach(var text in UnityEngine.Object.FindObjectsOfType<Text>(true))
         {
-            if(text.transform.parent.name=="Welcome") text.text="BIRD / TRACKING LAB 05\nInspect the fitted sphere and resulting Bird";
+            if(text.transform.parent.name=="Welcome") text.text=UnityEngine.Object.FindObjectsOfType<BirdAvatarUiInput>(true).Length>0?
+                "BIRD / TRACKING LAB 06\nSphere geometry + optional reach interaction":"BIRD / TRACKING LAB 05\nInspect the fitted sphere and resulting Bird";
             if(text.transform.parent.name=="Directions") text.text="SET LEFT / RIGHT: hold that hand straight; press with the other. Starts RAW.\nGold = fitted sphere, center and fit ray. Green = palm normal.\nCyan / pink ray and diamond = resulting Bird. Geometry is X-ray; toggle below.\nWhite tips are estimates. Singular fits hide the gold sphere, not Bird.";
         }
     }

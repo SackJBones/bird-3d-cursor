@@ -14,7 +14,7 @@ using VRC.Udon;
 // Exercises saved components through their compiled Udon and real frame dispatch.
 // SDK return-value fixtures substitute articulated hands, never call C# proxies.
 [DefaultExecutionOrder(32000)]
-public class UnityAvatarHandLabChecks : MonoBehaviour
+public partial class UnityAvatarHandLabChecks : MonoBehaviour
 {
     const string Active="Bird.AvatarHandLab.Checks";
     static Func<VRCPlayerApi,HumanBodyBones,Vector3> originalPosition;
@@ -268,6 +268,7 @@ public class UnityAvatarHandLabChecks : MonoBehaviour
         for(int side=0;side<2;side++) VM(GameObject.Find(side==0?"RESET LEFT":"RESET RIGHT").GetComponent<BirdLabHandControl>()).RunEvent("_interact");
         yield return null;
         for(int side=0;side<2;side++) Require(!Get<bool>(cursors[side],"poseValid") && !Get<Renderer>(views[side],"core").enabled,"Native reset hides Bird");
+        var ui=UiScenarios(); while(ui.MoveNext()) yield return null;
         Restore();
     }
     void CalibrateControls(bool expect=true)

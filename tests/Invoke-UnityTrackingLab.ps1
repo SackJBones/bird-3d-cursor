@@ -5,11 +5,15 @@ param(
     [switch]$RefineLayout,
     [switch]$RefineBird,
     [switch]$AddBird,
+    [switch]$AddUi,
+    [switch]$RefineUi,
     [switch]$Check,
     [switch]$CheckBird,
+    [switch]$SkipBuild,
     [switch]$Launch
 )
 $ErrorActionPreference='Stop'
+if($SkipBuild -and $Launch) { throw 'Choose SkipBuild or Launch, not both.' }
 $repo=Split-Path $PSScriptRoot -Parent
 $project=(Resolve-Path -LiteralPath $ProjectPath).Path
 if(!(Test-Path -LiteralPath (Join-Path $project 'Assets/BirdWorld/Scenes/BirdFeasibility.unity'))) { throw 'Use the maintained BirdWorld project.' }
@@ -19,7 +23,8 @@ New-Item -ItemType Directory -Force $runtime,$editor | Out-Null
 Get-ChildItem -LiteralPath (Join-Path $repo 'Integrations/VRChat') -File | Where-Object { $_.Name -match '\.cs(\.meta)?$' } | ForEach-Object { Copy-Item -LiteralPath $_.FullName -Destination (Join-Path $runtime $_.Name) }
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityTrackingLabChecks.cs') -Destination $runtime
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityAvatarHandLabChecks.cs') -Destination $runtime
-foreach($helper in @('UnityTrackingLab.cs','UnityTrackingLabBird.cs','UnityWorldBundleChecks.cs')) { Copy-Item -LiteralPath (Join-Path $PSScriptRoot $helper) -Destination $editor }
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityAvatarUiLabChecks.cs') -Destination $runtime
+foreach($helper in @('UnityTrackingLab.cs','UnityTrackingLabBird.cs','UnityTrackingLabUi.cs','UnityWorldBundleChecks.cs')) { Copy-Item -LiteralPath (Join-Path $PSScriptRoot $helper) -Destination $editor }
 $presentation=Join-Path $project 'Assets/BirdGenerated/Presentation'
 New-Item -ItemType Directory -Force $presentation | Out-Null
 foreach($name in @('BirdLogicalDepth.shader','BirdLogicalDepth.shader.meta')) { Copy-Item -LiteralPath (Join-Path $repo ('Unity/BirdPlugin/Runtime/Presentation/'+$name)) -Destination $presentation }
@@ -37,7 +42,11 @@ if($Generate) { Invoke-LabUnity 'UnityTrackingLab.Generate' 'lab-generate' }
 if($RefineLayout) { Invoke-LabUnity 'UnityTrackingLab.RefineLayout' 'lab-layout' }
 if($RefineBird) { Invoke-LabUnity 'UnityTrackingLabBird.RefineBird' 'lab-bird-layout' }
 if($AddBird) { Invoke-LabUnity 'UnityTrackingLabBird.AddBird' 'lab-bird-author' }
+if($AddUi) { Invoke-LabUnity 'UnityTrackingLabUi.AddUi' 'lab-ui-author' }
+if($RefineUi) { Invoke-LabUnity 'UnityTrackingLabUi.RefineUi' 'lab-ui-layout' }
 if($Check) { Invoke-LabUnity 'UnityTrackingLabChecks.Run' 'lab-check' }
 if($CheckBird) { Invoke-LabUnity 'UnityAvatarHandLabChecks.Run' 'lab-hand-check' }
-if($Launch) { Invoke-LabUnity 'UnityTrackingLab.BuildAndTestAndroid' 'lab-build' }
-else { Invoke-LabUnity 'UnityTrackingLab.BuildAndroid' 'lab-build' }
+if(!$SkipBuild) {
+    if($Launch) { Invoke-LabUnity 'UnityTrackingLab.BuildAndTestAndroid' 'lab-build' }
+    else { Invoke-LabUnity 'UnityTrackingLab.BuildAndroid' 'lab-build' }
+}

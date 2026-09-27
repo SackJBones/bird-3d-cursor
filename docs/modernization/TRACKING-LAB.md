@@ -33,6 +33,15 @@ fit hides its gold geometry and is reported in the hand panel; it is never
 replaced with a fictitious fitted sphere. See the avatar-input document for the
 render-shell distinction and the latest checkpoint for deployment evidence.
 
+The authored Lab 06 adds an optional **Reach station (right) / OFF** native toggle.
+It connects the same accepted avatar Bird to the reusable Udon highlight and
+spherical-scroll components in the same post-IK frame. Enter the wire sphere,
+extend through its back and sweep to spin; withdraw to coast. Colors highlight
+but do not select, and **RESET SPIN** uses native interaction. Clicking remains
+disabled. The station starts off and does not change calibration or geometry
+diagnostics. See [avatar UI timing and contracts](VRCHAT-AVATAR-UI.md) and the
+latest checkpoint for build versus actual deployment status.
+
 In lab v0.2, all 34 markers update every `PostLateUpdate`, after avatar IK.
 Only text refresh is limited to 5 Hz. There is no marker smoothing, deliberate
 delay or positional offset. The Lab 03 follow-up renders diagnostic joint/tip
@@ -74,6 +83,9 @@ an authored lab. Normal reruns restore maintained sources and stable GUIDs,
 compile Udon and use the saved scene. Omit `-Launch` to build without contacting
 a device. Omit `-Check` to skip the separate ClientSim/render check after a checked
 scene change. Close other Unity editors using this project first.
+`-SkipBuild` runs requested authoring/check steps without rebuilding the world;
+it cannot be combined with `-Launch`. `-AddUi` adds the optional station only
+when absent; `-RefineUi` explicitly updates that station's authored layout.
 
 The runner uses the SDK's public Build / BuildAndTest methods. Android Build and
 Test transfers a world bundle into the installed VRChat client; it does not build

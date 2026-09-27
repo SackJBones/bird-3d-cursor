@@ -20,6 +20,8 @@ Dana prioritizes a normal Android Build and Test world inside VRChat, even befor
 - [x] Load Lab 03 in actual Quest VRChat and accept physical SET calibration; Dana calibrated both hands but could not identify nearby Bird.
 - [x] Add Lab 04 RAW/FILTERED comparison, calibration retention during invalid input, fresh history after sampling gaps and readable saved diagnostic labels; compiled-Udon and SDK checks pass, Quest transfer hash matches.
 - [x] Correct anatomical palm winding, render actual fitted sphere/center and separate resulting Bird ray, and validate Lab 05 with 13682 compiled-Udon assertions over 300 frames plus actual point render checks.
+- [x] Connect fresh accepted avatar Bird to local UI after IK in the same frame, with explicit cancellation across loss, recalibration, mode and binding changes; preserve the earlier desktop input phase.
+- [x] Author an optional native-toggle reach/highlight/spin station in Lab 06, saved off and clear of geometry diagnostics; pass 14375 compiled-Udon lab assertions, UI/map regressions and normal Android SDK build. Lab 06 is build-only; Lab 05 remains deployed for physical sphere inspection.
 - [ ] Physically validate Lab 05 corrected palm normal, sphere geometry overlay, tip estimates and Bird feel. Dana confirmed joint markers visible but RAW rays pointed out the backs of the hands; the winding sign is corrected. Actual usability and click fidelity remain separate.
 - [ ] Later publish the same scene privately using normal account eligibility, metadata and SDK upload. Add PC under the same blueprint ID for PC guests.
 

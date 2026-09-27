@@ -17,7 +17,7 @@ public class BirdLabPointView : UdonSharpBehaviour
     private MaterialPropertyBlock coreProperties, haloProperties;
     public override void PostLateUpdate()
     {
-        if (input == null || !input.enabled || !input.gameObject.activeInHierarchy || !input.calibrated ||
+        if (!enabled || !gameObject.activeInHierarchy || input == null || !input.enabled || !input.gameObject.activeInHierarchy || !input.calibrated ||
             input.sampledFrame != Time.frameCount || input.cursor == null || !input.cursor.poseValid)
         { Clear(); return; }
         VRCPlayerApi player = Networking.LocalPlayer;

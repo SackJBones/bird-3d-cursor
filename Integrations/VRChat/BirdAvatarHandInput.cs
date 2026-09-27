@@ -18,6 +18,7 @@ public class BirdAvatarHandInput : UdonSharpBehaviour
     public float referenceFingerLength = .09f;
     [HideInInspector] public bool calibrated, dataReady;
     [HideInInspector] public int available, sampledFrame = -1;
+    [HideInInspector] public int calibrationRevision;
     [HideInInspector] public float fingerLength;
     [HideInInspector] public Vector3[] bonePositions = new Vector3[16];
     [HideInInspector] public Vector3[] estimatedTips = new Vector3[5];
@@ -165,6 +166,7 @@ public class BirdAvatarHandInput : UdonSharpBehaviour
     { ClearCalibration("Open this hand, then SET with the other hand."); }
     private void ClearCalibration(string message)
     {
+        calibrationRevision=calibrationRevision==int.MaxValue?0:calibrationRevision+1;
         calibrated = false; nextText = 0; lastSampleTime = -1;
         calibrationMessage = message;
         if (cursor != null) { cursor.tracking = false; cursor.Cancel(); }

@@ -66,6 +66,12 @@ Submit after their solver sample. The router runs at order 100 and scrolling at
 The experimental avatar-bone adapter still suppresses clicks and has unresolved
 physical calibration; this UI work does not change that limitation.
 
+For post-IK avatar input, use the dedicated [avatar UI bridge](VRCHAT-AVATAR-UI.md)
+with an explicit pointer and opt the router/scroll into `postLateUpdate`.
+This avoids consuming the preceding frame's avatar point in ordinary LateUpdate.
+The saved Lab 06 station uses this path for highlighting and reach-driven rotation;
+it does not enable avatar clicks.
+
 The desktop scene uses a separate, clearly labeled synthetic input producer.
 It is inactive for VR users. Its 0.1–30 m wheel range is a desktop control choice,
 not a Bird geometry or UI contact limit. No headset deployment or hand-tracking

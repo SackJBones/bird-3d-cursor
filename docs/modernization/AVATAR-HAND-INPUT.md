@@ -1,4 +1,4 @@
-# Experimental avatar Bird in Tracking Lab 05
+# Experimental avatar Bird in the tracking lab
 
 This is the first 16-point avatar-input experiment in the authored VRChat lab.
 It uses the existing `BirdSphereFit` and `BirdCursorState`, including the accepted
@@ -24,6 +24,12 @@ The console displays curl angle and desired/shown range. Two fixed white
 reference spheres compare the Bird material with an ordinary material. A gray sphere in front
 of the bench turns green when the logical hand-to-Bird segment passes through it.
 No click is required or synthesized in this first input test.
+
+The authored Lab 06 adds an optional [reach-and-spin station](VRCHAT-AVATAR-UI.md)
+using a separate same-frame UI bridge. Its native toggle defaults off; it consumes
+the existing accepted logical point and keeps clicks disabled. Calibration exposes
+a revision so downstream interactions can detect even an intervening RESET/SET
+that occurs between their frames. Fitting, range and filter equations are unchanged.
 
 **Point / RAW** is a native VRChat control below the mirror switch. Press it
 to compare **RAW** and **FILTERED** using identical hand input, geometry and

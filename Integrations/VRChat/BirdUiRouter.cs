@@ -8,6 +8,9 @@ public class BirdUiRouter : UdonSharpBehaviour
     public BirdUiPointer[] pointers=new BirdUiPointer[0];
     public BirdUiElement[] elements=new BirdUiElement[0];
     public bool automatic=true;
+    [Tooltip("Use after-IK input from BirdAvatarUiInput. Leave off for ordinary LateUpdate producers.")]
+    public bool postLateUpdate;
+    private int automaticFrame=-1;
     private int[] revisions=new int[0];
     private BirdUiElement[] candidates=new BirdUiElement[0];
     private bool stepping, ready;
@@ -21,7 +24,13 @@ public class BirdUiRouter : UdonSharpBehaviour
         foreach(BirdUiElement element in elements) if(element!=null) element.ResetPointers(pointers.Length);
         ready=true;
     }
-    private void LateUpdate() { if(automatic) Process(); }
+    private void LateUpdate() { if(!postLateUpdate) AutomaticStep(); }
+    public override void PostLateUpdate() { if(postLateUpdate) AutomaticStep(); }
+    private void AutomaticStep()
+    {
+        if(!automatic || automaticFrame==Time.frameCount) return;
+        automaticFrame=Time.frameCount; Process();
+    }
     public void Process()
     {
         if(stepping || !enabled || !gameObject.activeInHierarchy) return;
