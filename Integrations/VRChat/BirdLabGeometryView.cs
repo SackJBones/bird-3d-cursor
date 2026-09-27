@@ -16,7 +16,7 @@ public class BirdLabGeometryView : UdonSharpBehaviour
     public override void PostLateUpdate()
     {
         if (!enabled || !gameObject.activeInHierarchy || input == null || !input.enabled || !input.gameObject.activeInHierarchy ||
-            !input.calibrated || input.sampledFrame != Time.frameCount || input.cursor == null || !input.cursor.poseValid)
+            !input.tipsReady || input.sampledFrame != Time.frameCount || input.cursor == null || !input.cursor.poseValid)
         { Clear(); return; }
         var player=Networking.LocalPlayer;
         if (!Utilities.IsValid(player) || pointView == null || pointView.core == null) { Clear(); return; }

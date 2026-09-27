@@ -44,7 +44,7 @@ public class BirdAvatarUiInput : UdonSharpBehaviour
         if (pointer == null) return;
         // Never compete with the pointer's earlier automatic cursor poller.
         if (pointer.cursor != null || input == null || !input.enabled || !input.gameObject.activeInHierarchy ||
-            !input.calibrated || !input.dataReady || input.sampledFrame != Time.frameCount ||
+            !input.tipsReady || !input.dataReady || input.sampledFrame != Time.frameCount ||
             cursor == null || !cursor.enabled || !cursor.gameObject.activeInHierarchy || !cursor.tracking || !cursor.poseValid)
         { pointer.Cancel(); acceptedFrame=-1; return; }
         float now=Time.realtimeSinceStartup;

@@ -82,6 +82,13 @@ public partial class UnityAvatarHandLabChecks : MonoBehaviour
         var origins=VM(FindObjectOfType<BirdLabRootControl>());
         Require(Get<bool>(origins,"centered") && Get<UnityEngine.UI.Text>(origins,"label")==null && origins.GetComponent<Collider>()==null && origins.GetComponent<Renderer>()==null,"PALM default with comparison button removed");
         for(int side=0;side<2;side++) Require(Get<bool>(cursors[side],"smoothing") && Get<UdonBehaviour>(cursors[side],"adaptiveFilter")!=null && Get<float>(inputs[side],"littleFingerRootShare")==.5f,"Saved per-hand defaults are adaptive/palm");
+        for(int side=0;side<2;side++)
+        {
+            Require(Get<bool>(inputs[side],"automaticSetup") && !Get<bool>(inputs[side],"calibrated") && Get<bool>(inputs[side],"tipsReady") && Get<bool>(cursors[side],"poseValid"),"Real ClientSim avatar starts Bird without SET");
+            Require(Get<LineRenderer>(geometry[side],"birdRay").enabled && Get<Renderer>(views[side],"core").enabled,"Automatic startup renders ordinary point and geometry");
+            inputs[side].SetProgramVariable("automaticSetup",false);
+        }
+        yield return null;
         defaults.SendCustomEvent("SetRaw");
         for(int side=0;side<2;side++)
         {
@@ -89,7 +96,7 @@ public partial class UnityAvatarHandLabChecks : MonoBehaviour
             Require(Get<int>(inputs[side],"available")==16,"ClientSim supplies all 16 avatar origins");
             var sampled=Get<Vector3[]>(inputs[side],"bonePositions");
             for(int i=0;i<16;i++) Near(sampled[i],Networking.LocalPlayer.GetBonePosition(Bone(side,i)),.00001f,"Real SDK source binding");
-            Require(!Get<bool>(inputs[side],"calibrated") && !Get<bool>(cursors[side],"poseValid"),"No automatic calibration");
+            Require(!Get<bool>(inputs[side],"calibrated") && !Get<bool>(cursors[side],"poseValid"),"Manual-only comparison waits for SET");
             Require(geometry[side]!=null && !Get<LineRenderer>(geometry[side],"birdRay").enabled,"Uncalibrated geometry stays hidden");
             inputs[side].SendCustomEvent("CalibrateOpenHand");
             realBaseline+=(side==0?"Left":"Right")+" default-avatar open-pose calibration="+Get<bool>(inputs[side],"calibrated")+"; ";
@@ -234,7 +241,7 @@ public partial class UnityAvatarHandLabChecks : MonoBehaviour
             yield return null;
             Require(Get<bool>(inputs[0],"calibrated") && !Get<bool>(cursors[0],"poseValid"),"Longer data gap remains paused with calibration retained");
         }
-        Require(Get<UnityEngine.UI.Text>(inputs[0],"status").text.Contains("Paused / SET retained"),"Panel explains paused calibrated state");
+        Require(Get<UnityEngine.UI.Text>(inputs[0],"status").text.Contains("Paused / correction retained"),"Panel explains paused calibrated state");
         inputs[0].SendCustomEvent("CalibrateOpenHand"); Require(!Get<bool>(inputs[0],"calibrated"),"Explicit SET cannot calibrate invalid skeleton");
         SetHands(0,1,Quaternion.identity); yield return null;
         Require(!Get<bool>(inputs[0],"calibrated"),"Failed explicit calibration needs a successful SET");
@@ -279,6 +286,7 @@ public partial class UnityAvatarHandLabChecks : MonoBehaviour
         var direction=DirectionScenarios(); while(direction.MoveNext()) yield return null;
         var centerDirection=CenterDirectionScenarios(); while(centerDirection.MoveNext()) yield return null;
         var ui=UiScenarios(); while(ui.MoveNext()) yield return null;
+        var automatic=AutomaticSetupScenarios(); while(automatic.MoveNext()) yield return null;
         Restore();
     }
     void CalibrateControls(bool expect=true)

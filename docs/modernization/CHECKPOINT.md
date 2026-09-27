@@ -1244,3 +1244,66 @@ origin-marker/nonvisual-settings blocks are added. Both platform build logs incl
 the automatically recovered stale-helper CS2001 compile attempt described above;
 both subsequent compile graphs and normal SDK exports/gates succeed. No additional
 headset reload was needed for these final checks.
+
+
+## 2026-09-27 — Lab 13 automatic avatar fingertips (build-only)
+
+Removed required SET LEFT / SET RIGHT from the current tracking lab. Valid
+avatar bones immediately drive geometric fingertip estimates, including curled
+startup. Each finger independently learns a distal bone-local axis during
+natural near-extension, then follows actual distal rotation. The explicit .7
+bend-continuation and .8 segment-length assumptions remain adapter heuristics,
+not measured fingertips or a new Bird openness quantity. Optional REFINE retains
+the previous straight-hand correction; AUTO returns to estimates. Failed REFINE
+also resumes automatic estimates. See AUTOMATIC-AVATAR-SETUP.md.
+
+A separate tipsReady contract now drives point/geometry presentation, the simple
+point-through target and the post-IK UI bridge. Manual calibrated remains an
+explicit correction flag. Learning/reset boundaries clear filter/contact history;
+missing samples retain learned axes. Avatar/settings changes and disable restart
+estimation. Clicking remains disabled. Lab 12's accepted ADAPTIVE/PALM defaults,
+removed comparison buttons, sphere-center aim, behind-palm-only 45-degree
+knuckle-axis fallback and original range law are unchanged.
+
+Final compiled-Udon checks pass **120201 assertions over 997 normal frames** on
+both Android and Windows editor targets. New coverage includes curled/default
+avatar startup, both hands, arbitrary rigid orientations, .5x/1x/2x scale,
+MCP-folded rejection, per-finger learning, independently moving distal rotations,
+changed bind axes, all missing origins, disable/recovery, optional correction and
+contact-history cancellation. Review caught a remaining calibrated gate in the
+simple point-through exercise; it was corrected and both automatic hands plus
+out-of-range rejection were added before the final runs. Standard saved-scene
+34-marker cadence, lifecycle and render checks also passed on both platforms.
+The two automatic/refinement console renders were inspected; labels remain inside
+their panels and no required SET instruction remains in automatic mode.
+
+The tracked automatic-setup.csv contains 160 controlled endpoint samples.
+Maximum synthetic fixture disagreement is 5.33120158e-07 m;
+this is numerical agreement with a fixture sharing the .7 coupling assumption,
+NOT physical fingertip accuracy. Independent distal-motion/changed-bind tests
+exercise the learned-axis path separately. No new physical capture was requested.
+
+Normal, unmodified SDK exports and upload-size gates pass:
+- Android: 273127 bytes; SHA256 07DA7B94BAD4BB0C43FC62473ADEDEF18272DDD5052AA420D8B8241DE11BB68F.
+- Windows: 306694 bytes; SHA256 1AB8680C04CC3CEE3C7CDEA0E56B03B85EA0DA3F29B784EF3A79EF965B5F2299.
+- Runtime-source SHA256: 3FE97140AE73C982E9C503C42F280AD9ED1A863C079D31858948BC8834F36127.
+- Layout SHA256: 109AB9EA27C41F7DCBB3B2CFAEBB7956C104DE6468F1B2A6705830B342700AA3.
+
+Cross-platform source/version, processed scene/layout, colliders/spawns, all
+46 Udon bindings and 43 network bindings match; artifact hashes verify.
+Processed inventory is 267 GameObjects / 749 components, with no missing scripts or
+project MonoBehaviours. All 82 maintained/generated runtime source/meta files
+match, 316 Asset GUIDs are unique, and all 1063 authored scene blocks remain
+with unchanged Transform/RectTransform data. SDK dynamic-material order changed,
+but its inventory did not. Editor is restored to Android. Final compile/check/
+build logs have no C# compiler or Udon execution errors. Both export logs retain
+the known internal 'Build Finished, Result: Failure.' line before normal SDK
+success and validated artifacts; no validation was patched or bypassed.
+
+This cycle did not use ADB, wake/relaunch the headset, change the standalone app
+or upload a world. **Quest remains on Lab 12**, whose private DeviceLab12 record
+keeps hash 56DF58AE27ED2DC95219F4CF7C40349AEE1B5F6CEC58A3EBCABC1442CAC46FD5.
+Lab 12's physical pointing feel and Lab 13 automatic-tip fidelity remain pending.
+Offer Lab 13 when Dana is available; continue useful VRChat UI/world development
+without waiting on hardware. The recurring task retains this task, its active
+two-hour schedule and latest source prompt, now prioritizing that next work.

@@ -13,6 +13,7 @@ param(
     [switch]$RefinePalmDirection,
     [switch]$AddRootControl,
     [switch]$RefineSphereDirection,
+    [switch]$AddAutomaticSetup,
     [switch]$Check,
     [switch]$CheckBird,
     [switch]$SkipBuild,
@@ -35,6 +36,7 @@ Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityAvatarFilterLabChecks.cs')
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnitySphereFilterLabChecks.cs') -Destination $runtime
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityPalmDirectionLabChecks.cs') -Destination $runtime
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityCenterDirectionLabChecks.cs') -Destination $runtime
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityAutomaticHandLabChecks.cs') -Destination $runtime
 foreach($helper in @('UnityTrackingLab.cs','UnityTrackingLabBird.cs','UnityTrackingLabUi.cs','UnityTrackingLabBuildAudit.cs','UnityWorldBundleChecks.cs')) { Copy-Item -LiteralPath (Join-Path $PSScriptRoot $helper) -Destination $editor }
 $presentation=Join-Path $project 'Assets/BirdGenerated/Presentation'
 New-Item -ItemType Directory -Force $presentation | Out-Null
@@ -72,6 +74,7 @@ foreach($target in $targets) {
         if($RefinePalmDirection) { Invoke-LabUnity 'UnityTrackingLabBird.RefinePalmDirection' 'lab-palm-direction-author' $target }
         if($AddRootControl) { Invoke-LabUnity 'UnityTrackingLabBird.AddRootControl' 'lab-root-author' $target }
         if($RefineSphereDirection) { Invoke-LabUnity 'UnityTrackingLabBird.RefineSphereDirection' 'lab-center-direction-author' $target }
+        if($AddAutomaticSetup) { Invoke-LabUnity 'UnityTrackingLabBird.AddAutomaticSetup' 'lab-auto-setup-author' $target }
         $author=$false
     }
     if($Check) { Invoke-LabUnity 'UnityTrackingLabChecks.Run' 'lab-check' $target }

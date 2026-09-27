@@ -10,6 +10,12 @@ The Bird is a one-handed tool for controlling an arbitrary point in 3D space. It
 
 Bird's geometry specifies a point; interaction and appearance belong to the experience. The development branch keeps its new cursor/trail experiments in an independent optional assembly. See [geometry and presentation](docs/modernization/GEOMETRY-AND-PRESENTATION.md) for the current palm-side and long-range experiments and validation limits.
 
+The experimental [VRChat tracking lab](docs/modernization/TRACKING-LAB.md) now starts
+Bird from automatic avatar fingertip estimates, with optional manual refinement.
+It retains sphere-center aiming, adaptive smoothing and the palm-centered origin.
+Lab 13 builds through the normal SDK on Android and Windows; its automatic setup
+still needs physical testing. These are avatar estimates, not raw tracked fingertips.
+
 ## What is the Bird?
 
 The Bird is a novel interaction technique for spatial computing that solves a fundamental problem: how to smoothly control a precise point in 3D space with one hand. Unlike traditional interaction techniques:

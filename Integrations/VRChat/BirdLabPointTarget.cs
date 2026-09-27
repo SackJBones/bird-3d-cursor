@@ -21,7 +21,7 @@ public class BirdLabPointTarget : UdonSharpBehaviour
     }
     private bool Hit(BirdAvatarHandInput input)
     {
-        if(input==null || !input.enabled || !input.gameObject.activeInHierarchy || !input.calibrated ||
+        if(input==null || !input.enabled || !input.gameObject.activeInHierarchy || !input.tipsReady ||
             input.sampledFrame!=Time.frameCount || input.cursor==null || !input.cursor.poseValid || radius<=0) return false;
         Vector3 origin=input.cursor.handRoot, delta=input.cursor.position-origin;
         float length=delta.magnitude;

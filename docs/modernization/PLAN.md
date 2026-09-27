@@ -28,8 +28,9 @@ Dana prioritizes a normal Android Build and Test world inside VRChat, even befor
 - [x] Restore the tracked BirdWorld into a fresh project through pinned VPM dependencies, regenerate sources/bytecode with the maintained runner, and pass the full lab checks plus normal SDK exports on Windows and Android. Source/layout/Udon/network records match the normal project; this is not client or physical validation.
 - [x] Physically compare corrected palm geometry and ray origin through Labs 09/10. Dana sees the fitted geometry, says PALM feels much better and the behavior is familiar; ADAPTIVE also seems good. This is not broad acceptance of SPHERE, fingertip fidelity or clicks.
 - [x] Physically compare Lab 11 far-only knuckle-axis correction: Dana approves the 45-degree vector but rejects general far locking because it removes finger-pose steering.
-- [ ] Validate Lab 12 sphere-center aim at every range with only behind-palm/singular correction; save ADAPTIVE/PALM and remove their comparison buttons.
-- [ ] Remove mandatory SET LEFT / SET RIGHT through automatic avatar fingertip estimation; retain explicit calibration as an optional correction and cover startup, bone axes, avatar swaps and history cancellation.
+- [x] Validate Lab 12 sphere-center aim at every range with only behind-palm/singular correction; save ADAPTIVE/PALM and remove their comparison buttons. Both SDK exports pass; Android transferred/hash-verified, physical feel pending.
+- [x] Remove mandatory SET LEFT / SET RIGHT through automatic avatar fingertip estimation; retain explicit calibration as optional REFINE and cover startup, bone axes, avatar swaps and history cancellation. See AUTOMATIC-AVATAR-SETUP.md; Lab 13 is build-only.
+- [ ] Physically compare Lab 13 automatic fingertips and Lab 12 sphere-directed aim when Dana is available; preserve optional correction and do not block independent VRChat work on headset access.
 - [ ] Later publish the same scene privately using normal account eligibility, metadata and SDK upload. Add PC under the same blueprint ID for PC guests.
 
 See [TRACKING-LAB.md](TRACKING-LAB.md) for reproduction and the publication path. This takes precedence over further feature expansion below.
@@ -48,8 +49,8 @@ but rejects using it generally at long range. Lab 12 must keep the ray through
 the sphere center at every range except behind-palm/singular cases; separate
 direction from the existing radial continuation. ADAPTIVE/PALM are now required
 defaults, with both comparison buttons removed. Check the latest CHECKPOINT for
-deployment and physical feedback before retuning. Removing mandatory SET
-calibration is the next setup priority.
+deployment and physical feedback before retuning. Lab 13 removes mandatory SET
+calibration; physical estimator accuracy remains pending.
 
 Dana identifies the current problem as VRChat lab **FILTERED**; RAW responds
 quickly but is too noisy. Sphere size/center must remain the only measure of

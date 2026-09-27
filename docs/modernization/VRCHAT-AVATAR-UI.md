@@ -1,6 +1,6 @@
 # Connecting avatar Bird to local Udon interaction
 
-`BirdAvatarUiInput` connects the experimental calibrated avatar source to the
+`BirdAvatarUiInput` connects the experimental avatar source to the
 existing logical UI. It does not fit a sphere, step a solver, estimate a click,
 or read a displayed marker. The source remains an avatar-bone approximation;
 availability and calibration do not establish physical tracking confidence.
@@ -32,12 +32,14 @@ one frame. `automatic=false` preserves explicit `Process` dispatch. The bridge
 also submits at most once per frame; disabling/re-enabling it in that frame
 cannot create a second sample.
 
-The bridge accepts only a current-frame source with valid calibration, data and
-cursor tracking/pose. A missing or disabled source cancels its pointer. A
+The bridge accepts only a current-frame source with usable estimated fingertips,
+valid data and cursor tracking/pose. Lab 13's `tipsReady` includes automatic
+estimates and optional manual correction; explicit `calibrated` is not required.
+A missing or disabled source cancels its pointer. A
 different input, cursor or pointer rebases history; the previous pointer is
 released. Missed callback frames, a clock discontinuity or more than 250 ms
 between accepted samples also rebase. Source calibration has an explicit
-revision so RESET/SET or an avatar change cannot hide a discontinuity between
+revision so passive axis learning, AUTO/REFINE or an avatar change cannot hide a discontinuity between
 two consumer frames. Switching RAW/FILTERED rebases interaction history too.
 These transitions preserve the downstream rule that recovery cannot synthesize
 a press or reuse old spherical contact.
@@ -53,8 +55,8 @@ configuration instead of relying on that guard to arbitrate multiple producers.
 The saved `BirdTrackingLab` adds **Reach station (right) / OFF** beside the low
 front-row controls. Native VRChat Interact enables the station to the right of
 spawn, facing the viewer and clear of the diagnostic boards. It begins off so the sphere-fit
-inspection remains uncluttered. SET a hand at the existing console, enable the
-station and move Bird inside its larger wire sphere. Extend through the back
+inspection remains uncluttered. Bird starts automatically in Lab 13 (older
+revisions required SET). Enable the station and move Bird inside its larger wire sphere. Extend through the back
 to acquire it, then sweep/flick to rotate. Withdraw inside to coast. An outside
 wrist sweep cannot start rotation, and losing contact requires a new interior
 visit. Both hands use the same reusable component.

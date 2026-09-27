@@ -18,24 +18,25 @@ See [PALM-DIRECTION.md](PALM-DIRECTION.md) for the user's predictability require
 comparison evidence and Lab 12's sphere-center direction, with a 45-degree
 knuckle-axis fallback only for behind-palm/singular fits. Dana prefers PALM and
 ADAPTIVE; those are now defaults and their comparison buttons are removed.
-Removing required SET is the
-next setup task; automatic fingertip estimates remain separate from Bird geometry.
+Lab 13 removes required SET through [automatic fingertip estimation](AUTOMATIC-AVATAR-SETUP.md),
+kept separate from Bird geometry. This revision is build-only; Lab 12 remains on Quest.
 
 ## Try the lab
 
-Use VRChat's ordinary interaction on the console to the left. Open and straighten
-one hand, including the thumb, then use the other hand to activate **SET LEFT**
-or **SET RIGHT**. Each side can be calibrated independently. VRChat already identifies left and
-right; SET learns distal-bone axes because the SDK does not supply fingertip
-endpoints. It does not teach the system which hand is which. **RESET** hides that
-side's Bird and requires calibration again. White dots show estimated fingertips;
+Bird starts automatically when valid avatar bones arrive, even from a curled pose.
+Individual finger axes learn as those fingers naturally straighten. If correction
+is needed, straighten one hand including its thumb and use ordinary VRChat
+interaction on **REFINE LEFT / RIGHT** at the left console. **AUTO LEFT / RIGHT**
+returns that hand to automatic estimates. These controls are optional. VRChat
+already identifies left and right; calibration estimates distal-bone axes because
+the SDK does not supply fingertip endpoints. White dots show estimated fingertips;
 cyan/pink diagnostic dots show sampled avatar bone origins. Orange cubes are
 VRChat tracked hand origins, not Bird. The diagnostic dots now render through
 avatar skin so their articulation is inspectable; their positions remain exact
 SDK bone samples. This X-ray presentation is confined to diagnostics. Bird
 itself retains normal world occlusion. A short colored guide from the hand
 shows its current direction, bounded to 40 cm, without changing its position.
-The console displays curl angle and desired/shown range. Two fixed white
+The console displays estimation state, fit radius and desired/shown range. Two fixed white
 reference spheres compare the Bird material with an ordinary material. A gray sphere in front
 of the bench turns green when the logical hand-to-Bird segment passes through it.
 No click is required or synthesized in this first input test.
@@ -46,14 +47,11 @@ the existing accepted logical point and keeps clicks disabled. Calibration expos
 a revision so downstream interactions can detect even an intervening RESET/SET
 that occurs between their frames. Fitting, range and filter equations are unchanged.
 
-**Point / RAW** is a native VRChat control below the mirror switch. Press it
-to compare **RAW** and **FILTERED** using identical hand input, geometry and
-presentation. Each mode change seeds fresh filter history without recalibrating.
-Lab 05 starts RAW so known extreme-range filter history cannot obscure the input
-test. FILTERED remains available for comparison; the filter equations are unchanged.
-If desired range is near but shown range remains far, compare RAW before changing
-the calibration. If both ranges remain far while curling, inspect the joint/tip
-dots and curl readout instead.
+ADAPTIVE and PALM are the saved defaults. Their comparison buttons were removed
+at Dana's request in Lab 12; earlier RAW/FILTERED controls are historical.
+The nonvisual policy components retain authoring and regression APIs. Inspect
+desired/shown ranges alongside the actual sphere and fingertip dots when diagnosing
+input. Do not mistake an estimated endpoint for a measured fingertip.
 
 **Geometry / ON** toggles a separate X-ray overlay, initially on:
 
@@ -65,9 +63,10 @@ dots and curl readout instead.
 
 The gold fit is neither reflected nor clamped to look plausible. It disappears
 when the fitter rejects a singular/ill-conditioned point set; the hand panel
-reports that case explicitly. It also shows fitted radius, conditioning and the
-hand-limit blend. The final Bird may leave the fit-center ray when the limit law
-contributes; these are distinct quantities. At extreme distances, the colored ray
+reports that case explicitly. It also shows fitted radius, the scalar range-limit
+blend and the separate behind-palm aim correction. The raw Bird follows the
+fit-center ray unless the center is behind the palm or the fit is singular.
+Downstream smoothing can temporarily offset the displayed point. At extreme distances, the colored ray
 and diamond use the same render-shell endpoint as the point view, rather than
 claiming that a billion-meter line is drawn literally. Ordinary near geometry
 stays at its actual world position. Toggling this overlay changes no solver input.
@@ -81,7 +80,9 @@ lost, and controller-driven finger animation can also produce bone positions.
 ## Input contract
 
 `BirdAvatarHandInput` reads the local wrist and 15 finger bone origins plus five
-distal bone rotations every `PostLateUpdate`, after avatar IK. Calibration stores
+distal bone rotations every `PostLateUpdate`, after avatar IK. Automatic startup
+estimates endpoints from segment geometry, then learns each axis independently.
+Optional explicit calibration stores
 the preceding segment's direction in each distal bone's local rotation frame.
 Later endpoints follow the distal rotation rather than extending the current
 middle segment without regard to the last joint. This supports differing bone
@@ -93,9 +94,9 @@ thumb intermediate/distal/estimated tip, index proximal, then four points each
 for middle/ring/little. Index's estimated tip is supplied to the cursor's finite
 input contract, but `clicksAllowed` is forced off until click fidelity is tested.
 
-The root keeps Bird's 60% index-proximal / 40% thumb-proximal mapping. Palm normal
-uses ordered thumb/index/little origins with a handedness correction, without
-head/torso/world-up extrapolation. The calibration-only open-pose check uses the
+The authored PALM root uses 30% index-proximal / 30% little-proximal / 40%
+thumb-proximal. Palm normal uses wrist and knuckle origins with a handedness
+correction, without head/torso/world-up extrapolation. The calibration-only open-pose check uses the
 wrist-to-knuckle direction; a lateral thumb base would reject wide straight hands.
 The normal's physical orientation and the humanoid bone correspondence still
 need on-headset verification for a given avatar.
@@ -117,8 +118,8 @@ applied. This normalization changes the input interpretation, not the solver's
 range polynomial. Avatar proportions and inferred tips can still change feel.
 
 Missing/invalid bones or distal quaternions cancel and hide the cursor immediately
-but retain calibration. The status reads **Paused / SET retained**. Valid samples
-resume with fresh filter history and need no new SET. A sampling pause longer
+but retain learned axes or manual correction. The manual status reads **Paused /
+correction retained**. Valid samples resume with fresh filter history and need no setup action. A sampling pause longer
 than 250 ms also discards old filter history, since suspension may stop Udon
 without supplying an invalid sample. This is a recovery rule, not an adaptive
 smoothing algorithm.

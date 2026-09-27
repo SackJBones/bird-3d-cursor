@@ -256,6 +256,33 @@ public static class UnityTrackingLabBird
         }
         catch(Exception e) { UnityTrackingLab.Finish("lab-center-direction-author",false,e.ToString()); }
     }
+    public static void AddAutomaticSetup()
+    {
+        try
+        {
+            EnsurePrograms();var scene=EditorSceneManager.OpenScene(UnityTrackingLab.ScenePath);
+            var inputs=UnityEngine.Object.FindObjectsOfType<BirdAvatarHandInput>(true);
+            if(inputs.Length!=2) throw new Exception("Restore two authored hands first");
+            foreach(var input in inputs)
+            {
+                input.automaticSetup=true;input.estimatedDistalBendRatio=.7f;
+                UdonSharpEditorUtility.CopyProxyToUdon(input);
+                string hand=input.rightHand?"RIGHT":"LEFT";
+                GameObject.Find("SET "+hand+" label").GetComponentInChildren<Text>().text="REFINE "+hand+"\nOptional";
+                GameObject.Find("RESET "+hand+" label").GetComponentInChildren<Text>().text="AUTO "+hand;
+                UdonSharpEditorUtility.GetBackingUdonBehaviour(GameObject.Find("SET "+hand).GetComponent<BirdLabHandControl>()).interactText="Optional straight-hand fingertip correction";
+                UdonSharpEditorUtility.GetBackingUdonBehaviour(GameObject.Find("RESET "+hand).GetComponent<BirdLabHandControl>()).interactText="Return to automatic fingertip estimates";
+            }
+            foreach(var text in UnityEngine.Object.FindObjectsOfType<Text>(true))
+            {
+                if(text.transform.parent.name=="Welcome") text.text="BIRD / TRACKING LAB 13\nAutomatic fingertips + sphere-directed aim";
+                if(text.transform.parent.name=="Directions") text.text="Bird starts automatically. Adaptive smoothing and palm origin are on.\nWhite cross = origin. Gold = sphere / fit ray. Green = palm normal.\nWhite fingertip dots are estimates; finger axes learn as you move.\nOptional REFINE: straighten one hand. AUTO returns to automatic estimates.";
+            }
+            EditorSceneManager.SaveScene(scene);AssetDatabase.SaveAssets();
+            UnityTrackingLab.Finish("lab-auto-setup-author",true,"Automatic fingertip startup; per-finger passive axis learning; optional REFINE/AUTO controls; accepted geometry/filter defaults retained.");
+        }
+        catch(Exception e) { UnityTrackingLab.Finish("lab-auto-setup-author",false,e.ToString()); }
+    }
     static void FaceCalibrationConsole()
     {
         if(GameObject.Find("Bird calibration console")!=null) return;

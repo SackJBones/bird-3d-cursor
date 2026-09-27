@@ -12,15 +12,20 @@ public class BirdAvatarHandInput : UdonSharpBehaviour
     public BirdCursorState cursor;
     public bool rightHand;
     public Text status;
+    [Tooltip("Use estimated fingertips immediately, then learn each distal bone axis as that finger naturally straightens. SET remains an optional override.")]
+    public bool automaticSetup = true;
+    [Tooltip("Geometric distal-joint continuation before its axis is learned. This is an endpoint estimate, not a Bird openness signal.")]
+    [Range(0,1)] public float estimatedDistalBendRatio = .7f;
     [Tooltip("Estimated distal segment length / preceding segment length. Avatar-dependent, not measured fingertips.")]
     [Range(.2f, 1.5f)] public float tipLengthRatio = .8f;
     [Tooltip("Normalize the mean middle/ring/little finger length before the original range law.")]
     public float referenceFingerLength = .09f;
     [Tooltip("Pinky share of the 60% knuckle contribution to the ray origin. 0 = classic index/thumb; .5 = 30% index, 30% pinky, 40% thumb.")]
     [Range(0, 1)] public float littleFingerRootShare;
-    [HideInInspector] public bool calibrated, dataReady;
+    [HideInInspector] public bool calibrated, dataReady, tipsReady;
     [HideInInspector] public int available, sampledFrame = -1;
     [HideInInspector] public int calibrationRevision;
+    [HideInInspector] public int learnedFingers;
     [HideInInspector] public float fingerLength;
     [HideInInspector] public Vector3[] bonePositions = new Vector3[16];
     [HideInInspector] public Vector3[] estimatedTips = new Vector3[5];
@@ -28,11 +33,14 @@ public class BirdAvatarHandInput : UdonSharpBehaviour
     private Vector3[] fitPoints = new Vector3[16];
     private Quaternion[] distalRotations = new Quaternion[5];
     private Vector3[] tipAxes = new Vector3[5];
+    private bool[] learnedAxes = new bool[5];
+    private bool settingsBound, boundAutomatic;
+    private float boundBendRatio;
     private bool calibratedSide;
     private float calibratedRatio, calibratedReference, nextText;
     private float boundRootShare;
     private float lastSampleTime = -1;
-    private string calibrationMessage = "Open this hand, then SET with the other hand.";
+    private string calibrationMessage = "Estimated fingertips / clicks disabled";
     private int[] bones = new int[] {
         (int)HumanBodyBones.LeftHand,
         (int)HumanBodyBones.LeftThumbProximal, (int)HumanBodyBones.LeftThumbIntermediate, (int)HumanBodyBones.LeftThumbDistal,
@@ -68,14 +76,21 @@ public class BirdAvatarHandInput : UdonSharpBehaviour
         // temporal and contact history so it cannot become a gesture sweep.
         if(boundRootShare!=littleFingerRootShare)
         { boundRootShare=littleFingerRootShare; if(cursor!=null) cursor.Cancel(); }
-        // Calibration describes this avatar's bone-local axes. A missing sample
-        // pauses output, but does not change those axes or require another SET.
-        if (calibrated && (calibratedSide != rightHand || calibratedRatio != tipLengthRatio || calibratedReference != referenceFingerLength))
-            ClearCalibration("Hand settings changed: open this hand, then SET.");
+        // Axis estimates belong to one avatar/hand/settings binding. Automatic
+        // startup is usable immediately; it never records a curled first pose as
+        // an open-hand calibration.
+        if (!settingsBound || calibratedSide != rightHand || calibratedRatio != tipLengthRatio ||
+            calibratedReference != referenceFingerLength || boundAutomatic != automaticSetup || boundBendRatio != estimatedDistalBendRatio)
+        {
+            ClearCalibration("Estimated fingertips / clicks disabled");
+            settingsBound=true; calibratedSide=rightHand; calibratedRatio=tipLengthRatio;
+            calibratedReference=referenceFingerLength; boundAutomatic=automaticSetup; boundBendRatio=estimatedDistalBendRatio;
+        }
+        tipsReady=dataReady && (calibrated || automaticSetup);
         if (cursor != null)
         {
             cursor.clicksAllowed = false; // Estimated index endpoint has not been validated for clicking.
-            cursor.tracking = calibrated && dataReady;
+            cursor.tracking = tipsReady;
             if (cursor.tracking)
             {
                 BuildPoints();
@@ -102,7 +117,8 @@ public class BirdAvatarHandInput : UdonSharpBehaviour
         VRCPlayerApi player = Networking.LocalPlayer;
         if (!Utilities.IsValid(player) || !Positive(referenceFingerLength) || referenceFingerLength > 1 ||
             !Positive(tipLengthRatio) || tipLengthRatio < .2f || tipLengthRatio > 1.5f ||
-            !Finite(littleFingerRootShare) || littleFingerRootShare<0 || littleFingerRootShare>1) return;
+            !Finite(littleFingerRootShare) || littleFingerRootShare<0 || littleFingerRootShare>1 ||
+            !Finite(estimatedDistalBendRatio) || estimatedDistalBendRatio<0 || estimatedDistalBendRatio>1) return;
         int start = rightHand ? 16 : 0;
         for (int i = 0; i < 16; i++)
         {
@@ -152,11 +168,12 @@ public class BirdAvatarHandInput : UdonSharpBehaviour
             Vector3 a = (bonePositions[first+1]-bonePositions[first]).normalized;
             Vector3 b = (bonePositions[first+2]-bonePositions[first+1]).normalized;
             if (Vector3.Dot(a,b) < .9f || (f > 0 && (Vector3.Dot(a,forward) < .65f || Mathf.Abs(Vector3.Dot(a,normal)) > .4f)))
-            { calibrationMessage = "Straighten fingers and thumb, then SET again."; return; }
+            { calibrationMessage = automaticSetup?"Automatic estimates active / optional REFINE needs straight fingers":"Straighten fingers and thumb, then SET again."; return; }
             tipAxes[f] = Quaternion.Inverse(distalRotations[f]) * b;
         }
         calibratedSide = rightHand; calibratedRatio = tipLengthRatio; calibratedReference = referenceFingerLength;
-        calibrated = true;
+        settingsBound=true; boundAutomatic=automaticSetup; boundBendRatio=estimatedDistalBendRatio;
+        calibrated = true; learnedFingers=5; tipsReady=true;
         calibrationMessage = "Estimated fingertips / clicks disabled";
         nextText = 0;
     }
@@ -164,13 +181,35 @@ public class BirdAvatarHandInput : UdonSharpBehaviour
     private void BuildPoints()
     {
         fingerLength = 0;
+        bool learned=false;
+        Vector3 forward=(bonePositions[4]+bonePositions[7]+bonePositions[10]+bonePositions[13])*.25f-bonePositions[0];
+        forward=(forward-normal*Vector3.Dot(forward,normal)).normalized;
         for (int f = 0; f < 5; f++)
         {
             int first = 1+f*3;
             float preceding = (bonePositions[first+2]-bonePositions[first+1]).magnitude;
-            estimatedTips[f] = bonePositions[first+2] + distalRotations[f]*tipAxes[f]*(preceding*tipLengthRatio);
+            Vector3 direction;
+            if(calibrated || learnedAxes[f]) direction=distalRotations[f]*tipAxes[f];
+            else
+            {
+                Vector3 a=(bonePositions[first+1]-bonePositions[first]).normalized;
+                Vector3 b=(bonePositions[first+2]-bonePositions[first+1]).normalized;
+                direction=EstimateDirection(a,b);
+                // Learn independently, only near extension. MCP checks prevent
+                // a folded hand with nearly parallel phalanges from qualifying.
+                if(Vector3.Dot(a,b)>.995f && (f==0 || (Vector3.Dot(a,forward)>.65f && Mathf.Abs(Vector3.Dot(a,normal))<.4f)))
+                {
+                    // The learning frame uses the same geometric endpoint, so
+                    // adopting the axis cannot jump the current point. Thereafter
+                    // actual distal rotation also captures independent DIP motion.
+                    tipAxes[f]=Quaternion.Inverse(distalRotations[f])*direction;
+                    learnedAxes[f]=true; learnedFingers++; learned=true;
+                }
+            }
+            estimatedTips[f] = bonePositions[first+2] + direction*(preceding*tipLengthRatio);
             if (f >= 2) fingerLength += (bonePositions[first+1]-bonePositions[first]).magnitude + preceding*(1+tipLengthRatio);
         }
+        if(learned) AdvanceCalibrationHistory();
         fingerLength /= 3;
         fitPoints[0] = bonePositions[2]; fitPoints[1] = bonePositions[3]; fitPoints[2] = estimatedTips[0];
         fitPoints[3] = bonePositions[4];
@@ -182,31 +221,50 @@ public class BirdAvatarHandInput : UdonSharpBehaviour
         }
     }
 
+    private Vector3 EstimateDirection(Vector3 a,Vector3 b)
+    {
+        // Continue the observed joint bend on the unit sphere. No Euler chart,
+        // assumed bone-local axis, wrist/torso extrapolation or world-up axis.
+        float cosine=Mathf.Clamp(Vector3.Dot(a,b),-1,1);
+        Vector3 tangent=b*cosine-a;
+        float sine=tangent.magnitude;
+        // Coincident segments are straight; an exact fold has no unique bend
+        // plane, so retain the last observed segment as the conservative estimate.
+        if(sine<.000001f) return b;
+        float turn=estimatedDistalBendRatio*Mathf.Atan2(sine,cosine);
+        return (b*Mathf.Cos(turn)+tangent*(Mathf.Sin(turn)/sine)).normalized;
+    }
     public void ResetCalibration()
-    { ClearCalibration("Open this hand, then SET with the other hand."); }
-    private void ClearCalibration(string message)
+    { ClearCalibration(automaticSetup?"Automatic fingertips resumed / clicks disabled":"Open this hand, then SET with the other hand."); }
+    private void AdvanceCalibrationHistory()
     {
         calibrationRevision=calibrationRevision==int.MaxValue?0:calibrationRevision+1;
-        calibrated = false; nextText = 0; lastSampleTime = -1;
-        calibrationMessage = message;
-        if (cursor != null) { cursor.tracking = false; cursor.Cancel(); }
+        if(cursor!=null) cursor.Cancel();
+    }
+    private void ClearCalibration(string message)
+    {
+        AdvanceCalibrationHistory();
+        calibrated=tipsReady=false; learnedFingers=0;
+        for(int f=0;f<5;f++) learnedAxes[f]=false;
+        nextText = 0; lastSampleTime = -1; calibrationMessage = message;
+        if(cursor!=null) cursor.tracking=false;
     }
     public override void OnAvatarChanged(VRCPlayerApi player)
-    { if (Utilities.IsValid(player) && player.isLocal) { dataReady = false; ClearCalibration("Avatar changed: open this hand, then SET."); } }
-    private void OnDisable() { dataReady = false; available = 0; sampledFrame = -1; ClearCalibration("Input disabled: open this hand, then SET."); RefreshText(); }
+    { if (Utilities.IsValid(player) && player.isLocal) { dataReady = false; ClearCalibration("New avatar / fingertip estimates restarted"); } }
+    private void OnDisable() { dataReady = false; available = 0; sampledFrame = -1; ClearCalibration("Input disabled"); RefreshText(); }
     private void RefreshText()
     {
         if (status == null || Time.time < nextText) return;
         nextText = Time.time + .2f;
-        status.text = (rightHand ? "RIGHT" : "LEFT")+" / AVATAR BIRD\n"+available+"/16 bones / "+
-            (!calibrated ? "Awaiting calibration" : !dataReady ? "Paused / SET retained" : cursor != null && cursor.poseValid ? "Bird active" : "No valid Bird point")+"\n"+
-            (calibrated && !dataReady ? "Waiting for usable avatar bones." : calibrationMessage);
-        if (calibrated && cursor != null && cursor.poseValid)
+        string state=!dataReady?(calibrated?"Paused / correction retained":"Waiting for avatar bones"):
+            cursor!=null && cursor.poseValid?"Bird active":automaticSetup?"Estimating fingertips":"Awaiting optional SET";
+        string mode=calibrated?"Manual correction":automaticSetup?"Automatic / "+learnedFingers+" of 5 axes learned":"Manual-only input";
+        status.text=(rightHand?"RIGHT":"LEFT")+" / AVATAR BIRD\n"+available+"/16 bones / "+state+"\n"+mode+"\n"+calibrationMessage;
+        if (tipsReady && cursor != null && cursor.poseValid)
         {
-            status.text += "\nCurl "+cursor.bendDegrees.ToString("F0")+" deg / desired "+RangeLabel((cursor.rawPosition-cursor.handRoot).magnitude)+
-                " / shown "+RangeLabel((cursor.position-cursor.handRoot).magnitude);
-            status.text += cursor.fitter.fitValid ? "\nFit radius "+cursor.fitter.radius.ToString("F3")+" m / cond. "+cursor.fitter.confidence.ToString("F2") : "\nFit singular: using hand-limit law";
-            status.text += " / limit "+(cursor.limitWeight*100).ToString("F0")+"%";
+            status.text += "\nDesired "+RangeLabel((cursor.rawPosition-cursor.handRoot).magnitude)+" / shown "+RangeLabel((cursor.position-cursor.handRoot).magnitude);
+            status.text += cursor.fitter.fitValid ? "\nFit radius "+cursor.fitter.radius.ToString("F3")+" m" : "\nFit singular";
+            status.text += " / range limit "+(cursor.limitWeight*100).ToString("F0")+"% / aim fix "+(cursor.insideOutWeight*100).ToString("F0")+"%";
         }
     }
     private string RangeLabel(float value)

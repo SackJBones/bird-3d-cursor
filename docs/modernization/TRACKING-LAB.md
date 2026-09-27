@@ -1,5 +1,12 @@
 # VRChat tracking laboratory
 
+Current authored revision: **Lab 13**, with automatic fingertip estimates and
+optional REFINE/AUTO correction. Bird needs no SET step. ADAPTIVE/PALM defaults
+and Lab 12's sphere-center direction remain unchanged. Both platform builds and
+compiled-Udon checks pass; this revision has not been loaded on Quest, which
+retains Lab 12. See [automatic setup](AUTOMATIC-AVATAR-SETUP.md) and CHECKPOINT.md.
+The numbered milestones below describe their historical behavior.
+
 `BirdWorld/Assets/BirdWorld/Scenes/BirdTrackingLab.unity` is the first-client
 milestone: a normal authored VRChat world for inspecting avatar hands and
 trying experimental calibrated Bird input. It is separate from the standalone OpenXR comparison and the
@@ -82,7 +89,7 @@ no direction exists. Scalar range stays independent. ADAPTIVE and PALM are the
 saved defaults; both comparison buttons and labels are removed. Use
 `-RefineSphereDirection` to author/update this scene. See
 [PALM-DIRECTION.md](PALM-DIRECTION.md) and the latest CHECKPOINT for validation
-and device state. Required SET removal remains the next setup task.
+and device state. Lab 13 subsequently removes required SET.
 
 ## Historical Lab 11 far knuckle-axis comparison
 
@@ -93,8 +100,8 @@ The range gate smoothly completes at 25 metres and preserves distance. Use
 the historical Lab 11 artifacts for that comparison; its authoring switch and
 policy have been retired. See [PALM-DIRECTION.md](PALM-DIRECTION.md) and the latest CHECKPOINT for
 validation and device status. Dana confirms PALM feels much better and ADAPTIVE
-seems good; this does not accept the barely-tried SPHERE mode. Mandatory SET
-removal is the next setup priority, with manual correction retained.
+seems good; this does not accept the barely-tried SPHERE mode. Lab 13 removes
+mandatory SET while retaining manual correction.
 
 ## Lab 10 origin comparison
 
