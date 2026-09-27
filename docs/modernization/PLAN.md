@@ -8,6 +8,19 @@ Work every two hours in substantial passes, approximately 45–60 minutes of act
 
 Use `feature/vrchat-modernization` in both repositories. All maintained package code belongs in `SackJBones/bird-3d-cursor`; full projects, large scenes and assets belong in `SackJBones/bird-3d-cursor-projects`. Pin dependencies to reproducible revisions. Create eventual review PRs; do not merge unfinished work. Later engine integrations branch off this feature branch, with separate large demo repositories where necessary.
 
+## Immediate delivery milestone, 2026-09-27 UTC
+
+Dana prioritizes a normal Android Build and Test world inside VRChat, even before Bird is connected. Keep a direct path from the same authored scene to private upload through the unmodified SDK and its normal validation. The lab should expose VRChat avatar/bone/tracking-origin assumptions clearly and make adding Bird the natural next step. Do not require finishing the two-hand gesture port or more demonstrations first.
+
+- [x] Author BirdTrackingLab with safe spawn/floor, real-scale references, optional standard SDK mirror and local avatar-bone/tracking-origin diagnostics.
+- [x] Validate saved scene through compiled Udon/ClientSim and camera renders; pass normal Android SDK build plus compressed/uncompressed upload-size checks.
+- [x] Use the SDK BuildAndTest API to transfer the world into the Quest VRChat TestWorlds directory and request its launch.
+- [x] Confirm actual Quest VRChat scene rendering and Udon diagnostics: stereo device capture shows the lab, avatar hands, 16/16 bones on both sides and VR mode. Subjective usability remains separate.
+- [ ] Connect a characterized avatar input to Bird in this lab, initially one supported avatar and one simple target. Preserve explicit fingertip/calibration limitations.
+- [ ] Later publish the same scene privately using normal account eligibility, metadata and SDK upload. Add PC under the same blueprint ID for PC guests.
+
+See [TRACKING-LAB.md](TRACKING-LAB.md) for reproduction and the publication path. This takes precedence over further feature expansion below.
+
 ## Current priorities, 2026-09-26 UTC
 
 Dana physically likes v0.7 and the accepted range transition. Version 0.8

@@ -341,3 +341,8 @@ Per-frame assertion counts vary with editor frame rate. The runner copies the
 pose sample plus its Resources material/shader and stable metadata. This is not
 physical XR tracking, headset perception or VRChat validation. See
 [TWO-HAND-POSE.md](../docs/modernization/TWO-HAND-POSE.md).
+
+
+### Standard VRChat tracking lab
+
+Invoke-UnityTrackingLab.ps1 uses the maintained BirdWorld project and the SDK public Build / BuildAndTest APIs. Use -Generate only for an absent scene, -Check for real compiled-Udon ClientSim/native-Interact/render validation, and -Launch for the Android device transfer/launch. The runner also performs the SDK upload compressed/uncompressed size checks. It preserves SDK validation and does not upload. The lab has no Bird solver dependency; runtime scripts expose local avatar bones and tracking origins, with a standard mirror and native switches. See docs/modernization/TRACKING-LAB.md for the exact workflow, evidence and private-upload path.
