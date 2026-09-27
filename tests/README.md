@@ -343,6 +343,27 @@ physical XR tracking, headset perception or VRChat validation. See
 [TWO-HAND-POSE.md](../docs/modernization/TWO-HAND-POSE.md).
 
 
+### Local Udon two-hand pose
+
+`Invoke-UnityUdonTwoHandChecks.ps1 -UnityEditor <Unity.exe> -ProjectPath <BirdWorld> -Platform Both -Regressions -BuildWorld`
+restores source/metas and runs the authored `BirdPoseDemo` through compiled Udon.
+`-Author` explicitly adds the optional gesture only if absent. Windows is the
+default platform; Android and Both are also supported. Each target retains its
+own result/log copies. Regressions run the existing pose, paired Hanoi and map
+suites in the combined scene. BuildWorld uses normal SDK build-only and reads
+each bundle catalog independently, with no client launch or upload.
+
+The gesture suite covers normal LateUpdate tabletop and PostLateUpdate distant
+building docking; paired samples, stale input, release/re-clutch, rejected intent,
+both primary roles, menu/area/consumed input, reference changes, callbacks,
+revision wrap, phase mismatch, once-per-frame dispatch, disabled callbacks,
+mirrored/nonuniform frames and whole-box bounds. The 30/72/120 Hz measurement
+uses a constant 90-degree/1.5x request for 0.5 s. Images and CSVs are under ignored
+`Validation/UdonTwoHand`. Synchronous captures occur after completed transactions
+to avoid triggering the production stale-sample cutoff. Assertions are largely
+individual box corners; synthetic accepted hand roots/presses do not establish
+physical avatar click fidelity, real client performance or shared ownership.
+
 ### Standard VRChat tracking lab
 
 `Invoke-UnityTrackingLab.ps1` restores the maintained lab sources and uses the

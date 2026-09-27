@@ -265,3 +265,8 @@ catalog. The SDK still prints the unexplained internal `Build Finished, Result:
 Failure.` line despite API completion and a fresh readable artifact. Catalog
 loading is not scene instantiation or VRChat-client runtime validation. No Android
 build, upload, account, client launch or headset operation occurred this cycle.
+
+The subsequent local Udon two-hand adapter now drives this same transaction from
+fresh paired logical pointers, with explicit input ownership and update phase.
+See [TWO-HAND-POSE.md](TWO-HAND-POSE.md) for the current gesture implementation
+and validation. Avatar clicks and physical fidelity remain separate gates.

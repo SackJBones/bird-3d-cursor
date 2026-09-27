@@ -12,6 +12,10 @@ public class BirdObjectGrip : UdonSharpBehaviour
     [Min(.01f)] public float followRate=18;
     [Min(.01f)] public float returnDuration=.25f;
     public bool automatic=true;
+    [Tooltip("Match after-IK avatar input and the two-hand adapter; leave off for ordinary LateUpdate input.")]
+    public bool postLateUpdate;
+    private int automaticFrame=-1;
+    private bool boundPhase;
     [HideInInspector] public BirdObjectTarget ActiveTarget;
     [HideInInspector] public BirdUiPointer ActivePointer;
     [HideInInspector] public BirdObjectSnapTarget Candidate;
@@ -50,14 +54,29 @@ public class BirdObjectGrip : UdonSharpBehaviour
 
     public void Initialize() { if(processing) return; CancelImmediately(); Seed(); }
     void Start() { Seed(); }
-    void OnEnable() { Seed(); }
+    void OnEnable() { boundPhase=postLateUpdate; Seed(); }
     void Seed()
     {
         if(revisions.Length!=pointers.Length) revisions=new int[pointers.Length];
         for(int i=0;i<pointers.Length;i++) if(pointers[i]!=null) revisions[i]=pointers[i].revision;
     }
     void OnDisable() { CancelImmediately(); Seed(); }
-    void LateUpdate() { if(automatic) { stepDelta=Time.deltaTime; Process(); } }
+    void LateUpdate() { if(!postLateUpdate) AutomaticStep(); }
+    public override void PostLateUpdate() { if(postLateUpdate) AutomaticStep(); }
+    private void AutomaticStep()
+    {
+        if(!automatic || !enabled || !gameObject.activeInHierarchy || automaticFrame==Time.frameCount) return;
+        automaticFrame=Time.frameCount;
+        if(boundPhase!=postLateUpdate) { CancelImmediately(); Seed(); boundPhase=postLateUpdate; return; }
+        stepDelta=Time.deltaTime; Process();
+    }
+    // Shares the grip's mode/menu ownership with optional gesture adapters.
+    public bool AllowsInput(BirdUiPointer pointer)
+    {
+        if(!enabled || !gameObject.activeInHierarchy || pointer==null || pointer.uiConsumed || Blocked()) return false;
+        foreach(var configured in pointers) if(configured==pointer) return true;
+        return false;
+    }
 
     public void Process()
     {
@@ -209,9 +228,15 @@ public class BirdObjectGrip : UdonSharpBehaviour
     }
     void StopPoseRequest()
     {
+        StopHeldPose(true);
+    }
+    // Freeze at the displayed pose; releasing a clutch cannot erase rejected intent.
+    public void StopHeldPose(bool blocked)
+    {
+        if(ActiveTarget==null || IsReturning) return;
         RequestedLocalRotation=poseStartRotation=rotation; RequestedScaleFactor=CurrentScaleFactor;
         poseStartLogScale=Math.Log(CurrentScaleFactor); poseResponseIntegral=0;
-        PoseLimited=true; ReadyToPlace=false;
+        PoseLimited=PoseLimited || blocked; ReadyToPlace=false;
     }
     bool DestinationPose(BirdObjectSnapTarget slot,out Quaternion orientation,out float factor,out Bounds bounds)
     {

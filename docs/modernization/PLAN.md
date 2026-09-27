@@ -65,7 +65,7 @@ the recovered capabilities are sufficient and the launcher is not a blocker.
 - [x] Extend ordinary Unity grabbing with opt-in bounded rotation/uniform scaling, pose-aware docks and full-pose rollback; 5989 pose assertions, a two-scale preview and standalone player pass. See [OBJECT-POSE.md](OBJECT-POSE.md).
 - [x] Adapt optional pose constraints, full-pose docking and rollback into local Udon; authored BirdPoseDemo and 13332 VM assertions pass, alongside existing Hanoi/map regressions. Correct mirrored authored-rotation matching in both runtimes. See [OBJECT-POSE.md](OBJECT-POSE.md).
 - [x] Add an optional ordinary Unity two-hand pose clutch and exclusive accepted-live-input Objects mode in Quest v0.10; 4863 gesture assertions, normal-frame Windows/Quest-host checks, Android build/install/startup pass. See [TWO-HAND-POSE.md](TWO-HAND-POSE.md).
-- [ ] Adapt the deliberate gesture to local Udon with explicit mode/input ownership, then advance useful real VRChat hand input independently of headset feedback.
+- [x] Adapt the deliberate two-hand gesture to local Udon with shared menu/viewing-area/input ownership, paired samples, release/re-clutch and explicit update phase; test the saved pose scene in compiled Udon. See TWO-HAND-POSE.md and the latest checkpoint. Avatar click fidelity remains a separate gate.
 - [ ] Assess physical two-hand feel, mixed device cadences and performance; retain collision/lift, dynamic occupancy and shared-reservation work.
 - [ ] Validate real VRChat hand input, client/mobile runtime, multiplayer policy and physical UI feel; the new station uses explicitly labeled desktop demonstration input.
 

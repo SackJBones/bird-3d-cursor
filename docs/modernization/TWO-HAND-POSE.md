@@ -111,8 +111,67 @@ captures are inspected. Per-frame assertion totals vary with editor frame rate.
 The inputs are synthetic accepted states, not physical XR measurements.
 
 Physical two-hand comfort/precision, mixed device cadences and performance remain
-unassessed. The local Udon pose transaction exists, but this gesture adapter and
-live VRChat hand path still need their own implementation and validation. Collision
+unassessed. The live VRChat hand path still needs click-fidelity validation. Collision
 sweeps/lift, dynamic occupancy, multiplayer reservations and real VRChat client
 testing remain separate work; per-frame workspace containment is not collision
 avoidance or network authority.
+
+## Local Udon adapter
+
+`Integrations/VRChat/BirdObjectTwoHandPose.cs` ports the clutch into a separate
+UdonSharp component, with no networking or changes to Bird point/range/filter
+math. Bind one `BirdObjectGrip` and two dedicated `BirdUiPointer` producers.
+Both pointers must belong to that grip, have the same user identity, and supply
+distinct hand-root origins in world metres. A shared head origin cannot supply
+the span. Targets must opt into rotation and/or scale as before.
+
+The adapter runs at order 110, after the UI router (100), before the grip (120).
+Both default to ordinary LateUpdate. For an after-IK producer such as
+`BirdAvatarUiInput`, set `postLateUpdate` on the router, gesture and grip together.
+Automatic dispatch is at most once per frame; explicit `Process` accepts
+`stepDelta` for a host-owned loop. Changing phases or bindings consumes existing
+presses. An automatic phase mismatch cannot acquire. Keep a single producer per pointer and
+a single active gesture controller per grip.
+
+The grip exposes `AllowsInput` so the gesture shares the existing viewing-area,
+menu-focus and per-sample `uiConsumed` exclusions. A UI-owned secondary cannot
+join or continue a clutch. Primary loss/menu exclusion still rolls back the
+whole transaction. Secondary loss freezes pose, marks the request limited, and
+requires fresh valid intent before a drop. `StopHeldPose(bool blocked)` freezes
+the displayed rotation/scale without clearing a previous rejected request.
+Disabling just the gesture relinquishes rotation/scale while retaining primary
+translation; an experience switch should also disable/cancel the grip and cancel
+its pointers. Re-enabling cannot replay an already-held secondary press.
+
+Optional engaged/disengaged callbacks use the conventional Udon event-target
+and event-name fields, separate from target grab/place/cancel callbacks.
+The authored `BirdPoseDemo` binds the new component to its existing two pointers
+and shared grip. Its desktop mouse producer still drives only the first pointer;
+Q/E and scale commands remain usable and take over from an active clutch.
+This binding does not invent a second hand or enable avatar clicks. Tracking Lab
+05 remains deployed for physical geometry inspection; neither the lab nor the
+installed standalone app is replaced by this work.
+
+Run `tests/Invoke-UnityUdonTwoHandChecks.ps1 -UnityEditor <Unity.exe>
+-ProjectPath <BirdWorld> -Platform Both -Regressions -BuildWorld` to restore sources and run the
+saved scene through actual compiled Udon. `-Author` explicitly adds the component
+only when absent and refuses to overwrite an authored binding. The normal-frame
+sequence covers tabletop LateUpdate and distant-building PostLateUpdate input;
+contracts cover release/re-clutch, stale/mismatched samples, callbacks, permissions,
+ownership and exact-pose placement. Rendering happens after completed transactions
+so synchronous GPU readback cannot masquerade as a live input pause. Logs/results
+and images remain in the ignored project/Validation directories. See the latest
+checkpoint for measured results and SDK build evidence.
+
+The runner defaults to Windows; `-Platform Android` or `Both` selects mobile or
+both editor targets. Each selected target runs the gesture suite, optional
+regressions, and optional normal SDK build and independent bundle-catalog read.
+Platform-suffixed logs/results are retained. These builds never launch a client,
+contact the headset or upload. Catalog loading is not client execution.
+
+The compiled-Udon constant-request [rate measurements](measurements/udon-two-hand-pose-rates.csv)
+give 89.3935852 degrees and factor 1.49590743 at all three printed cadences.
+The factor is within 0.00000012 of the ordinary fixture, which uses different
+world-space root coordinates. This is not a claim of bit-identical arithmetic
+across the two fixtures. Differently
+sampled moving hands and headset pacing still require separate assessment.
