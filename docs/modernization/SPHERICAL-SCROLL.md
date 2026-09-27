@@ -157,7 +157,7 @@ CSV measurements, static captures and a timed rendered sequence live under
 ignored `Validation/Menu2022/MenuCaptures`; these are synthetic timestamps and
 real Unity rendering, not device frame pacing or a physical feel assessment.
 
-Current result: **316 spherical assertions**, in addition to 57 menu assertions.
+Current result: **638 spherical assertions**, in addition to 57 menu assertions.
 The fixed-axis drive/coast endpoint is 84.28236 / 84.2822647 / 84.28227 degrees at
 120/72/30 Hz, versus 84.28226 degrees analytically. The multi-axis trajectory's
 final angular difference from 120 Hz is 0.004876 degrees at 72 Hz and 0.042053
@@ -178,3 +178,37 @@ the package MonoBehaviours themselves do not execute as world Udon.
 Deployment/build outcomes are recorded separately in CHECKPOINT.md and
 QUEST-LIVE-HANDS.md. Physical comparison with the endorsed legacy flick feel,
 mixed-cadence input, moving layout transforms and multiplayer remain pending.
+
+## Deliberate acquisition, 2026-09-27
+
+Both maintained implementations now require an observed interior visit followed
+by an outward crossing through the back surface. Each pointer has independent
+arming state on each selector. Being far away while aiming through an untouched
+sphere never acquires it. A fixed-reach wrist sweep or rigid hand/point translation
+cannot initiate scrolling: hand-to-point range must increase on the acquiring
+sample. A rejected exit consumes the interior visit; later outside motion cannot
+reuse it. Withdrawal stops driving but retains coasting, and a fresh interior visit
+can rearm. Another hand waiting outside cannot inherit or queue a takeover.
+
+The arming interior is inset by the entry margin, capped at ten percent of radius
+for small spheres. The narrow back-surface margin band preserves an outward
+approach; the exact surface boundary is not an exit. Contact geometry, angular
+response and damping remain separate and unchanged. Selection inside is still
+free and no press is needed to scroll.
+
+The consumer must observe adjacent input revisions. Missed revisions, user or
+pointer changes, ineligibility, or more than 250 ms without a fresh sample clear
+pending contact. Active discontinuity also clears inertia. Moving or resizing
+the interaction sphere cancels contact, so layout changes cannot manufacture a
+crossing. This is a conservative fixed-volume contract; continuous manipulation
+of moving interaction volumes remains future work. Small floating-point geometry
+tolerances and a radius-relative positive-extension tolerance avoid false changes
+at numerical precision limits. No unobserved path is reconstructed.
+
+`UnitySphereEntryContract` runs the same cases against ordinary Unity and compiled
+Udon. It includes startup/outside sweeps, skipped samples, front/side exits,
+fixed-range sweeps, translation, boundary samples, moving/shrinking volumes,
+staleness, ownership and both hands. A shared pointer operates a large background
+sphere through ten untouched foreground spheres, then deliberately addresses one
+foreground sphere. These tests establish the contact policy, not subjective feel.
+The installed standalone v0.10 app and Lab 05 were not replaced by this cycle.

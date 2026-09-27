@@ -45,13 +45,12 @@ public sealed class UnityMapPlayerSmoke : MonoBehaviour
             if(stage==10)
             {
                 Require(demo.Zoom.Factor==1 && !demo.Zoom.ScalingEnabled && demo.Scroll.enabled,"Normal reset switches to rotation");
-                rotation=demo.Rotation.rotation; started=Time.unscaledTime; stage++;
+                rotation=demo.Rotation.rotation; Feed(demo.Volume.transform.position); started=Time.unscaledTime; stage++; return;
             }
             if(stage==11)
             {
                 float t=Time.unscaledTime-started; Vector3 normal=Quaternion.AngleAxis(t*50,Vector3.up)*Vector3.forward;
-                Feed(origin+(demo.Volume.transform.position+normal*.95f-origin)*2);
-                if(t<.7f) return;
+                if(t<.7f) { Feed(origin+(demo.Volume.transform.position+normal*.95f-origin)*2); return; }
                 Require(demo.Scroll.ActivePointer!=null && Quaternion.Angle(rotation,demo.Rotation.rotation)>10,"Normal back-surface rotation");
                 rotation=demo.Rotation.rotation; Feed(demo.Volume.transform.position); started=Time.unscaledTime; stage++; return;
             }

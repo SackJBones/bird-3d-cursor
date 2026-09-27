@@ -88,8 +88,8 @@ public class UnityUdonMapChecks : MonoBehaviour
         if(stage==13) { Assert(Ref(scroll,"activePointer")==null,"Map interior does not drive rotation"); Feed(RangePoint(7)); started=Time.unscaledTime; stage++; return false; }
         if(stage==14)
         {
-            float t=Mathf.Min(.6f,Time.unscaledTime-started); Feed(Origin+(Center+Vector3.right*t-Origin).normalized*7);
-            if(t<.6f) return false;
+            float t=Mathf.Min(.6f,Time.unscaledTime-started);
+            if(t<.6f) { Feed(Origin+(Center+Vector3.right*t-Origin).normalized*7); return false; }
             Assert(((Vector3)scroll.GetProgramVariable("angularVelocity")).magnitude>1,"Far-side flick builds momentum");
             Feed(Center); released=Target().parent.localRotation; started=Time.unscaledTime; stage++; return false;
         }
@@ -203,7 +203,9 @@ public class UnityUdonMapChecks : MonoBehaviour
         // sequence so the intentional pause cancellation is not a capture artifact.
         Capture("map-open"); station.SendCustomEvent("ZoomMap"); Sample(6); for(int i=0;i<100;i++) Sample(12); Capture("map-zoomed");
         station.SendCustomEvent("ResetMap"); scroll.SetProgramVariable("stepDelta",1f/72);
+        Feed(Center); scroll.SendCustomEvent("Process");
         for(int i=0;i<45;i++) { Feed(Origin+(Center+Vector3.right*(i*.013f)-Origin).normalized*7); scroll.SendCustomEvent("Process"); }
+        Assert(Ref(scroll,"activePointer")!=null && ((Vector3)scroll.GetProgramVariable("angularVelocity")).magnitude>0,"Rotated capture follows deliberate interior entry");
         Capture("map-rotated"); panel.SendCustomEvent("Close"); Capture("map-back");
     }
     public static void Generate()

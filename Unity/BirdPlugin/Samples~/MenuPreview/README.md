@@ -79,8 +79,9 @@ keep persistent selection in the experience's own model. See the maintained
 
 For the spherical example, attach `BirdSphericalSelectorPreview` in a separate
 empty scene instead. Mouse movement aims, the wheel changes reach, and a click
-chooses a color the logical point reaches through. Move the point beyond the
-**back** of the larger wire sphere to scroll, then withdraw inside to let the
+chooses a color the logical point reaches through. Move the point inside, then
+extend it away from the hand through the **back** of the larger wire sphere to
+scroll. An outside sweep alone cannot start it. Withdraw inside to let the
 choices coast. Movement through the front or inside the sphere never drives
 rotation. No click or hold is needed for scrolling.
 

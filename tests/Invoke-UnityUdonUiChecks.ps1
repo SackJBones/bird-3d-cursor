@@ -19,6 +19,7 @@ Get-ChildItem -LiteralPath (Join-Path $repo 'Integrations/VRChat') -File | Where
     Copy-Item -LiteralPath $_.FullName -Destination (Join-Path $runtime $_.Name)
 }
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityUdonUiChecks.cs') -Destination (Join-Path $runtime 'UnityUdonUiChecks.cs')
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnitySphereEntryContract.cs') -Destination (Join-Path $runtime 'UnitySphereEntryContract.cs')
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityWorldBundleChecks.cs') -Destination (Join-Path $editor 'UnityWorldBundleChecks.cs')
 function Invoke-UiUnity([string]$Method,[string]$Stem,[string]$Target='StandaloneWindows64') {
     $result=Join-Path $project ($Stem+'-result.txt')

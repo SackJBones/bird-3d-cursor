@@ -59,6 +59,14 @@ and moving volumes, tracking/owner changes, callback/lifecycle changes and neste
 near/far selectors. A coarse sample that jumps completely through a sphere
 without any observed interior visit should not invent contact.
 
+Implemented in the maintained ordinary Unity and Udon spherical-scroll components
+on 2026-09-27. The shared contract tests include one background selector behind
+ten untouched foreground selectors. See [acquisition details](SPHERICAL-SCROLL.md#deliberate-acquisition-2026-09-27)
+for margins, adjacent-sample requirements, stale input and fixed-volume policy.
+This does not change the fitting or filtering laws. The installed standalone
+v0.10 and Quest Lab 05 remain unchanged by this contact-policy checkpoint;
+physical contact feel is pending.
+
 ## Bounded numerical study (2026-09-27)
 
 `python tests/compare_far_filter.py` reproduces

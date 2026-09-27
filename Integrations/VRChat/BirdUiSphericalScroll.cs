@@ -27,6 +27,15 @@ public class BirdUiSphericalScroll : UdonSharpBehaviour
     private Vector3 previousNormal;
     private int revision;
     private bool stepping, hasMotionOwner;
+    private BirdUiPointer[] observedPointers=new BirdUiPointer[0];
+    private bool[] seen=new bool[0], armed=new bool[0], entered=new bool[0], continuous=new bool[0];
+    private int[] seenRevision=new int[0];
+    private string[] seenUser=new string[0];
+    private double[] lastRange=new double[0];
+    private float[] sampleAge=new float[0];
+    private Vector3 previousCenter;
+    private float previousRadius;
+    private bool hasSphereHistory;
 
     private void LateUpdate() { if(automatic) { stepDelta=Time.unscaledDeltaTime; Process(); } }
     private void OnDisable() { Cancel(); }
@@ -34,6 +43,8 @@ public class BirdUiSphericalScroll : UdonSharpBehaviour
     {
         bool wasActive=activePointer!=null;
         activePointer=motionOwner=null; hasMotionOwner=false; ownerId=null; angularVelocity=Vector3.zero;
+        hasSphereHistory=false;
+        for(int i=0;i<seen.Length;i++) seen[i]=armed[i]=entered[i]=continuous[i]=false;
         if(wasActive && eventTarget!=null && !string.IsNullOrEmpty(stoppedEvent)) eventTarget.SendCustomEvent(stoppedEvent);
     }
     private bool Eligible(BirdUiPointer pointer)
@@ -51,9 +62,19 @@ public class BirdUiSphericalScroll : UdonSharpBehaviour
     {
         float dt=stepDelta;
         if(!Finite(dt) || dt<=0 || dt>.25f || !ValidSphere() || rotationTarget==null || !rotationTarget.gameObject.activeInHierarchy ||
-            !Finite(response) || !Finite(damping) || !Finite(maximumSpeed) || response<0 || damping<0 || maximumSpeed<=0)
+            !Finite(response) || !Finite(damping) || !Finite(maximumSpeed) || response<0 || damping<0 || maximumSpeed<=0 || !Finite(entryMargin) || entryMargin<0)
         { Cancel(); return; }
+        PrepareHistory();
         if(hasMotionOwner && (!Eligible(motionOwner) || motionOwner.userId!=ownerId)) Cancel();
+        if(!enabled || !gameObject.activeInHierarchy) return;
+        Vector3 center=sphere.transform.TransformPoint(sphere.center), scale=sphere.transform.lossyScale;
+        float radius=sphere.radius*Mathf.Max(Mathf.Abs(scale.x),Mathf.Max(Mathf.Abs(scale.y),Mathf.Abs(scale.z)));
+        if(hasSphereHistory && ((center-previousCenter).sqrMagnitude>Mathf.Max(1e-10f,radius*radius*1e-10f) ||
+            Mathf.Abs(radius-previousRadius)>Mathf.Max(1e-6f,radius*1e-5f))) Cancel();
+        if(!enabled || !gameObject.activeInHierarchy) return;
+        previousCenter=center; previousRadius=radius; hasSphereHistory=true;
+        ObserveEntries(center,radius,dt);
+        if(hasMotionOwner && !HasContinuousSample(motionOwner)) Cancel();
         if(!enabled || !gameObject.activeInHierarchy) return;
         bool driving=Eligible(activePointer) && Contact(activePointer,0);
         if(!driving && activePointer!=null)
@@ -65,9 +86,10 @@ public class BirdUiSphericalScroll : UdonSharpBehaviour
         bool acquired=false;
         if(activePointer==null)
         {
-            foreach(BirdUiPointer pointer in pointers)
+            for(int i=0;i<observedPointers.Length;i++)
             {
-                if(!Eligible(pointer) || !Contact(pointer,entryMargin)) continue;
+                var pointer=observedPointers[i];
+                if(!entered[i] || !Eligible(pointer) || pointer.userId!=seenUser[i] || pointer.revision!=seenRevision[i] || !Contact(pointer,entryMargin)) continue;
                 if(motionOwner!=null && motionOwner!=pointer) angularVelocity=Vector3.zero;
                 activePointer=motionOwner=pointer; ownerId=pointer.userId; hasMotionOwner=true;
                 previousNormal=contactNormal; revision=pointer.revision; acquired=true;
@@ -79,7 +101,7 @@ public class BirdUiSphericalScroll : UdonSharpBehaviour
         Vector3 inputVelocity=Vector3.zero;
         if(activePointer!=null)
         {
-            if(!Eligible(activePointer) || !Contact(activePointer,0)) { Cancel(); return; }
+            if(!Eligible(activePointer) || activePointer.userId!=ownerId || (acquired && revision!=activePointer.revision) || !Contact(activePointer,0)) { Cancel(); return; }
             if(!acquired && revision!=activePointer.revision)
             {
                 Vector3 cross=Vector3.Cross(previousNormal,contactNormal);
@@ -102,6 +124,58 @@ public class BirdUiSphericalScroll : UdonSharpBehaviour
         {
             rotationTarget.RotateAround(sphere.transform.TransformPoint(sphere.center),rotation/angle,angle*Mathf.Rad2Deg);
             Physics.SyncTransforms();
+        }
+    }
+    private void PrepareHistory()
+    {
+        int count=pointers==null?0:pointers.Length;
+        bool changed=observedPointers.Length!=count;
+        if(!changed) for(int i=0;i<count;i++) if(observedPointers[i]!=pointers[i]) changed=true;
+        if(!changed) return;
+        Cancel(); observedPointers=new BirdUiPointer[count];
+        seen=new bool[count]; armed=new bool[count]; entered=new bool[count]; continuous=new bool[count];
+        seenRevision=new int[count]; seenUser=new string[count]; lastRange=new double[count]; sampleAge=new float[count];
+        for(int i=0;i<count;i++) observedPointers[i]=pointers[i];
+    }
+    private bool HasContinuousSample(BirdUiPointer pointer)
+    {
+        for(int i=0;i<observedPointers.Length;i++) if(observedPointers[i]==pointer) return continuous[i];
+        return false;
+    }
+    private void ObserveEntries(Vector3 center,float radius,float dt)
+    {
+        double inset=Math.Min(entryMargin,radius*.1f), insideRadius=radius-inset;
+        double epsilon=Math.Max(1e-6,radius*1e-6);
+        for(int i=0;i<observedPointers.Length;i++)
+        {
+            var pointer=observedPointers[i]; entered[i]=false;
+            if(!Eligible(pointer)) { seen[i]=armed[i]=continuous[i]=false; continue; }
+            if(seen[i] && pointer.revision==seenRevision[i] && pointer.userId==seenUser[i])
+            {
+                sampleAge[i]+=dt; continuous[i]=sampleAge[i]<=.25f;
+                if(!continuous[i]) armed[i]=false;
+                continue;
+            }
+            int nextRevision=seenRevision[i]==int.MaxValue?0:seenRevision[i]+1;
+            continuous[i]=seen[i] && pointer.hasHistory && pointer.userId==seenUser[i] &&
+                pointer.revision==nextRevision && sampleAge[i]<=.25f;
+            if(!continuous[i]) armed[i]=false;
+            Vector3 delta=pointer.position-pointer.origin, offset=pointer.position-center;
+            double range=Math.Sqrt((double)delta.x*delta.x+(double)delta.y*delta.y+(double)delta.z*delta.z);
+            double distance=Math.Sqrt((double)offset.x*offset.x+(double)offset.y*offset.y+(double)offset.z*offset.z);
+            if(distance<insideRadius) armed[i]=true;
+            else if(armed[i] && distance>radius)
+            {
+                double extension=range-lastRange[i];
+                if(extension>=-epsilon && Contact(pointer,0))
+                {
+                    bool beyondMargin=Contact(pointer,entryMargin);
+                    entered[i]=extension>epsilon && beyondMargin;
+                    if(beyondMargin) armed[i]=false;
+                }
+                else armed[i]=false;
+            }
+            seen[i]=true; seenRevision[i]=pointer.revision; seenUser[i]=pointer.userId; lastRange[i]=range; sampleAge[i]=0;
         }
     }
     public bool Contact(BirdUiPointer pointer, float margin)

@@ -28,6 +28,7 @@ foreach ($name in @('BirdMenuPreviewSurface.mat', 'BirdMenuPreviewSurface.mat.me
 }
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityMenuChecks.cs') -Destination (Join-Path $project 'Assets/UnityMenuChecks.cs')
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnitySphericalScrollChecks.cs') -Destination (Join-Path $project 'Assets/UnitySphericalScrollChecks.cs')
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnitySphereEntryContract.cs') -Destination (Join-Path $project 'Assets/UnitySphereEntryContract.cs')
 $result = Join-Path $project 'menu-result.txt'
 $log = Join-Path $project 'menu-checks.log'
 Set-Content -LiteralPath $result -Value 'PENDING: Unity has not completed this run.'

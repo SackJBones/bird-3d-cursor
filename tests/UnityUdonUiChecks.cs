@@ -90,6 +90,17 @@ public class UnityUdonUiChecks : MonoBehaviour
         EditorSceneManager.OpenScene(ScenePath);
         var accepted=new GameObject("UI accepted cursor fixture").AddUdonSharpComponent<BirdCursorState>();
         UdonSharpEditorUtility.CopyProxyToUdon(accepted);
+        // Temporary test-only selectors share one actual Udon pointer. Their
+        // isolated location cannot intercept the authored station's menu rays.
+        var shared=GameObject.Find("UI Left").GetComponent<BirdUiPointer>();
+        for(int i=0;i<11;i++)
+        {
+            var go=new GameObject("Layered sphere fixture "+i);go.transform.position=new Vector3(0,-50,i==10?100:(i+1)*2);
+            var sphere=go.AddComponent<SphereCollider>();sphere.radius=i==10?20:.3f;sphere.isTrigger=true;
+            var scroll=go.AddUdonSharpComponent<BirdUiSphericalScroll>();scroll.sphere=sphere;scroll.pointers=new[]{shared};scroll.automatic=false;
+            scroll.rotationTarget=new GameObject("Fixture rotated content").transform;scroll.rotationTarget.SetParent(go.transform,false);
+            UdonSharpEditorUtility.CopyProxyToUdon(scroll);
+        }
         SessionState.SetBool(Active,true); EditorApplication.isPlaying=true;
     }
     static void Compile()
@@ -222,6 +233,7 @@ public class UnityUdonUiChecks : MonoBehaviour
             scroll.SendCustomEvent("Cancel"); GameObject.Find("UI Rotating Colors").transform.rotation=Quaternion.identity;
             scroll.SetProgramVariable("stepDelta",1f/hz);
             Vector3 frameOrigin=center-frames[frameIndex]*Vector3.forward*4;
+            Feed(left,frameOrigin,center,false); scroll.SendCustomEvent("Process");
             for(int i=0;i<=hz;i++)
             {
                 Vector3 normal=frames[frameIndex]*Quaternion.AngleAxis(i*60f/hz,Vector3.up)*Vector3.forward;
@@ -267,13 +279,15 @@ public class UnityUdonUiChecks : MonoBehaviour
                 Vector3 p=c+new Vector3(Mathf.Sin(i*.31f)*.4f,Mathf.Cos(i*.23f)*.4f,5);
                 RaycastHit hit;
                 Assert(sphere.Raycast(new Ray(p,(o-p).normalized),out hit,20),"Physics reverse ray control");
-                scroll.SendCustomEvent("Cancel"); Feed(left,o,p,false); scroll.SendCustomEvent("Process");
+                scroll.SendCustomEvent("Cancel"); Feed(left,o,c,false); scroll.SendCustomEvent("Process");
+                Feed(left,o,p,false); scroll.SendCustomEvent("Process");
                 Assert(scroll.GetProgramVariable("activePointer")!=null,"Compiled contact acquires scaled sphere");
                 Assert(Vector3.Distance((Vector3)scroll.GetProgramVariable("contactPoint"),hit.point)<.00002f,"Compiled/physics far hit agreement");
             }
         }
         sphere.transform.localScale=Vector3.one; sphere.transform.rotation=Quaternion.identity; sphere.center=Vector3.zero;
-        scroll.SendCustomEvent("Cancel"); Feed(left,center-Vector3.forward*4,center+Vector3.forward*1e12f,false); scroll.SendCustomEvent("Process");
+        scroll.SendCustomEvent("Cancel"); Feed(left,center-Vector3.forward*4,center,false); scroll.SendCustomEvent("Process");
+        Feed(left,center-Vector3.forward*4,center+Vector3.forward*1e12f,false); scroll.SendCustomEvent("Process");
         Assert(scroll.GetProgramVariable("activePointer")!=null,"No short cast limit on far logical reach");
         Feed(left,origin,origin,false); scroll.SendCustomEvent("Process");
         Assert(scroll.GetProgramVariable("activePointer")==null,"Zero-length point cannot scroll");
@@ -282,7 +296,10 @@ public class UnityUdonUiChecks : MonoBehaviour
         Assert((Vector3)scroll.GetProgramVariable("angularVelocity")==Vector3.zero,"Loss/recovery between scroll frames rebases");
         Feed(right,origin,center+new Vector3(-.8f,0,3),false);
         left.SendCustomEvent("Cancel"); scroll.SendCustomEvent("Process");
-        Assert((UdonBehaviour)scroll.GetProgramVariable("activePointer")==right && (Vector3)scroll.GetProgramVariable("angularVelocity")==Vector3.zero,"Other hand acquires without inherited angular impulse");
+        Assert(scroll.GetProgramVariable("activePointer")==null,"Outside other hand cannot take over");
+        Feed(right,origin,center,false); scroll.SendCustomEvent("Process");
+        Feed(right,origin,center+new Vector3(-.8f,0,3),false); scroll.SendCustomEvent("Process");
+        Assert((UdonBehaviour)scroll.GetProgramVariable("activePointer")==right && (Vector3)scroll.GetProgramVariable("angularVelocity")==Vector3.zero,"Other hand's deliberate entry has no inherited impulse");
         scroll.SetProgramVariable("stepDelta",.3f); scroll.SendCustomEvent("Process");
         Assert(scroll.GetProgramVariable("activePointer")==null && (Vector3)scroll.GetProgramVariable("angularVelocity")==Vector3.zero,"Long pause cancels");
         scroll.SetProgramVariable("stepDelta",1f/72);
@@ -290,7 +307,33 @@ public class UnityUdonUiChecks : MonoBehaviour
         right.gameObject.SetActive(false); scroll.SendCustomEvent("Process");
         Assert(scroll.GetProgramVariable("activePointer")==null,"Disabled input cannot scroll");
         right.gameObject.SetActive(true);
+        DeliberateEntry(left,right,scroll);
+        LayeredEntry(left);
         LifecycleContracts(left,right,router,root,colors,scroll,origin,center);
+    }
+    static void LayeredEntry(UdonBehaviour pointer)
+    {
+        var selectors=new UdonBehaviour[11];
+        for(int i=0;i<11;i++)selectors[i]=Vm<BirdUiSphericalScroll>("Layered sphere fixture "+i);
+        Vector3 offset=Vector3.down*50;pointer.SendCustomEvent("Cancel");
+        checks+=UnitySphereEntryContract.Layered(p=>Feed(pointer,offset+Vector3.back*3,offset+p,false),
+            dt=>{foreach(var s in selectors){s.SetProgramVariable("stepDelta",dt);s.SendCustomEvent("Process");}},
+            i=>selectors[i].GetProgramVariable("activePointer")!=null,i=>(Vector3)selectors[i].GetProgramVariable("angularVelocity"));
+        pointer.SendCustomEvent("Cancel");foreach(var s in selectors)DestroyImmediate(s.gameObject);
+    }
+    static void DeliberateEntry(UdonBehaviour left,UdonBehaviour right,UdonBehaviour scroll)
+    {
+        var inputs=new[]{left,right}; var sphere=(SphereCollider)scroll.GetProgramVariable("sphere");
+        Vector3 center=sphere.transform.position; float radius=sphere.radius;
+        var target=(Transform)scroll.GetProgramVariable("rotationTarget");
+        checks+=UnitySphereEntryContract.Run((i,o,p)=>Feed(inputs[i],center+o,center+p,false),
+            dt=>{scroll.SetProgramVariable("stepDelta",dt);scroll.SendCustomEvent("Process");},
+            ()=>scroll.GetProgramVariable("activePointer")==null?-1:(UdonBehaviour)scroll.GetProgramVariable("activePointer")==left?0:1,
+            ()=>(Vector3)scroll.GetProgramVariable("angularVelocity"),
+            ()=>{scroll.SendCustomEvent("Cancel");foreach(var p in inputs){p.SendCustomEvent("Cancel");p.SetProgramVariable("userId","LocalUser");}sphere.center=Vector3.zero;sphere.radius=1;target.rotation=Quaternion.identity;Physics.SyncTransforms();},
+            i=>inputs[i].SendCustomEvent("Cancel"),(i,id)=>inputs[i].SetProgramVariable("userId",id),
+            (c,r)=>{sphere.center=c;sphere.radius=r;Physics.SyncTransforms();});
+        sphere.radius=radius; Physics.SyncTransforms(); scroll.SetProgramVariable("stepDelta",1f/72);
     }
     static void Feed(UdonBehaviour pointer,Vector3 origin,Vector3 point,bool pressed)
     {
@@ -439,7 +482,8 @@ public class UnityUdonUiChecks : MonoBehaviour
         Feed(left,origin,origin,false); router.SendCustomEvent("Process"); Aim(left,"UI Open",false); router.SendCustomEvent("Process");
         Aim(left,"UI Colors",false); router.SendCustomEvent("Process"); Aim(left,"UI Colors",true); router.SendCustomEvent("Process");
         Assert((int)colors.GetProgramVariable("state")==1,"Branch reopens after lifecycle controls");
-        scroll.SetProgramVariable("panel",colors); Feed(left,origin,center+Vector3.forward*3,false); scroll.SendCustomEvent("Process");
+        scroll.SetProgramVariable("panel",colors); Feed(left,origin,center,false); scroll.SendCustomEvent("Process");
+        Feed(left,origin,center+Vector3.forward*3,false); scroll.SendCustomEvent("Process");
         Assert(scroll.GetProgramVariable("activePointer")!=null,"Owned open panel permits scroll");
         colors.SetProgramVariable("state",2); scroll.SendCustomEvent("Process");
         Assert(scroll.GetProgramVariable("activePointer")==null && (Vector3)scroll.GetProgramVariable("angularVelocity")==Vector3.zero,"Background panel cancels scroll");

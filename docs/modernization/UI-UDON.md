@@ -74,8 +74,14 @@ source to the same pointer.
 
 The outer sphere must be independent from its rotating content and larger than
 the selectable layout. Front entry and the entire interior remain free of scroll
-drive. Only passing the far surface plus the 3 mm entry margin acquires; crossing
-back inside releases into coasting. No press is required. Defaults retain the
+drive. Observe the point inside first, then extend its hand-relative reach through
+the far surface plus the 3 mm entry margin to acquire; crossing back inside
+releases into coasting. Outside sweeps cannot acquire an untouched selector.
+Contact loss requires another interior visit; arming is per pointer and per
+object. Skipped revisions, stale samples over 250 ms and moving/resizing volumes
+invalidate pending contact; active discontinuities clear inertia. See the precise
+[deliberate acquisition contract](SPHERICAL-SCROLL.md#deliberate-acquisition-2026-09-27).
+No press is required. Defaults retain the
 Unity implementation's 10/s input response, 0.99/s damping and 720 degrees/s
 input cap. Loss, disable, owner change, closed/background panel, invalid sphere
 or a step over 250 ms clears inertia. Different-hand acquisition rebases without
@@ -149,3 +155,25 @@ closes its panel. The standalone UI regression remains applicable.
 
 SDK references: [UdonSharp language and component model](https://creators.vrchat.com/worlds/udon/udonsharp/)
 and [editor proxies and backing behaviours](https://udonsharp.docs.vrchat.com/editor-scripting/).
+
+
+## Deliberate contact checkpoint, 2026-09-27
+
+The maintained gate now requires interior observation followed by outward
+back-surface entry; see SPHERICAL-SCROLL.md. The final actual compiled-Udon suite
+passes 763 assertions, including ten untouched foreground selectors in front of
+one deliberately controlled background selector. Map integration passes 62
+compiled-Udon assertions. These include normal-frame interactions and renders;
+physical hand feel remains pending.
+
+Fresh SDK build-only artifacts and independent scene-catalog loading pass:
+
+| Target | Bytes | SHA256 |
+| --- | ---: | --- |
+| Windows x64 | 191225 | `CD7933B74C56355A35F95F2B3B4CCD379FB2185917AA87DDE59A14719DACD6F0` |
+| Android | 160925 | `C3F96A816292FD6DD7996C13C146EEA39424CDFDBCAE9F2B7BC444DA1B6AF85F` |
+
+The existing internal bundle Result: Failure qualification above still applies.
+No client launch/upload or headset replacement occurred; Lab 05 remains deployed
+for the separate real-hand sphere geometry assessment. Artifacts and captures
+remain ignored in the heavy repository.

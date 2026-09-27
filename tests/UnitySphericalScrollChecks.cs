@@ -30,14 +30,45 @@ public static class UnitySphericalScrollChecks
         { pointer.Submit(origin,point,true,pressed); scroll.Process(dt); }
         public void Normal(Vector3 normal,float dt=.01f)
         { Feed(origin+(normal-origin)*2,dt); }
+        public void Arm(float dt=.01f) { Feed(sphere.transform.TransformPoint(sphere.center),dt); }
         public void Dispose() { UnityEngine.Object.DestroyImmediate(root); }
     }
 
     public static string Run()
     {
         checks=0;
-        Contact(); Lifecycle(); FrameRates(); RigidMotion(); Layout(); Preview();
-        return checks+" spherical assertions: back-only engagement, physics contact, damping/rates, lifecycle, layout";
+        Contact(); DeliberateEntry(); LayeredEntry(); Lifecycle(); FrameRates(); RigidMotion(); Layout(); Preview();
+        return checks+" spherical assertions: deliberate inside/outward entry, physics contact, damping/rates, lifecycle, layout";
+    }
+
+    static void LayeredEntry()
+    {
+        var fixtures=new Fixture[11];
+        try
+        {
+            for(int i=0;i<11;i++)
+            {
+                var f=fixtures[i]=new Fixture(); f.root.transform.position=Vector3.forward*(i==10?100:(i+1)*2);
+                f.sphere.radius=i==10?20:.3f; f.scroll.Configure(f.sphere,f.target,new[]{fixtures[0].pointer});
+            }
+            Physics.SyncTransforms();
+            checks+=UnitySphereEntryContract.Layered(p=>fixtures[0].pointer.Submit(Vector3.back*3,p,true,false),
+                dt=>{foreach(var f in fixtures)f.scroll.Process(dt);},i=>fixtures[i].scroll.ActivePointer!=null,i=>fixtures[i].scroll.AngularVelocity);
+        }
+        finally {foreach(var f in fixtures)if(f!=null)f.Dispose();}
+    }
+
+    static void DeliberateEntry()
+    {
+        using(var f=new Fixture())
+        {
+            var other=new GameObject("Entry second hand").AddComponent<BirdPointerInput>(); other.transform.SetParent(f.root.transform,false);
+            var inputs=new[]{f.pointer,other}; f.scroll.Configure(f.sphere,f.target,inputs);
+            checks+=UnitySphereEntryContract.Run((i,o,p)=>inputs[i].Submit(o,p,true,false),dt=>f.scroll.Process(dt),
+                ()=>f.scroll.ActivePointer==null?-1:f.scroll.ActivePointer==f.pointer?0:1,()=>f.scroll.AngularVelocity,
+                ()=>{f.scroll.Cancel();foreach(var p in inputs){p.Cancel();p.SetUser("LocalUser");}f.sphere.center=Vector3.zero;f.sphere.radius=1;f.target.rotation=Quaternion.identity;Physics.SyncTransforms();},
+                i=>inputs[i].Cancel(),(i,id)=>inputs[i].SetUser(id),(c,r)=>{f.sphere.center=c;f.sphere.radius=r;Physics.SyncTransforms();});
+        }
     }
 
     static void Contact()
@@ -106,21 +137,24 @@ public static class UnitySphericalScrollChecks
             f.scroll.enabled=true;
             var other=new GameObject("Other hand").AddComponent<BirdPointerInput>(); other.transform.SetParent(f.root.transform,false);
             f.scroll.Configure(f.sphere,f.target,new[]{f.pointer,other});
-            f.Normal(Vector3.forward);
+            f.Arm(); f.Normal(Vector3.forward);
             other.Submit(f.origin,f.origin+(Vector3.right-f.origin)*2,true,false); f.scroll.Process(.01f);
             Require(f.scroll.ActivePointer==f.pointer,"other hand cannot steal active contact");
             before=f.target.rotation; f.Feed(Vector3.zero);
-            Require(f.scroll.ActivePointer==other && Quaternion.Angle(before,f.target.rotation)<.001f,"hand transfer rebases without an impulse");
+            Require(f.scroll.ActivePointer==null && Quaternion.Angle(before,f.target.rotation)<.001f,"outside other hand cannot take over");
+            other.Submit(f.origin,Vector3.zero,true,false); f.scroll.Process(.01f);
+            other.Submit(f.origin,f.origin+(Vector3.right-f.origin)*2,true,false); f.scroll.Process(.01f);
+            Require(f.scroll.ActivePointer==other,"other hand acquires after its own new inside/out crossing");
             other.Submit(f.origin,Vector3.zero,true,false); f.scroll.Process(.01f);
             UnityEngine.Object.DestroyImmediate(other.gameObject); f.scroll.Process(.01f);
             Require(f.scroll.AngularVelocity==Vector3.zero,"destroyed inertia owner cancels safely");
-            f.Normal(Vector3.forward); f.Normal(Quaternion.AngleAxis(20,Vector3.up)*Vector3.forward);
+            f.Arm(); f.Normal(Vector3.forward); f.Normal(Quaternion.AngleAxis(20,Vector3.up)*Vector3.forward);
             f.sphere.radius=0; before=f.target.rotation; f.scroll.Process(.01f);
             Require(f.scroll.AngularVelocity==Vector3.zero && Quaternion.Angle(before,f.target.rotation)<.001f,"invalid sphere cancels without rotating");
-            f.sphere.radius=1; f.Normal(Vector3.forward); f.scroll.Process(1);
+            f.sphere.radius=1; f.Arm(); f.Normal(Vector3.forward); f.scroll.Process(1);
             Require(f.scroll.ActivePointer==null && f.scroll.AngularVelocity==Vector3.zero,"long pause cancels stale movement");
             f.scroll.Started.AddListener(p=>{ f.scroll.enabled=false; f.scroll.Process(.01f); });
-            f.Normal(Vector3.forward);
+            f.Arm(); f.Normal(Vector3.forward);
             Require(!f.scroll.enabled && f.scroll.AngularVelocity==Vector3.zero,"reentrant start listener may disable safely");
         }
         using(var f=new Fixture())
@@ -128,7 +162,7 @@ public static class UnitySphericalScrollChecks
             var panel=f.root.AddComponent<BirdMenuPanel>(); panel.Configure(null);
             f.scroll.Configure(f.sphere,f.target,new[]{f.pointer},panel);
             f.Normal(Vector3.forward); Require(f.scroll.ActivePointer==null,"closed panel rejects scrolling");
-            panel.Open(f.pointer); f.Normal(Vector3.forward); Require(f.scroll.ActivePointer==f.pointer,"owner panel enables scrolling");
+            panel.Open(f.pointer); f.Arm(); f.Normal(Vector3.forward); Require(f.scroll.ActivePointer==f.pointer,"owner panel enables deliberate scrolling");
             f.Normal(Quaternion.AngleAxis(15,Vector3.up)*Vector3.forward);
             panel.Close(); f.scroll.Process(.01f);
             Require(f.scroll.ActivePointer==null && f.scroll.AngularVelocity==Vector3.zero,"closing panel stops inertia");
@@ -146,7 +180,7 @@ public static class UnitySphericalScrollChecks
             float velocity,endAngle;
             using(var f=new Fixture())
             {
-                float dt=1f/hz; f.Normal(Vector3.forward,dt);
+                float dt=1f/hz; f.Arm(dt); f.Normal(Vector3.forward,dt);
                 for(int i=1;i<=hz;i++) f.Normal(Quaternion.AngleAxis(60f*i/hz,Vector3.up)*Vector3.forward,dt);
                 Require(Mathf.Abs(f.scroll.AngularVelocity.magnitude-expectedVelocity)<.0001f,"fixed-axis filtered velocity agrees with continuous solution at "+hz);
                 velocity=f.scroll.AngularVelocity.magnitude;
@@ -158,7 +192,7 @@ public static class UnitySphericalScrollChecks
             }
             using(var f=new Fixture())
             {
-                float dt=1f/hz; f.Normal(Vector3.forward,dt);
+                float dt=1f/hz; f.Arm(dt); f.Normal(Vector3.forward,dt);
                 for(int i=1;i<=hz*2;i++)
                 {
                     float t=(float)i/hz;
@@ -186,7 +220,7 @@ public static class UnitySphericalScrollChecks
         Quaternion baseline;
         using(var f=new Fixture())
         {
-            f.Normal(Vector3.forward);
+            f.Arm(); f.Normal(Vector3.forward);
             for(int i=1;i<=60;i++) f.Normal(Quaternion.Euler(i*.4f,i*.7f,0)*Vector3.forward);
             baseline=f.target.rotation;
         }
@@ -196,6 +230,7 @@ public static class UnitySphericalScrollChecks
             Quaternion rotation=Quaternion.Euler(173,57,-21);
             f.root.transform.SetPositionAndRotation(offset,rotation);
             f.target.localPosition=new Vector3(.2f,0,0); f.origin=offset+rotation*f.origin;
+            f.Arm();
             for(int i=0;i<=60;i++)
             {
                 var hit=offset+rotation*(Quaternion.Euler(i*.4f,i*.7f,0)*Vector3.forward);

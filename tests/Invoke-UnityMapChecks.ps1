@@ -16,7 +16,7 @@ $package=(Join-Path $repo 'Unity/BirdPlugin').Replace('\','/')
 @{dependencies=@{'com.bird3d.cursor'="file:$package";'com.unity.modules.imageconversion'='1.0.0'}} | ConvertTo-Json -Depth 3 | Set-Content -LiteralPath (Join-Path $project 'Packages/manifest.json')
 Get-ChildItem -LiteralPath (Join-Path $repo 'Unity/BirdPlugin/Samples~/MenuPreview') -File | Where-Object { $_.Name -match '\.cs(\.meta)?$' } | Copy-Item -Destination (Join-Path $project 'Assets')
 Copy-Item -Path (Join-Path $repo 'Unity/BirdPlugin/Samples~/MenuPreview/Resources/*') -Destination (Join-Path $project 'Assets/Resources')
-foreach ($name in @('UnityMapChecks.cs','UnitySphericalScrollChecks.cs','UnityMapPlayerSmoke.cs')) { Copy-Item -LiteralPath (Join-Path $PSScriptRoot $name) -Destination (Join-Path $project "Assets/$name") }
+foreach ($name in @('UnityMapChecks.cs','UnitySphericalScrollChecks.cs','UnitySphereEntryContract.cs','UnityMapPlayerSmoke.cs')) { Copy-Item -LiteralPath (Join-Path $PSScriptRoot $name) -Destination (Join-Path $project "Assets/$name") }
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityMapPlayerBuild.cs') -Destination (Join-Path $project 'Assets/Editor/UnityMapPlayerBuild.cs')
 function Invoke-MapUnity([string]$Method,[string]$Stem) {
     $result=Join-Path $project ($Stem+'-result.txt'); $log=Join-Path $project ($Stem+'.log')

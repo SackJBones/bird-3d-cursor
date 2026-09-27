@@ -154,6 +154,7 @@ public sealed class UnityMapChecks : MonoBehaviour
         for(int i=0;i<100;i++) Feed(demo,origin+delta*3,false); Require(demo.Zoom.Factor<.65f,"Map shrinks with reach"); Capture(demo,"small");
         Aim(demo,demo.RotateButton,false); Aim(demo,demo.RotateButton,true); Require(!demo.Zoom.ScalingEnabled && demo.Scroll.enabled,"Rotation action excludes zoom");
         Quaternion initial=demo.Rotation.rotation;
+        Feed(demo,demo.Volume.transform.position,false);
         for(int i=0;i<40;i++) { Vector3 normal=Quaternion.AngleAxis(i,Vector3.up)*Vector3.forward; Feed(demo,origin+(demo.Volume.transform.position+normal*.95f-origin)*2,false); }
         Require(Quaternion.Angle(initial,demo.Rotation.rotation)>10,"Existing back-surface rotation drives map"); Capture(demo,"rotated");
         Aim(demo,demo.ResetButton,false); Aim(demo,demo.ResetButton,true); Near(demo.Zoom.Factor,1,.00001f,"Reset button restores map zoom");
