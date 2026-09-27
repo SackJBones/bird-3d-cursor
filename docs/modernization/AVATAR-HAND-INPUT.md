@@ -1,4 +1,4 @@
-# Experimental avatar Bird in Tracking Lab 03
+# Experimental avatar Bird in Tracking Lab 04
 
 This is the first 16-point avatar-input experiment in the authored VRChat lab.
 It uses the existing `BirdSphereFit` and `BirdCursorState`, including the accepted
@@ -20,10 +20,18 @@ avatar skin so their articulation is inspectable; their positions remain exact
 SDK bone samples. This X-ray presentation is confined to diagnostics. Bird
 itself retains normal world occlusion. A short colored guide from the hand
 shows its current direction, bounded to 40 cm, without changing its position.
-The console displays curl angle and desired/filtered range. Two fixed white
+The console displays curl angle and desired/shown range. Two fixed white
 reference spheres compare the Bird material with an ordinary material. A gray sphere in front
 of the bench turns green when the logical hand-to-Bird segment passes through it.
 No click is required or synthesized in this first input test.
+
+**Point / FILTERED** is a native VRChat control below the mirror switch. Press it
+to compare **RAW** and **FILTERED** using identical hand input, geometry and
+presentation. Each mode change seeds fresh filter history without recalibrating.
+FILTERED remains the default; RAW is a diagnostic comparison, not a new solver.
+If desired range is near but shown range remains far, compare RAW before changing
+the calibration. If both ranges remain far while curling, inspect the joint/tip
+dots and curl readout instead.
 
 Compare white dots against the ends of the avatar fingers, then open/curl the
 hand and turn the wrist. A successful calibration only establishes usable data
@@ -59,10 +67,20 @@ billion-meter reach across uniform avatar scales. No preview range clamp is
 applied. This normalization changes the input interpretation, not the solver's
 range polynomial. Avatar proportions and inferred tips can still change feel.
 
-Missing/invalid bones, invalid distal quaternions, local avatar-change events,
-disable, handedness changes or altered calibration settings cancel the cursor
-and clear calibration. Recovery is explicit. Remote avatar events do not clear
-local calibration. No profile or player data is recorded or networked.
+Missing/invalid bones or distal quaternions cancel and hide the cursor immediately
+but retain calibration. The status reads **Paused / SET retained**. Valid samples
+resume with fresh filter history and need no new SET. A sampling pause longer
+than 250 ms also discards old filter history, since suspension may stop Udon
+without supplying an invalid sample. This is a recovery rule, not an adaptive
+smoothing algorithm.
+
+Local SDK avatar-change events, disable, handedness/calibration-setting changes
+and explicit RESET still clear calibration. Explicit SET attempts replace the
+previous calibration, including when the new attempt fails. Remote avatar events
+do not clear local calibration. Retention relies on the SDK's
+[avatar-change event](https://creators.vrchat.com/worlds/udon/avatar-events/);
+the adapter does not independently query avatar identity. No profile or player
+data is recorded or networked.
 
 ## Presentation and timing
 
@@ -88,20 +106,26 @@ From the light repository:
   -ProjectPath '../bird-3d-cursor-projects/BirdWorld' -Check -CheckBird
 ```
 
-Add `-Launch` only when switching the headset into the new lab is useful. Dana requested loading Lab 03 after the standalone feedback was recorded.
+Add `-Launch` only when switching the headset into the new lab is useful.
 The standalone v0.10 installation remains available and unchanged.
 `-AddBird` is a one-time authoring operation and refuses an existing integration.
+`-RefineBird` updates the existing lab's authored diagnostics and native comparison
+control; it preserves the other demo scenes.
 Sources and shader GUIDs restore into ignored `BirdGenerated`; authored scene,
 materials and Udon program metadata live in the heavy repository.
 
-Compiled-Udon checks pass 4,872 assertions over 244 normal frames. Both default
+Compiled-Udon checks pass 7,704 assertions over 296 normal frames. Both default
 ClientSim robot hands calibrate and run Bird; their inferred mean finger length
 is about 0.11645 m and their near-flat pose selects the far limit. Actual SDK
 avatar scaling to 0.5x/1.5x/restored size preserves normalized range. Controlled
 SDK position/rotation fixtures cover arbitrary distal axes, mirrored/upside-down
 hands, 0.5x/1.5x/3x sizes, articulation from flare through fist, 30 changing
 consecutive frames, 36 independent data faults, disable/recovery, native controls,
-remote/local SDK avatar event routing and the logical target. The full fist
+remote/local SDK avatar event routing and the logical target. Missing-data tests
+check retained calibration, hidden visuals and recovery without stale far history;
+a controlled stale-timestamp fixture checks the sampling-gap path. It is not an
+actual headset suspend/resume test. Native RAW/FILTERED switching checks mode
+isolation, disabled controls, fresh history and unchanged geometry. The full fist
 returns to the root even after billion-meter filtered history. Event replay is
 not an actual avatar replacement; synthetic bones are not physical tracking.
 
@@ -109,9 +133,19 @@ The standard diagnostic test also passes its 34-marker cadence/lifecycle checks.
 Rendered controls also verify normal material occlusion, X-ray visibility
 through an opaque object, and the Bird point material at a known visible
 position. The short guide is checked against the logical point and its 40 cm
-bound. Camera renders are inspected. Final SDK build evidence is in CHECKPOINT.md.
+bound. Saved/reloaded UI label anchors are checked against their backing panels;
+camera renders are inspected. Final SDK build evidence is in CHECKPOINT.md.
 Lab 03 was subsequently loaded through normal SDK Android BuildAndTest. An
 actual stereo device capture shows the console running, 16/16 bone availability,
 left-hand calibration accepted and Bird active, with the right hand awaiting
 calibration. This proves the adapter executes in-client and accepts a physical
 calibration; tip accuracy, pointing feel and clicking remain unvalidated.
+
+Lab 04's compiled-Udon pose sequence reproduces a large lag: immediately after
+moving from a flat far pose to a 90-degree curl, raw range is 1.277 m while the
+filtered point remains about 87.5 million m away. Switching RAW shows 1.277 m on
+the next normal frame. See [synthetic temporal measurements](measurements/avatar-hand-temporal.csv).
+This establishes a possible contributor to an absent nearby point, not the cause
+of Dana's physical report. The filter equations remain unchanged. Lab 04 passed
+normal Android SDK BuildAndTest; its 167,798-byte bundle hash matches the Quest
+copy. The headset was asleep, so this revision's in-client view is unconfirmed.

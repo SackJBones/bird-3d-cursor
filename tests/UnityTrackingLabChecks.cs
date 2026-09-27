@@ -40,6 +40,15 @@ public class UnityTrackingLabChecks : MonoBehaviour
             var mirror=(GameObject)mv.GetProgramVariable("target");
             if(stage==0 || stage==2)
             {
+                int boards=0;
+                foreach(var canvas in FindObjectsOfType<Canvas>())
+                {
+                    if(canvas.renderMode!=RenderMode.WorldSpace) continue;
+                    var backing=GameObject.Find(canvas.name+" backing"); if(backing==null) continue;
+                    Require(Vector3.Distance(backing.transform.position,canvas.transform.position+canvas.transform.forward*.025f)<.0002f,"Saved label stays on its board: "+canvas.name);
+                    boards++;
+                }
+                Require(boards>=10,"Authored world-space label placement checked after reload");
                 Require((int)pv.GetProgramVariable("leftAvailable")==16 && (int)pv.GetProgramVariable("rightAvailable")==16,"Real SDK bone availability");
                 var markers=(Transform[])pv.GetProgramVariable("markers"); Require(markers.Length==32,"32 authored markers");
                 foreach(var marker in markers) Require(marker.gameObject.activeSelf && marker.GetComponent<Collider>()==null,"Live noncolliding marker");

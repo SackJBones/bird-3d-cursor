@@ -34,6 +34,7 @@ public class UnityAvatarHandLabChecks : MonoBehaviour
     bool started;
     string realBaseline="";
     readonly List<string> measurements=new List<string>{"phase,side,bend_deg,scale,range_m,finger_length_m,flat_weight,fist_weight"};
+    readonly List<string> temporal=new List<string>{"phase,frame,side,raw_m,shown_m,calibrated,data_ready"};
     public static void Run()
     {
         File.WriteAllText("lab-hand-check-result.txt","PENDING");
@@ -141,7 +142,46 @@ public class UnityAvatarHandLabChecks : MonoBehaviour
         SetHands(230,1,Quaternion.identity); yield return null;
         for(int side=0;side<2;side++) Near(Get<Vector3>(cursors[side],"position"),Get<Vector3>(cursors[side],"handRoot"),.00001f,"Immediate fist return clears distant filter history");
         for(int side=0;side<2;side++) cursors[side].SetProgramVariable("smoothing",false);
-        // Every required origin and invalid distal orientation independently cancel only one hand.
+        // The authored native comparison control changes only smoothing. Reproduce
+        // the far-to-near history case without changing the production recurrence.
+        var filter=VM(FindObjectOfType<BirdLabFilterControl>());
+        filter.SendCustomEvent("SetFiltered");
+        SetHands(0,1,Quaternion.identity); yield return null; CalibrateControls(); yield return null;
+        for(int frame=0;frame<12;frame++) yield return null;
+        SetHands(90,1,Quaternion.identity); yield return null;
+        for(int side=0;side<2;side++)
+        {
+            Require(Range(side)<4,"Comparison pose places raw Bird in the working volume");
+            previousRaw[side]=Get<Vector3>(cursors[side],"rawPosition");
+            RecordTemporal("legacy_return",side);
+        }
+        Require(filter.RunEvent("_interact"),"Native RAW comparison event");
+        for(int side=0;side<2;side++) Require(Get<bool>(inputs[side],"calibrated") && !Get<bool>(cursors[side],"poseValid"),"Mode change clears history, keeps calibration");
+        yield return null;
+        for(int side=0;side<2;side++)
+        {
+            Require(!Get<bool>(cursors[side],"smoothing"),"RAW bypasses filtering on both hands");
+            Near(Get<Vector3>(cursors[side],"rawPosition"),previousRaw[side],.00001f,"Mode switch leaves geometry unchanged");
+            Near(Get<Vector3>(cursors[side],"position"),previousRaw[side],.00001f,"RAW displays incoming point next frame");
+            RecordTemporal("raw_comparison",side);
+        }
+        filter.enabled=false; filter.SendCustomEvent("SetFiltered"); yield return null;
+        Require(!Get<bool>(filter,"filtered"),"Disabled comparison control cannot change mode"); filter.enabled=true;
+        Require(filter.RunEvent("_interact"),"Native FILTERED comparison event"); yield return null;
+        for(int side=0;side<2;side++) Near(Get<Vector3>(cursors[side],"position"),Get<Vector3>(cursors[side],"rawPosition"),.00001f,"Filtered mode seeds from fresh point");
+        filter.SendCustomEvent("SetFiltered");
+        for(int side=0;side<2;side++) Require(Get<bool>(cursors[side],"poseValid"),"Setting the same mode does not reset it");
+        // Simulate the unscaled timestamp discontinuity after application suspension,
+        // without an intervening invalid-bone frame or another calibration.
+        SetHands(0,1,Quaternion.identity); yield return null; CalibrateControls(); yield return null;
+        SetHands(90,1,Quaternion.identity);
+        inputs[0].SetProgramVariable("lastSampleTime",Time.realtimeSinceStartup-1);
+        yield return null;
+        Require(Get<bool>(inputs[0],"calibrated"),"Sample gap retains this avatar's calibration");
+        Near(Get<Vector3>(cursors[0],"position"),Get<Vector3>(cursors[0],"rawPosition"),.00001f,"Sample gap reseeds distant history");
+        RecordTemporal("sample_gap_recovery",0);
+        // Every required origin and invalid distal orientation independently pause
+        // only one hand. Bone-local calibration survives sample loss; cursor state does not.
         for(int fault=0;fault<36;fault++)
         {
             SetHands(0,1,Quaternion.identity); yield return null; CalibrateControls(); yield return null;
@@ -150,13 +190,27 @@ public class UnityAvatarHandLabChecks : MonoBehaviour
             else if(fault<34) positions[Bone(side,8)]=new Vector3(float.NaN,1,1);
             else rotations[Bone(side,9)]=new Quaternion(0,0,0,0);
             yield return null;
-            Require(!Get<bool>(inputs[side],"dataReady") && !Get<bool>(inputs[side],"calibrated") && !Get<bool>(cursors[side],"poseValid"),"Invalid bone cancels source and solver "+fault);
+            Require(!Get<bool>(inputs[side],"dataReady") && Get<bool>(inputs[side],"calibrated") && !Get<bool>(cursors[side],"poseValid"),"Invalid bone pauses source/solver and retains calibration "+fault);
             Require(!Get<Renderer>(views[side],"core").enabled,"Loss hides point");
+            Require(!Get<LineRenderer>(views[side],"directionGuide").enabled,"Loss hides guide");
+            foreach(var marker in Get<Transform[]>(views[side],"tipMarkers")) Require(!marker.gameObject.activeSelf,"Loss hides estimated tip");
             Require(Get<bool>(inputs[1-side],"calibrated") && Get<bool>(cursors[1-side],"poseValid"),"Other hand survives fault");
-            inputs[side].SendCustomEvent("CalibrateOpenHand"); Require(!Get<bool>(inputs[side],"calibrated"),"Cannot calibrate invalid skeleton");
-            SetHands(0,1,Quaternion.identity); yield return null;
-            Require(!Get<bool>(inputs[side],"calibrated") && !Get<bool>(cursors[side],"poseValid"),"Recovery needs explicit calibration");
+            SetHands(90,1,Quaternion.identity); yield return null;
+            Require(Get<bool>(inputs[side],"calibrated") && Get<bool>(cursors[side],"poseValid"),"Same-avatar data recovery resumes without SET");
+            Near(Get<Vector3>(cursors[side],"position"),Get<Vector3>(cursors[side],"rawPosition"),.00001f,"Recovery cannot reuse old far filter history");
+            CheckHands("fault_recovery",90,1);
         }
+        positions[Bone(0,4)]=Vector3.zero;
+        inputs[0].SetProgramVariable("nextText",0f);
+        for(int frame=0;frame<30;frame++)
+        {
+            yield return null;
+            Require(Get<bool>(inputs[0],"calibrated") && !Get<bool>(cursors[0],"poseValid"),"Longer data gap remains paused with calibration retained");
+        }
+        Require(Get<UnityEngine.UI.Text>(inputs[0],"status").text.Contains("Paused / SET retained"),"Panel explains paused calibrated state");
+        inputs[0].SendCustomEvent("CalibrateOpenHand"); Require(!Get<bool>(inputs[0],"calibrated"),"Explicit SET cannot calibrate invalid skeleton");
+        SetHands(0,1,Quaternion.identity); yield return null;
+        Require(!Get<bool>(inputs[0],"calibrated"),"Failed explicit calibration needs a successful SET");
         SetHands(90,1,Quaternion.identity); yield return null;
         CalibrateControls(false); yield return null;
         for(int side=0;side<2;side++) Require(!Get<bool>(inputs[side],"calibrated"),"Curled pose refuses open-hand calibration");
@@ -282,6 +336,12 @@ public class UnityAvatarHandLabChecks : MonoBehaviour
         var image=new Texture2D(1600,1000,TextureFormat.RGB24,false); image.ReadPixels(new Rect(0,0,1600,1000),0,0); image.Apply(); File.WriteAllBytes("../Validation/TrackingLab/"+name+".png",image.EncodeToPNG()); RenderTexture.active=null; camera.targetTexture=null; target.Release(); Destroy(target); Destroy(image); Destroy(camera.gameObject);
         foreach(var item in avatarRenderers) item.Key.enabled=item.Value;
     }
+    void RecordTemporal(string phase,int side)
+    {
+        temporal.Add(string.Format(System.Globalization.CultureInfo.InvariantCulture,"{0},{1},{2},{3:R},{4:R},{5},{6}",
+            phase,frames,side,Range(side),(Get<Vector3>(cursors[side],"position")-Get<Vector3>(cursors[side],"handRoot")).magnitude,
+            Get<bool>(inputs[side],"calibrated"),Get<bool>(inputs[side],"dataReady")));
+    }
     void CheckDiagnosticRendering()
     {
         var camera=new GameObject("Isolated diagnostic render check").AddComponent<Camera>();
@@ -310,6 +370,7 @@ public class UnityAvatarHandLabChecks : MonoBehaviour
     void Finish(bool success,string message)
     {
         Restore(); SessionState.SetBool(Active,false); Directory.CreateDirectory("../Validation/TrackingLab"); File.WriteAllLines("../Validation/TrackingLab/avatar-hand-input.csv",measurements);
+        File.WriteAllLines("../Validation/TrackingLab/avatar-hand-temporal.csv",temporal);
         File.WriteAllText("lab-hand-check-result.txt",(success?"PASS: ":"FAIL: ")+message+"\nBaseline: "+realBaseline); EditorApplication.Exit(success?0:1);
     }
 }

@@ -15,6 +15,15 @@ explicitly calibrated avatar-finger adapter, estimated fingertips, Bird point
 and point-through target. See [avatar input](AVATAR-HAND-INPUT.md) for controls,
 assumptions and checks. It does not record hand data or modify the player.
 
+Current Lab 04 adds a native **Point / FILTERED** control to compare RAW output,
+retains SET calibration across invalid samples, and starts fresh filter history
+after missing data or a sampling pause. Avatar changes still require SET. The
+comparison shares one solver and presentation; it does not promote a new filter.
+The diagnostic panel distinguishes desired and shown range. Synthetic compiled
+Udon reproduces severe legacy lag after a far pose, but the physical missing-Bird
+report remains unresolved. The new bundle is transferred and hash-verified on
+Quest; the headset was asleep before its view could be confirmed.
+
 In lab v0.2, all 34 markers update every `PostLateUpdate`, after avatar IK.
 Only text refresh is limited to 5 Hz. There is no marker smoothing, deliberate
 delay or positional offset. The Lab 03 follow-up renders diagnostic joint/tip

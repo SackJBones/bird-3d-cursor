@@ -17,7 +17,9 @@ Dana prioritizes a normal Android Build and Test world inside VRChat, even befor
 - [x] Use the SDK BuildAndTest API to transfer the world into the Quest VRChat TestWorlds directory and request its launch.
 - [x] Confirm actual Quest VRChat scene rendering and Udon diagnostics: stereo device capture shows the lab, avatar hands, 16/16 bones on both sides and VR mode. Subjective usability remains separate.
 - [x] Connect an experimental 16-point avatar adapter, explicit estimated-tip calibration and a logical point-through target in the authored lab. Compiled Udon/ClientSim checks pass; see AVATAR-HAND-INPUT.md.
-- [ ] Physically validate Lab 03 calibration, palm orientation, tip estimates and Bird feel in Quest VRChat; it has not been launched yet. Click fidelity remains separate.
+- [x] Load Lab 03 in actual Quest VRChat and accept physical SET calibration; Dana calibrated both hands but could not identify nearby Bird.
+- [x] Add Lab 04 RAW/FILTERED comparison, calibration retention during invalid input, fresh history after sampling gaps and readable saved diagnostic labels; compiled-Udon and SDK checks pass, Quest transfer hash matches.
+- [ ] Physically validate Lab 04 palm orientation, tip estimates and Bird feel; this revision transferred while the headset was asleep. Missing nearby Bird remains unresolved. Click fidelity remains separate.
 - [ ] Later publish the same scene privately using normal account eligibility, metadata and SDK upload. Add PC under the same blueprint ID for PC guests.
 
 See [TRACKING-LAB.md](TRACKING-LAB.md) for reproduction and the publication path. This takes precedence over further feature expansion below.

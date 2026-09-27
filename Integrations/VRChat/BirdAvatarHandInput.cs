@@ -27,6 +27,7 @@ public class BirdAvatarHandInput : UdonSharpBehaviour
     private Vector3[] tipAxes = new Vector3[5];
     private bool calibratedSide;
     private float calibratedRatio, calibratedReference, nextText;
+    private float lastSampleTime = -1;
     private string calibrationMessage = "Open this hand, then SET with the other hand.";
     private int[] bones = new int[] {
         (int)HumanBodyBones.LeftHand,
@@ -47,9 +48,16 @@ public class BirdAvatarHandInput : UdonSharpBehaviour
     {
         if (!enabled || !gameObject.activeInHierarchy) return;
         sampledFrame = Time.frameCount;
+        float now = Time.realtimeSinceStartup;
+        // Suspension can stop Udon entirely, so no invalid sample is guaranteed.
+        // Re-seed the old filter after a long gap while keeping avatar calibration.
+        if (lastSampleTime >= 0 && (now < lastSampleTime || now-lastSampleTime > .25f) && cursor != null) cursor.Cancel();
+        lastSampleTime = now;
         ReadBones();
-        if (calibrated && (!dataReady || calibratedSide != rightHand || calibratedRatio != tipLengthRatio || calibratedReference != referenceFingerLength))
-            ResetCalibration();
+        // Calibration describes this avatar's bone-local axes. A missing sample
+        // pauses output, but does not change those axes or require another SET.
+        if (calibrated && (calibratedSide != rightHand || calibratedRatio != tipLengthRatio || calibratedReference != referenceFingerLength))
+            ClearCalibration("Hand settings changed: open this hand, then SET.");
         if (cursor != null)
         {
             cursor.clicksAllowed = false; // Estimated index endpoint has not been validated for clicking.
@@ -151,23 +159,26 @@ public class BirdAvatarHandInput : UdonSharpBehaviour
     }
 
     public void ResetCalibration()
+    { ClearCalibration("Open this hand, then SET with the other hand."); }
+    private void ClearCalibration(string message)
     {
-        calibrated = false; nextText = 0;
-        calibrationMessage = "Open this hand, then SET with the other hand.";
+        calibrated = false; nextText = 0; lastSampleTime = -1;
+        calibrationMessage = message;
         if (cursor != null) { cursor.tracking = false; cursor.Cancel(); }
     }
     public override void OnAvatarChanged(VRCPlayerApi player)
-    { if (Utilities.IsValid(player) && player.isLocal) { dataReady = false; ResetCalibration(); } }
-    private void OnDisable() { dataReady = false; available = 0; sampledFrame = -1; ResetCalibration(); RefreshText(); }
+    { if (Utilities.IsValid(player) && player.isLocal) { dataReady = false; ClearCalibration("Avatar changed: open this hand, then SET."); } }
+    private void OnDisable() { dataReady = false; available = 0; sampledFrame = -1; ClearCalibration("Input disabled: open this hand, then SET."); RefreshText(); }
     private void RefreshText()
     {
         if (status == null || Time.time < nextText) return;
         nextText = Time.time + .2f;
         status.text = (rightHand ? "RIGHT" : "LEFT")+" / AVATAR BIRD\n"+available+"/16 bones / "+
-            (!calibrated ? "Awaiting calibration" : cursor != null && cursor.poseValid ? "Bird active" : "No valid Bird point")+"\n"+calibrationMessage;
+            (!calibrated ? "Awaiting calibration" : !dataReady ? "Paused / SET retained" : cursor != null && cursor.poseValid ? "Bird active" : "No valid Bird point")+"\n"+
+            (calibrated && !dataReady ? "Waiting for usable avatar bones." : calibrationMessage);
         if (calibrated && cursor != null && cursor.poseValid)
             status.text += "\nCurl "+cursor.bendDegrees.ToString("F0")+" deg / desired "+RangeLabel((cursor.rawPosition-cursor.handRoot).magnitude)+
-                " / filtered "+RangeLabel((cursor.position-cursor.handRoot).magnitude);
+                " / shown "+RangeLabel((cursor.position-cursor.handRoot).magnitude);
     }
     private string RangeLabel(float value)
     {

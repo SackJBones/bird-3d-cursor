@@ -1,0 +1,6 @@
+phase,frame,side,raw_m,shown_m,calibrated,data_ready
+legacy_return,97,0,1.27717686,8.749978E+07,True,True
+legacy_return,97,1,1.27717686,8.749978E+07,True,True
+raw_comparison,98,0,1.27717686,1.27717686,True,True
+raw_comparison,98,1,1.27717686,1.27717686,True,True
+sample_gap_recovery,103,0,1.27717686,1.27717686,True,True

@@ -12,20 +12,24 @@ using UdonSharpEditor;
 public static class UnityTrackingLabBird
 {
     const string Folder="Assets/BirdWorld/TrackingLab/";
+    static void EnsurePrograms()
+    {
+        foreach(string name in new[]{"BirdAvatarHandInput","BirdLabHandControl","BirdLabPointView","BirdLabPointTarget","BirdLabFilterControl"})
+        {
+            string path="Assets/BirdWorld/Programs/"+name+".asset";
+            var source=AssetDatabase.LoadAssetAtPath<MonoScript>("Assets/BirdGenerated/Runtime/"+name+".cs");
+            if(source==null) throw new Exception("Missing source "+name);
+            var program=AssetDatabase.LoadAssetAtPath<UdonSharpProgramAsset>(path);
+            if(program==null) { program=ScriptableObject.CreateInstance<UdonSharpProgramAsset>(); program.sourceCsScript=source; AssetDatabase.CreateAsset(program,path); }
+            else if(program.sourceCsScript!=source) throw new Exception("Program source mismatch "+name);
+        }
+        UnityTrackingLab.Compile();
+    }
     public static void AddBird()
     {
         try
         {
-            foreach(string name in new[]{"BirdAvatarHandInput","BirdLabHandControl","BirdLabPointView","BirdLabPointTarget"})
-            {
-                string path="Assets/BirdWorld/Programs/"+name+".asset";
-                var source=AssetDatabase.LoadAssetAtPath<MonoScript>("Assets/BirdGenerated/Runtime/"+name+".cs");
-                if(source==null) throw new Exception("Missing source "+name);
-                var program=AssetDatabase.LoadAssetAtPath<UdonSharpProgramAsset>(path);
-                if(program==null) { program=ScriptableObject.CreateInstance<UdonSharpProgramAsset>(); program.sourceCsScript=source; AssetDatabase.CreateAsset(program,path); }
-                else if(program.sourceCsScript!=source) throw new Exception("Program source mismatch "+name);
-            }
-            UnityTrackingLab.Compile();
+            EnsurePrograms();
             var scene=EditorSceneManager.OpenScene(UnityTrackingLab.ScenePath);
             if(UnityEngine.Object.FindObjectOfType<BirdAvatarHandInput>(true)!=null) throw new Exception("Refusing to overwrite authored Bird integration");
             var root=GameObject.Find("Bird integration / future local input and presentation");
@@ -77,6 +81,7 @@ public static class UnityTrackingLabBird
                 if(text.transform.parent.name=="Welcome") text.text="BIRD / TRACKING LAB 03\nAvatar geometry, estimated tips, live Bird point";
             }
             AddPointDiagnostics();
+            AddFilterControl();
             EditorSceneManager.SaveScene(scene); AssetDatabase.SaveAssets(); UnityTrackingLab.Finish("lab-bird-author",true,"Authored explicit avatar calibration, separate long-range point presentation and logical point-through target.");
         }
         catch(Exception e) { UnityTrackingLab.Finish("lab-bird-author",false,e.ToString()); }
@@ -85,13 +90,11 @@ public static class UnityTrackingLabBird
     {
         try
         {
+            EnsurePrograms();
             var scene=EditorSceneManager.OpenScene(UnityTrackingLab.ScenePath);
-            GameObject.Find("Bird point-through target").transform.position=new Vector3(1.4f,1.35f,-.3f);
-            var hint=GameObject.Find("Bird target hint"); hint.transform.position=new Vector3(1.4f,1.1f,-.3f);
-            var text=hint.GetComponentInChildren<Text>(); text.rectTransform.sizeDelta=new Vector2(850,125); text.fontSize=28;
-            var backing=GameObject.Find("Bird target hint backing"); backing.transform.position=hint.transform.position+Vector3.forward*.025f; backing.transform.localScale=new Vector3(1.78f,.33f,.02f);
             FaceCalibrationConsole();
             AddPointDiagnostics();
+            AddFilterControl();
             foreach(var control in UnityEngine.Object.FindObjectsOfType<BirdLabHandControl>()) UdonSharpEditorUtility.GetBackingUdonBehaviour(control).proximity=5;
             EditorSceneManager.SaveScene(scene); AssetDatabase.SaveAssets(); UnityTrackingLab.Finish("lab-bird-layout",true,"Calibration console faces the spawn and target clears instructions.");
         }
@@ -153,6 +156,40 @@ public static class UnityTrackingLabBird
             if(text.transform.parent.name=="Directions") text.text="SET learns fingertip directions: hold that hand straight; use the other to press.\nOrange cubes = hand origins. Small colored dots = joints, visible through skin.\nBird = larger cyan / pink point and short guide. Curl fingers to bring it near.\nWhite fingertip dots are estimates. Clicking is disabled.";
         }
     }
+    static void AddFilterControl()
+    {
+        var control=UnityEngine.Object.FindObjectOfType<BirdLabFilterControl>();
+        if(control==null)
+        {
+            var position=new Vector3(-.65f,.9f,-.6f);
+            var button=Primitive("Bird filter control",PrimitiveType.Cube,position,new Vector3(1.15f,.30f,.12f),
+                AssetDatabase.LoadAssetAtPath<Material>(Folder+"Ink.mat"),null,true);
+            control=button.AddUdonSharpComponent<BirdLabFilterControl>();
+            control.label=Label("Bird filter label",position-Vector3.forward*.075f,1.1f,.28f,36,"Point / FILTERED\nPress for RAW");
+            control.cursors=new BirdCursorState[2];
+            foreach(var input in UnityEngine.Object.FindObjectsOfType<BirdAvatarHandInput>()) control.cursors[input.rightHand?1:0]=input.cursor;
+            UdonSharpEditorUtility.CopyProxyToUdon(control);
+            var vm=UdonSharpEditorUtility.GetBackingUdonBehaviour(control); vm.interactText="Compare raw / filtered Bird"; vm.proximity=5;
+        }
+        // A lower front row leaves the existing bench controls and diagnostic
+        // boards readable from spawn, rather than masking them with close panels.
+        control.transform.position=new Vector3(-.65f,.9f,-.6f);
+        PlaceLabel(control.label.transform.parent.gameObject,new Vector3(-.65f,.9f,-.675f));
+        GameObject.Find("Bird material reference").transform.position=new Vector3(-.8f,.55f,-.6f);
+        GameObject.Find("Ordinary material reference").transform.position=new Vector3(-.5f,.55f,-.6f);
+        PlaceLabel(GameObject.Find("Material reference hint"),new Vector3(-.65f,.35f,-.6f));
+        GameObject.Find("Material reference hint backing").transform.position=new Vector3(-.65f,.35f,-.575f);
+        GameObject.Find("Bird point-through target").transform.position=new Vector3(1,1.15f,-.6f);
+        var hint=GameObject.Find("Bird target hint"); PlaceLabel(hint,new Vector3(1,.72f,-.6f));
+        var label=hint.GetComponentInChildren<Text>(); label.rectTransform.sizeDelta=new Vector2(550,125); label.fontSize=26;
+        label.text="Point through: green\nNo click needed";
+        var backing=GameObject.Find("Bird target hint backing"); backing.transform.position=new Vector3(1,.72f,-.575f); backing.transform.localScale=new Vector3(1.18f,.33f,.02f);
+        foreach(var text in UnityEngine.Object.FindObjectsOfType<Text>(true))
+        {
+            if(text.transform.parent.name=="Welcome") text.text="BIRD / TRACKING LAB 04\nAvatar Bird / raw and filtered comparison";
+            if(text.transform.parent.name=="Directions") text.text="SET LEFT / RIGHT: hold that hand straight; press with the other.\nOrange = hand origins. Small colored dots = joints, visible through skin.\nBird is the larger point; its short line shows direction. Curl to bring it near.\nPoint FILTERED / RAW compares smoothing. White tips are estimates.";
+        }
+    }
     static Material Material(string name,Shader shader,Color color)
     { var m=new Material(shader){color=color}; AssetDatabase.CreateAsset(m,Folder+name+".mat"); return m; }
     static GameObject Primitive(string name,PrimitiveType type,Vector3 position,Vector3 size,Material material,Transform parent,bool collider=false)
@@ -162,9 +199,17 @@ public static class UnityTrackingLabBird
     }
     static Text Label(string name,Vector3 position,float width,float height,int fontSize,string value)
     {
-        var canvas=new GameObject(name,typeof(RectTransform)).AddComponent<Canvas>(); canvas.renderMode=RenderMode.WorldSpace; canvas.transform.position=position; canvas.transform.localScale=Vector3.one*.002f;
+        var canvas=new GameObject(name,typeof(RectTransform)).AddComponent<Canvas>(); canvas.renderMode=RenderMode.WorldSpace; PlaceLabel(canvas.gameObject,position); canvas.transform.localScale=Vector3.one*.002f;
         var label=new GameObject("Text",typeof(RectTransform)).AddComponent<Text>(); label.transform.SetParent(canvas.transform,false); label.rectTransform.sizeDelta=new Vector2(width/.002f,height/.002f);
         label.font=Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf"); label.fontSize=fontSize; label.alignment=TextAnchor.MiddleCenter; label.raycastTarget=false; label.text=value; return label;
+    }
+    static void PlaceLabel(GameObject go,Vector3 world)
+    {
+        var rect=go.GetComponent<RectTransform>();
+        // RectTransform serializes anchored XY; assigning Transform.position alone
+        // can leave the old anchor coordinates when the scene is saved/reloaded.
+        rect.anchoredPosition3D=rect.parent==null?world:rect.parent.InverseTransformPoint(world);
+        EditorUtility.SetDirty(rect);
     }
     static Text Board(string name,Vector3 position,float width,float height,int fontSize,string value)
     {
