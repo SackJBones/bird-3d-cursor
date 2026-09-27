@@ -51,7 +51,7 @@ foreach ($name in @('UnityQuestHandsBuild.cs','UnityQuestHandsChecks.cs','UnityP
 # Migrate the earlier generated helper: a Play Mode component must live outside Editor.
 $oldHelper = Join-Path $project 'Assets/Editor/UnityDepthVisualChecks.cs'
 if (Test-Path -LiteralPath $oldHelper) { Remove-Item -LiteralPath $oldHelper }
-foreach ($name in @('BirdSphereFit.cs','BirdCursorState.cs')) { Copy-Item (Join-Path $repo "Integrations/VRChat/$name") (Join-Path $project "Assets/$name") }
+foreach ($name in @('BirdSphereFit.cs','BirdCursorState.cs','BirdRangeAdaptiveFilter.cs')) { Copy-Item (Join-Path $repo "Integrations/VRChat/$name") (Join-Path $project "Assets/$name") }
 Copy-Item (Join-Path $repo 'Unity/BirdPlugin/Samples~/MenuPreview/BirdSphericalSelectorPreview.cs') (Join-Path $project 'Assets/BirdSphericalSelectorPreview.cs')
 foreach($name in @('BirdPosePreview.cs','BirdPosePreview.cs.meta')) { Copy-Item -LiteralPath (Join-Path $repo "Unity/BirdPlugin/Samples~/HanoiPreview/$name") -Destination (Join-Path $project "Assets/$name") }
 New-Item -ItemType Directory -Force (Join-Path $project 'Assets/Resources') | Out-Null

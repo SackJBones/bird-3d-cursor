@@ -47,7 +47,7 @@ public partial class UnityAvatarHandLabChecks : MonoBehaviour
     }
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Begin() { if(SessionState.GetBool(Active,false)) new GameObject("Avatar hand lab checks").AddComponent<UnityAvatarHandLabChecks>(); }
-    void Start() { deadline=Time.unscaledTime+150; }
+    void Start() { deadline=Time.unscaledTime+300; }
     void LateUpdate()
     {
         if(!SessionState.GetBool(Active,false)) return;
@@ -175,7 +175,7 @@ public partial class UnityAvatarHandLabChecks : MonoBehaviour
             previousRaw[side]=Get<Vector3>(cursors[side],"rawPosition");
             RecordTemporal("legacy_return",side);
         }
-        Require(filter.RunEvent("_interact"),"Native RAW comparison event");
+        filter.SendCustomEvent("SetRaw");
         for(int side=0;side<2;side++) Require(Get<bool>(inputs[side],"calibrated") && !Get<bool>(cursors[side],"poseValid"),"Mode change clears history, keeps calibration");
         yield return null;
         for(int side=0;side<2;side++)
@@ -268,6 +268,7 @@ public partial class UnityAvatarHandLabChecks : MonoBehaviour
         for(int side=0;side<2;side++) VM(GameObject.Find(side==0?"RESET LEFT":"RESET RIGHT").GetComponent<BirdLabHandControl>()).RunEvent("_interact");
         yield return null;
         for(int side=0;side<2;side++) Require(!Get<bool>(cursors[side],"poseValid") && !Get<Renderer>(views[side],"core").enabled,"Native reset hides Bird");
+        var adaptive=AdaptiveScenarios(); while(adaptive.MoveNext()) yield return null;
         var ui=UiScenarios(); while(ui.MoveNext()) yield return null;
         Restore();
     }

@@ -14,7 +14,7 @@ public static class UnityTrackingLabBird
     const string Folder="Assets/BirdWorld/TrackingLab/";
     static void EnsurePrograms()
     {
-        foreach(string name in new[]{"BirdAvatarHandInput","BirdLabHandControl","BirdLabPointView","BirdLabPointTarget","BirdLabFilterControl","BirdLabGeometryView"})
+        foreach(string name in new[]{"BirdAvatarHandInput","BirdLabHandControl","BirdLabPointView","BirdLabPointTarget","BirdLabFilterControl","BirdLabGeometryView","BirdRangeAdaptiveFilter"})
         {
             string path="Assets/BirdWorld/Programs/"+name+".asset";
             var source=AssetDatabase.LoadAssetAtPath<MonoScript>("Assets/BirdGenerated/Runtime/"+name+".cs");
@@ -102,6 +102,33 @@ public static class UnityTrackingLabBird
         }
         catch(Exception e) { UnityTrackingLab.Finish("lab-bird-layout",false,e.ToString()); }
     }
+    public static void AddAdaptive()
+    {
+        try
+        {
+            EnsurePrograms();
+            var scene=EditorSceneManager.OpenScene(UnityTrackingLab.ScenePath);
+            var control=UnityEngine.Object.FindObjectOfType<BirdLabFilterControl>();
+            if(control==null || control.cursors==null || control.cursors.Length!=2) throw new Exception("Restore the authored two-hand lab first");
+            if(UnityEngine.Object.FindObjectsOfType<BirdRangeAdaptiveFilter>(true).Length!=0) throw new Exception("Refusing to overwrite an authored filter experiment");
+            control.adaptiveFilters=new BirdRangeAdaptiveFilter[2]; control.filtered=control.adaptive=false;
+            for(int side=0;side<2;side++)
+            {
+                var go=new GameObject((side==0?"Left":"Right")+" optional adaptive filter");
+                go.transform.SetParent(control.cursors[side].transform);
+                var policy=go.AddUdonSharpComponent<BirdRangeAdaptiveFilter>(); control.adaptiveFilters[side]=policy;
+                control.cursors[side].smoothing=false; control.cursors[side].adaptiveFilter=null;
+                UdonSharpEditorUtility.CopyProxyToUdon(policy); UdonSharpEditorUtility.CopyProxyToUdon(control.cursors[side]);
+            }
+            control.label.text="Point / RAW\nPress for FILTERED"; UdonSharpEditorUtility.CopyProxyToUdon(control);
+            UdonSharpEditorUtility.GetBackingUdonBehaviour(control).interactText="Compare raw / original filter / adaptive filter";
+            foreach(var text in UnityEngine.Object.FindObjectsOfType<Text>(true))
+                if(text.transform.parent.name=="Welcome") text.text="BIRD / TRACKING LAB 07\nSphere geometry + optional filter comparison";
+            EditorSceneManager.SaveScene(scene); AssetDatabase.SaveAssets();
+            UnityTrackingLab.Finish("lab-filter-author",true,"Added independent per-hand adaptive policies, opt-in through the existing native control; RAW default retained.");
+        }
+        catch(Exception e) { UnityTrackingLab.Finish("lab-filter-author",false,e.ToString()); }
+    }
     static void FaceCalibrationConsole()
     {
         if(GameObject.Find("Bird calibration console")!=null) return;
@@ -177,9 +204,9 @@ public static class UnityTrackingLabBird
         // boards readable from spawn, rather than masking them with close panels.
         // Establish input fidelity without the known extreme-range filter lag.
         // The existing native button keeps the legacy filter available for comparison.
-        control.filtered=false;
+        control.filtered=control.adaptive=false;
         control.label.text="Point / RAW\nPress for FILTERED";
-        foreach(var cursor in control.cursors) { cursor.smoothing=false; UdonSharpEditorUtility.CopyProxyToUdon(cursor); }
+        foreach(var cursor in control.cursors) { cursor.smoothing=false; cursor.adaptiveFilter=null; UdonSharpEditorUtility.CopyProxyToUdon(cursor); }
         UdonSharpEditorUtility.CopyProxyToUdon(control);
         control.transform.position=new Vector3(-.65f,.9f,-.6f);
         PlaceLabel(control.label.transform.parent.gameObject,new Vector3(-.65f,.9f,-.675f));
@@ -194,7 +221,8 @@ public static class UnityTrackingLabBird
         var backing=GameObject.Find("Bird target hint backing"); backing.transform.position=new Vector3(1,.35f,-.575f); backing.transform.localScale=new Vector3(1.18f,.33f,.02f);
         foreach(var text in UnityEngine.Object.FindObjectsOfType<Text>(true))
         {
-            if(text.transform.parent.name=="Welcome") text.text=UnityEngine.Object.FindObjectsOfType<BirdAvatarUiInput>(true).Length>0?
+            if(text.transform.parent.name=="Welcome") text.text=control.adaptiveFilters!=null && control.adaptiveFilters.Length==2?
+                "BIRD / TRACKING LAB 07\nSphere geometry + optional filter comparison":UnityEngine.Object.FindObjectsOfType<BirdAvatarUiInput>(true).Length>0?
                 "BIRD / TRACKING LAB 06\nSphere geometry + optional reach interaction":"BIRD / TRACKING LAB 05\nInspect the fitted sphere and resulting Bird";
             if(text.transform.parent.name=="Directions") text.text="SET LEFT / RIGHT: hold that hand straight; press with the other. Starts RAW.\nGold = fitted sphere, center and fit ray. Green = palm normal.\nCyan / pink ray and diamond = resulting Bird. Geometry is X-ray; toggle below.\nWhite tips are estimates. Singular fits hide the gold sphere, not Bird.";
         }

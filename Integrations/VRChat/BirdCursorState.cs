@@ -11,6 +11,10 @@ public class BirdCursorState : UdonSharpBehaviour
     public Vector3 indexTip;
     public bool tracking;
     public bool smoothing;
+    [Tooltip("Optional experimental policy used only while smoothing. Null preserves the original recurrence.")]
+    public BirdRangeAdaptiveFilter adaptiveFilter;
+    [HideInInspector] public float sampleDeltaTime=1f/72;
+    [HideInInspector] public int historyRevision;
     public bool clicksAllowed = true;
     // Optional interaction policy for the closed-hand end of useHandLimits.
     // Index-tip reach along the palm replaces the unreliable closed fit.
@@ -42,6 +46,8 @@ public class BirdCursorState : UdonSharpBehaviour
     [HideInInspector] public bool up;
     [HideInInspector] public float clickDepth;
     private bool filterReady;
+    private BirdRangeAdaptiveFilter boundAdaptive;
+    private int boundPolicyRevision;
     private float variance = 1;
     private Vector3 handForward;
     private float fingerLength;
@@ -50,6 +56,12 @@ public class BirdCursorState : UdonSharpBehaviour
     public void Step()
     {
         down = up = false;
+        BirdRangeAdaptiveFilter policy=smoothing?adaptiveFilter:null;
+        if(boundAdaptive!=policy)
+        {
+            Cancel(); boundAdaptive=policy;
+            if(boundAdaptive!=null) boundAdaptive.Cancel();
+        }
         if (!tracking || fitter == null || !FiniteVector(handRoot) || !FiniteVector(indexTip)) { Reject(); return; }
         fitter.points = points;
         fitter.Fit();
@@ -75,7 +87,20 @@ public class BirdCursorState : UdonSharpBehaviour
         if (!FiniteVector(candidate)) { Reject(); return; }
         Vector3 raw = candidate;
         float nextVariance = 1;
-        if (smoothing && filterReady)
+        if(smoothing && adaptiveFilter!=null)
+        {
+            adaptiveFilter.sampleRoot=handRoot; adaptiveFilter.samplePosition=raw;
+            adaptiveFilter.sampleNoise=270f*mappedDistance*mappedDistance*mappedDistance;
+            adaptiveFilter.sampleDeltaTime=sampleDeltaTime; adaptiveFilter.sampleFist=fistWeight>=1;
+            adaptiveFilter.Step();
+            if(!adaptiveFilter.valid) { Reject(); return; }
+            if(boundPolicyRevision!=adaptiveFilter.historyRevision)
+            {
+                AdvanceHistory(); boundPolicyRevision=adaptiveFilter.historyRevision;
+            }
+            candidate=adaptiveFilter.position;
+        }
+        else if (smoothing && filterReady)
         {
             // Bird's scalar-covariance Vector3 Kalman recurrence: Q=.001, R=270*d^3.
             float noise = 270f * mappedDistance * mappedDistance * mappedDistance;
@@ -195,14 +220,18 @@ public class BirdCursorState : UdonSharpBehaviour
 
     public void Cancel()
     {
+        AdvanceHistory();
         down = up = false;
         Reject();
     }
+
+    private void AdvanceHistory() { historyRevision=historyRevision==int.MaxValue?0:historyRevision+1; }
 
     private void Reject()
     {
         poseValid = false;
         filterReady = false;
+        if(boundAdaptive!=null) boundAdaptive.Cancel();
         up = selected;
         selected = false;
         if (cursorVisual != null) cursorVisual.gameObject.SetActive(false);

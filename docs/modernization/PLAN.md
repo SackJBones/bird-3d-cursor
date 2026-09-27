@@ -23,6 +23,7 @@ Dana prioritizes a normal Android Build and Test world inside VRChat, even befor
 - [x] Connect fresh accepted avatar Bird to local UI after IK in the same frame, with explicit cancellation across loss, recalibration, mode and binding changes; preserve the earlier desktop input phase.
 - [x] Author an optional native-toggle reach/highlight/spin station in Lab 06, saved off and clear of geometry diagnostics; pass 14375 compiled-Udon lab assertions, UI/map regressions and normal Android SDK build. Lab 06 is build-only; Lab 05 remains deployed for physical sphere inspection.
 - [x] Add normal Windows/Android lab export and processed-scene parity checks for source versions, layout, colliders, spawns, Udon bindings and network IDs; preserve single-platform Android BuildAndTest as the default. See TRACKING-LAB.md and the latest build checkpoint.
+- [x] Add Lab 07's optional raw-range adaptive filter, retaining RAW default and original FILTERED mode. Both targets pass 47074 compiled-Udon assertions and normal SDK exports; see RANGE-ADAPTIVE-FILTER.md. Build-only; Lab 05 remains deployed, and physical feel is pending.
 - [x] Restore the tracked BirdWorld into a fresh project through pinned VPM dependencies, regenerate sources/bytecode with the maintained runner, and pass the full lab checks plus normal SDK exports on Windows and Android. Source/layout/Udon/network records match the normal project; this is not client or physical validation.
 - [ ] Physically validate Lab 05 corrected palm normal, sphere geometry overlay, tip estimates and Bird feel. Dana confirmed joint markers visible but RAW rays pointed out the backs of the hands; the winding sign is corrected. Actual usability and click fidelity remain separate.
 - [ ] Later publish the same scene privately using normal account eligibility, metadata and SDK upload. Add PC under the same blueprint ID for PC guests.
@@ -31,7 +32,7 @@ See [TRACKING-LAB.md](TRACKING-LAB.md) for reproduction and the publication path
 
 ## World presentation direction, 2026-09-27 UTC
 
-Dana added a design conversation and two preferred architectural images; see
+Dana added a design conversation and four preferred architectural images; see
 [WORLD-DESIGN.md](WORLD-DESIGN.md) and the preserved heavy-repository references.
 Current VRChat input/interaction work remains the priority. Later world work
 should favor an editable arrival-to-coastal-complex blockout, a circular Bird

@@ -38,6 +38,10 @@ The additional circular-opening/steps reference emphasizes the clean full-circle
 threshold, shallow nearby stairs, a substantial branching white support and
 sweeping inhabited structure immediately beyond it. Use this alongside the
 arrival cavern image when composing the first view and traversable route.
+Dana's later filename clarification says the view need not be this open and can
+show more architecture; the image also supplies reference for the distant island.
+Retain the earlier largely architectural first reveal rather than treating the
+picture's broad exposure to sky and sea as mandatory.
 The additional sculptures reference suggests quiet display spaces with warm
 floors, generous separation and pale, folded organic forms on simple plinths.
 It is reference for sculptural form and a comfortable gallery atmosphere;

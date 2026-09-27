@@ -181,7 +181,17 @@ public partial class UnityAvatarHandLabChecks
         Require(Get<bool>(pointers[0],"tracked") && !Get<bool>(pointers[0],"hasHistory"),"Rebinding pointer seeds new history");
         var filter=VM(FindObjectOfType<BirdLabFilterControl>());filter.RunEvent("_interact");yield return null;
         Require(!Get<bool>(pointers[0],"hasHistory"),"Raw/filtered comparison switch rebases interaction history");
-        Near(Get<Vector3>(pointers[0],"position"),Get<Vector3>(cursors[0],"position"),.0001f,"Bridge follows accepted filtered output");filter.RunEvent("_interact");yield return null;
+        Near(Get<Vector3>(pointers[0],"position"),Get<Vector3>(cursors[0],"position"),.0001f,"Bridge follows accepted filtered output");
+        filter.RunEvent("_interact");yield return null;
+        Require(Get<bool>(filter,"adaptive") && !Get<bool>(pointers[0],"hasHistory"),"Legacy to adaptive rebases even though smoothing stays true");
+        var policy=(UdonBehaviour)cursors[0].GetProgramVariable("adaptiveFilter");
+        policy.SetProgramVariable("farResponseSeconds",.06f);yield return null;
+        Require(!Get<bool>(pointers[0],"hasHistory"),"Adaptive settings reseed interaction history");
+        policy.SetProgramVariable("farResponseSeconds",.05f);yield return null;
+        filter.SendCustomEvent("SetRaw");filter.SendCustomEvent("SetAdaptive");yield return null;
+        Require(!Get<bool>(pointers[0],"hasHistory"),"Mode round-trip within a frame cannot retain contact history");
+        filter.RunEvent("_interact");yield return null;
+        Require(!Get<bool>(filter,"filtered") && !Get<bool>(pointers[0],"hasHistory"),"Adaptive to RAW rebases cleanly");
         SetHands(0,1,Quaternion.identity);yield return null;CalibrateControls();yield return null;
         for(int side=0;side<2;side++) Require(!Get<bool>(pointers[side],"hasHistory"),"Explicit SET rebases UI even when no invalid sample is observed");
         // A stale source cannot be reused, even if a renderer remains visible.

@@ -8,6 +8,7 @@ param(
     [switch]$AddBird,
     [switch]$AddUi,
     [switch]$RefineUi,
+    [switch]$AddAdaptive,
     [switch]$Check,
     [switch]$CheckBird,
     [switch]$SkipBuild,
@@ -26,6 +27,7 @@ Get-ChildItem -LiteralPath (Join-Path $repo 'Integrations/VRChat') -File | Where
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityTrackingLabChecks.cs') -Destination $runtime
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityAvatarHandLabChecks.cs') -Destination $runtime
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityAvatarUiLabChecks.cs') -Destination $runtime
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityAvatarFilterLabChecks.cs') -Destination $runtime
 foreach($helper in @('UnityTrackingLab.cs','UnityTrackingLabBird.cs','UnityTrackingLabUi.cs','UnityTrackingLabBuildAudit.cs','UnityWorldBundleChecks.cs')) { Copy-Item -LiteralPath (Join-Path $PSScriptRoot $helper) -Destination $editor }
 $presentation=Join-Path $project 'Assets/BirdGenerated/Presentation'
 New-Item -ItemType Directory -Force $presentation | Out-Null
@@ -53,6 +55,7 @@ foreach($target in $targets) {
         if($AddBird) { Invoke-LabUnity 'UnityTrackingLabBird.AddBird' 'lab-bird-author' $target }
         if($AddUi) { Invoke-LabUnity 'UnityTrackingLabUi.AddUi' 'lab-ui-author' $target }
         if($RefineUi) { Invoke-LabUnity 'UnityTrackingLabUi.RefineUi' 'lab-ui-layout' $target }
+        if($AddAdaptive) { Invoke-LabUnity 'UnityTrackingLabBird.AddAdaptive' 'lab-filter-author' $target }
         $author=$false
     }
     if($Check) { Invoke-LabUnity 'UnityTrackingLabChecks.Run' 'lab-check' $target }

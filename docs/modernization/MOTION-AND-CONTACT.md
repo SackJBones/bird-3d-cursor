@@ -1,5 +1,10 @@
 # Standalone feedback: far response and intentional contact
 
+Follow-up: the VRChat lab now has an explicitly optional
+[range-adaptive comparison](RANGE-ADAPTIVE-FILTER.md), with compiled-Udon and
+SDK export evidence. RAW and the original recurrence remain available; no
+standalone APK or deployed headset revision changes are implied.
+
 Dana's 2026-09-27 feedback explicitly concerns standalone Quest v0.10, not the
 VRChat tracking lab. Dana subsequently clarified that VRChat remains the project priority: these
 ideas should be preserved and explored in a bounded experiment, but may be

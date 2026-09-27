@@ -52,7 +52,13 @@ public class BirdAvatarHandInput : UdonSharpBehaviour
         float now = Time.realtimeSinceStartup;
         // Suspension can stop Udon entirely, so no invalid sample is guaranteed.
         // Re-seed the old filter after a long gap while keeping avatar calibration.
-        if (lastSampleTime >= 0 && (now < lastSampleTime || now-lastSampleTime > .25f) && cursor != null) cursor.Cancel();
+        bool gap=lastSampleTime>=0 && (now<lastSampleTime || now-lastSampleTime>.25f);
+        if(cursor!=null)
+        {
+            if(gap) cursor.Cancel();
+            // A fresh seed has no elapsed filter interval. Do not integrate a suspension.
+            cursor.sampleDeltaTime=lastSampleTime<0 || gap?1f/72:now-lastSampleTime;
+        }
         lastSampleTime = now;
         ReadBones();
         // Calibration describes this avatar's bone-local axes. A missing sample

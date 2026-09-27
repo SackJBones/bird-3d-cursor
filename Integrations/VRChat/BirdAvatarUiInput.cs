@@ -18,6 +18,8 @@ public class BirdAvatarUiInput : UdonSharpBehaviour
     private float acceptedTime;
     private int boundCalibration;
     private bool boundSmoothing;
+    private BirdRangeAdaptiveFilter boundFilter;
+    private int boundHistory;
 
     public override void PostLateUpdate()
     {
@@ -26,11 +28,14 @@ public class BirdAvatarUiInput : UdonSharpBehaviour
         BirdCursorState cursor = input == null ? null : input.cursor;
         int calibration=input==null?0:input.calibrationRevision;
         bool smoothing=cursor!=null && cursor.smoothing;
-        if (boundPointer != pointer || boundInput != input || boundCursor != cursor || boundCalibration!=calibration || boundSmoothing!=smoothing)
+        var filter=cursor==null?null:cursor.adaptiveFilter;
+        int history=cursor==null?0:cursor.historyRevision;
+        if (boundPointer != pointer || boundInput != input || boundCursor != cursor || boundCalibration!=calibration || boundSmoothing!=smoothing || boundFilter!=filter || boundHistory!=history)
         {
             if (boundPointer != null) boundPointer.Cancel();
             boundPointer = pointer; boundInput = input; boundCursor = cursor;
             boundCalibration=calibration; boundSmoothing=smoothing;
+            boundFilter=filter; boundHistory=history;
             acceptedFrame=-1;
             if (pointer != null) pointer.Cancel();
         }

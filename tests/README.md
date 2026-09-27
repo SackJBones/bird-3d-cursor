@@ -366,6 +366,15 @@ physical avatar click fidelity, real client performance or shared ownership.
 
 ### Standard VRChat tracking lab
 
+The saved Lab 07 includes optional per-hand adaptive filter policies. `-CheckBird`
+also runs `UnityAvatarFilterLabChecks`: actual compiled-Udon near recurrence,
+distant turn/return, noise, moving-origin/mirror and lifecycle checks, followed by
+normal avatar-frame mode switching and UI cancellation. Measurements are written
+to ignored `Validation/TrackingLab/range-adaptive-filter.csv`. RAW remains the
+saved default; this does not replace the currently deployed lab. `-AddAdaptive`
+authors an absent comparison and refuses replacement; omit it for the saved scene.
+See `docs/modernization/RANGE-ADAPTIVE-FILTER.md` for policy and evidence limits.
+
 `Invoke-UnityTrackingLab.ps1` restores the maintained lab sources and uses the
 SDK public Build / BuildAndTest APIs. Android is the default. `-Platform Windows`
 selects PC; `-Platform Both` builds Windows then Android and compares processed

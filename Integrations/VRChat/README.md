@@ -1,5 +1,10 @@
 # Bird VRChat integration
 
+Lab 07 adds an explicitly optional `BirdRangeAdaptiveFilter` comparison. RAW
+remains the saved default; the original filter remains selectable. Restore the
+adaptive source/meta alongside `BirdCursorState` even when leaving its reference
+null. See [policy, timing and validation](../../docs/modernization/RANGE-ADAPTIVE-FILTER.md).
+
 The integration includes caller-fed geometry, experimental avatar input, and
 local Udon menu/spherical and bounded object manipulation components. The latest
 authored example is `BirdWorld/Assets/BirdWorld/Scenes/BirdPoseDemo.unity` in the
@@ -86,14 +91,14 @@ BirdCursorState.cs composes one dedicated BirdSphereFit with caller-supplied fit
 
 The component preserves Bird.cs's unfiltered range law and its nearest-of-fit-center-or-cursor selection sphere, with strict press depth >7 mm and release depth <5 mm. The caller provides the hand root (the ordinary Bird uses a weighted thumb/index base), and must supply a real or clearly synthetic index tip. The Udon state component has optional Kalman smoothing (see below), but no twist, input adapter, avatar-scale normalization, networking or automatic sampling. It is not equivalent to the full Bird runtime and does not turn avatar distal bones into fingertips. Extreme but finite ranges are not clamped; realistic-pose calibration and performance/usability testing remain required.
 
-For compiled-VM validation, restore both cursor/fitter sources and stable metas plus tests/UnityUdonCursorChecks.cs into Assets/BirdGenerated/Runtime. Run Unity 2022.3.22f1 -batchmode -nographics -executeMethod UnityUdonCursorChecks.Run. The helper creates ignored program assets and two unsaved cursor/fitter instances, then sends real Udon Step/Cancel events with synthetic samples. Read udon-cursor-result.txt. Marker checks inspect transforms and active flags; they are not rendered-image or hardware validation.
+For compiled-VM validation, restore cursor/fitter/adaptive-policy sources and stable metas plus tests/UnityUdonCursorChecks.cs into Assets/BirdGenerated/Runtime. Run Unity 2022.3.22f1 -batchmode -nographics -executeMethod UnityUdonCursorChecks.Run. The helper creates ignored program assets and two unsaved cursor/fitter instances, then sends real Udon Step/Cancel events with synthetic samples. Read udon-cursor-result.txt. Marker checks inspect transforms and active flags; they are not rendered-image or hardware validation.
 
 
 ## Synthetic world scene
 
 BirdSyntheticDemo.cs feeds an animated tetrahedral pose and index-tip depth into one cursor/fitter pair at up to ~33 samples/s. It is a labeled demonstration, not a hand input adapter. Two instances produce cyan/pink paths with gold pressed cursors and click-count labels. Each LineRenderer retains at most 64 positions (128 total), tapers toward its oldest point and replaces old positions as new samples arrive. This is sample-count-bounded history, not a guaranteed wall-clock fade under slow frames. PauseDemo cancels the cursor, clears its trail and changes its label; ResumeDemo resumes with fresh history. Send pause before deactivation.
 
-The heavy repository tracks BirdSyntheticDemo.unity, its three Udon program assets and simple Unlit/Color materials. Restore BirdSphereFit, BirdCursorState and BirdSyntheticDemo sources/metas into Assets/BirdGenerated/Runtime before opening/compiling a fresh checkout. To reproduce a new scene, copy tests/UnityUdonDemoChecks.cs into the same directory and run Generate (refuses an existing scene/program asset). Validate reopens the saved scene, runs ClientSim, checks bounded trails/clicks/pause/recovery and saves a camera image under the ignored Validation/UdonDemo directory. Use Unity 2022.3.22f1 -batchmode without -nographics for Validate. Neither command uploads a world or uses a headset.
+The heavy repository tracks BirdSyntheticDemo.unity, its three Udon program assets and simple Unlit/Color materials. Restore BirdSphereFit, BirdCursorState, BirdRangeAdaptiveFilter and BirdSyntheticDemo sources/metas into Assets/BirdGenerated/Runtime before opening/compiling a fresh checkout. To reproduce a new scene, copy tests/UnityUdonDemoChecks.cs into the same directory and run Generate (refuses an existing scene/program asset). Validate reopens the saved scene, runs ClientSim, checks bounded trails/clicks/pause/recovery and saves a camera image under the ignored Validation/UdonDemo directory. Use Unity 2022.3.22f1 -batchmode without -nographics for Validate. Neither command uploads a world or uses a headset.
 
 
 ## Conventional demo controls

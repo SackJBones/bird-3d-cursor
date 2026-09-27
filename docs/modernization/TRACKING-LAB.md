@@ -42,6 +42,12 @@ disabled. The station starts off and does not change calibration or geometry
 diagnostics. See [avatar UI timing and contracts](VRCHAT-AVATAR-UI.md) and the
 latest checkpoint for build versus actual deployment status.
 
+Lab 07 adds **ADAPTIVE** after the existing original **FILTERED** mode on the
+Point comparison control. It tests responsiveness driven by incoming raw range
+and correction of stale far-range history during return. RAW remains the saved
+default. This revision is build-only; Lab 05 remains deployed for physical
+geometry inspection. See [filter policy and limits](RANGE-ADAPTIVE-FILTER.md).
+
 In lab v0.2, all 34 markers update every `PostLateUpdate`, after avatar IK.
 Only text refresh is limited to 5 Hz. There is no marker smoothing, deliberate
 delay or positional offset. The Lab 03 follow-up renders diagnostic joint/tip
