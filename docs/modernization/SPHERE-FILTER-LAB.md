@@ -3,8 +3,10 @@
 Lab 08 adds **SPHERE** after ADAPTIVE on the native Point control. RAW remains
 the saved default, followed by original FILTERED, ADAPTIVE, SPHERE, then RAW.
 The geometry overlay, optional reach station, calibration, disabled avatar
-clicks and original range polynomial are preserved. This is a build-only
-comparison; it does not imply a new headset deployment or accepted feel.
+clicks and original range polynomial are preserved. At Dana's request, Lab 08
+was loaded into Quest VRChat on 2026-09-27; transfer hash and actual stereo
+rendering are verified. Physical filter comparison remains pending; deployment
+does not imply accepted feel. See the latest CHECKPOINT for the device artifact.
 
 `BirdSphereSpaceFilter` is a separate caller-stepped Udon component. It consumes
 the existing sphere-derived center-minus-hand vector before polynomial range

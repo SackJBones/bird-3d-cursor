@@ -6,7 +6,8 @@ available. Restore **all** maintained runtime source/meta pairs, including both
 filter classes even when their references are null; the tracking-lab runner does
 this automatically. See [sphere filter lab](../../docs/modernization/SPHERE-FILTER-LAB.md)
 for lifecycle, reproduction and the distinction between build checks and physical
-feel. The new comparison is build-only; no headset update is implied.
+feel. Lab 08 is now loaded in Quest VRChat at Dana's request; transfer and stereo
+rendering are verified, with physical filter comparison pending.
 
 Lab 07 adds an explicitly optional `BirdRangeAdaptiveFilter` comparison. RAW
 remains the saved default; the original filter remains selectable. Restore the

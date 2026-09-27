@@ -1107,3 +1107,43 @@ world building and free-asset provenance/credit requirements remain in force.
 Final audit: recurring instructions updated in place and verified byte-for-byte
 against the saved prompt, preserving the active two-hour schedule and task.
 Both repositories pass whitespace checks.
+
+
+## Lab 08 loaded into Quest VRChat at Dana's request, 2026-09-27 UTC
+
+Dana is present and explicitly invited a headset deployment for comparison.
+The USB-authorized Quest 3 was awake. Closed the running VRChat client and used
+the maintained runner's normal Android SDK BuildAndTest, without reauthoring
+or changing runtime code. The previously passed compiled-Udon tests remain the
+code evidence; no redundant full test run or standalone update was performed.
+
+SDK build, compressed/uncompressed size gates and processed-scene audit PASS:
+262675 bytes, SHA256
+`DD89B5CB41715F90D85BC7D6AEBFA44DA4A84E0F3494155A0291059A1365FD7E`.
+The device TestWorlds bundle `134350157633591055_.vrcw` has that exact hash.
+The running client and actual stereo capture show the lab, both 16/16 bone
+readouts, cyan/pink hand markers, RAW control and awaiting-SET calibration.
+This establishes transfer, launch and in-client rendering/Udon diagnostics.
+It does not establish the new filter's physical feel or performance. Info-level
+heartbeat output was not observed; rendering is the direct runtime evidence.
+No matched Udon execution exception appeared in the captured startup log slice.
+Private capture, log, exported scene and deployment record are under ignored
+Validation/TrackingLab/DeviceLab08.
+
+Runtime-source and processed-layout hashes, component counts and 45 compiled
+Udon behaviours match the tested builds. SDK export only reordered the same
+DynamicMaterials references in the authored scene. Verified that this was the
+entire scene diff, preserved the exported scene privately, and restored the
+original list order. Both code repositories otherwise retain their tested state.
+Final build log has no C# compile, shader or Udon execution errors; the known
+internal Unity bundle 'Build Finished, Result: Failure.' line remains, qualified
+by SDK success and now actual client rendering. No validation was bypassed.
+
+Dana was told to SET each straight hand, then press Point three times from RAW
+to SPHERE (RAW -> FILTERED -> ADAPTIVE -> SPHERE). Requested comparison of distant
+wrist turns and nearby fine adjustment; ordinary closure return and optional
+Geometry OFF were suggested. Feedback remains pending. Lab 08 now supersedes
+Lab 05 as the last verified deployment; historical build-only notes are stale
+for current device state. Leave this scene available while Dana tests; advance
+independent agreed work without repeatedly restarting it. Standalone v0.10,
+account state and headset power settings were not changed. No online upload.
