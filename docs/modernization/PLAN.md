@@ -16,7 +16,8 @@ Dana prioritizes a normal Android Build and Test world inside VRChat, even befor
 - [x] Validate saved scene through compiled Udon/ClientSim and camera renders; pass normal Android SDK build plus compressed/uncompressed upload-size checks.
 - [x] Use the SDK BuildAndTest API to transfer the world into the Quest VRChat TestWorlds directory and request its launch.
 - [x] Confirm actual Quest VRChat scene rendering and Udon diagnostics: stereo device capture shows the lab, avatar hands, 16/16 bones on both sides and VR mode. Subjective usability remains separate.
-- [ ] Connect a characterized avatar input to Bird in this lab, initially one supported avatar and one simple target. Preserve explicit fingertip/calibration limitations.
+- [x] Connect an experimental 16-point avatar adapter, explicit estimated-tip calibration and a logical point-through target in the authored lab. Compiled Udon/ClientSim checks pass; see AVATAR-HAND-INPUT.md.
+- [ ] Physically validate Lab 03 calibration, palm orientation, tip estimates and Bird feel in Quest VRChat; it has not been launched yet. Click fidelity remains separate.
 - [ ] Later publish the same scene privately using normal account eligibility, metadata and SDK upload. Add PC under the same blueprint ID for PC guests.
 
 See [TRACKING-LAB.md](TRACKING-LAB.md) for reproduction and the publication path. This takes precedence over further feature expansion below.
@@ -544,3 +545,8 @@ Preserved the small stereo/occlusion CSVs under docs/modernization/measurements;
 ### Hand input preference from Dana, 2026-09-27 UTC
 
 Prefer supported direct tracked hand-joint positions for responsiveness and anatomical fidelity. Avatar hand bones are an acceptable fallback when the platform does not expose those joints. Current VRChat diagnostics use avatar bone origins plus tracked hand origins; do not imply these are raw finger joints or true fingertips. Sample the latest post-IK avatar pose each frame rather than introducing diagnostic marker latency. See TRACKING-LAB.md.
+
+
+### Latest standalone feedback, 2026-09-27 UTC
+
+Dana explicitly identifies standalone Quest v0.10 as the subject of far-wrist smoothing lag and unwanted foreground color-selector scrolling. Dana clarified that VRChat remains the project priority. Capture these corrections and give smoothing a bounded experiment; defer it as research if needed rather than delaying world delivery. Preserve the full requirements in MOTION-AND-CONTACT.md: near-volume identity, raw-target-driven adaptation, hand-centered compressed-space exploration, and per-object inside-to-back contact with full rearming after loss. Dana reports the corrected VRChat diagnostic markers look good.

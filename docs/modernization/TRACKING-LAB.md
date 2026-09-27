@@ -1,8 +1,8 @@
 # VRChat tracking laboratory
 
 `BirdWorld/Assets/BirdWorld/Scenes/BirdTrackingLab.unity` is the first-client
-milestone: a normal authored VRChat world for inspecting avatar hands before
-connecting Bird. It is separate from the standalone OpenXR comparison and the
+milestone: a normal authored VRChat world for inspecting avatar hands and
+trying experimental calibrated Bird input. It is separate from the standalone OpenXR comparison and the
 desktop-input interaction demonstration scenes.
 
 The world provides a protected floor/spawn, meter grid, 10/25/50 cm objects,
@@ -10,8 +10,10 @@ distant range references, a work bench, a switchable SDK mirror and local hand
 diagnostics. Cyan/pink spheres show avatar bone origins; amber cubes show the
 SDK's left/right TrackingData origins. Bone counts indicate availability, not
 tracking confidence. Distal bone origins are not fingertip endpoints. The console
-reports avatar eye height and hand-origin/wrist separation. Nothing fits a sphere,
-calibrates the avatar, records hand data or modifies the player.
+reports avatar eye height and hand-origin/wrist separation. Lab 03 adds an
+explicitly calibrated avatar-finger adapter, estimated fingertips, Bird point
+and point-through target. See [avatar input](AVATAR-HAND-INPUT.md) for controls,
+assumptions and checks. It does not record hand data or modify the player.
 
 In lab v0.2, all 34 markers update every `PostLateUpdate`, after avatar IK.
 Only text refresh is limited to 5 Hz. There is no marker smoothing, deliberate
@@ -34,7 +36,7 @@ can affect the fit even with a responsive per-frame sampler. See
 Native VRChat Interact controls toggle the mirror and markers. The mirror starts
 off and is limited to 512-pixel resolution. Diagnostics are per-client; visitors
 do not compete for the switches. Bird clicking is unnecessary. A named integration
-root reserves space for a separate input/solver/presentation station.
+root contains the separate input/solver/presentation station.
 
 ## Reproduce and test
 
@@ -44,7 +46,7 @@ From the lightweight repository, with the heavy BirdWorld project beside it:
 ./tests/Invoke-UnityTrackingLab.ps1 `
   -UnityEditor 'C:/Program Files/Unity/Hub/Editor/2022.3.22f1/Editor/Unity.exe' `
   -ProjectPath '../bird-3d-cursor-projects/BirdWorld' `
-  -Check -Launch
+  -Check -CheckBird -Launch
 ```
 
 Use `-Generate` only to create the absent scene: generation refuses to overwrite
@@ -89,8 +91,8 @@ publication steps, not a special migration for this lab. See
 [first-world publishing](https://creators.vrchat.com/worlds/creating-your-first-world/)
 and [cross-platform setup](https://creators.vrchat.com/platforms/android/cross-platform-setup/).
 
-Next connect the tested Bird solver to a characterized avatar-input adapter,
-starting with one supported avatar and one simple target. Keep tracked origins,
+Next physically assess the experimental avatar-input adapter with one supported
+avatar and the simple target. Keep tracked origins,
 avatar bone positions, inferred endpoints, calibration and logical/presented Bird
 points separately inspectable. Networked cursors and shared-object ownership are
 independent later work.
@@ -144,7 +146,7 @@ The normal SDK Android BuildAndTest workflow rebuilt and transferred 105,951
 bytes; device SHA256 matches
 `9A2FBB28FC500998AA07193ABB5DDBBFCE957D6C7C9BD4149B7B83C0A3C74A8D`.
 The updated lab is visibly running inside VRChat. This proves deployment and
-runtime operation; subjective motion responsiveness still needs Dana's assessment.
+runtime operation; Dana subsequently confirmed that the markers look good.
 The prior SDK internal failure-log qualification remains. No matched Udon runtime
 execution exception was found in the client log. The headset had slept; one
 ordinary wake command sufficed, without persistent power-setting changes.

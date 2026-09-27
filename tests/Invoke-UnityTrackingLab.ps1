@@ -3,7 +3,9 @@ param(
     [Parameter(Mandatory=$true)][string]$ProjectPath,
     [switch]$Generate,
     [switch]$RefineLayout,
+    [switch]$AddBird,
     [switch]$Check,
+    [switch]$CheckBird,
     [switch]$Launch
 )
 $ErrorActionPreference='Stop'
@@ -15,7 +17,11 @@ $runtime=Join-Path $project 'Assets/BirdGenerated/Runtime'; $editor=Join-Path $p
 New-Item -ItemType Directory -Force $runtime,$editor | Out-Null
 Get-ChildItem -LiteralPath (Join-Path $repo 'Integrations/VRChat') -File | Where-Object { $_.Name -match '\.cs(\.meta)?$' } | ForEach-Object { Copy-Item -LiteralPath $_.FullName -Destination (Join-Path $runtime $_.Name) }
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityTrackingLabChecks.cs') -Destination $runtime
-foreach($helper in @('UnityTrackingLab.cs','UnityWorldBundleChecks.cs')) { Copy-Item -LiteralPath (Join-Path $PSScriptRoot $helper) -Destination $editor }
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityAvatarHandLabChecks.cs') -Destination $runtime
+foreach($helper in @('UnityTrackingLab.cs','UnityTrackingLabBird.cs','UnityWorldBundleChecks.cs')) { Copy-Item -LiteralPath (Join-Path $PSScriptRoot $helper) -Destination $editor }
+$presentation=Join-Path $project 'Assets/BirdGenerated/Presentation'
+New-Item -ItemType Directory -Force $presentation | Out-Null
+foreach($name in @('BirdLogicalDepth.shader','BirdLogicalDepth.shader.meta')) { Copy-Item -LiteralPath (Join-Path $repo ('Unity/BirdPlugin/Runtime/Presentation/'+$name)) -Destination $presentation }
 function Invoke-LabUnity([string]$Method,[string]$Stem) {
     $result=Join-Path $project ($Stem+'-result.txt'); $log=Join-Path $project ($Stem+'.log')
     Set-Content -LiteralPath $result -Value 'PENDING'
@@ -27,6 +33,8 @@ function Invoke-LabUnity([string]$Method,[string]$Stem) {
 Invoke-LabUnity 'UnityWorldSdkSetup.Run' 'world-sdk-setup'
 if($Generate) { Invoke-LabUnity 'UnityTrackingLab.Generate' 'lab-generate' }
 if($RefineLayout) { Invoke-LabUnity 'UnityTrackingLab.RefineLayout' 'lab-layout' }
+if($AddBird) { Invoke-LabUnity 'UnityTrackingLabBird.AddBird' 'lab-bird-author' }
 if($Check) { Invoke-LabUnity 'UnityTrackingLabChecks.Run' 'lab-check' }
+if($CheckBird) { Invoke-LabUnity 'UnityAvatarHandLabChecks.Run' 'lab-hand-check' }
 if($Launch) { Invoke-LabUnity 'UnityTrackingLab.BuildAndTestAndroid' 'lab-build' }
 else { Invoke-LabUnity 'UnityTrackingLab.BuildAndroid' 'lab-build' }
