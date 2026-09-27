@@ -974,3 +974,29 @@ All 78 maintained runtime source/meta files match generated copies and all 306 A
 Lab 05 remains deployed for Dana's physical corrected-normal/fitted-sphere/estimated-tip assessment. Lab 07 is local build-only and adds no hardware/account prerequisite. Keep this filter opt-in pending physical comparison; do not extend filtering research indefinitely before progressing the agreed VRChat world. WORLD-DESIGN.md and the recurring prompt preserve the four-image reference set, opening/island clarification, independent critic-agent iteration and authorized asset sourcing with correct licenses/credits.
 
 Final audit: all nine maintained lab helpers match generated copies. The existing active two-hour heartbeat was updated in place with the same task and inherited permissions; its saved UTF-8 prompt exactly matches RECURRING-PROMPT.txt. Whitespace checks pass.
+
+
+## Sphere-derived control study, 2026-09-27 19:52 UTC
+
+Dana identifies latest physical feedback as VRChat lab FILTERED: RAW responds
+well but is too noisy. Preserve sphere size/center as the measure of opening;
+do not introduce an openness classifier or convert qualitative percentages
+into new pose bands. SPHERE-SPACE-CONTROL.md records the exact correction,
+nearby/architectural/landscape feel targets and a bounded next implementation.
+
+Added tests/study_sphere_space_control.py and retained synthetic measurements.
+Direction/length filtering before range expansion avoids angular contraction;
+30/72/120 Hz checks pass. At 72 Hz, 90/170-degree steps reach 90% in one sample,
+1-degree in four and exact 180-degree reversal in five, independent of tested
+range. The illustrative global curve preserves the two legacy near terms and
+unit origin gain; its ninth-power tail is not a tuned/approved default.
+Synthetic noise reduction, origin endpoint and rigid/mirrored transport checks
+pass. An optional private OpenXR replay has finite results for 1,440 right and
+two left tracked samples; this is not VRChat tracking or perceptual evidence.
+
+Current-palm noise, near-hand isotropy, antipodes, float precision and runtime
+performance remain explicit concerns. No Unity/Udon source, scene, build,
+deployment, account or standalone change occurred. Lab 05 remains the last
+recorded deployed lab, Lab 07 build-only. Next isolate a bounded optional filter
+comparison in VRChat and validate it before changing defaults. The recurring
+brief now gives the sphere-only requirement precedence over older notes.

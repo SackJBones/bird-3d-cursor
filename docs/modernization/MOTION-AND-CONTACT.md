@@ -1,5 +1,12 @@
 # Standalone feedback: far response and intentional contact
 
+Newer feedback explicitly concerns **VRChat lab, FILTERED**: RAW is responsive
+but too noisy; nearby range should be more precise and distant turns much faster.
+Dana requires sphere size/center to remain the measure of opening, with no new
+openness quantity. See [SPHERE-SPACE-CONTROL.md](SPHERE-SPACE-CONTROL.md) for the
+requirements and bounded numerical study. The standalone feedback below remains
+useful history, not the app identification for this newer report.
+
 Follow-up: the VRChat lab now has an explicitly optional
 [range-adaptive comparison](RANGE-ADAPTIVE-FILTER.md), with compiled-Udon and
 SDK export evidence. RAW and the original recurrence remain available; no

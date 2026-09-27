@@ -30,6 +30,20 @@ Dana prioritizes a normal Android Build and Test world inside VRChat, even befor
 
 See [TRACKING-LAB.md](TRACKING-LAB.md) for reproduction and the publication path. This takes precedence over further feature expansion below.
 
+## Latest VRChat feel feedback, 2026-09-27 UTC
+
+Dana identifies the current problem as VRChat lab **FILTERED**; RAW responds
+quickly but is too noisy. Sphere size/center must remain the only measure of
+opening. The stated 65/80/90 percent ranges are qualitative feel goals, not new
+pose inputs or threshold bands. See [SPHERE-SPACE-CONTROL.md](SPHERE-SPACE-CONTROL.md).
+
+- [x] Record sphere-only requirements and study separate direction/distance filtering before nonlinear range expansion, including angular contraction and nearby gain checks.
+- [ ] Implement a bounded optional VRChat comparison, validate ordinary near-hand behavior and range-independent turning in compiled Udon, then obtain physical feedback. Keep RAW/original comparisons and distinguish filter effects from range-curve changes; the study's illustrative ninth-power curve is not an approved default.
+
+The study does not change production code or headset content. Do not treat
+numerical noise/response results as physical acceptance or let research displace
+the VRChat delivery plan.
+
 ## World presentation direction, 2026-09-27 UTC
 
 Dana added a design conversation and four preferred architectural images; see

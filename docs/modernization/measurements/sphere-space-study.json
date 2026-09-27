@@ -1,0 +1,673 @@
+{
+  "scope": "Double-precision numerical experiment, not a Unity/Udon implementation or deployment.",
+  "input": "Existing sphere-derived center-minus-hand vector. No new openness feature.",
+  "curve": {
+    "near_sphere_m": 0.08,
+    "maximum_near_reach_m": 3.0,
+    "far_sphere_m": 0.12,
+    "far_reach_m": 100.0,
+    "derived_power": 9,
+    "origin_gain": 1,
+    "tail_coefficient": 99.16
+  },
+  "response": [
+    {
+      "hz": 30,
+      "angle_deg": 1,
+      "sphere_distance_m": 0.005,
+      "candidate_reach_m": 0.006250000037534907,
+      "angular_90pct_seconds": 0.1,
+      "minimum_radius_fraction": 0.9999999999999998
+    },
+    {
+      "hz": 30,
+      "angle_deg": 1,
+      "sphere_distance_m": 0.02,
+      "candidate_reach_m": 0.040009839550627445,
+      "angular_90pct_seconds": 0.1,
+      "minimum_radius_fraction": 0.9999999999999998
+    },
+    {
+      "hz": 30,
+      "angle_deg": 1,
+      "sphere_distance_m": 0.07,
+      "candidate_reach_m": 1.0905104669463266,
+      "angular_90pct_seconds": 0.1,
+      "minimum_radius_fraction": 0.9999999999999988
+    },
+    {
+      "hz": 30,
+      "angle_deg": 1,
+      "sphere_distance_m": 0.12,
+      "candidate_reach_m": 100.0,
+      "angular_90pct_seconds": 0.1,
+      "minimum_radius_fraction": 0.999999999999999
+    },
+    {
+      "hz": 30,
+      "angle_deg": 1,
+      "sphere_distance_m": 0.5,
+      "candidate_reach_m": 37534919.87349323,
+      "angular_90pct_seconds": 0.1,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 30,
+      "angle_deg": 1,
+      "sphere_distance_m": 2,
+      "candidate_reach_m": 9839550627647.01,
+      "angular_90pct_seconds": 0.1,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 30,
+      "angle_deg": 90,
+      "sphere_distance_m": 0.005,
+      "candidate_reach_m": 0.006250000037534907,
+      "angular_90pct_seconds": 0.03333333333333333,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 30,
+      "angle_deg": 90,
+      "sphere_distance_m": 0.02,
+      "candidate_reach_m": 0.040009839550627445,
+      "angular_90pct_seconds": 0.03333333333333333,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 30,
+      "angle_deg": 90,
+      "sphere_distance_m": 0.07,
+      "candidate_reach_m": 1.0905104669463266,
+      "angular_90pct_seconds": 0.03333333333333333,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 30,
+      "angle_deg": 90,
+      "sphere_distance_m": 0.12,
+      "candidate_reach_m": 100.0,
+      "angular_90pct_seconds": 0.03333333333333333,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 30,
+      "angle_deg": 90,
+      "sphere_distance_m": 0.5,
+      "candidate_reach_m": 37534919.87349323,
+      "angular_90pct_seconds": 0.03333333333333333,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 30,
+      "angle_deg": 90,
+      "sphere_distance_m": 2,
+      "candidate_reach_m": 9839550627647.01,
+      "angular_90pct_seconds": 0.03333333333333333,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 30,
+      "angle_deg": 170,
+      "sphere_distance_m": 0.005,
+      "candidate_reach_m": 0.006250000037534907,
+      "angular_90pct_seconds": 0.03333333333333333,
+      "minimum_radius_fraction": 0.9999999999999998
+    },
+    {
+      "hz": 30,
+      "angle_deg": 170,
+      "sphere_distance_m": 0.02,
+      "candidate_reach_m": 0.040009839550627445,
+      "angular_90pct_seconds": 0.03333333333333333,
+      "minimum_radius_fraction": 0.9999999999999998
+    },
+    {
+      "hz": 30,
+      "angle_deg": 170,
+      "sphere_distance_m": 0.07,
+      "candidate_reach_m": 1.0905104669463266,
+      "angular_90pct_seconds": 0.03333333333333333,
+      "minimum_radius_fraction": 0.9999999999999988
+    },
+    {
+      "hz": 30,
+      "angle_deg": 170,
+      "sphere_distance_m": 0.12,
+      "candidate_reach_m": 100.0,
+      "angular_90pct_seconds": 0.03333333333333333,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 30,
+      "angle_deg": 170,
+      "sphere_distance_m": 0.5,
+      "candidate_reach_m": 37534919.87349323,
+      "angular_90pct_seconds": 0.03333333333333333,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 30,
+      "angle_deg": 170,
+      "sphere_distance_m": 2,
+      "candidate_reach_m": 9839550627647.01,
+      "angular_90pct_seconds": 0.03333333333333333,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 30,
+      "angle_deg": 180,
+      "sphere_distance_m": 0.005,
+      "candidate_reach_m": 0.006250000037534907,
+      "angular_90pct_seconds": 0.1,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 30,
+      "angle_deg": 180,
+      "sphere_distance_m": 0.02,
+      "candidate_reach_m": 0.040009839550627445,
+      "angular_90pct_seconds": 0.1,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 30,
+      "angle_deg": 180,
+      "sphere_distance_m": 0.07,
+      "candidate_reach_m": 1.0905104669463266,
+      "angular_90pct_seconds": 0.1,
+      "minimum_radius_fraction": 0.9999999999999988
+    },
+    {
+      "hz": 30,
+      "angle_deg": 180,
+      "sphere_distance_m": 0.12,
+      "candidate_reach_m": 100.0,
+      "angular_90pct_seconds": 0.1,
+      "minimum_radius_fraction": 0.999999999999999
+    },
+    {
+      "hz": 30,
+      "angle_deg": 180,
+      "sphere_distance_m": 0.5,
+      "candidate_reach_m": 37534919.87349323,
+      "angular_90pct_seconds": 0.1,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 30,
+      "angle_deg": 180,
+      "sphere_distance_m": 2,
+      "candidate_reach_m": 9839550627647.01,
+      "angular_90pct_seconds": 0.1,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 72,
+      "angle_deg": 1,
+      "sphere_distance_m": 0.005,
+      "candidate_reach_m": 0.006250000037534907,
+      "angular_90pct_seconds": 0.05555555555555555,
+      "minimum_radius_fraction": 0.9999999999999998
+    },
+    {
+      "hz": 72,
+      "angle_deg": 1,
+      "sphere_distance_m": 0.02,
+      "candidate_reach_m": 0.040009839550627445,
+      "angular_90pct_seconds": 0.05555555555555555,
+      "minimum_radius_fraction": 0.9999999999999998
+    },
+    {
+      "hz": 72,
+      "angle_deg": 1,
+      "sphere_distance_m": 0.07,
+      "candidate_reach_m": 1.0905104669463266,
+      "angular_90pct_seconds": 0.05555555555555555,
+      "minimum_radius_fraction": 0.9999999999999988
+    },
+    {
+      "hz": 72,
+      "angle_deg": 1,
+      "sphere_distance_m": 0.12,
+      "candidate_reach_m": 100.0,
+      "angular_90pct_seconds": 0.05555555555555555,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 72,
+      "angle_deg": 1,
+      "sphere_distance_m": 0.5,
+      "candidate_reach_m": 37534919.87349323,
+      "angular_90pct_seconds": 0.05555555555555555,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 72,
+      "angle_deg": 1,
+      "sphere_distance_m": 2,
+      "candidate_reach_m": 9839550627647.01,
+      "angular_90pct_seconds": 0.05555555555555555,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 72,
+      "angle_deg": 90,
+      "sphere_distance_m": 0.005,
+      "candidate_reach_m": 0.006250000037534907,
+      "angular_90pct_seconds": 0.013888888888888888,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 72,
+      "angle_deg": 90,
+      "sphere_distance_m": 0.02,
+      "candidate_reach_m": 0.040009839550627445,
+      "angular_90pct_seconds": 0.013888888888888888,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 72,
+      "angle_deg": 90,
+      "sphere_distance_m": 0.07,
+      "candidate_reach_m": 1.0905104669463266,
+      "angular_90pct_seconds": 0.013888888888888888,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 72,
+      "angle_deg": 90,
+      "sphere_distance_m": 0.12,
+      "candidate_reach_m": 100.0,
+      "angular_90pct_seconds": 0.013888888888888888,
+      "minimum_radius_fraction": 0.999999999999999
+    },
+    {
+      "hz": 72,
+      "angle_deg": 90,
+      "sphere_distance_m": 0.5,
+      "candidate_reach_m": 37534919.87349323,
+      "angular_90pct_seconds": 0.013888888888888888,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 72,
+      "angle_deg": 90,
+      "sphere_distance_m": 2,
+      "candidate_reach_m": 9839550627647.01,
+      "angular_90pct_seconds": 0.013888888888888888,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 72,
+      "angle_deg": 170,
+      "sphere_distance_m": 0.005,
+      "candidate_reach_m": 0.006250000037534907,
+      "angular_90pct_seconds": 0.013888888888888888,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 72,
+      "angle_deg": 170,
+      "sphere_distance_m": 0.02,
+      "candidate_reach_m": 0.040009839550627445,
+      "angular_90pct_seconds": 0.013888888888888888,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 72,
+      "angle_deg": 170,
+      "sphere_distance_m": 0.07,
+      "candidate_reach_m": 1.0905104669463266,
+      "angular_90pct_seconds": 0.013888888888888888,
+      "minimum_radius_fraction": 0.9999999999999988
+    },
+    {
+      "hz": 72,
+      "angle_deg": 170,
+      "sphere_distance_m": 0.12,
+      "candidate_reach_m": 100.0,
+      "angular_90pct_seconds": 0.013888888888888888,
+      "minimum_radius_fraction": 0.999999999999999
+    },
+    {
+      "hz": 72,
+      "angle_deg": 170,
+      "sphere_distance_m": 0.5,
+      "candidate_reach_m": 37534919.87349323,
+      "angular_90pct_seconds": 0.013888888888888888,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 72,
+      "angle_deg": 170,
+      "sphere_distance_m": 2,
+      "candidate_reach_m": 9839550627647.01,
+      "angular_90pct_seconds": 0.013888888888888888,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 72,
+      "angle_deg": 180,
+      "sphere_distance_m": 0.005,
+      "candidate_reach_m": 0.006250000037534907,
+      "angular_90pct_seconds": 0.06944444444444445,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 72,
+      "angle_deg": 180,
+      "sphere_distance_m": 0.02,
+      "candidate_reach_m": 0.040009839550627445,
+      "angular_90pct_seconds": 0.06944444444444445,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 72,
+      "angle_deg": 180,
+      "sphere_distance_m": 0.07,
+      "candidate_reach_m": 1.0905104669463266,
+      "angular_90pct_seconds": 0.06944444444444445,
+      "minimum_radius_fraction": 0.9999999999999988
+    },
+    {
+      "hz": 72,
+      "angle_deg": 180,
+      "sphere_distance_m": 0.12,
+      "candidate_reach_m": 100.0,
+      "angular_90pct_seconds": 0.06944444444444445,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 72,
+      "angle_deg": 180,
+      "sphere_distance_m": 0.5,
+      "candidate_reach_m": 37534919.87349323,
+      "angular_90pct_seconds": 0.06944444444444445,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 72,
+      "angle_deg": 180,
+      "sphere_distance_m": 2,
+      "candidate_reach_m": 9839550627647.01,
+      "angular_90pct_seconds": 0.06944444444444445,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 120,
+      "angle_deg": 1,
+      "sphere_distance_m": 0.005,
+      "candidate_reach_m": 0.006250000037534907,
+      "angular_90pct_seconds": 0.05,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 120,
+      "angle_deg": 1,
+      "sphere_distance_m": 0.02,
+      "candidate_reach_m": 0.040009839550627445,
+      "angular_90pct_seconds": 0.05,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 120,
+      "angle_deg": 1,
+      "sphere_distance_m": 0.07,
+      "candidate_reach_m": 1.0905104669463266,
+      "angular_90pct_seconds": 0.05,
+      "minimum_radius_fraction": 0.9999999999999988
+    },
+    {
+      "hz": 120,
+      "angle_deg": 1,
+      "sphere_distance_m": 0.12,
+      "candidate_reach_m": 100.0,
+      "angular_90pct_seconds": 0.05,
+      "minimum_radius_fraction": 0.999999999999999
+    },
+    {
+      "hz": 120,
+      "angle_deg": 1,
+      "sphere_distance_m": 0.5,
+      "candidate_reach_m": 37534919.87349323,
+      "angular_90pct_seconds": 0.05,
+      "minimum_radius_fraction": 0.999999999999998
+    },
+    {
+      "hz": 120,
+      "angle_deg": 1,
+      "sphere_distance_m": 2,
+      "candidate_reach_m": 9839550627647.01,
+      "angular_90pct_seconds": 0.05,
+      "minimum_radius_fraction": 0.999999999999998
+    },
+    {
+      "hz": 120,
+      "angle_deg": 90,
+      "sphere_distance_m": 0.005,
+      "candidate_reach_m": 0.006250000037534907,
+      "angular_90pct_seconds": 0.016666666666666666,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 120,
+      "angle_deg": 90,
+      "sphere_distance_m": 0.02,
+      "candidate_reach_m": 0.040009839550627445,
+      "angular_90pct_seconds": 0.016666666666666666,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 120,
+      "angle_deg": 90,
+      "sphere_distance_m": 0.07,
+      "candidate_reach_m": 1.0905104669463266,
+      "angular_90pct_seconds": 0.016666666666666666,
+      "minimum_radius_fraction": 0.9999999999999988
+    },
+    {
+      "hz": 120,
+      "angle_deg": 90,
+      "sphere_distance_m": 0.12,
+      "candidate_reach_m": 100.0,
+      "angular_90pct_seconds": 0.016666666666666666,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 120,
+      "angle_deg": 90,
+      "sphere_distance_m": 0.5,
+      "candidate_reach_m": 37534919.87349323,
+      "angular_90pct_seconds": 0.016666666666666666,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 120,
+      "angle_deg": 90,
+      "sphere_distance_m": 2,
+      "candidate_reach_m": 9839550627647.01,
+      "angular_90pct_seconds": 0.016666666666666666,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 120,
+      "angle_deg": 170,
+      "sphere_distance_m": 0.005,
+      "candidate_reach_m": 0.006250000037534907,
+      "angular_90pct_seconds": 0.008333333333333333,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 120,
+      "angle_deg": 170,
+      "sphere_distance_m": 0.02,
+      "candidate_reach_m": 0.040009839550627445,
+      "angular_90pct_seconds": 0.008333333333333333,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 120,
+      "angle_deg": 170,
+      "sphere_distance_m": 0.07,
+      "candidate_reach_m": 1.0905104669463266,
+      "angular_90pct_seconds": 0.008333333333333333,
+      "minimum_radius_fraction": 0.9999999999999988
+    },
+    {
+      "hz": 120,
+      "angle_deg": 170,
+      "sphere_distance_m": 0.12,
+      "candidate_reach_m": 100.0,
+      "angular_90pct_seconds": 0.008333333333333333,
+      "minimum_radius_fraction": 0.999999999999999
+    },
+    {
+      "hz": 120,
+      "angle_deg": 170,
+      "sphere_distance_m": 0.5,
+      "candidate_reach_m": 37534919.87349323,
+      "angular_90pct_seconds": 0.008333333333333333,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 120,
+      "angle_deg": 170,
+      "sphere_distance_m": 2,
+      "candidate_reach_m": 9839550627647.01,
+      "angular_90pct_seconds": 0.008333333333333333,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 120,
+      "angle_deg": 180,
+      "sphere_distance_m": 0.005,
+      "candidate_reach_m": 0.006250000037534907,
+      "angular_90pct_seconds": 0.058333333333333334,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 120,
+      "angle_deg": 180,
+      "sphere_distance_m": 0.02,
+      "candidate_reach_m": 0.040009839550627445,
+      "angular_90pct_seconds": 0.058333333333333334,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 120,
+      "angle_deg": 180,
+      "sphere_distance_m": 0.07,
+      "candidate_reach_m": 1.0905104669463266,
+      "angular_90pct_seconds": 0.058333333333333334,
+      "minimum_radius_fraction": 0.9999999999999988
+    },
+    {
+      "hz": 120,
+      "angle_deg": 180,
+      "sphere_distance_m": 0.12,
+      "candidate_reach_m": 100.0,
+      "angular_90pct_seconds": 0.058333333333333334,
+      "minimum_radius_fraction": 0.999999999999999
+    },
+    {
+      "hz": 120,
+      "angle_deg": 180,
+      "sphere_distance_m": 0.5,
+      "candidate_reach_m": 37534919.87349323,
+      "angular_90pct_seconds": 0.058333333333333334,
+      "minimum_radius_fraction": 1.0
+    },
+    {
+      "hz": 120,
+      "angle_deg": 180,
+      "sphere_distance_m": 2,
+      "candidate_reach_m": 9839550627647.01,
+      "angular_90pct_seconds": 0.058333333333333334,
+      "minimum_radius_fraction": 1.0
+    }
+  ],
+  "jitter": [
+    {
+      "hz": 30,
+      "sphere_distance_m": 0.02,
+      "raw_radial_rms_m": 0.0005989663171917638,
+      "filtered_radial_rms_m": 0.0002554161634449019,
+      "raw_angle_rms_deg": 0.04823759029494619,
+      "filtered_angle_rms_deg": 0.03244008317805039
+    },
+    {
+      "hz": 30,
+      "sphere_distance_m": 0.07,
+      "raw_radial_rms_m": 0.02092377664381562,
+      "filtered_radial_rms_m": 0.010127144613067313,
+      "raw_angle_rms_deg": 0.05174413122838103,
+      "filtered_angle_rms_deg": 0.034910678300680516
+    },
+    {
+      "hz": 30,
+      "sphere_distance_m": 0.12,
+      "raw_radial_rms_m": 1.5002246029556865,
+      "filtered_radial_rms_m": 0.7235455791320368,
+      "raw_angle_rms_deg": 0.04993696016352754,
+      "filtered_angle_rms_deg": 0.03430471818362359
+    },
+    {
+      "hz": 72,
+      "sphere_distance_m": 0.02,
+      "raw_radial_rms_m": 0.0005912264049830785,
+      "filtered_radial_rms_m": 0.0001976285302657389,
+      "raw_angle_rms_deg": 0.04862024242042604,
+      "filtered_angle_rms_deg": 0.024802584852867064
+    },
+    {
+      "hz": 72,
+      "sphere_distance_m": 0.07,
+      "raw_radial_rms_m": 0.022070285746514925,
+      "filtered_radial_rms_m": 0.007101215107821238,
+      "raw_angle_rms_deg": 0.05333700272472233,
+      "filtered_angle_rms_deg": 0.02684857140612907
+    },
+    {
+      "hz": 72,
+      "sphere_distance_m": 0.12,
+      "raw_radial_rms_m": 1.5293065998421573,
+      "filtered_radial_rms_m": 0.4854018171952437,
+      "raw_angle_rms_deg": 0.050043279952937066,
+      "filtered_angle_rms_deg": 0.024241473353011595
+    },
+    {
+      "hz": 120,
+      "sphere_distance_m": 0.02,
+      "raw_radial_rms_m": 0.0005969057675098966,
+      "filtered_radial_rms_m": 0.00015791474896403415,
+      "raw_angle_rms_deg": 0.050668278053790046,
+      "filtered_angle_rms_deg": 0.02134612161998415
+    },
+    {
+      "hz": 120,
+      "sphere_distance_m": 0.07,
+      "raw_radial_rms_m": 0.02181710813710972,
+      "filtered_radial_rms_m": 0.005668502088062483,
+      "raw_angle_rms_deg": 0.05044409508811232,
+      "filtered_angle_rms_deg": 0.020242720015912662
+    },
+    {
+      "hz": 120,
+      "sphere_distance_m": 0.12,
+      "raw_radial_rms_m": 1.4223121338462161,
+      "filtered_radial_rms_m": 0.38088125100219994,
+      "raw_angle_rms_deg": 0.05038787098020406,
+      "filtered_angle_rms_deg": 0.02076268802616439
+    }
+  ],
+  "limitations": [
+    "Sphere-distance anchors are illustrative, not calibrated to 65/80/90 percent hand opening.",
+    "Independent radial/angular filtering needs near-origin and antipodal design review.",
+    "Current-palm transport adds no filter lag to rigid pose, but also passes palm-pose noise.",
+    "No tracking ground truth, perceptual tuning, raw joint API improvement or runtime performance evidence.",
+    "The candidate power-law tail grows much faster than legacy at extreme input; runtime finite-range handling is unresolved."
+  ],
+  "contracts": "PASS: curve anchors, monotonicity, direction/range decoupling, 30/72/120Hz, rigid/mirrored transport, zero endpoint."
+}
