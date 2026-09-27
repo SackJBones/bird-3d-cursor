@@ -345,4 +345,17 @@ physical XR tracking, headset perception or VRChat validation. See
 
 ### Standard VRChat tracking lab
 
-Invoke-UnityTrackingLab.ps1 uses the maintained BirdWorld project and the SDK public Build / BuildAndTest APIs. Use -Generate only for an absent scene, -Check for real compiled-Udon ClientSim/native-Interact/render validation, and -Launch for the Android device transfer/launch. The runner also performs the SDK upload compressed/uncompressed size checks. It preserves SDK validation and does not upload. The lab has no Bird solver dependency; runtime scripts expose local avatar bones and tracking origins, with a standard mirror and native switches. See docs/modernization/TRACKING-LAB.md for the exact workflow, evidence and private-upload path.
+`Invoke-UnityTrackingLab.ps1` restores the maintained lab sources and uses the
+SDK public Build / BuildAndTest APIs. Android is the default. `-Platform Windows`
+selects PC; `-Platform Both` builds Windows then Android and compares processed
+scene layout, colliders, spawns, Udon bindings and SDK network IDs. Separate
+bundles/JSON audit records remain under ignored Validation/TrackingLab.
+
+Use `-Check` for saved-scene compiled-Udon marker/native-control/render checks
+and `-CheckBird` for articulated SDK avatar fixtures through the actual solver
+and optional UI station. `-SkipBuild` runs checks without exporting. `-Launch`
+explicitly requests transfer/client launch for one selected platform. No online
+upload is performed. Use authoring switches only when intending to modify the
+saved scene; `-Generate`, `-AddBird` and `-AddUi` refuse to overwrite existing
+content. See [TRACKING-LAB.md](../docs/modernization/TRACKING-LAB.md) for complete
+commands, build-audit limits and the normal private-upload path.

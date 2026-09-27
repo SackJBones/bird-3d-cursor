@@ -192,16 +192,20 @@ public static class UnityTrackingLab
         }
         catch(Exception e) { Finish("lab-layout",false,e.ToString()); }
     }
-    public static void BuildAndroid() { Build(false); }
-    public static void BuildAndTestAndroid() { Build(true); }
-    static async void Build(bool launch)
+    public static void BuildAndroid() { Build(false,BuildTarget.Android); }
+    public static void BuildAndTestAndroid() { Build(true,BuildTarget.Android); }
+    public static void BuildCurrent() { Build(false,EditorUserBuildSettings.activeBuildTarget); }
+    public static void BuildAndTestCurrent() { Build(true,EditorUserBuildSettings.activeBuildTarget); }
+    static async void Build(bool launch,BuildTarget target)
     {
         File.WriteAllText("lab-build-result.txt","PENDING");
         bool hadPref=EditorPrefs.HasKey("VRC.SDKBase_StripAllShaders"), oldPref=EditorPrefs.GetBool("VRC.SDKBase_StripAllShaders");
         try
         {
-            if(EditorUserBuildSettings.activeBuildTarget!=BuildTarget.Android) throw new Exception("Android target required");
-            EditorSceneManager.OpenScene(ScenePath); Compile(); descriptor=UnityEngine.Object.FindObjectOfType<VRCSceneDescriptor>();
+            if(EditorUserBuildSettings.activeBuildTarget!=target || (target!=BuildTarget.Android && target!=BuildTarget.StandaloneWindows64)) throw new Exception("Use Android or Windows x64 target");
+            bool mobile=target==BuildTarget.Android; string platform=mobile?"Android":"Windows";
+            var scene=EditorSceneManager.OpenScene(ScenePath); Compile(); descriptor=UnityEngine.Object.FindObjectOfType<VRCSceneDescriptor>();
+            UnityTrackingLabBuildAudit.Begin(scene);
             panel=ScriptableObject.CreateInstance<VRCSdkControlPanel>(); var builder=new VRCSdkControlPanelWorldBuilder(); builder.RegisterBuilder(panel);
             if(!builder.IsValidBuilder(out string reason)) throw new Exception(reason);
             string sdkErrors="",artifact=null;
@@ -209,12 +213,13 @@ public static class UnityTrackingLab
             builder.OnSdkBuildSuccess+=(_,path)=>artifact=path;
             if(launch) await builder.BuildAndTest(); else artifact=await builder.Build();
             if(!string.IsNullOrEmpty(sdkErrors) || string.IsNullOrEmpty(artifact) || !File.Exists(artifact)) throw new Exception("SDK build did not produce a successful artifact: "+sdkErrors);
-            Directory.CreateDirectory("../Validation/TrackingLab"); string output="../Validation/TrackingLab/BirdTrackingLab_Android.vrcw"; File.Copy(artifact,output,true);
+            Directory.CreateDirectory("../Validation/TrackingLab"); string output="../Validation/TrackingLab/BirdTrackingLab_"+platform+".vrcw"; File.Copy(artifact,output,true);
             string hash; using(var stream=File.OpenRead(output)) using(var sha=SHA256.Create()) hash=BitConverter.ToString(sha.ComputeHash(stream)).Replace("-","");
             // The upload path performs these same platform size checks after BuildWithSignature.
-            if(ValidationEditorHelpers.CheckIfAssetBundleFileTooLarge(ContentType.World,output,out int size,true)) throw new Exception("Upload compressed size check failed: "+size);
-            if(ValidationEditorHelpers.CheckIfUncompressedAssetBundleFileTooLarge(ContentType.World,out int unpacked,true)) throw new Exception("Upload uncompressed size check failed: "+unpacked);
-            Finish("lab-build",true,"SDK Android world build; bytes="+new FileInfo(output).Length+" SHA256="+hash+"; normal SDK validation passed; "+(launch?"BuildAndTest transfer/launch requested; inspect device for actual load.":"not launched.") ,false);
+            if(ValidationEditorHelpers.CheckIfAssetBundleFileTooLarge(ContentType.World,output,out int size,mobile)) throw new Exception("Upload compressed size check failed: "+size);
+            if(ValidationEditorHelpers.CheckIfUncompressedAssetBundleFileTooLarge(ContentType.World,out int unpacked,mobile)) throw new Exception("Upload uncompressed size check failed: "+unpacked);
+            string audit=UnityTrackingLabBuildAudit.Complete(output,launch);
+            Finish("lab-build",true,"SDK "+platform+" world build; bytes="+new FileInfo(output).Length+" SHA256="+hash+"; normal SDK validation and upload-size gates passed; "+audit+"; "+(launch?"BuildAndTest transfer/launch requested; inspect client for actual load.":"not launched.") ,false);
         }
         catch(Exception e)
         {
@@ -224,6 +229,7 @@ public static class UnityTrackingLab
         }
         finally
         {
+            UnityTrackingLabBuildAudit.End();
             if(hadPref) EditorPrefs.SetBool("VRC.SDKBase_StripAllShaders",oldPref); else EditorPrefs.DeleteKey("VRC.SDKBase_StripAllShaders");
             if(panel!=null) UnityEngine.Object.DestroyImmediate(panel);
             EditorApplication.Exit(File.ReadAllText("lab-build-result.txt").StartsWith("PASS:")?0:1);

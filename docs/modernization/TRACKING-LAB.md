@@ -100,14 +100,66 @@ An SDK transfer/launch result is distinct from a successful in-client scene load
 The world logs `BIRD_TRACKING_LAB_READY` once its Udon status component has a local
 player. Actual client logs and physical view must be assessed separately.
 
+## Build the same lab for Windows and Android
+
+The runner defaults to Android. Use `-Platform Windows` for PC, or build both
+without launching either client:
+
+```powershell
+./tests/Invoke-UnityTrackingLab.ps1 `
+  -UnityEditor 'C:/Program Files/Unity/Hub/Editor/2022.3.22f1/Editor/Unity.exe' `
+  -ProjectPath '../bird-3d-cursor-projects/BirdWorld' `
+  -Platform Both
+```
+
+Add `-Check -CheckBird` after scene or runtime changes to run the saved-scene
+and compiled-Udon avatar/UI suites on each selected target. Authoring switches
+run only once. Both builds Windows first and Android second, leaving Android
+selected for the usual Quest workflow. `-Launch` is explicit and accepts only
+one platform; it uses that platform's ordinary SDK BuildAndTest. No mode uploads.
+
+Each platform uses normal SDK scene/project validation, compilation/export and
+compressed/uncompressed upload-size gates. An editor-only scene-processing
+observer then checks the actual processed lab: one descriptor/pipeline and a
+spawn, all authored Udon program bindings with nonempty compiled programs,
+no missing scripts and no remaining project MonoBehaviours. It never alters
+the scene or disables SDK validation. The normal SDK panel remains authoritative
+for its warnings, account eligibility and online publishing.
+
+The ignored `Validation/TrackingLab` folder contains separate
+`BirdTrackingLab_Windows.vrcw` and `BirdTrackingLab_Android.vrcw`, each with a JSON
+build record. The record includes the artifact hash/size, source scene identity,
+Unity/Worlds SDK versions, maintained runtime/shader source hash, processed
+component/program inventory and layout/network bindings. The final Both step
+checks the bundle hashes and compares the two processed layouts, collider
+shapes, spawn paths, component inventories, Udon source bindings and SDK network
+IDs. Runtime sources must still match the records. Catalog loading confirms
+the expected scene is in each bundle; it does not instantiate a VRChat client.
+
+Results/logs in BirdWorld also retain their platform suffixes (for example,
+`lab-build-StandaloneWindows64-result.txt`, `lab-build-Android-result.txt` and
+`lab-platforms-result.txt`). Unsuffixed result/log files describe the most recent
+step for compatibility with the existing workflow. Build records are evidence
+for those artifacts, not an upload authorization or a guarantee of identical
+platform rendering, performance or multiplayer behavior.
+
+For a clean checkout, restore the pinned VPM packages with Creator Companion
+or `vpm resolve project <absolute BirdWorld path>` before running the script.
+The runner restores maintained runtime source/metas, shaders and lab helpers;
+Unity regenerates Udon bytecode. It must not depend on another project's Library,
+ignored compiled programs or old validation helpers. See the latest checkpoint
+for the clean-restoration test and precise build evidence.
+
 ## Path to a private world
 
 Open this same saved scene in the normal SDK panel, sign in to the uploading
 VRChat account and choose online publishing when ready. Supply name, description,
 thumbnail and capacity, and retain the assigned Pipeline Manager blueprint ID
-for updates. Keep it private. Add a Windows build under that same ID if PC friends
-should join; the Android version serves Quest. No lab-specific runtime conversion
-or replacement input system is needed.
+for updates. Keep it private. The normal SDK Builder platform selector supports
+Windows and Android together; both must use that same blueprint ID. The SDK
+performs its ordinary build/upload for each platform from this authored scene.
+The local audit bundles are validation artifacts, not a separate manual-upload
+format. No lab-specific runtime conversion or replacement input system is needed.
 
 Build and Test and upload share normal SDK scene validation/export. The helper
 also calls the compressed and uncompressed world-size checks used by upload.
