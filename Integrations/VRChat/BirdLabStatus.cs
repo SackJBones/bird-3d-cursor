@@ -13,16 +13,18 @@ public class BirdLabStatus : UdonSharpBehaviour
     private float nextSample;
     private bool announced;
 
-    private void Update()
+    public override void PostLateUpdate()
     {
-        if (Time.time < nextSample) return;
-        nextSample = Time.time + 0.2f;
+        if (!enabled || !gameObject.activeInHierarchy) return;
         VRCPlayerApi player = Networking.LocalPlayer;
         if (!Utilities.IsValid(player)) return;
         Vector3 left = player.GetTrackingData(VRCPlayerApi.TrackingDataType.LeftHand).position;
         Vector3 right = player.GetTrackingData(VRCPlayerApi.TrackingDataType.RightHand).position;
         if (leftOrigin != null) leftOrigin.position = left;
         if (rightOrigin != null) rightOrigin.position = right;
+        // Text allocation is throttled independently from the live hand markers.
+        if (Time.time < nextSample) return;
+        nextSample = Time.time + 0.2f;
         if (status != null)
             status.text = "LOCAL PLAYER / " + (player.IsUserInVR() ? "VR" : "DESKTOP") +
                 "\nAvatar eye height: " + player.GetAvatarEyeHeightAsMeters().ToString("F2") + " m" +
@@ -33,7 +35,7 @@ public class BirdLabStatus : UdonSharpBehaviour
         if (!announced)
         {
             announced = true;
-            Debug.Log("BIRD_TRACKING_LAB_READY: v0.1; local player available; standard world diagnostics active; Bird solver not enabled.");
+            Debug.Log("BIRD_TRACKING_LAB_READY: v0.2; per-frame post-IK markers; standard world diagnostics active; Bird solver not enabled.");
         }
     }
 }

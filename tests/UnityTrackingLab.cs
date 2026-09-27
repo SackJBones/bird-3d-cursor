@@ -85,6 +85,7 @@ public static class UnityTrackingLab
                 "Use VRChat's normal interaction on the two controls.\nCompare your avatar hands with the colored bone markers.\nBird will be added here after the input is understood.",30);
             var overlay = new GameObject("Local hand diagnostics");
             var probe = overlay.AddUdonSharpComponent<BirdHandDataProbe>();
+            probe.followEveryFrame = true;
             probe.markers = new Transform[32];
             for(int i=0;i<32;i++)
             {
@@ -157,7 +158,7 @@ public static class UnityTrackingLab
     {
         var go=Box(name+" control",position,new Vector3(1.05f,.23f,.13f),dark);
         var value=go.AddUdonSharpComponent<BirdLabToggle>(); value.target=target; value.title=name; value.initiallyEnabled=initiallyEnabled;
-        value.label=Label(name+" label",position-Vector3.forward*.08f,1,.2f,32); value.label.text=name+(initiallyEnabled?" / ON":" / OFF");
+        value.label=Label(name+" label",position-Vector3.forward*.08f,1,.2f,24); value.label.text=name+(initiallyEnabled?" / ON":" / OFF");
         UdonSharpEditorUtility.CopyProxyToUdon(value);
         var vm=UdonSharpEditorUtility.GetBackingUdonBehaviour(value); vm.proximity=3; vm.interactText="Toggle "+name;
     }
@@ -171,10 +172,14 @@ public static class UnityTrackingLab
         try
         {
             var scene=EditorSceneManager.OpenScene(ScenePath);
+            Compile();
+            var probe=UnityEngine.Object.FindObjectOfType<BirdHandDataProbe>(true);
+            probe.followEveryFrame=true;
+            UdonSharpEditorUtility.CopyProxyToUdon(probe);
             foreach(var text in UnityEngine.Object.FindObjectsOfType<Text>(true))
             {
                 string name=text.transform.parent.name;
-                int size=name=="Welcome"?84:name=="Directions"?60:name=="Bone availability"?54:name=="Tracking origins"?50:name=="Mirror instructions"?50:name=="Reference sizes"?60:name.EndsWith("label")?64:84;
+                int size=name=="Welcome"?84:name=="Directions"?60:name=="Bone availability"?54:name=="Tracking origins"?50:name=="Mirror instructions"?50:name=="Reference sizes"?60:name.EndsWith("label")?48:84;
                 text.fontSize=size;
             }
             foreach(string name in new[]{"Floor","Stone"})
@@ -183,7 +188,7 @@ public static class UnityTrackingLab
                 material.shader=Shader.Find("Standard"); material.color=name=="Floor"?new Color(.36f,.42f,.43f):new Color(.63f,.66f,.6f);
                 material.SetFloat("_Glossiness",0); material.SetFloat("_Metallic",0); EditorUtility.SetDirty(material);
             }
-            EditorSceneManager.SaveScene(scene); AssetDatabase.SaveAssets(); Finish("lab-layout",true,"Larger readable labels and tinted standard materials saved.");
+            EditorSceneManager.SaveScene(scene); AssetDatabase.SaveAssets(); Finish("lab-layout",true,"Per-frame post-IK markers, fitted toggle labels and tinted standard materials saved.");
         }
         catch(Exception e) { Finish("lab-layout",false,e.ToString()); }
     }

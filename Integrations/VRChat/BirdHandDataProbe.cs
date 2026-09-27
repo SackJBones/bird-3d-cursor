@@ -9,9 +9,12 @@ public class BirdHandDataProbe : UdonSharpBehaviour
 {
     public Transform[] markers;
     public Text status;
+    [Tooltip("Follow the final avatar pose every frame. Text remains throttled; older diagnostic scenes retain 10 Hz sampling by default.")]
+    public bool followEveryFrame;
     [HideInInspector] public int leftAvailable;
     [HideInInspector] public int rightAvailable;
     private float nextSample;
+    private float nextStatus;
     private bool paused;
     private int[] bones = new int[] {
         (int)HumanBodyBones.LeftHand,
@@ -50,11 +53,24 @@ public class BirdHandDataProbe : UdonSharpBehaviour
 
     private void Update()
     {
+        if (followEveryFrame) return;
         // UdonManager can deliver one queued Update after OnDisable. Keep the
         // cleared display intact until this behaviour is active again.
         if (paused || !enabled || !gameObject.activeInHierarchy) return;
         if (Time.time < nextSample) return;
         nextSample = Time.time + 0.1f;
+        SampleBones();
+    }
+
+    public override void PostLateUpdate()
+    {
+        // VRChat has finished avatar IK here. No interpolation or deliberate delay.
+        if (!followEveryFrame || paused || !enabled || !gameObject.activeInHierarchy) return;
+        SampleBones();
+    }
+
+    private void SampleBones()
+    {
         leftAvailable = 0;
         rightAvailable = 0;
         VRCPlayerApi player = Networking.LocalPlayer;
@@ -70,12 +86,13 @@ public class BirdHandDataProbe : UdonSharpBehaviour
             if (valid) { if (i < 16) leftAvailable++; else rightAvailable++; }
             if (markers != null && i < markers.Length && markers[i] != null)
             {
-                markers[i].gameObject.SetActive(valid);
+                if (markers[i].gameObject.activeSelf != valid) markers[i].gameObject.SetActive(valid);
                 if (valid) markers[i].position = position;
             }
         }
-        if (status != null)
+        if (status != null && Time.time >= nextStatus)
         {
+            nextStatus = Time.time + 0.2f;
             if (!available) status.text = "BIRD / HAND DATA PROBE\nWaiting for local player";
             else status.text = "BIRD / AVATAR BONE PROBE\nLeft " + leftAvailable + "/16  Right " + rightAvailable +
                 "/16\nVR mode: " + player.IsUserInVR() + "\nBones are not raw tracked joints or fingertips";
@@ -99,6 +116,7 @@ public class BirdHandDataProbe : UdonSharpBehaviour
     {
         paused = false;
         nextSample = 0;
+        nextStatus = 0;
     }
 
     private void ClearDisplay()

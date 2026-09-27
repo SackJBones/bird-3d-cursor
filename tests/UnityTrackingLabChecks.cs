@@ -8,11 +8,13 @@ using UdonSharpEditor;
 using VRC.SDKBase;
 using VRC.SDK3.Components;
 
+[DefaultExecutionOrder(32000)] // Observe after the SDK PostLateUpdater (31000).
 public class UnityTrackingLabChecks : MonoBehaviour
 {
     const string Active="Bird.TrackingLab.Checks";
     float deadline,next;
     int stage;
+    int cadenceFrames;
     public static void Run()
     {
         File.WriteAllText("lab-check-result.txt","PENDING");
@@ -30,6 +32,7 @@ public class UnityTrackingLabChecks : MonoBehaviour
         try
         {
             if(Time.unscaledTime>deadline) throw new Exception("ClientSim lab timeout");
+            if(stage==3) return;
             if(!Utilities.IsValid(Networking.LocalPlayer) || Time.timeSinceLevelLoad<3 || Time.unscaledTime<next) return;
             var probe=FindObjectOfType<BirdHandDataProbe>(true); var pv=UdonSharpEditorUtility.GetBackingUdonBehaviour(probe);
             var control=GameObject.Find("Hand markers control").GetComponent<BirdLabToggle>(); var cv=UdonSharpEditorUtility.GetBackingUdonBehaviour(control);
@@ -48,9 +51,7 @@ public class UnityTrackingLabChecks : MonoBehaviour
                 {
                     var descriptor=FindObjectOfType<VRCSceneDescriptor>();
                     Require(Physics.Raycast(descriptor.spawns[0].position+Vector3.up,Vector3.down,out RaycastHit hit,2) && hit.collider.name=="Laboratory floor","Spawn has floor support");
-                    Capture("spawn",new Vector3(0,1.65f,-3),new Vector3(0,1.6f,2));
-                    Capture("overview",new Vector3(4.7f,2.6f,-4.8f),new Vector3(-.3f,1.5f,2));
-                    Finish(true,"Saved scene/compiled Udon normal-frame diagnostics, both native Interact toggles, marker disable/recovery, tracked-origin binding, spawn floor and two renders. Synthetic ClientSim avatar; device validation separate."); return;
+                    stage=3; return;
                 }
                 Require(cv.RunEvent("_interact"),"Native hand toggle event"); Require(mv.RunEvent("_interact"),"Native mirror toggle event");
             }
@@ -62,6 +63,31 @@ public class UnityTrackingLabChecks : MonoBehaviour
                 cv.RunEvent("_interact"); mv.RunEvent("_interact");
             }
             stage++; next=Time.unscaledTime+.5f;
+        }
+        catch(Exception e) { Finish(false,e.ToString()); }
+    }
+    void LateUpdate()
+    {
+        if(!SessionState.GetBool(Active,false) || stage!=3) return;
+        try
+        {
+            var probe=FindObjectOfType<BirdHandDataProbe>(); var pv=UdonSharpEditorUtility.GetBackingUdonBehaviour(probe);
+            var status=FindObjectOfType<BirdLabStatus>(); var sv=UdonSharpEditorUtility.GetBackingUdonBehaviour(status);
+            var markers=(Transform[])pv.GetProgramVariable("markers"); var bones=(int[])pv.GetProgramVariable("bones");
+            var left=(Transform)sv.GetProgramVariable("leftOrigin"); var right=(Transform)sv.GetProgramVariable("rightOrigin");
+            for(int i=0;i<markers.Length;i++) Require(Vector3.Distance(markers[i].position,Networking.LocalPlayer.GetBonePosition((HumanBodyBones)bones[i]))<.0001f,"Same-frame avatar bone "+i);
+            Require(Vector3.Distance(left.position,Networking.LocalPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.LeftHand).position)<.0001f,"Same-frame left origin");
+            Require(Vector3.Distance(right.position,Networking.LocalPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.RightHand).position)<.0001f,"Same-frame right origin");
+            if(++cadenceFrames==30)
+            {
+                Capture("spawn",new Vector3(0,1.65f,-3),new Vector3(0,1.6f,2));
+                Capture("overview",new Vector3(4.7f,2.6f,-4.8f),new Vector3(-.3f,1.5f,2));
+                Finish(true,"Saved scene/compiled Udon: all 34 markers restored to SDK positions on 30 consecutive post-IK frames; both native Interact toggles, disable/recovery, spawn floor and two renders. Synthetic ClientSim avatar; device validation separate."); return;
+            }
+            // Perturb only the output after observing it. A throttled updater leaves
+            // this stale position next frame even when the simulator hand is still.
+            foreach(var marker in markers) marker.position+=Vector3.up;
+            left.position+=Vector3.up; right.position+=Vector3.up;
         }
         catch(Exception e) { Finish(false,e.ToString()); }
     }

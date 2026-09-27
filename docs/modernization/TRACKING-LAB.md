@@ -13,6 +13,24 @@ tracking confidence. Distal bone origins are not fingertip endpoints. The consol
 reports avatar eye height and hand-origin/wrist separation. Nothing fits a sphere,
 calibrates the avatar, records hand data or modifies the player.
 
+In lab v0.2, all 34 markers update every `PostLateUpdate`, after avatar IK.
+Only text refresh is limited to 5 Hz. There is no marker smoothing, deliberate
+delay or positional offset to make them visible outside the avatar. The original
+lab sampled bone markers at 10 Hz and origin markers at 5 Hz; Dana correctly
+noticed the resulting lag beside the smoothly animated avatar hands. Other
+diagnostic scenes retain their opt-in/default cadence. See the official
+[post-IK event](https://udonsharp.docs.vrchat.com/events/).
+
+Dana's input preference is direct tracked hand-joint positions where a supported
+platform API exposes them, with avatar bone positions as the acceptable fallback.
+For the current VRChat world, the documented `GetTrackingData` API gives local
+head/hand origins; finger positions from `GetBonePosition` belong to the avatar.
+No supported raw finger-joint API has been established here. Never describe
+these bone samples or inferred fingertips as exact real hand joints. Preserve
+this source distinction when connecting Bird; avatar proportions and animation
+can affect the fit even with a responsive per-frame sampler. See
+[player positions](https://creators.vrchat.com/worlds/udon/players/player-positions/).
+
 Native VRChat Interact controls toggle the mirror and markers. The mirror starts
 off and is limited to 512-pixel resolution. Diagnostics are per-client; visitors
 do not compete for the switches. Bird clicking is unnecessary. A named integration
@@ -112,3 +130,21 @@ SDK Android setup selected its mobile quality tier and changed audio voice count
 to 32 virtual / 24 real. Those normal project defaults are retained. No SDK source,
 client, account settings, privacy permissions or persistent headset power setting
 was modified. This world has not been uploaded online.
+
+## Marker cadence correction, 2026-09-27 UTC
+
+Lab v0.2 removes the marker sampling throttle after Dana's physical comparison
+with the gray avatar hands. The compiled-Udon ClientSim check now perturbs all
+34 marker transforms between frames, then requires each to match its current
+SDK position after the next post-IK update on 30 consecutive frames. Both native
+controls, marker disable/recovery and spawn support still pass. The marker-toggle
+ON/OFF text now fits, verified in editor renders and an actual Quest stereo capture.
+
+The normal SDK Android BuildAndTest workflow rebuilt and transferred 105,951
+bytes; device SHA256 matches
+`9A2FBB28FC500998AA07193ABB5DDBBFCE957D6C7C9BD4149B7B83C0A3C74A8D`.
+The updated lab is visibly running inside VRChat. This proves deployment and
+runtime operation; subjective motion responsiveness still needs Dana's assessment.
+The prior SDK internal failure-log qualification remains. No matched Udon runtime
+execution exception was found in the client log. The headset had slept; one
+ordinary wake command sufficed, without persistent power-setting changes.
