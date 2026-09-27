@@ -932,3 +932,10 @@ All 76 maintained runtime source/meta files match generated copies and all 302 c
 No headset, account, upload, client launch or standalone APK operation this cycle. Lab 05 remains deployed for Dana's physical corrected-normal/sphere-fit/estimated-tip inspection. Lab 06 remains build-only with its optional reach station off and clicks disabled. Prioritize real avatar fidelity when feedback arrives and continue the agreed world work independently otherwise; physical two-hand feel, validated avatar clicks, physics/lift/dynamic occupancy and multiplayer ownership remain separate pending work.
 
 Final audit: the existing active two-hour heartbeat was updated in place, retaining its task and inherited permissions; the saved UTF-8 prompt exactly matches RECURRING-PROMPT.txt. Both repositories pass whitespace checks.
+
+
+## World-design references from Dana (2026-09-27 UTC)
+
+Read the newly supplied world design conversation and inspected both preferred PNGs (complex lowpoly and spawn point cavern lowpoly). Preserved all three files byte-for-byte in the heavy repository at Reference/WorldDesign20260927 with filename/size/SHA256 provenance, outside Assets; original workspace files are unchanged. WORLD-DESIGN.md distills visitor flow, coastal-ridge/vertical white massing, circular onboarding threshold, social wings, water/overlook and distant-island intent. It clearly separates supplied design direction from a proposed editable blockout/prefab/editor-time mesh workflow.
+
+Dana explicitly keeps current VRChat Bird input/interaction work as the highest priority. Images are architectural and flow references, not exact-render targets; iteration/editability takes precedence. The omitted generated floor plan was unsatisfactory and is not an approved layout, while its written discussion remains useful. No scene, runtime, build or headset change is made for this documentation checkpoint. PLAN and recurring instructions now point future presentation work to these references.

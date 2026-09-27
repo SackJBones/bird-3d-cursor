@@ -29,6 +29,20 @@ Dana prioritizes a normal Android Build and Test world inside VRChat, even befor
 
 See [TRACKING-LAB.md](TRACKING-LAB.md) for reproduction and the publication path. This takes precedence over further feature expansion below.
 
+## World presentation direction, 2026-09-27 UTC
+
+Dana added a design conversation and two preferred architectural images; see
+[WORLD-DESIGN.md](WORLD-DESIGN.md) and the preserved heavy-repository references.
+Current VRChat input/interaction work remains the priority. Later world work
+should favor an editable arrival-to-coastal-complex blockout, a circular Bird
+onboarding threshold, stacked white forms, cozy social rooms and distant reach
+opportunities. Images guide structure/flow rather than exact reproduction.
+The generated floor-plan result was rejected and is not a layout specification.
+Editability for iteration takes precedence over matching a reference rendering.
+
+- [x] Read the supplied conversation, inspect both images and preserve references with provenance.
+- [ ] When presentation work is appropriate, develop an editable spatial blockout and evaluate visitor flow before detailed artwork; do not make this a prerequisite for the current hand-input milestone.
+
 ## Current priorities, 2026-09-26 UTC
 
 Dana physically likes v0.7 and the accepted range transition. Version 0.8
