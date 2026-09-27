@@ -10,6 +10,8 @@ public class BirdLabPointView : UdonSharpBehaviour
     public BirdAvatarHandInput input;
     public Renderer core;
     public LineRenderer halo;
+    [Tooltip("Optional short lab guide toward the logical point; never changes its range.")]
+    public LineRenderer directionGuide;
     public Transform[] tipMarkers;
     public Color tint = Color.cyan;
     private MaterialPropertyBlock coreProperties, haloProperties;
@@ -21,6 +23,13 @@ public class BirdLabPointView : UdonSharpBehaviour
         VRCPlayerApi player = Networking.LocalPlayer;
         if (!Utilities.IsValid(player)) { Clear(); return; }
         var head = player.GetTrackingData(VRCPlayerApi.TrackingDataType.Head);
+        if (directionGuide != null)
+        {
+            Vector3 fromHand = input.cursor.position-input.cursor.handRoot;
+            directionGuide.enabled = fromHand.sqrMagnitude > .000001f;
+            directionGuide.SetPosition(0,input.cursor.handRoot);
+            directionGuide.SetPosition(1,input.cursor.handRoot+fromHand.normalized*Mathf.Min(.4f,fromHand.magnitude));
+        }
         Vector3 offset = input.cursor.position-head.position;
         float distance = Mathf.Max(.001f,offset.magnitude);
         float renderDistance = distance <= 100 ? distance : 100+400*(1-1/(1+(distance-100)/400));
@@ -56,6 +65,7 @@ public class BirdLabPointView : UdonSharpBehaviour
     {
         if (core != null) core.enabled=false;
         if (halo != null) halo.enabled=false;
+        if (directionGuide != null) directionGuide.enabled=false;
         if (tipMarkers != null) foreach(var marker in tipMarkers) if(marker!=null) marker.gameObject.SetActive(false);
     }
     private void OnDisable() { Clear(); }

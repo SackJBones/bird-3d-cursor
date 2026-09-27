@@ -76,6 +76,7 @@ public static class UnityTrackingLabBird
                 if(text.transform.parent.name=="Directions") text.text="Open one hand. Use the other to SET LEFT or SET RIGHT.\nWhite dots are estimated fingertips; colored dots are avatar bones.\nBird uses this approximation. Clicking is not enabled yet.";
                 if(text.transform.parent.name=="Welcome") text.text="BIRD / TRACKING LAB 03\nAvatar geometry, estimated tips, live Bird point";
             }
+            AddPointDiagnostics();
             EditorSceneManager.SaveScene(scene); AssetDatabase.SaveAssets(); UnityTrackingLab.Finish("lab-bird-author",true,"Authored explicit avatar calibration, separate long-range point presentation and logical point-through target.");
         }
         catch(Exception e) { UnityTrackingLab.Finish("lab-bird-author",false,e.ToString()); }
@@ -90,6 +91,7 @@ public static class UnityTrackingLabBird
             var text=hint.GetComponentInChildren<Text>(); text.rectTransform.sizeDelta=new Vector2(850,125); text.fontSize=28;
             var backing=GameObject.Find("Bird target hint backing"); backing.transform.position=hint.transform.position+Vector3.forward*.025f; backing.transform.localScale=new Vector3(1.78f,.33f,.02f);
             FaceCalibrationConsole();
+            AddPointDiagnostics();
             foreach(var control in UnityEngine.Object.FindObjectsOfType<BirdLabHandControl>()) UdonSharpEditorUtility.GetBackingUdonBehaviour(control).proximity=5;
             EditorSceneManager.SaveScene(scene); AssetDatabase.SaveAssets(); UnityTrackingLab.Finish("lab-bird-layout",true,"Calibration console faces the spawn and target clears instructions.");
         }
@@ -105,6 +107,51 @@ public static class UnityTrackingLabBird
                 GameObject.Find(name).transform.SetParent(console.transform,true);
         }
         console.transform.rotation=Quaternion.Euler(0,-50,0);
+    }
+    static void AddPointDiagnostics()
+    {
+        var xray=Shader.Find("Bird/Lab X-ray joints"); if(xray==null) throw new Exception("Restore lab X-ray shader");
+        var probe=UnityEngine.Object.FindObjectOfType<BirdHandDataProbe>();
+        var diagnostic=new Material[3];
+        for(int i=0;i<3;i++)
+        {
+            string name=i==0?"LeftBones":i==1?"RightBones":"XRayTips";
+            diagnostic[i]=AssetDatabase.LoadAssetAtPath<Material>(Folder+name+".mat");
+            if(diagnostic[i]==null) diagnostic[i]=Material(name,xray,i==0?Color.cyan:i==1?new Color(1,.25f,.6f):Color.white);
+        }
+        for(int i=0;i<probe.markers.Length;i++) probe.markers[i].GetComponent<Renderer>().sharedMaterial=diagnostic[i<16?0:1];
+        foreach(var input in UnityEngine.Object.FindObjectsOfType<BirdAvatarHandInput>()) input.status.fontSize=32;
+        foreach(var view in UnityEngine.Object.FindObjectsOfType<BirdLabPointView>())
+        {
+            string name=view.input.rightHand?"Right":"Left";
+            string path=Folder+name+"Direction.mat";
+            var mat=AssetDatabase.LoadAssetAtPath<Material>(path);
+            if(mat==null) mat=Material(name+"Direction",Shader.Find("Unlit/Color"),view.tint);
+            if(view.directionGuide==null)
+            {
+                view.directionGuide=new GameObject(name+" Bird direction guide").AddComponent<LineRenderer>();
+                view.directionGuide.transform.SetParent(view.transform); view.directionGuide.positionCount=2;
+                view.directionGuide.useWorldSpace=true; view.directionGuide.startWidth=view.directionGuide.endWidth=.003f;
+                view.directionGuide.enabled=false;
+            }
+            view.directionGuide.sharedMaterial=mat; UdonSharpEditorUtility.CopyProxyToUdon(view);
+            foreach(var marker in view.tipMarkers) marker.GetComponent<Renderer>().sharedMaterial=diagnostic[2];
+        }
+        // Same point shader at a known ordinary distance, independent of live hand data.
+        // The adjacent ordinary material distinguishes shader failure from missing geometry.
+        var parent=GameObject.Find("Bird integration / avatar approximation").transform;
+        if(GameObject.Find("Bird material reference")==null)
+        {
+            Primitive("Bird material reference",PrimitiveType.Sphere,new Vector3(-.12f,1.48f,.85f),Vector3.one*.08f,
+                AssetDatabase.LoadAssetAtPath<Material>(Folder+"BirdPoint.mat"),parent);
+            Primitive("Ordinary material reference",PrimitiveType.Sphere,new Vector3(.12f,1.48f,.85f),Vector3.one*.08f,
+                AssetDatabase.LoadAssetAtPath<Material>(Folder+"EstimatedTips.mat"),parent);
+            Board("Material reference hint",new Vector3(0,1.65f,.85f),1.8f,.2f,26,"Two white dots: cursor material / ordinary material");
+        }
+        foreach(var text in UnityEngine.Object.FindObjectsOfType<Text>(true))
+        {
+            if(text.transform.parent.name=="Directions") text.text="SET learns fingertip directions: hold that hand straight; use the other to press.\nOrange cubes = hand origins. Small colored dots = joints, visible through skin.\nBird = larger cyan / pink point and short guide. Curl fingers to bring it near.\nWhite fingertip dots are estimates. Clicking is disabled.";
+        }
     }
     static Material Material(string name,Shader shader,Color color)
     { var m=new Material(shader){color=color}; AssetDatabase.CreateAsset(m,Folder+name+".mat"); return m; }

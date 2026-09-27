@@ -70,6 +70,7 @@ public class UnityAvatarHandLabChecks : MonoBehaviour
     }
     IEnumerator Scenarios()
     {
+        CheckDiagnosticRendering();
         for(int side=0;side<2;side++)
         {
             Require(Get<int>(inputs[side],"available")==16,"ClientSim supplies all 16 avatar origins");
@@ -215,6 +216,10 @@ public class UnityAvatarHandLabChecks : MonoBehaviour
             for(int f=2;f<5;f++) for(int j=0;j<4;j++) Near(points[4+(f-2)*4+j],j==3?expectedTips[side,f]:positions[Bone(side,1+f*3+j)],.0001f,"Fit finger mapping");
             Vector3 raw=Get<Vector3>(cursors[side],"rawPosition"); Require(!float.IsNaN(raw.sqrMagnitude) && !float.IsInfinity(raw.sqrMagnitude),"Finite logical range");
             var core=Get<Renderer>(views[side],"core"); Require(core.enabled,"Point view enabled same frame");
+            var guide=Get<LineRenderer>(views[side],"directionGuide");
+            Vector3 root=Get<Vector3>(cursors[side],"handRoot"), filtered=Get<Vector3>(cursors[side],"position");
+            Near(guide.GetPosition(0),root,.00001f,"Guide starts at logical root");
+            Near(guide.GetPosition(1),root+(filtered-root).normalized*Mathf.Min(.4f,(filtered-root).magnitude),.00001f,"Guide is bounded and uses logical direction");
             var head=Networking.LocalPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Head).position;
             Require(Vector3.Distance(core.transform.position,head)<500.1f,"Visual shell does not constrain logical range");
             if(Vector3.Distance(Get<Vector3>(cursors[side],"position"),head)<=4) Require(Mathf.Abs(core.transform.localScale.x-.032f)<.00001f,"Fixed near cursor size");
@@ -276,6 +281,31 @@ public class UnityAvatarHandLabChecks : MonoBehaviour
         camera.cullingMask=~((1<<5)|(1<<9)|(1<<10)|(1<<19)); var target=new RenderTexture(1600,1000,24){antiAliasing=4}; camera.targetTexture=target; camera.Render(); RenderTexture.active=target;
         var image=new Texture2D(1600,1000,TextureFormat.RGB24,false); image.ReadPixels(new Rect(0,0,1600,1000),0,0); image.Apply(); File.WriteAllBytes("../Validation/TrackingLab/"+name+".png",image.EncodeToPNG()); RenderTexture.active=null; camera.targetTexture=null; target.Release(); Destroy(target); Destroy(image); Destroy(camera.gameObject);
         foreach(var item in avatarRenderers) item.Key.enabled=item.Value;
+    }
+    void CheckDiagnosticRendering()
+    {
+        var camera=new GameObject("Isolated diagnostic render check").AddComponent<Camera>();
+        camera.transform.position=new Vector3(1000,1000,997); camera.orthographic=true; camera.orthographicSize=1;
+        camera.nearClipPlane=.01f; camera.farClipPlane=10; camera.cullingMask=1<<31;
+        camera.clearFlags=CameraClearFlags.SolidColor; camera.backgroundColor=Color.black;
+        var sphere=GameObject.CreatePrimitive(PrimitiveType.Sphere); sphere.layer=31; sphere.transform.position=new Vector3(1000,1000,1000); sphere.transform.localScale=Vector3.one*.5f;
+        var wall=GameObject.CreatePrimitive(PrimitiveType.Cube); wall.layer=31; wall.transform.position=new Vector3(1000,1000,999); wall.transform.localScale=new Vector3(2,2,.1f);
+        var black=new Material(Shader.Find("Unlit/Color")){color=Color.black}; wall.GetComponent<Renderer>().sharedMaterial=black;
+        var target=new RenderTexture(128,128,24); camera.targetTexture=target;
+        var pixels=new Texture2D(128,128,TextureFormat.RGB24,false);
+        for(int mode=0;mode<3;mode++)
+        {
+            sphere.GetComponent<Renderer>().sharedMaterial=mode==0?AssetDatabase.LoadAssetAtPath<Material>("Assets/BirdWorld/TrackingLab/EstimatedTips.mat"):
+                mode==1?FindObjectOfType<BirdHandDataProbe>().markers[0].GetComponent<Renderer>().sharedMaterial:
+                AssetDatabase.LoadAssetAtPath<Material>("Assets/BirdWorld/TrackingLab/BirdPoint.mat");
+            wall.SetActive(mode!=2); camera.Render(); RenderTexture.active=target;
+            pixels.ReadPixels(new Rect(0,0,128,128),0,0); pixels.Apply(); RenderTexture.active=null;
+            Color center=pixels.GetPixel(64,64);
+            Require(mode==0?center.maxColorComponent<.05f:mode==1?center.r<.1f && center.g>.8f && center.b>.8f:center.r>.8f && center.g>.8f && center.b>.8f,
+                "Rendered ordinary occlusion / X-ray bone / visible point shader mode="+mode+" color="+center);
+        }
+        camera.targetTexture=null; target.Release(); DestroyImmediate(camera.gameObject); DestroyImmediate(sphere); DestroyImmediate(wall);
+        DestroyImmediate(target); DestroyImmediate(pixels); DestroyImmediate(black);
     }
     void Finish(bool success,string message)
     {

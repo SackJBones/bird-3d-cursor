@@ -165,6 +165,15 @@ public class BirdAvatarHandInput : UdonSharpBehaviour
         nextText = Time.time + .2f;
         status.text = (rightHand ? "RIGHT" : "LEFT")+" / AVATAR BIRD\n"+available+"/16 bones / "+
             (!calibrated ? "Awaiting calibration" : cursor != null && cursor.poseValid ? "Bird active" : "No valid Bird point")+"\n"+calibrationMessage;
+        if (calibrated && cursor != null && cursor.poseValid)
+            status.text += "\nCurl "+cursor.bendDegrees.ToString("F0")+" deg / desired "+RangeLabel((cursor.rawPosition-cursor.handRoot).magnitude)+
+                " / filtered "+RangeLabel((cursor.position-cursor.handRoot).magnitude);
+    }
+    private string RangeLabel(float value)
+    {
+        if (value >= 1000000) return (value/1000000).ToString("F1")+" Mm";
+        if (value >= 1000) return (value/1000).ToString("F1")+" km";
+        return value.ToString("F2")+" m";
     }
     private bool Positive(float f) { return Finite(f) && f > 0; }
     private bool Finite(float f) { return !float.IsNaN(f) && !float.IsInfinity(f); }

@@ -3,6 +3,7 @@ param(
     [Parameter(Mandatory=$true)][string]$ProjectPath,
     [switch]$Generate,
     [switch]$RefineLayout,
+    [switch]$RefineBird,
     [switch]$AddBird,
     [switch]$Check,
     [switch]$CheckBird,
@@ -22,6 +23,7 @@ foreach($helper in @('UnityTrackingLab.cs','UnityTrackingLabBird.cs','UnityWorld
 $presentation=Join-Path $project 'Assets/BirdGenerated/Presentation'
 New-Item -ItemType Directory -Force $presentation | Out-Null
 foreach($name in @('BirdLogicalDepth.shader','BirdLogicalDepth.shader.meta')) { Copy-Item -LiteralPath (Join-Path $repo ('Unity/BirdPlugin/Runtime/Presentation/'+$name)) -Destination $presentation }
+foreach($name in @('BirdLabXRay.shader','BirdLabXRay.shader.meta')) { Copy-Item -LiteralPath (Join-Path $repo ('Integrations/VRChat/Shaders/'+$name)) -Destination $presentation }
 function Invoke-LabUnity([string]$Method,[string]$Stem) {
     $result=Join-Path $project ($Stem+'-result.txt'); $log=Join-Path $project ($Stem+'.log')
     Set-Content -LiteralPath $result -Value 'PENDING'
@@ -33,6 +35,7 @@ function Invoke-LabUnity([string]$Method,[string]$Stem) {
 Invoke-LabUnity 'UnityWorldSdkSetup.Run' 'world-sdk-setup'
 if($Generate) { Invoke-LabUnity 'UnityTrackingLab.Generate' 'lab-generate' }
 if($RefineLayout) { Invoke-LabUnity 'UnityTrackingLab.RefineLayout' 'lab-layout' }
+if($RefineBird) { Invoke-LabUnity 'UnityTrackingLabBird.RefineBird' 'lab-bird-layout' }
 if($AddBird) { Invoke-LabUnity 'UnityTrackingLabBird.AddBird' 'lab-bird-author' }
 if($Check) { Invoke-LabUnity 'UnityTrackingLabChecks.Run' 'lab-check' }
 if($CheckBird) { Invoke-LabUnity 'UnityAvatarHandLabChecks.Run' 'lab-hand-check' }

@@ -10,9 +10,18 @@ an avatar approximation, not raw tracked hand joints. The older 12-origin
 
 Use VRChat's ordinary interaction on the console to the left. Open and straighten
 one hand, including the thumb, then use the other hand to activate **SET LEFT**
-or **SET RIGHT**. Each side can be calibrated independently. **RESET** hides that
+or **SET RIGHT**. Each side can be calibrated independently. VRChat already identifies left and
+right; SET learns distal-bone axes because the SDK does not supply fingertip
+endpoints. It does not teach the system which hand is which. **RESET** hides that
 side's Bird and requires calibration again. White dots show estimated fingertips;
-cyan/pink diagnostic dots show sampled avatar bone origins. A gray sphere in front
+cyan/pink diagnostic dots show sampled avatar bone origins. Orange cubes are
+VRChat tracked hand origins, not Bird. The diagnostic dots now render through
+avatar skin so their articulation is inspectable; their positions remain exact
+SDK bone samples. This X-ray presentation is confined to diagnostics. Bird
+itself retains normal world occlusion. A short colored guide from the hand
+shows its current direction, bounded to 40 cm, without changing its position.
+The console displays curl angle and desired/filtered range. Two fixed white
+reference spheres compare the Bird material with an ordinary material. A gray sphere in front
 of the bench turns green when the logical hand-to-Bird segment passes through it.
 No click is required or synthesized in this first input test.
 
@@ -85,7 +94,7 @@ The standalone v0.10 installation remains available and unchanged.
 Sources and shader GUIDs restore into ignored `BirdGenerated`; authored scene,
 materials and Udon program metadata live in the heavy repository.
 
-Compiled-Udon checks pass 4,621 assertions over 244 normal frames. Both default
+Compiled-Udon checks pass 4,872 assertions over 244 normal frames. Both default
 ClientSim robot hands calibrate and run Bird; their inferred mean finger length
 is about 0.11645 m and their near-flat pose selects the far limit. Actual SDK
 avatar scaling to 0.5x/1.5x/restored size preserves normalized range. Controlled
@@ -97,7 +106,10 @@ returns to the root even after billion-meter filtered history. Event replay is
 not an actual avatar replacement; synthetic bones are not physical tracking.
 
 The standard diagnostic test also passes its 34-marker cadence/lifecycle checks.
-Camera renders are inspected. Final SDK build evidence is in CHECKPOINT.md.
+Rendered controls also verify normal material occlusion, X-ray visibility
+through an opaque object, and the Bird point material at a known visible
+position. The short guide is checked against the logical point and its 40 cm
+bound. Camera renders are inspected. Final SDK build evidence is in CHECKPOINT.md.
 Lab 03 was subsequently loaded through normal SDK Android BuildAndTest. An
 actual stereo device capture shows the console running, 16/16 bone availability,
 left-hand calibration accepted and Bird active, with the right hand awaiting

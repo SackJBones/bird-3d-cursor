@@ -17,7 +17,9 @@ assumptions and checks. It does not record hand data or modify the player.
 
 In lab v0.2, all 34 markers update every `PostLateUpdate`, after avatar IK.
 Only text refresh is limited to 5 Hz. There is no marker smoothing, deliberate
-delay or positional offset to make them visible outside the avatar. The original
+delay or positional offset. The Lab 03 follow-up renders diagnostic joint/tip
+dots through avatar skin; the original depth-tested dots could be hidden inside
+the gray hands. Bird itself retains normal world occlusion. The original
 lab sampled bone markers at 10 Hz and origin markers at 5 Hz; Dana correctly
 noticed the resulting lag beside the smoothly animated avatar hands. Other
 diagnostic scenes retain their opt-in/default cadence. See the official
