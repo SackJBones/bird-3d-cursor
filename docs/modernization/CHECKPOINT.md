@@ -1831,3 +1831,72 @@ work can test normal two-client options and investigate mid-range radial noise,
 then validated clicks/beacons and the prioritized repairs. Preserve the accepted
 near path and visual inflation. Do not let hardware/account gates or optional
 metashape research stall independent progress.
+
+
+## 2026-09-28 10:45 UTC — mid-range measurements and real Quest launch diagnosis
+
+This bounded cycle investigated the reported room-scale radial instability and
+made routine headset evidence repeatable. Production geometry, filter settings,
+range law, near feel, visual inflation, prefab and architectural assets are
+unchanged. No new world export was necessary.
+
+- Added UnityMidRangeLabChecks to the compiled-Udon hand suite: 1,008 controlled
+  measurements at 30/72/120 Hz and 3/4/6/8/12/20/50 m, comparing full center
+  influence at 20/12/8 m. Includes independent and correlated noise, radial RMS,
+  signed bias, jump percentile, angular RMS, 15/90-degree turns and half/double
+  range steps. Parameters are restored afterward. Added 900 articulated-bone
+  noise samples per side at 3/6/8/12/20 m through the actual avatar pipeline.
+- Android and Windows both PASS 390,859 assertions over 2,929 normal frames,
+  exit 0. Earlier original-Kalman, near identity, SE(3)/reflection and lifecycle
+  checks still run. Android restored. Controlled datasets are byte-identical,
+  SHA256 24C9D1693B9FB6CFF18067F6BC06AC5F949693EEB008070708B2242A91039583.
+  All bone fixtures retain valid fits; no singular samples in either target.
+- Earlier full effect is REJECTED as a rollout: at 8 m / 72 Hz, white radial
+  RMS improves only 11.27 to 10.34 cm, while a 15-degree turn's 90% settling
+  slows 319 to 347 ms. A 90-degree step contracts range to 40.0% instead of
+  51.5%. The full avatar fixture even worsens at 6 m on both targets. See
+  MID-RANGE-ASSESSMENT.md and heavy Reference/MidRangeAssessment/20260928.
+  These synthetic probes do not measure Quest tracking noise or physical feel.
+- The lab runner now pins the Unity process handle, stores exit codes, and
+  requires PASS plus exit 0, matching the maintained coastal runner. The first
+  import briefly reported the newly added partial method absent; Unity's normal
+  compilation-graph refresh resolved it, and subsequent compilation/tests passed.
+  No SDK patch or relaxed gate was used.
+
+Added tests/quest_vrchat_smoke.py using normal ADB/client TestWorlds operations.
+A bundle opts into transfer/hash verification and cold launch; capture-only
+leaves the current session untouched. Evidence is private: battery, memory,
+recent client logs, metadata and a CRC/structure-checked stereo PNG. It does not
+claim visual/physical/multiplayer acceptance automatically. On missing VRChat
+process it retains a diagnostic screen and startup log and exits with failure.
+The actual 4128x2208 PNG was accepted; truncated, corrupt-CRC and bad-signature
+variants were rejected. Script syntax/help checks pass. Its running-app success
+path still needs a real follow-up after the environment blocker below clears.
+
+IMPORTANT CURRENT HEADSET STATE: The existing Social Bird 02 bundle transferred
+again with matching E5D014AB60B6789A20E5AA7542843805CF5430B32F54092F4063ED576CA730BD.
+Android accepted the 10:41 UTC launch request, but VRChat was not running after
+it. The inspected 10:42 UTC stereo capture shows Quest's Finding position in room
+message saying the room is too dim. This is a blocked fresh launch, NOT a build
+or rendering success. The previously rendered Social Bird 02 remains installed;
+do not describe it as currently running. Private evidence:
+Validation/CoastalWorld/DeviceSocialBird02-20260928-Recheck and
+DeviceSocialBird02-20260928-Diagnostic. Battery 69%, AC powered, weak charger
+false, 42 C. No boundary/tracking/account bypass. Small room lighting or a lit
+placement is needed for normal room tracking; do not let this stall development.
+
+Official Build & Test documentation supports two PC clients in one local test
+instance, so online publication is not inherently needed for that transport
+check. The configured Steam library and standard Oculus software directory have
+no PC VRChat installation (neither standard executable exists). SOCIAL-BIRD.md
+records the supported next test and limits. ClientSim still does not establish
+real transport, immutable player ownership, multi-visitor Quest cost or feel.
+
+Next bounded work: continue the pit-hole/cliff-enclosure repairs with ordinary
+editable assets and the requested independent critic. Check current headset
+tracking before counting another launch as successful; use it routinely for
+meaningful changes under Dana's standing replace-anytime authorization. One
+later bounded filtering candidate may decouple radial steadiness from aiming,
+reusing intrinsic S2 and symmetry machinery while preserving the exact accepted
+near path, original Vector3 baseline and sizing. Do not maroon the world on this
+research, repeat rejected parameter tuning, or silently enable unvalidated clicks.

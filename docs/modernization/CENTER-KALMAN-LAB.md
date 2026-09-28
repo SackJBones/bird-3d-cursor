@@ -1,5 +1,10 @@
 # Sphere-center Kalman stage (Lab 14)
 
+The later [mid-range assessment](MID-RANGE-ASSESSMENT.md) measures room-scale
+noise and turn contraction after Dana's coastal-world feedback. Earlier full
+effect produces too little benefit and worsens turns; saved settings remain
+unchanged. See that assessment and the latest CHECKPOINT before retuning.
+
 Dana's Lab 13 feedback: nearby movement feels right, but distant pointing is
 too noisy, particularly as the fingers approach a plane. Angular response is
 fast enough; increasing the final point's lag alone would give up that benefit.

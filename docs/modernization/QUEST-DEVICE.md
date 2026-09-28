@@ -1,7 +1,11 @@
 # Quest development power settings
 
-Current world, 2026-09-28 UTC: **Social Bird 02** is transferred/hash-verified and
-visibly rendering in actual Quest VRChat. It contains personal Bird, debounced
+Current installed test world, 2026-09-28 UTC: **Social Bird 02** is transferred/
+hash-verified and previously visibly rendered in actual Quest VRChat. At the
+10:41 UTC recheck, its fresh cold launch was blocked by Quest's **“Finding
+position in room” / room too dim** dialog. No VRChat process was running in the
+10:42 UTC diagnostic. Do not claim it is currently rendering. The exact same
+bundle remains installed; no new runtime was built this cycle. It contains personal Bird, debounced
 pedestal acquisition and the optional social presentation layer. The previous
 Personal Bird 01 was accepted by Dana; its near feel and visual inflation remain
 unchanged. See the latest CHECKPOINT and private heavy
@@ -14,8 +18,44 @@ be replaced at any time without asking again.** This supersedes all earlier
 instructions to preserve a particular session. Use it routinely for meaningful
 checks; an unavailable device must not block independent development. At this
 deployment it reported 54% battery, AC power, no weak charger and 41 degrees C.
+The later diagnostic reports 69%, AC powered, no weak charger and 42 degrees C.
+Private evidence for the failed launch and inspected stereo tracking dialog is
+under `Validation/CoastalWorld/DeviceSocialBird02-20260928-Recheck` and
+`DeviceSocialBird02-20260928-Diagnostic`. The new repeatable helper correctly
+returns a failure even though transfer and the Android launch request succeeded.
+It retains screenshot/startup evidence when the app process is absent. Resume a
+normal client check once room lighting/tracking is available; do not disable the
+boundary or substitute fake tracking to report a pass. Independent world work
+continues while this physical environment condition remains.
 
 ## Wireless ADB and wall power, 2026-09-28 UTC
+
+### Repeatable VRChat evidence
+
+`tests/quest_vrchat_smoke.py` uses only Python's standard library and the installed
+ADB executable. Use a new **ignored/private** output directory for every run;
+raw device logs may contain account/session information and must not be committed.
+With no bundle argument it captures the running session without restarting it:
+
+```powershell
+python tests/quest_vrchat_smoke.py --adb <adb.exe> --serial <authorized-device> --out <private-new-directory>
+```
+
+Adding `--bundle <validated-Android.vrcw> --world-name <new-build-name>` opts into
+transfer and cold launch through the unmodified client's normal TestWorlds path.
+Both launch extras are strings, as in the SDK. A failed device hash check stops
+before launch. It never reinstalls the client or changes account, boundary or
+sleep settings. A Wi-Fi address reconnects automatically; an unauthorized or
+unavailable device is a recorded failure, not a false pass.
+
+The evidence includes battery/power, memory diagnostics, per-process recent logs,
+and a stereo PNG whose signature, complete chunks, CRCs and end marker are checked
+before saving. ADB has previously returned success with a truncated screenshot,
+so its exit code alone is insufficient. Inspect `headset.png` afterward: the
+script explicitly leaves visual acceptance unverified. A successful launch
+request does not establish the loaded world, and zero matched Udon error lines
+does not prove absence of every device problem. Physical feel and multiplayer
+acceptance always require their own evidence.
 
 The Quest ran out of battery on computer USB power. A power/data adapter attempt
 did not expose an ADB device; Windows had an unidentified USB descriptor failure,

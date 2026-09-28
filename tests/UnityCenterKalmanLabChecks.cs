@@ -131,6 +131,7 @@ public partial class UnityAvatarHandLabChecks
         var control=FindObjectOfType<BirdLabFilterControl>();var vm=VM(control);
         vm.SendCustomEvent("SetRaw");
         CenterContracts(centerPolicies[0],centerPolicies[1],VM(control.adaptiveFilters[0]),VM(control.adaptiveFilters[1]));
+        MidRangeContracts(centerPolicies[0],VM(control.adaptiveFilters[0]));
         for(int side=0;side<2;side++)
         {
             inputs[side].SetProgramVariable("automaticSetup",true);
@@ -208,6 +209,7 @@ public partial class UnityAvatarHandLabChecks
             CenterMetric("bone_noise_"+bend+"deg_singular_samples",0,bend,invalid[0],"count");
         }
         cursors[1].SetProgramVariable("centerFilter",centerPolicies[1]);
+        var midRangeBones=MidRangeBoneScenarios(); while(midRangeBones.MoveNext()) yield return null;
         for(int side=0;side<2;side++) inputs[side].SendCustomEvent("ResetCalibration");
         SetHands(70,1,Quaternion.identity);yield return null;
         Capture("bird-center-kalman",new Vector3(0,1.65f,-3),new Vector3(0,1.4f,1));

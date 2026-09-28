@@ -39,6 +39,7 @@ Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityPalmDirectionLabChecks.cs'
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityCenterDirectionLabChecks.cs') -Destination $runtime
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityAutomaticHandLabChecks.cs') -Destination $runtime
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityCenterKalmanLabChecks.cs') -Destination $runtime
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityMidRangeLabChecks.cs') -Destination $runtime
 Copy-Item -LiteralPath (Join-Path $repo 'Unity/BirdPlugin/Runtime/Scripts/KalmanFilterVector3.cs') -Destination $runtime
 foreach($helper in @('UnityTrackingLab.cs','UnityTrackingLabBird.cs','UnityTrackingLabUi.cs','UnityTrackingLabBuildAudit.cs','UnityWorldBundleChecks.cs')) { Copy-Item -LiteralPath (Join-Path $PSScriptRoot $helper) -Destination $editor }
 $presentation=Join-Path $project 'Assets/BirdGenerated/Presentation'
@@ -49,9 +50,12 @@ function Invoke-LabUnity([string]$Method,[string]$Stem,[string]$Target) {
     $result=Join-Path $project ($Stem+'-result.txt'); $log=Join-Path $project ($Stem+'.log')
     Set-Content -LiteralPath $result -Value 'PENDING'
     $process=Start-Process -FilePath $UnityEditor -ArgumentList @('-batchmode','-buildTarget',$Target,'-projectPath',('"'+$project+'"'),'-executeMethod',$Method,'-logFile',('"'+$log+'"')) -WindowStyle Hidden -PassThru
+    $null=$process.Handle
     if(!$process.WaitForExit(600000)) { $process.Kill(); throw "Unity lab step timed out: $log" }
-    $process.Refresh(); $summary=Get-Content -Raw -LiteralPath $result; Write-Output $summary
-    if($process.ExitCode -ne 0 -or !$summary.StartsWith('PASS:')) { throw "Unity lab step failed: $log" }
+    $exitCode=$process.ExitCode
+    $summary=Get-Content -Raw -LiteralPath $result; Write-Output $summary
+    Set-Content -LiteralPath (Join-Path $project ($Stem+'-'+$Target+'-exit.txt')) -Value ([string]$exitCode)
+    if($exitCode -ne 0 -or !$summary.StartsWith('PASS:')) { throw "Unity lab step failed (exit code '$exitCode'): $log" }
     if(Select-String -LiteralPath $log -Quiet -Pattern 'UdonBehaviour.*exception|Udon runtime exception|An exception occurred during Udon execution') { throw "Udon execution error: $log" }
     Copy-Item -LiteralPath $result -Destination (Join-Path $project ($Stem+'-'+$Target+'-result.txt'))
     Copy-Item -LiteralPath $log -Destination (Join-Path $project ($Stem+'-'+$Target+'.log'))
@@ -87,6 +91,14 @@ foreach($target in $targets) {
         $centerMetrics=Join-Path $project '../Validation/TrackingLab/center-kalman.csv'
         if(Test-Path -LiteralPath $centerMetrics) {
             Copy-Item -LiteralPath $centerMetrics -Destination (Join-Path $project ('../Validation/TrackingLab/center-kalman-'+$target+'.csv'))
+        }
+        $midMetrics=Join-Path $project '../Validation/TrackingLab/mid-range.csv'
+        if(Test-Path -LiteralPath $midMetrics) {
+            Copy-Item -LiteralPath $midMetrics -Destination (Join-Path $project ('../Validation/TrackingLab/mid-range-'+$target+'.csv'))
+        }
+        $boneMetrics=Join-Path $project '../Validation/TrackingLab/mid-range-bones.csv'
+        if(Test-Path -LiteralPath $boneMetrics) {
+            Copy-Item -LiteralPath $boneMetrics -Destination (Join-Path $project ('../Validation/TrackingLab/mid-range-bones-'+$target+'.csv'))
         }
     }
     if(!$SkipBuild) {

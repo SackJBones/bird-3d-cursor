@@ -17,6 +17,15 @@ debounce acquisition, investigate mid-range stability, validate clicks and build
 teleport beacons, then repair/detail the coast, pond, gardens, sky and fish.
 Organic metashape shells are an optional reach goal around the existing complex.
 
+The [mid-range assessment](MID-RANGE-ASSESSMENT.md) rejects simply moving the
+center filter's full-effect distance closer: modest stationary benefit comes
+with extra delay and worse range contraction on turns. Keep accepted defaults.
+One later bounded candidate may separate radial and directional filtering with
+the existing symmetry checks; this research must not stall pit/cliff repairs or
+other world work. [SOCIAL-BIRD.md](SOCIAL-BIRD.md) records the supported two-PC-
+client test path and the currently missing PC client installation. The dedicated
+Quest is routinely available for real loading/rendering checks.
+
 Dana has tried the coastal world and now prioritizes acquiring a personal Bird
 from its small pedestal and pointing immediately. Everyone can get one; there
 is no scarce/shared pickup. Reuse the accepted lab input, separate geometry from

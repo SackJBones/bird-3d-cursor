@@ -77,6 +77,26 @@ does not establish touch acquisition, active remote cursors or multiplayer feel.
 
 ## Official SDK basis (checked 2026-09-28)
 
+### Local two-client feasibility
+
+The [official Build & Test workflow](https://creators.vrchat.com/worlds/udon/using-build-test/)
+supports two desktop clients in the same local test instance, including synced
+variables and events. The documented setup uses Number of Clients = 2 and
+separate `--profile` values. This is a supported next test; an online world
+upload is not inherently necessary for a two-desktop-client transport check.
+It is separate from a PC/Quest shared online-instance test, and would not by
+itself establish Quest multiplayer cost.
+
+On 2026-09-28, the configured Steam library and the standard Oculus software
+directory on this machine contained no PC VRChat installation. Steam's only
+configured library did not list VRChat app 438100; neither documented default
+executable path existed. The Quest client remains available and authorized.
+Do not call ClientSim's synthetic snapshots a substitute for the missing
+two-client acceptance. Once the PC client is installed and logged in, use the
+ordinary SDK Windows Build & Test, then the acceptance sequence above. Do not
+patch the SDK, client, account requirements or ownership rules to manufacture a
+pass. Keep unrelated hand/world work moving while this setup is unavailable.
+
 - [PlayerObjects](https://creators.vrchat.com/worlds/udon/persistence/player-object/):
   per-player templates, immutable ownership, runtime reference binding and
   optional persistence.
