@@ -30,6 +30,7 @@ public class UnityCoastalWorldChecks : IProcessSceneWithReport
     public static void Author(){try{BirdCoastalWorldAuthoring.Create();Finish("coastal-author",true,"Created separate authored coastal world, six editable region prefabs and saved profile meshes.");}catch(Exception e){Finish("coastal-author",false,e.ToString());}}
     public static void ReviseR05(){try{BirdCoastalWorldAuthoring.ApplyR05();Finish("coastal-r05",true,"Applied scoped R05 prefab revision.");}catch(Exception e){Finish("coastal-r05",false,e.ToString());}}
     public static void RefineR05(){try{BirdCoastalWorldAuthoring.RefineR05();Finish("coastal-r05-refine",true,"Applied independent-review doorway and sightline refinement.");}catch(Exception e){Finish("coastal-r05-refine",false,e.ToString());}}
+    public static void AddBird(){try{BirdPersonalStationAuthoring.AddToCoastalWorld();Finish("coastal-bird-author",true,"Added independent local Bird station prefab; architecture preserved.");}catch(Exception e){Finish("coastal-bird-author",false,e.ToString());}}
     public static void Check()
     {
         try
@@ -97,6 +98,8 @@ public class UnityCoastalWorldChecks : IProcessSceneWithReport
             Capture("18-left-passage-lateral",new Vector3(-17.8f,1.65f,2),new Vector3(-13,2,1),90);
             Capture("19-right-passage-lateral",new Vector3(17.8f,1.65f,0),new Vector3(13,2,1),90);
             Capture("20-upper-floor",new Vector3(2,14.65f,23),new Vector3(-15,15,22),85);
+            if(UnityEngine.Object.FindObjectOfType<BirdPersonalStation>(true)!=null)
+                Capture("21-personal-bird-pedestal",new Vector3(0,1.6f,-3.7f),new Vector3(0,1.2f,-1.4f),65);
             Require(failed==0,"Navigation routes incomplete; inspect routes.csv (captures retained)");
             CheckEditableProfile();
             Finish("coastal-check",true,"Saved authored scene: safe spawn, six prefab regions, all seven destination routes complete for standing capsule; scoped mesh edit preservation and twenty captures. "+tris+" instance triangles / "+materials+" materials. Not physical headset, multiplayer or measured device performance.");
@@ -164,6 +167,8 @@ public class UnityCoastalWorldChecks : IProcessSceneWithReport
         try
         {
             Directory.CreateDirectory(Folder);var scene=EditorSceneManager.OpenScene(BirdCoastalWorldAuthoring.ScenePath);
+            UdonSharp.Compiler.UdonSharpCompilerV1.CompileSync();
+            Require(!UdonSharp.UdonSharpProgramAsset.AnyUdonSharpScriptHasError(),"Udon compilation");
             audit=true;processed=0;var descriptor=UnityEngine.Object.FindObjectOfType<VRCSceneDescriptor>();
             panel=ScriptableObject.CreateInstance<VRCSdkControlPanel>();var builder=new VRCSdkControlPanelWorldBuilder();builder.RegisterBuilder(panel);
             Require(builder.IsValidBuilder(out string reason),reason);string errors="";builder.OnSdkBuildError+=(_,e)=>errors+=e+"\n";
@@ -185,8 +190,16 @@ public class UnityCoastalWorldChecks : IProcessSceneWithReport
         var all=scene.GetRootGameObjects().SelectMany(g=>g.GetComponentsInChildren<Component>(true)).ToArray();
         Require(all.All(c=>c!=null),"No missing components after SDK processing");
         Require(!all.OfType<MonoBehaviour>().Any(c=>c.GetType().Assembly.GetName().Name.StartsWith("Assembly-CSharp")),"No project MonoBehaviours in exported world");
+        var programs=all.OfType<VRC.Udon.UdonBehaviour>().ToArray();
+        Require(programs.Length==13,"Personal station and two complete Bird pipelines survive SDK processing");
+        foreach(var vm in programs)
+        {
+            var program=new SerializedObject(vm).FindProperty("serializedProgramAsset");
+            Require(program!=null&&program.objectReferenceValue!=null,"Exported Udon bytecode reference exists");
+            Require(vm.SyncMethod==VRC.SDKBase.Networking.SyncType.None,"Personal Bird remains unsynced per visitor");
+        }
         Require(all.OfType<VRCSceneDescriptor>().Count()==1&&all.OfType<PipelineManager>().Count()==1,"Descriptor and pipeline retained");processed++;
-        inventory=all.OfType<Transform>().Count()+" GameObjects, "+all.Length+" components, no missing/project scripts";
+        inventory=all.OfType<Transform>().Count()+" GameObjects, "+all.Length+" components, "+programs.Length+" unsynced Udon programs, no missing/project scripts";
     }
     static void Require(bool condition,string message){if(!condition)throw new Exception(message);}
     static void Finish(string stem,bool pass,string message,bool exit=true)

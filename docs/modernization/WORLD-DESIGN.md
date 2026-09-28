@@ -17,6 +17,18 @@ reconstruct or treat that drawing as an approved layout. The accompanying
 written discussion remains useful guidance; dimensions and final connections
 are still open to iteration.
 
+## Optional future forms: metaballs (2026-09-28)
+
+Dana added `metaballs for bird world conversation.txt`, preserved byte-for-byte
+beside the earlier references. It proposes blobby architecture cut by planes or
+other forms to create occupiable rooms, with substantial rounded openings and
+forms that feel plausible and safe. Consider an editable field/SubD source,
+offline mesh extraction, simplification, separate inexpensive colliders and
+baked lighting. This is a promising future modeling direction, not a requirement
+to replace the current editable blockout or add runtime raymarching. Technical
+claims in that concept conversation require checking when implemented. Bringing
+Bird into the existing world is the current priority.
+
 ## Experience and sequence
 
 Visitors spawn within a broad, smooth, white, cavernous interior built into a

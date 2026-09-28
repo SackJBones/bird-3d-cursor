@@ -8,6 +8,25 @@ Work every two hours in substantial passes, approximately 45–60 minutes of act
 
 Use `feature/vrchat-modernization` in both repositories. All maintained package code belongs in `SackJBones/bird-3d-cursor`; full projects, large scenes and assets belong in `SackJBones/bird-3d-cursor-projects`. Pin dependencies to reproducible revisions. Create eventual review PRs; do not merge unfinished work. Later engine integrations branch off this feature branch, with separate large demo repositories where necessary.
 
+## Current objective: get Bird from the pedestal, 2026-09-28 UTC
+
+Dana has tried the coastal world and now prioritizes acquiring a personal Bird
+from its small pedestal and pointing immediately. Everyone can get one; there
+is no scarce/shared pickup. Reuse the accepted lab input, separate geometry from
+embodiments, and keep mandatory setup absent. See [PERSONAL-BIRD.md](PERSONAL-BIRD.md).
+
+The north star is taking Bird to other worlds, optionally as a dot/trail with
+click color feedback, mandala, dancing fireball, inventory, flying paintbrush or
+pet. These are distribution/architecture examples, not additional demos to build
+now. Provide conventional, versioned integrations for world/avatar developers.
+Recent native Items are promising but public custom Item creation is not yet
+supported by the official FAQ checked today; world persistence is world-scoped.
+See the researched path and constraints in [BIRD-PORTABILITY.md](BIRD-PORTABILITY.md).
+
+Dana's new metaballs conversation is preserved as optional post-MVP architectural
+research: editable implicit/SubD forms, plane cuts, believable wall thickness,
+offline mesh generation and cheap collision/lighting. It does not delay Bird.
+
 ## Immediate delivery milestone, 2026-09-27 UTC
 
 Dana prioritizes a normal Android Build and Test world inside VRChat, even before Bird is connected. Keep a direct path from the same authored scene to private upload through the unmodified SDK and its normal validation. The lab should expose VRChat avatar/bone/tracking-origin assumptions clearly and make adding Bird the natural next step. Do not require finishing the two-hand gesture port or more demonstrations first.

@@ -4,8 +4,9 @@
 is a separate architectural scene following [WORLD-DESIGN.md](WORLD-DESIGN.md)
 and the four approved references. It does not replace `BirdTrackingLab.unity`.
 The tracking lab remains the place to evaluate Bird input while this world is
-developed. Bird, UI, Hanoi and mandala are not connected in the coastal scene;
-named experience anchors reserve their intended locations.
+developed. The personal Bird station now occupies the arrival pedestal; see
+[PERSONAL-BIRD.md](PERSONAL-BIRD.md) for behavior and the dated checkpoint for
+validation/deployment. UI, Hanoi and mandala remain reserved experience anchors.
 
 ## Authored structure
 

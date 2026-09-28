@@ -1646,3 +1646,78 @@ coastal scene is still an architecture-only preview with no connected Bird/UI/
 Hanoi/mandala activities. Subjective navigation, comfort and performance remain
 pending; one headset render is not broad acceptance. No online upload or world
 source edit. Preserve the user's current session; do not reload for housekeeping.
+
+
+## 2026-09-28 UTC — Personal Bird 01 in the coastal world
+
+Dana's requested next objective is implemented and deployed as a local world MVP.
+The arrival pedestal's cyan light can be touched by either palm (0.12 s dwell),
+or activated with normal VRChat Use. Each visitor independently enables both
+hands; the object is not consumed or network-owned. Use again puts Bird away;
+withdrawal is required before another touch. No SET step or avatar swap.
+
+Maintained new components: BirdPersonalStation (opt-in lifecycle) and
+BirdPointPresentation (optional marble/locator/logical-depth ribbon), plus the
+one-time BirdPersonalStationAuthoring helper and UnityPersonalBirdChecks.
+The self-contained Personal Bird station prefab is nested under the coastal
+experience anchors. Existing architecture is preserved. All runtime hand fit,
+palm origin, sphere-direction correction, polynomial and Lab 14 filters are
+reused unchanged; authored scalar settings are compared with the saved lab.
+Click color is supported by the view, but estimated avatar clicks remain off.
+
+Validation completed with exit 0:
+- Android and Windows compiled-Udon/ClientSim: 328 assertions in 172 frames each.
+  Touch and native acquisition, independent prefab instances, reentry, both
+  hands, same-frame input, tracking loss/recovery, bounded trails and actual
+  render/occlusion tests at 1 m, 4 m, 30 m and 10 km. Independent local instances
+  do not constitute a multiplayer client test.
+- Android coastal geometry/navigation/editability: 7 complete routes, 338 passage
+  capsule samples, 20 architecture captures plus the new pedestal view. Active
+  arrival inventory: 224 mesh instances, 30,796 triangles, 11 materials and 123
+  non-trigger colliders. Inactive Bird renderers are not part of those counts;
+  these are not measured GPU/frame-time numbers. Existing full walks were not
+  rerun because no traversal geometry changed.
+- Normal unmodified SDK exports pass compressed/uncompressed upload-size and
+  bundle-catalog checks on both targets. Processed scene: 288 GameObjects,
+  897 components, 13 unsynced Udon programs with bytecode references, zero
+  missing/project MonoBehaviours. Android restored as the editor target.
+- Android: 574228 bytes, SHA256
+  0BF183B87D0D5DED9D5BC6FA6E14D8734D79A2E71285A5B71622FD6C691428FC.
+- Windows: 612472 bytes, SHA256
+  795226D142F36727DA7B6108687C4FFF99539051DD40889202E4F305937C84FC.
+- Independent world critic reviewed the two pedestal views: 7.5/10 for this
+  addition, no blocking visual issue. Near text is legible, the cyan light is
+  unobstructed; discovery from spawn and the word Use could be improved later.
+  Existing whole-world scores are unchanged and their overall target is unmet.
+
+Quest: transferred/hash-verified BirdCoastalWorld_PersonalBird01.vrcw through
+Wi-Fi ADB and cold-launched with the normal SDK localWorldPath/watchWorlds intent.
+A complete stereo capture shows the actual new scene, the label Bird is yours,
+a cyan cursor with a short trail beside the left avatar hand, and the pink
+cursor at the right edge. Dana said they would try it; subjective feedback is
+still pending. The world was left running. The fresh per-process log excerpt has
+zero matched Udon-exception lines; this is not a claim of globally clean logs.
+Private evidence: Validation/CoastalWorld/DevicePersonalBird01 in the heavy repo.
+Durable build/test/render evidence: Reference/PersonalBird/20260928.
+
+Dana clarified that 10 km visibility is required but 1000 km should not hold up
+this delivery. The initial 1000 km/512px/1km-camera probe had zero colored pixels;
+its cause is unresolved. The accepted 10 km test uses the actual world camera
+clip settings, 1024px/4x MSAA and enough elapsed time to exercise a real trail.
+No range clamp or geometry change was introduced to pass the practical target.
+Long-distance physical salience and Quest frame cost still need user acceptance.
+
+Research/roadmap: BIRD-PORTABILITY.md records current official Items/Props,
+world persistence, avatar components, VRCRaycast, OSC and VPM sources. Native
+Items fit the goal but public user-created Items remain unsupported according
+to the checked FAQ; world persistence cannot transfer code/data between worlds.
+Ship reusable world integration first; evaluate avatar/OSC paths separately and
+revisit Item access later. Mandala, dancing fireball, inventory, flying paintbrush
+and pet remain conceptual embodiments, not new demos implemented here. Social
+visibility and click validation are subsequent layers; this MVP is local only.
+
+Dana's metaballs conversation is archived byte-for-byte with provenance and
+added to WORLD-DESIGN/PLAN as optional post-MVP modeling research. The existing
+same-task two-hour heartbeat was updated through the app and its saved prompt
+verified against RECURRING-PROMPT.txt. Existing schedule/permissions/reporting
+intent retained. No online world upload, avatar change or additional app install.
