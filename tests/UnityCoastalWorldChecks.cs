@@ -26,6 +26,10 @@ public partial class UnityCoastalWorldChecks : IProcessSceneWithReport
     static bool audit;
     static int processed;
     static string inventory;
+    public static void PrepareLighting(){try{BirdCoastalLightingAuthoring.Prepare();EditorApplication.Exit(0);}catch(Exception e){Finish("coastal-lighting-prepare",false,e.ToString());}}
+    public static void RefineLighting(){try{BirdCoastalLightingAuthoring.Refine();EditorApplication.Exit(0);}catch(Exception e){Finish("coastal-lighting-refine",false,e.ToString());}}
+    public static void SmoothLightingJoins(){try{BirdCoastalLightingAuthoring.SmoothJoins();EditorApplication.Exit(0);}catch(Exception e){Finish("coastal-lighting-joins",false,e.ToString());}}
+    public static async void BakeLighting(){try{await BirdCoastalLightingAuthoring.Bake();EditorApplication.Exit(0);}catch(Exception e){Finish("coastal-lighting-bake",false,e.ToString());}}
     public int callbackOrder=>int.MaxValue;
     public static void Author(){try{BirdCoastalWorldAuthoring.Create();Finish("coastal-author",true,"Created separate authored coastal world, six editable region prefabs and saved profile meshes.");}catch(Exception e){Finish("coastal-author",false,e.ToString());}}
     public static void ReviseR05(){try{BirdCoastalWorldAuthoring.ApplyR05();Finish("coastal-r05",true,"Applied scoped R05 prefab revision.");}catch(Exception e){Finish("coastal-r05",false,e.ToString());}}

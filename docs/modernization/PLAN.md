@@ -23,6 +23,11 @@ Read the newest checkpoint for tested builds and actual Quest state. Finger
 clicks remain disabled pending physical validation; a synthetic test press is
 not that acceptance. Preserve the accepted near feel and visual inflation.
 
+The [baked daylight workflow](COASTAL-LIGHTING.md) addresses the Windows cavern's
+missing interior light with ordinary editable Unity lighting assets. Keep the
+cross-platform renders and actual Quest check separate from aesthetic acceptance;
+the independent critic's remaining findings still guide later world passes.
+
 The [mid-range assessment](MID-RANGE-ASSESSMENT.md) rejects simply moving the
 center filter's full-effect distance closer: modest stationary benefit comes
 with extra delay and worse range contraction on turns. Keep accepted defaults.

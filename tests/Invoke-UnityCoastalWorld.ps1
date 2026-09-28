@@ -2,7 +2,7 @@ param(
  [Parameter(Mandatory=$true)][string]$UnityEditor,
  [Parameter(Mandatory=$true)][string]$ProjectPath,
  [ValidateSet('Android','Windows','Both')][string]$Platform='Android',
- [switch]$Create,[switch]$ReviseR05,[switch]$RefineR05,[switch]$RepairR06,[switch]$RefineRockR06,[switch]$AddBird,[switch]$AddSocial,[switch]$AddBeacons,[switch]$AddPractice,[switch]$CheckBird,[switch]$CheckSocial,[switch]$CheckBeacons,[switch]$Check,[switch]$Walk,[switch]$Build
+ [switch]$Create,[switch]$ReviseR05,[switch]$RefineR05,[switch]$RepairR06,[switch]$RefineRockR06,[switch]$AddBird,[switch]$AddSocial,[switch]$AddBeacons,[switch]$AddPractice,[switch]$PrepareLighting,[switch]$RefineLighting,[switch]$SmoothLightingJoins,[switch]$BakeLighting,[switch]$CheckLighting,[switch]$CheckBird,[switch]$CheckSocial,[switch]$CheckBeacons,[switch]$Check,[switch]$Walk,[switch]$Build
 )
 $ErrorActionPreference='Stop'
 if($ReviseR05 -and $RefineR05){throw '-ReviseR05 already includes the refinement; use -RefineR05 only for the first-pass R05 assets.'}
@@ -20,6 +20,7 @@ Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityCoastalWalkChecks.cs') -De
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityPersonalBirdChecks.cs') -Destination $runtime
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnitySocialBirdChecks.cs') -Destination $runtime
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityBeaconChecks.cs') -Destination $runtime
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityLightingChecks.cs') -Destination $runtime
 Get-ChildItem -LiteralPath (Join-Path $repo 'Integrations/VRChat') -File | Where-Object { $_.Name -match '\.cs(\.meta)?$' } | ForEach-Object { Copy-Item -LiteralPath $_.FullName -Destination (Join-Path $runtime $_.Name) }
 $presentation=Join-Path $project 'Assets/BirdGenerated/Presentation'
 New-Item -ItemType Directory -Force $presentation | Out-Null
@@ -52,6 +53,11 @@ foreach($target in $targets){
  if($AddSocial){Invoke-Coastal 'UnityCoastalWorldChecks.AddSocial' 'coastal-social-author' $target;$AddSocial=$false}
  if($AddBeacons){Invoke-Coastal 'UnityCoastalWorldChecks.AddBeacons' 'coastal-beacons-author' $target;$AddBeacons=$false}
  if($AddPractice){Invoke-Coastal 'UnityCoastalWorldChecks.AddPractice' 'coastal-practice-author' $target;$AddPractice=$false}
+ if($PrepareLighting){Invoke-Coastal 'UnityCoastalWorldChecks.PrepareLighting' 'coastal-lighting-prepare' $target;$PrepareLighting=$false}
+ if($RefineLighting){Invoke-Coastal 'UnityCoastalWorldChecks.RefineLighting' 'coastal-lighting-refine' $target;$RefineLighting=$false}
+ if($SmoothLightingJoins){Invoke-Coastal 'UnityCoastalWorldChecks.SmoothLightingJoins' 'coastal-lighting-joins' $target;$SmoothLightingJoins=$false}
+ if($BakeLighting){Invoke-Coastal 'UnityCoastalWorldChecks.BakeLighting' 'coastal-lighting-bake' $target;$BakeLighting=$false}
+ if($CheckLighting){Invoke-Coastal 'UnityLightingChecks.Run' 'coastal-lighting-check' $target}
  if($CheckBird){Invoke-Coastal 'UnityPersonalBirdChecks.Run' 'coastal-bird-check' $target}
  if($CheckSocial){Invoke-Coastal 'UnitySocialBirdChecks.Run' 'coastal-social-check' $target}
  if($CheckBeacons){Invoke-Coastal 'UnityBeaconChecks.Run' 'coastal-beacons-check' $target}

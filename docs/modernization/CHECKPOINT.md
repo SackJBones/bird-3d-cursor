@@ -2127,3 +2127,71 @@ Heavy commit 8d918b01b2bde63dbb7b8ed6c7d035f64a46d0d4 includes editable assets,
 Reference/TeleportBeacons/20260928-Beacons02. Same-chat heartbeat remains every
 two hours with inherited permissions, 30-60 minute coherent passes and meaningful-
 change-only notifications. Continue routine dedicated-headset use.
+
+
+## 2026-09-28 19:18 UTC — Lighting01, baked daylight and actual Quest rendering
+
+Completed a bounded cross-platform lighting pass after Beacons02 exposed the
+Windows cavern's missing interior illumination. Maintained authoring is
+BirdCoastalLightingAuthoring, with ordinary saved LightingSettings, eight baked
+lights, a LightProbeGroup and lightmap assets. No new runtime lighting component.
+See COASTAL-LIGHTING.md. Six editable region prefabs and all existing materials,
+architecture, colliders and Bird runtime controls remain unchanged. Independent
+baseline comparison confirms exact positions/normals/triangle indices/bounds
+for all 85 meshes receiving UV2, plus preserved original scene transforms.
+
+The first preparation caught an editor/runtime assembly dependency and Unity's
+secondary-UV generator welding nearly coincident seams. Failed UV attempts were
+restored. The final per-triangle UV-only method changes no geometry. Initial
+lighting was too bright at the pickup and had dark scalloped joins. Critic-guided
+refinement uses 6 texels/m, larger chart margins, 128 direct / 256 indirect samples,
+no added AO, gentler area fill and brighter room fills. Six curved shells receive
+an ordinary 2 cm bake-ray offset; floor/stair parameters stay at their defaults.
+The final bake has two non-directional maps (1024 and 512; 1,310,720 texels),
+181 mapped renderers, 219 probes and zero realtime lights. UV-overlap warnings
+remain on 140 objects; do not call this a clean final art bake.
+
+Both focused Play Mode lighting checks pass with exit 0 under normal VRC High
+and VRC Mobile, eight rendered views per platform. Both normal SDK exports,
+upload-size gates, scene/Udon audits and bundle catalog/hash checks pass, exit 0:
+- Android: 1,642,902 bytes, SHA256 460C4C06C05E489D910B4A4935DA8C89049E2CC90224B98334CBBB4E32154F22.
+- Windows: 2,053,189 bytes, SHA256 09A613E32CF33B6A3A0851B7391EA99691D9793AAD062008E3D0FC05EB871F61.
+Both export 361 objects / 1,104 components / 28 None programs plus one manual
+per-player stream, no missing/project scripts or persistence. Android restored.
+No SDK/client patches or online upload. Geometry byte-preservation replaces a
+repeat of the previous 17 out-and-back walks. The older combined Windows
+navigation/capture shutdown failure remains a separate unresolved limitation.
+
+Independent critic recommends retaining the final shell-offset candidate:
+scalloped canopy joins are substantially cleaner without obvious new leaks or
+floating structures in the inspected arrival/support/stair/passage views.
+Normal Windows now matches Android's broad hierarchy and materially resolves
+the previous flat dark-shadow failure. Lighting-only scores 6.5 aesthetics /
+6.5 white readability / 7 navigation hierarchy / 7 hangout suitability.
+Full-world scores remain 6 / 8 / 6.5 / 6.5, targets unmet. Remaining findings:
+support mottling, faint shell seams, slightly warm whites, downward stair
+contrast and UV chart cleanup. This is editor-render parity, not PC-client
+or final aesthetics acceptance. Do not spend every next cycle rebaking.
+
+The dedicated Quest received the exact Android bundle, hash verified. Initial
+captures at 19:14-19:16 UTC showed Connecting, not the world. A normal warm
+am start repeated the same SDK localWorldPath/watchWorlds extras. The client
+logged a waiting-for-master timeout before the world eventually appeared.
+Inspected 19:17:56 UTC stereo capture visibly renders Lighting01's shaded
+arrival, support, pedestal, steps and practice board. No account, authentication,
+boundary or client changes. Existing fallback/error avatar hands were present
+before this pass and remain; Bird was not acquired and physical gestures are
+unverified. Saved avatar clicks and teleport actions remain OFF. Battery 74%,
+AC, weak charger false, 38 C. No matched Udon exception lines in capture, not
+an all-logs-clean claim. Three stationary-arrival VrApi samples were 72/72,
+73/72, 72/72, zero tear/stale, 3.20-3.35 ms app time; no active/multiplayer
+performance conclusion. Raw logs/screens remain in ignored DeviceLighting01-*.
+
+Heavy commit a4e6277e40a79fd13bc6e65c280df985de9eac8a contains editable lighting
+assets and curated 22 review images/results/device observations at
+Reference/WorldBuildingReviews/20260928-Lighting01. The world is left running.
+Continue extensive dedicated-headset use, including replacing the local world.
+Next favor one coherent coast/pond/garden/sky or supported functional pass;
+keep accepted near feel, inflation, companion palettes, and geometry/presentation
+separation. Unavailable real hands or a second client must not stall independent
+work. Keep the same-chat two-hour heartbeat and 30–60 minute cycle rhythm.
