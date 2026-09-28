@@ -1,5 +1,12 @@
 # Quest development power settings
 
+Current world, 2026-09-28 UTC: Dana requested the coastal world if runnable.
+Coastal R05 is now transferred/hash-verified over Wi-Fi and visibly rendering in
+Quest VRChat. It is left open for exploration; Lab 14 remains installed but is
+not selected. This is an architecture-only preview, with Bird interaction still
+in the lab. See latest CHECKPOINT and private heavy
+`Validation/CoastalWorld/DeviceR05` evidence. Preserve the current user session.
+
 ## Wireless ADB and wall power, 2026-09-28 UTC
 
 The Quest ran out of battery on computer USB power. A power/data adapter attempt

@@ -1622,3 +1622,27 @@ no matched C# compiler errors, Udon exceptions, inactive-controller warnings or
 BuildFinishedResultFailure messages. SDK-only DynamicMaterials list ordering
 noise was verified as semantically identical and restored; the authored scene
 file remains unchanged. Editor setup is restored to Android with exit zero.
+
+
+## 2026-09-28 UTC — Coastal R05 launched in Quest VRChat for Dana
+
+Dana requested the recent Bird world if runnable, otherwise the latest lab.
+Transferred the existing validated 486011-byte R05 Android bundle over Wi-Fi
+ADB to TestWorlds/BirdCoastalWorld_R05.vrcw. Device SHA256 matches
+312779CE69959E2EE9464D6966CC17B2DCF750367B36418386030C9F2B53349B.
+The first Android intent resumed a previous world. A normal client force-stop
+and cold launch using the installed SDK's localWorldPath/watchWorlds string
+extras (canonical /storage/emulated/0 path) succeeded. Fresh stereo capture
+coastal-relaunch.png visibly shows the authored gallery, seating and sculpture
+inside Quest VRChat. This is the first coastal client-rendering verification.
+Private evidence and launch record: heavy Validation/CoastalWorld/DeviceR05.
+The fresh session has zero matched Udon-exception lines, but client startup
+contains other exceptions/warnings; do not describe the client log as clean.
+
+Coastal R05 is now left open for Dana. This supersedes the earlier device-state
+instruction to preserve the currently running lab: Lab 14 remains installed,
+not currently selected, and no Bird math or scene code was changed here. The
+coastal scene is still an architecture-only preview with no connected Bird/UI/
+Hanoi/mandala activities. Subjective navigation, comfort and performance remain
+pending; one headset render is not broad acceptance. No online upload or world
+source edit. Preserve the user's current session; do not reload for housekeeping.
