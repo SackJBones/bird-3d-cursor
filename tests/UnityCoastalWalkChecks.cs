@@ -19,6 +19,7 @@ public class UnityCoastalWalkChecks : MonoBehaviour
     IEnumerator sequence;
     float deadline;
     int frames;
+    int routeCount;
     string lastCollision="";
     readonly List<string> rows=new List<string>{"route,frames,end_error_m,status"};
     public static void Run()
@@ -39,7 +40,7 @@ public class UnityCoastalWalkChecks : MonoBehaviour
             if(Time.unscaledTime>deadline)throw new Exception("Walkthrough timed out");
             if(Time.timeSinceLevelLoad<3)return;
             if(sequence==null)sequence=Walk();
-            frames++;if(!sequence.MoveNext())Finish(true,"Standing CharacterController traversed seven saved-collider routes out and back in "+frames+" normal frames. No jump, teleport between corners or at turnaround, or collision bypass. Single-player geometry test, not headset/client locomotion.");
+            frames++;if(!sequence.MoveNext())Finish(true,"Standing CharacterController traversed "+routeCount+" saved-collider routes out and back in "+frames+" normal frames. Includes seven destination routes and any authored pit repair probes. No jump, teleport between corners or at turnaround, or collision bypass. Single-player geometry test, not headset/client locomotion.");
         }
         catch(Exception e){Finish(false,e.ToString()+"; last collision="+lastCollision);}
     }
@@ -53,7 +54,21 @@ public class UnityCoastalWalkChecks : MonoBehaviour
         controller.center=Vector3.up*.875f;controller.stepOffset=.24f;controller.slopeLimit=40;controller.skinWidth=.025f;controller.minMoveDistance=0;
         var routes=JsonUtility.FromJson<Routes>(File.ReadAllText(Folder+"/walk-routes.json"));
         if(routes.routes.Length!=7)throw new Exception("Expected all seven complete navigation routes");
-        foreach(var route in routes.routes)
+        var allRoutes=new List<Route>(routes.routes);
+        if(GameObject.Find("03 Supported coastal terraces/Closed conversation pit steps")!=null)
+        {
+            Func<float,float,float,Vector3> pit=(radius,angle,y)=>new Vector3(-2+radius*Mathf.Cos(angle*Mathf.Deg2Rad),y,26+radius*Mathf.Sin(angle*Mathf.Deg2Rad));
+            for(int i=0;i<8;i++)
+            {
+                float angle=i*45+22.5f;
+                allRoutes.Add(new Route{name="Pit radial descent "+i,points=new[]{pit(5.8f,angle,1),pit(4.35f,angle,.2f)}});
+            }
+            var ring=new List<Vector3>();for(int i=0;i<=24;i++)ring.Add(pit(4.35f,i*15,.2f));
+            allRoutes.Add(new Route{name="Pit complete inner ring",points=ring.ToArray()});
+            allRoutes.Add(new Route{name="Pit seat opening to floor",points=new[]{pit(5.8f,315,1),pit(4.35f,315,.2f),pit(1.8f,315,0)}});
+        }
+        routeCount=allRoutes.Count;
+        foreach(var route in allRoutes)
         {
             controller.enabled=false;transform.position=route.points[0]+Vector3.up*.03f;controller.enabled=true;Physics.SyncTransforms();
             // Return from the actual endpoint without resetting the controller.

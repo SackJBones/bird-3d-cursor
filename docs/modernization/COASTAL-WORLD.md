@@ -8,6 +8,11 @@ developed. The personal Bird station now occupies the arrival pedestal; see
 [PERSONAL-BIRD.md](PERSONAL-BIRD.md) for behavior and the dated checkpoint for
 validation/deployment. UI, Hanoi and mandala remain reserved experience anchors.
 
+R06 repairs the conversation-pit openings and encloses the arrival in a saved
+rock shoulder without moving the complex. See [COASTAL-WORLD-R06.md](COASTAL-WORLD-R06.md)
+for scoped authoring/checks and [COASTAL-WORLD-REVIEW-R06.md](COASTAL-WORLD-REVIEW-R06.md)
+for the independent critique. The broader world remains an architectural blockout.
+
 ## Authored structure
 
 Six ordinary prefab instances separate arrival, social wings, supported coastal

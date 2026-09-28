@@ -1900,3 +1900,81 @@ later bounded filtering candidate may decouple radial steadiness from aiming,
 reusing intrinsic S2 and symmetry machinery while preserving the exact accepted
 near path, original Vector3 baseline and sizing. Do not maroon the world on this
 research, repeat rejected parameter tuning, or silently enable unvalidated clicks.
+
+
+## Coastal R06 pit/enclosure repair and live Quest validation — 2026-09-28 13:05 UTC
+
+Bounded architecture repair completed in the existing saved world. Heavy commit
+82e76254e5107c03e85e4b1f5450d447042def1a contains the authored assets and curated
+Reference/WorldBuildingReviews/20260928-R06 evidence. No production Bird geometry,
+range/filter parameters, accepted near behavior, sizing or personal/social
+runtime code changed. Click actions remain unvalidated/disabled.
+
+- The old upper pit riser missed 192/192 sampled rays. A closed 96-chord stepped
+  bowl now supplies collar, all risers/treads and underside; terrace/floor circle
+  joins match. Seating ends/undersides are capped. Old separate steps remain
+  inactive for inspection. The white rear wall now closes its own vault crown,
+  eliminating the cyan slit; this is separate from rock cover.
+- A closed hollow rock shoulder embeds the cavern without moving architecture.
+  First rendered/independent review rejected an oversized flat wall. A scoped
+  mesh-only refinement lowers the coastal lip and slopes/rises inland with
+  broader facets. ApplyR06 is one-time; do not rerun on saved assets. The optional
+  RefineRockR06 operation replaces only its named mesh, not manual mesh edits.
+  See COASTAL-WORLD-R06.md; no runtime generator or new third-party assets.
+- Final Android scene check passes and exits 0: seven closed repair meshes,
+  6,696 consistently paired edges, 2,268 riser/tread/crown/rear rays plus wing
+  roof and standing-volume checks, 338 existing passage samples, seven complete
+  destination routes, scoped edit preservation and 29 renders. Initial full
+  check caught an inventory assumption about runtime Bird trail meshes; only
+  the two known runtime slots are now allowed missing authored meshes. The
+  original failed result/log is retained privately, not treated as a pass.
+- Android and Windows standing CharacterController tests pass exit 0 across
+  17 routes out/back, 34 legs and 14,059 normal Update calls (14,058 route-leg
+  frames plus completion); CSVs match byte-for-byte, max endpoint error .2339 m.
+  Shallow pit treads can be spanned by the standing capsule; no fine foot-
+  placement or physical comfort acceptance is claimed. Android's compiled-Udon
+  Bird integration test passes 334 assertions / 296 frames. Android restored.
+- Normal unmodified SDK builds pass exit 0 on both platforms, including size,
+  scene catalog and processed-component checks: 302 objects, 933 components,
+  17 unsynced programs plus one manual per-player stream, no missing/project
+  scripts. Android 633281 bytes, SHA256
+  46BA39ABAB4B9D91FB82CE80CF2AD7103E06A18388A8E342F45F91591462D124.
+  Windows 676526 bytes, SHA256
+  11554BCC00465D3E331DFDD7850697D46A1EABE5B20F4E69A0DAEC343955322E.
+  The older Windows combined scene/capture shutdown failure is still unresolved;
+  independent walking/build passes do not erase it. No online upload.
+
+Independent critic's final follow-up accepts this bounded repair, including
+replacement west view and final walks. Scores remain aesthetics 6, navigability
+8, hangout 6.5, overall 6.5/10; target >=8 in each is NOT met. First rejected
+pass scored 5/8/6.5/6. Remaining blunt rock base/dark cavity, stretched rear
+facets, flat terrace undersides and primitive coast remain future work. Preserve
+these honest findings; do not claim finished architecture from closed meshes.
+
+HEADSET NOW WORKING: The earlier dim-room blocker cleared. At 12:43 UTC actual
+VRChat Home rendered. R06 transferred with matching hash, cold-launched through
+normal SDK-style localWorldPath/watchWorlds extras, and visibly rendered the
+arrival/Bird pedestal by 12:54. A final 13:03 capture still shows that world.
+The initial 15-second capture showed initialization only; one later screencap
+failed during Unity target switching, then a capture-only retry succeeded.
+Private evidence: Validation/CoastalWorld/DeviceR06-20260928-*; helper running-app
+and post-launch success paths are now exercised. Raw logs/screens remain private.
+Recent log has no matched Udon exceptions, but platform/voice startup and Oculus
+transaction errors exist; do not call logs clean. Final battery 73%, AC powered,
+weak charger false, 40 C. Do not preserve this build as a constraint: Dana permits
+replacement any time and requests routine extensive actual-device validation.
+
+Limited real-device observation: 98 VrApi samples from 08:54:25–08:56:02 local
+report 72–73 FPS against 72 FPS target, none below target. This is one idle
+arrival view, not active Bird use, all-world performance, physical feel or
+multiplayer acceptance. Sanitized samples are curated; source logs are private.
+The world stays loaded for the next check; older bundles remain for rollback.
+
+Next bounded priority: functional validation toward finger clicks / editable
+Bird teleport beacons, or supported real-client social checks if prerequisites
+are available. Actual hand motion and second-client/account gaps must remain
+explicit, not block independent preparation or be mislabeled as acceptance.
+Keep clicks disabled until validated. Follow WORLD-NEXT-STEPS-20260928.md for
+later coast/pond/lighting and optional organic shells, retaining critic review.
+Do not repeat the rejected mid-range retune or alter accepted near feel/sizing.
+Maintain the same-chat two-hour cadence and quiet-on-unchanged notification policy.

@@ -20,7 +20,7 @@ using VRC.SDKBase.Editor;
 using VRC.SDKBase.Editor.Api;
 using VRC.SDKBase.Editor.Validation;
 
-public class UnityCoastalWorldChecks : IProcessSceneWithReport
+public partial class UnityCoastalWorldChecks : IProcessSceneWithReport
 {
     const string Folder="../Validation/CoastalWorld";
     static bool audit;
@@ -46,6 +46,7 @@ public class UnityCoastalWorldChecks : IProcessSceneWithReport
             Require(hit.normal.y>.9f,"Spawn floor is flat");
             Require(!Physics.CheckCapsule(spawn+Vector3.up*.35f,spawn+Vector3.up*1.55f,.25f),"Spawn standing capsule is clear");
             CheckWingPassages();
+            CheckR06Repairs();
             var sources=new List<NavMeshBuildSource>();
             foreach(var c in UnityEngine.Object.FindObjectsOfType<Collider>())
             {
@@ -76,9 +77,12 @@ public class UnityCoastalWorldChecks : IProcessSceneWithReport
                 File.WriteAllText(Folder+"/walk-routes.json",JsonUtility.ToJson(new UnityCoastalWalkChecks.Routes{routes=walkRoutes.ToArray()},true));
             }
             finally{nav.Remove();UnityEngine.Object.DestroyImmediate(data);}
-            var filters=UnityEngine.Object.FindObjectsOfType<MeshFilter>();long tris=filters.Sum(f=>(long)f.sharedMesh.triangles.Length/3);
+            var filters=UnityEngine.Object.FindObjectsOfType<MeshFilter>();
+            var dynamicTrails=new HashSet<MeshFilter>(UnityEngine.Object.FindObjectsOfType<BirdPointPresentation>(true).Select(v=>v.trailMesh));
+            Require(filters.All(f=>f.sharedMesh!=null||dynamicTrails.Contains(f)),"Only known runtime Bird trails may omit an authored mesh");
+            long tris=filters.Where(f=>f.sharedMesh!=null).Sum(f=>(long)f.sharedMesh.triangles.Length/3);
             int materials=UnityEngine.Object.FindObjectsOfType<Renderer>().SelectMany(r=>r.sharedMaterials).Where(m=>m!=null).Distinct().Count();
-            File.WriteAllText(Folder+"/geometry-budget.txt","Scene instances: "+filters.Length+" mesh renderers; "+tris+" triangles; "+materials+" shared materials; "+sources.Count+" colliders. These are scene counts, not measured Quest frame cost.\nNavigation capsule: radius .25 m, height 1.75 m, climb .24 m; voxel .08 m. Failed routes="+failed+".\n");
+            File.WriteAllText(Folder+"/geometry-budget.txt","Scene instances: "+filters.Length+" mesh filters ("+filters.Count(f=>f.sharedMesh==null)+" known runtime Bird trail slots); "+tris+" authored triangles; "+materials+" shared materials; "+sources.Count+" colliders. Inactive personal rigs and runtime-generated trails are not a measured device workload.\nNavigation capsule: radius .25 m, height 1.75 m, climb .24 m; voxel .08 m. Failed routes="+failed+".\n");
             Capture("01-arrival",new Vector3(0,1.65f,-13),new Vector3(0,4,4),90);
             Capture("02-threshold",new Vector3(0,2.65f,4.5f),new Vector3(3,6,17),82);
             Capture("03-main-terrace",new Vector3(14,2.65f,29),new Vector3(-8,7,16),82);
@@ -101,9 +105,11 @@ public class UnityCoastalWorldChecks : IProcessSceneWithReport
             Capture("20-upper-floor",new Vector3(2,14.65f,23),new Vector3(-15,15,22),85);
             if(UnityEngine.Object.FindObjectOfType<BirdPersonalStation>(true)!=null)
                 Capture("21-personal-bird-pedestal",new Vector3(0,1.6f,-3.7f),new Vector3(0,1.2f,-1.4f),65);
+            CaptureR06Repairs();
             Require(failed==0,"Navigation routes incomplete; inspect routes.csv (captures retained)");
             CheckEditableProfile();
-            Finish("coastal-check",true,"Saved authored scene: safe spawn, six prefab regions, all seven destination routes complete for standing capsule; scoped mesh edit preservation and twenty captures. "+tris+" instance triangles / "+materials+" materials. Not physical headset, multiplayer or measured device performance.");
+            int captures=20+(UnityEngine.Object.FindObjectOfType<BirdPersonalStation>(true)!=null?1:0)+(GameObject.Find("03 Supported coastal terraces/Closed conversation pit steps")!=null?8:0);
+            Finish("coastal-check",true,"Saved authored scene: safe spawn, six prefab regions, all seven destination routes complete for standing capsule; scoped mesh edit preservation and "+captures+" captures. "+tris+" instance triangles / "+materials+" materials. Not physical headset, multiplayer or measured device performance.");
         }
         catch(Exception e){Finish("coastal-check",false,e.ToString());}
     }
@@ -153,7 +159,7 @@ public class UnityCoastalWorldChecks : IProcessSceneWithReport
     {
         var go=new GameObject("Plan camera");var cam=go.AddComponent<Camera>();cam.transform.position=new Vector3(0,90,20);cam.transform.rotation=Quaternion.Euler(90,0,0);cam.orthographic=true;cam.orthographicSize=45;cam.farClipPlane=150;cam.clearFlags=CameraClearFlags.SolidColor;cam.backgroundColor=new Color(.14f,.18f,.21f);
         // Remove roof/upper slabs only for the explicitly labeled circulation plan.
-        var hidden=UnityEngine.Object.FindObjectsOfType<Renderer>().Where(r=>r.name.Contains("vault") || r.name.Contains("overhang") || r.name=="High lookout").ToArray();foreach(var r in hidden)r.enabled=false;
+        var hidden=UnityEngine.Object.FindObjectsOfType<Renderer>().Where(r=>r.name.Contains("vault") || r.name.Contains("overhang") || r.name=="High lookout" || r.name=="Arrival ridge shoulder").ToArray();foreach(var r in hidden)r.enabled=false;
         var lines=new List<GameObject>();foreach(var path in paths){var line=new GameObject("Measured navigation route");var lr=line.AddComponent<LineRenderer>();lr.sharedMaterial=new Material(Shader.Find("Unlit/Color")){color=Color.cyan};lr.positionCount=path.Length;lr.SetPositions(path.Select(p=>p+Vector3.up*.15f).ToArray());lr.startWidth=lr.endWidth=.12f;lines.Add(line);}
         Render(cam,Folder+"/10-circulation-plan-roofs-hidden.png");foreach(var r in hidden)r.enabled=true;foreach(var line in lines){UnityEngine.Object.DestroyImmediate(line.GetComponent<Renderer>().sharedMaterial);UnityEngine.Object.DestroyImmediate(line);}UnityEngine.Object.DestroyImmediate(go);
     }

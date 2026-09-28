@@ -2,7 +2,7 @@ param(
  [Parameter(Mandatory=$true)][string]$UnityEditor,
  [Parameter(Mandatory=$true)][string]$ProjectPath,
  [ValidateSet('Android','Windows','Both')][string]$Platform='Android',
- [switch]$Create,[switch]$ReviseR05,[switch]$RefineR05,[switch]$AddBird,[switch]$AddSocial,[switch]$CheckBird,[switch]$CheckSocial,[switch]$Check,[switch]$Walk,[switch]$Build
+ [switch]$Create,[switch]$ReviseR05,[switch]$RefineR05,[switch]$RepairR06,[switch]$RefineRockR06,[switch]$AddBird,[switch]$AddSocial,[switch]$CheckBird,[switch]$CheckSocial,[switch]$Check,[switch]$Walk,[switch]$Build
 )
 $ErrorActionPreference='Stop'
 if($ReviseR05 -and $RefineR05){throw '-ReviseR05 already includes the refinement; use -RefineR05 only for the first-pass R05 assets.'}
@@ -12,6 +12,7 @@ $editor=Join-Path $project 'Assets/BirdGenerated/Editor'
 New-Item -ItemType Directory -Force $editor | Out-Null
 Get-ChildItem -LiteralPath (Join-Path $repo 'Integrations/VRChat/Editor') -File | ForEach-Object { Copy-Item -LiteralPath $_.FullName -Destination (Join-Path $editor $_.Name) }
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityCoastalWorldChecks.cs') -Destination $editor
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityCoastalRepairChecks.cs') -Destination $editor
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityWorldBundleChecks.cs') -Destination $editor
 $runtime=Join-Path $project 'Assets/BirdGenerated/Runtime'
 New-Item -ItemType Directory -Force $runtime | Out-Null
@@ -44,13 +45,15 @@ foreach($target in $targets){
  if($Create){Invoke-Coastal 'UnityCoastalWorldChecks.Author' 'coastal-author' $target;$Create=$false}
  if($ReviseR05){Invoke-Coastal 'UnityCoastalWorldChecks.ReviseR05' 'coastal-r05' $target;$ReviseR05=$false}
  if($RefineR05){Invoke-Coastal 'UnityCoastalWorldChecks.RefineR05' 'coastal-r05-refine' $target;$RefineR05=$false}
+ if($RepairR06){Invoke-Coastal 'UnityCoastalWorldChecks.RepairR06' 'coastal-r06' $target;$RepairR06=$false}
+ if($RefineRockR06){Invoke-Coastal 'UnityCoastalWorldChecks.RefineRockR06' 'coastal-r06-rock' $target;$RefineRockR06=$false}
  if($AddBird){Invoke-Coastal 'UnityCoastalWorldChecks.AddBird' 'coastal-bird-author' $target;$AddBird=$false}
  if($AddSocial){Invoke-Coastal 'UnityCoastalWorldChecks.AddSocial' 'coastal-social-author' $target;$AddSocial=$false}
  if($CheckBird){Invoke-Coastal 'UnityPersonalBirdChecks.Run' 'coastal-bird-check' $target}
  if($CheckSocial){Invoke-Coastal 'UnitySocialBirdChecks.Run' 'coastal-social-check' $target}
  if($Check){
   Invoke-Coastal 'UnityCoastalWorldChecks.Check' 'coastal-check' $target
-  Get-ChildItem -LiteralPath $evidence -File | Where-Object { $_.Extension -eq '.png' -or $_.Name -in @('routes.csv','walk-routes.json','geometry-budget.txt','editability.txt','passage-clearance.txt') -or $_.Name -like 'route-*.txt' } | Copy-Item -Destination $targetEvidence
+  Get-ChildItem -LiteralPath $evidence -File | Where-Object { $_.Extension -eq '.png' -or $_.Name -in @('routes.csv','walk-routes.json','geometry-budget.txt','editability.txt','passage-clearance.txt','r06-before.txt','r06-repair-checks.txt') -or $_.Name -like 'route-*.txt' } | Copy-Item -Destination $targetEvidence
  }
  if($Walk){
   Invoke-Coastal 'UnityCoastalWalkChecks.Run' 'coastal-walk' $target

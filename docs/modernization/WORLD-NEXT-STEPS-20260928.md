@@ -14,6 +14,28 @@ Record actual device evidence; distinguish unattended checks from physical feel
 and from real multi-client tests. An unavailable headset still must not block
 independent development.
 
+## Progress through R06
+
+Social streams, contrasting hand pairs and body-departure acquisition debounce
+are implemented and have synthetic coverage; actual multi-client acceptance
+remains open. The mid-range investigation rejected earlier full filter influence
+because its modest noise benefit worsened turning response; production feel
+and visual sizing remain unchanged. See `MID-RANGE-ASSESSMENT.md`.
+
+R06 repairs the pit's missing riser, circle joins and open seating ends, closes
+the white rear-wall crown, and adds a rock enclosure without moving the complex.
+Both platform builds and all 17 out-and-back walking routes pass; the world is
+visibly loaded in Quest VRChat. See `COASTAL-WORLD-R06.md` and its independent
+review. Enclosure is functional, but broader rock shaping and world aesthetics
+remain unfinished (overall 6.5/10).
+
+Next favor a bounded functional pass toward validated finger clicks and Bird
+teleport beacons, or supported real-client social verification if its prerequisites
+are available. Lack of actual hand motion or a second logged-in client must not
+be relabeled as acceptance or stall independent preparation. Keep unvalidated
+click actions disabled. Later coast/pond/lighting work can continue using the
+critic's remaining design findings; do not repeat the rejected filter retune.
+
 ## Ordered work and proposed approach
 
 1. **Social Bird and reliable acquisition.** Independent per-player snapshot
@@ -22,8 +44,8 @@ independent development.
    Debounce the pedestal: collecting Bird cannot immediately toggle it off;
    require leaving the vicinity with the body, then returning deliberately.
    Text should say to return here to put it away. Disabling is a minor activity.
-   This is the current bounded implementation cycle, with synthetic network
-   verification clearly distinguished from a real two-client test.
+   The implementation's synthetic network verification is clearly distinguished
+   from a real two-client test.
    Dana's follow-up explicitly requires contrasting companion colors for the two
    hands (cyan/pink, lime/lavender, etc.), as well as varying the pair by player.
    Similar shades on both hands are not acceptable: hand identity is especially

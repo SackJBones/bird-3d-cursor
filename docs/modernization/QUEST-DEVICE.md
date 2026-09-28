@@ -153,3 +153,23 @@ Device file: BirdTrackingLab14_CenterKalman.vrcw in the same TestWorlds director
 Transfer hash and actual Lab 14 stereo rendering are verified; both hands show
 16/16 avatar bones. Physical feel is pending. Prior Lab 13 remains for rollback.
 See CENTER-KALMAN-LAB.md for the large-turn range-contraction tradeoff.
+
+Latest observed device state, 2026-09-28 12:54 UTC: the earlier dim-room warning
+has cleared. VRChat Home was rendering before deployment. The validated Coastal
+R06 Android world then transferred with matching SHA256
+`46BA39ABAB4B9D91FB82CE80CF2AD7103E06A18388A8E342F45F91591462D124`,
+and a normal cold launch loaded `BirdCoastalWorld_R06.vrcw`. The initial capture
+showed initialization; the subsequent inspected stereo image shows the coastal
+arrival and Bird pedestal. It now replaces Social Bird 02 as the observed live
+world. Both older files remain available for rollback; no online upload occurred.
+
+Private evidence is under `Validation/CoastalWorld/DeviceR06-20260928-*` in the
+heavy repository. One capture failed with an ADB transport exit while Unity was
+switching build targets; a fresh capture-only retry succeeded without relaunching
+the app. The checked recent client log has no matched Udon exception, but does
+contain platform/voice startup warnings and Oculus transaction errors. Do not
+describe the whole log as clean. Battery was 73%, AC powered, weak-charger false,
+43 C at the successful post-load observation. This proves transfer/loading and
+actual rendering, not physical navigation, hand feel, multiplayer or whole-world
+performance acceptance. Use the dedicated device routinely after meaningful
+changes under Dana's replace-anytime authorization.
