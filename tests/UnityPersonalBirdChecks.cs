@@ -20,6 +20,8 @@ public class UnityPersonalBirdChecks : MonoBehaviour
     const string Folder = "../Validation/CoastalWorld/PersonalBird";
     static Func<VRCPlayerApi,HumanBodyBones,Vector3> originalPosition;
     static Func<VRCPlayerApi,HumanBodyBones,Quaternion> originalRotation;
+    static Func<VRCPlayerApi,VRCPlayerApi.TrackingDataType,VRCPlayerApi.TrackingData> originalTracking;
+    static Vector3 headShift;
     static readonly Dictionary<HumanBodyBones,Vector3> positions = new Dictionary<HumanBodyBones,Vector3>();
     static readonly Dictionary<HumanBodyBones,Quaternion> rotations = new Dictionary<HumanBodyBones,Quaternion>();
     static readonly string[] suffix = { "Hand","ThumbProximal","ThumbIntermediate","ThumbDistal","IndexProximal","IndexIntermediate","IndexDistal","MiddleProximal","MiddleIntermediate","MiddleDistal","RingProximal","RingIntermediate","RingDistal","LittleProximal","LittleIntermediate","LittleDistal" };
@@ -83,6 +85,7 @@ public class UnityPersonalBirdChecks : MonoBehaviour
                 views=station.personalRig.GetComponentsInChildren<BirdPointPresentation>(true);
                 originalPosition=VRCPlayerApi._GetBonePosition; originalRotation=VRCPlayerApi._GetBoneRotation;
                 VRCPlayerApi._GetBonePosition=Position; VRCPlayerApi._GetBoneRotation=Rotation;
+                originalTracking=VRCPlayerApi._GetTrackingData; VRCPlayerApi._GetTrackingData=Tracking; headShift=Vector3.zero;
                 sequence=Scenarios();
             }
             frames++;
@@ -92,6 +95,8 @@ public class UnityPersonalBirdChecks : MonoBehaviour
     }
     IEnumerator Scenarios()
     {
+        Vector3 standing=station.touchPoint.position; standing.y=0;
+        Networking.LocalPlayer.TeleportTo(standing,Quaternion.identity); yield return null;
         Require(!station.personalRig.activeSelf&&!Get<bool>(VM(station),"acquired"),"Off on arrival");
         Require(views.Length==2,"Two point embodiments");
         SetHands(100,Quaternion.identity,Vector3.zero); yield return null;
@@ -103,10 +108,24 @@ public class UnityPersonalBirdChecks : MonoBehaviour
         Require(Get<bool>(VM(station),"acquired")&&station.personalRig.activeSelf,"Touch acquires Bird without a controller");
         Require(!other.personalRig.activeSelf&&!Get<bool>(VM(other),"acquired"),"Other local instance unaffected");
         Require(VM(station).RunEvent("_interact"),"Normal VRChat Use event"); yield return null;
-        Require(!station.personalRig.activeSelf,"Use puts Bird away");
+        Require(station.personalRig.activeSelf&&!Get<bool>(VM(station),"returnArmed"),"Repeated Use cannot undo acquisition before leaving");
+        SetHands(100,Quaternion.identity,Vector3.zero); yield return null;
+        Require(!Get<bool>(VM(station),"returnArmed"),"Withdrawing only the hands does not arm put-away");
+        Vector3 fixedOrigin=Networking.LocalPlayer.GetPosition(); headShift=Vector3.back*3; yield return null;
+        Require((Networking.LocalPlayer.GetPosition()-fixedOrigin).sqrMagnitude<.0001f,"Physical head movement does not require moving the playspace origin");
+        Require(Get<bool>(VM(station),"returnArmed"),"Leaving vicinity with body arms return");
+        VM(station).RunEvent("_interact"); yield return null;
+        Require(station.personalRig.activeSelf,"Remote Use cannot put away before returning");
+        headShift=Vector3.zero; yield return null;
+        SetHands(100,Quaternion.identity,shift);
+        until=Time.time+.2f; while(Time.time<until) yield return null;
+        Require(!station.personalRig.activeSelf,"Returning and touching puts Bird away");
+        VM(station).RunEvent("_interact"); yield return null;
+        Require(!station.personalRig.activeSelf,"Immediate repeated Use cannot reacquire after putting away");
         until=Time.time+.2f; while(Time.time<until) yield return null;
         Require(!station.personalRig.activeSelf,"Hand must withdraw before touch reacquires");
-        SetHands(100,Quaternion.identity,Vector3.zero); yield return null;
+        SetHands(100,Quaternion.identity,Vector3.zero);
+        until=Time.time+1.1f; while(Time.time<until) yield return null;
         SetHands(100,Quaternion.identity,shift);
         until=Time.time+.2f; while(Time.time<until) yield return null;
         Require(station.personalRig.activeSelf,"Reentry reacquires unlimited Bird");
@@ -152,6 +171,8 @@ public class UnityPersonalBirdChecks : MonoBehaviour
             }
             Render(views[0],eye,"range-"+range.ToString("0"));
         }
+        Networking.LocalPlayer.TeleportTo(standing+Vector3.back*3,Quaternion.identity); yield return null;
+        Networking.LocalPlayer.TeleportTo(standing,Quaternion.identity); yield return null;
         VM(station).RunEvent("_interact"); yield return null;
         Require(views.All(v=>!v.core.enabled&&!v.trailRenderer.enabled),"Put-away clears presentation");
         VM(other).RunEvent("_interact"); yield return null;
@@ -170,7 +191,7 @@ public class UnityPersonalBirdChecks : MonoBehaviour
             for(int blocked=0;blocked<2;blocked++)
             {
                 wall.SetActive(blocked==1);camera.Render();RenderTexture.active=render;image.ReadPixels(new Rect(0,0,1024,1024),0,0);image.Apply();RenderTexture.active=null;
-                int colored=image.GetPixels32().Count(c=>c.g>40&&c.b>40&&c.r<30);
+                int colored=image.GetPixels32().Count(c=>Mathf.Max(c.r,Mathf.Max(c.g,c.b))>40&&Mathf.Min(c.r,Mathf.Min(c.g,c.b))<80);
                 if(blocked==0){Directory.CreateDirectory(Folder);File.WriteAllBytes(Folder+"/"+name+".png",image.EncodeToPNG());}
                 Require(blocked==0?colored>=3:colored==0,"Actual cursor/trail visibility and logical occlusion "+name+" blocked="+blocked+" pixels="+colored+
                     " core="+view.core.enabled+" position="+view.core.transform.position+" scale="+view.core.transform.lossyScale+" halo="+view.halo.enabled+" width="+view.halo.startWidth+" tint="+view.halo.startColor+" knots="+Get<int>(VM(view),"trailCount")+" trail="+view.trailRenderer.enabled+" headRotation="+Networking.LocalPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Head).rotation);
@@ -205,12 +226,19 @@ public class UnityPersonalBirdChecks : MonoBehaviour
     static HumanBodyBones Bone(int side,int i){return (HumanBodyBones)Enum.Parse(typeof(HumanBodyBones),(side==0?"Left":"Right")+suffix[i]);}
     static Vector3 Position(VRCPlayerApi p,HumanBodyBones b){return p.isLocal&&positions.ContainsKey(b)?positions[b]:originalPosition(p,b);}
     static Quaternion Rotation(VRCPlayerApi p,HumanBodyBones b){return p.isLocal&&rotations.ContainsKey(b)?rotations[b]:originalRotation(p,b);}
+    static VRCPlayerApi.TrackingData Tracking(VRCPlayerApi p,VRCPlayerApi.TrackingDataType type)
+    {
+        var data=originalTracking(p,type);
+        if(p.isLocal&&type==VRCPlayerApi.TrackingDataType.Head)data.position+=headShift;
+        return data;
+    }
     static UdonBehaviour VM(UdonSharp.UdonSharpBehaviour p){return UdonSharpEditorUtility.GetBackingUdonBehaviour(p);}
     static T Get<T>(UdonBehaviour vm,string field){return (T)vm.GetProgramVariable(field);}
     void Require(bool condition,string message){assertions++;if(!condition)throw new Exception(message);}
     void Finish(bool success,string message)
     {
         if(originalPosition!=null)VRCPlayerApi._GetBonePosition=originalPosition;if(originalRotation!=null)VRCPlayerApi._GetBoneRotation=originalRotation;
+        if(originalTracking!=null)VRCPlayerApi._GetTrackingData=originalTracking; headShift=Vector3.zero;
         SessionState.SetBool(Active,false);Directory.CreateDirectory(Folder);
         string result=(success?"PASS: ":"FAIL: ")+message;
         File.WriteAllText("coastal-bird-check-result.txt",result);File.WriteAllText(Folder+"/check-"+EditorUserBuildSettings.activeBuildTarget+".txt",result);EditorApplication.Exit(success?0:1);

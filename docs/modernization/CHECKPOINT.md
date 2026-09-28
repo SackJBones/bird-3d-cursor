@@ -1721,3 +1721,113 @@ added to WORLD-DESIGN/PLAN as optional post-MVP modeling research. The existing
 same-task two-hour heartbeat was updated through the app and its saved prompt
 verified against RECURRING-PROMPT.txt. Existing schedule/permissions/reporting
 intent retained. No online world upload, avatar change or additional app install.
+
+
+## 2026-09-28 - Social Bird 02, pedestal debounce, and expanded world roadmap
+
+Dana accepted Personal Bird 01 ("it feels like magic"). The working volume and
+visual inflation are explicitly accepted; room-to-two-room radial instability
+is a separate next investigation. Their complete new request and a bounded
+ordered plan are in WORLD-NEXT-STEPS-20260928.md. It covers social visibility,
+contrasting companion hand-color pairs varied by player, pedestal debounce,
+mid-range stability, validated pointer-finger clicks and vertical torus teleport
+beacons, conversation-pit repairs, cliff enclosure around the existing spawn
+cavern, coast/distant land/plants/skybox, a curved extended pond and winding path,
+fish boids attracted to any logical Bird in the water, and optional offline
+ovoid/cone metashape shells with marching cubes/decimation/baked lighting around
+existing architecture. Infrastructure comes first; continue 30-60 minute passes
+every two hours. Existing visual references and independent architectural critic
+workflow remain applicable to later world-building.
+
+Dana subsequently emphasized that the Quest is dedicated to this project:
+use it extensively for real VRChat validation and replace its loaded build at
+ANY time. This supersedes prior preservation instructions. QUEST-DEVICE.md and
+the same-chat heartbeat now capture that standing authorization. Hardware
+unavailability still must not block independent work.
+
+Implemented in this cycle:
+
+- BirdPersonalStation ignores immediate repeated put-away attempts. The tracked
+  head must leave a 2.2 m horizontal vicinity before returning within 1.1 m and
+  touching/using the pedestal can put Bird away. Hand withdrawal alone does not
+  arm it. The tracked head supports room-scale walking with a fixed playspace
+  origin. A one-second reacquisition cooldown and hand withdrawal prevent an
+  immediate flip back. Text says "Return here to put it away."
+- BirdSocialPresentation is an optional manual-sync VRCPlayerObject template
+  added to the ordinary personal prefab. Each visitor's copy reads only that
+  owner's local station; observer copies feed independent passive point states
+  and the existing point/trail embodiment. No shared scarce pool or persisted
+  cursor state. The owner's original cursor remains immediate; no networking
+  writes into hand input, geometry, range or filters.
+- Nine fixed fields hold mask, two palm origins/two logical points, two history
+  revisions, timestamp and sequence (72 raw scalar bytes before overhead).
+  Requests are bounded to 10 Hz, with congestion gating, failure retry and idle
+  silence after hidden-state acknowledgement. Observers use bounded 0.1 s
+  world-space interpolation, 1.5 s stale expiry, malformed/reordered rejection,
+  per-hand loss and fresh trails on revision/teleport/reentry. This is visual
+  interpolation only; large turns can cut chords between samples.
+- Deterministic player palettes vary the whole pair. Left/right remain strongly
+  contrasting companion hues, preserving cyan/pink for the first pair. No click
+  authority is given to observer points; avatar clicks remain disabled.
+- One-time additive editor authoring preserves the architecture and creates
+  normal SDK PlayerObjects. SDK program initialization is awaited before proxy
+  serialization. Runtime ownership/cloning use public SDK mechanisms only.
+
+Validation and limits:
+
+- Android personal check: PASS, 334 assertions / 297 frames. Windows: PASS,
+  334 / 296. Saved Lab 14 scalar settings still match; tests cover acquisition,
+  repeat-use prevention, hand-only withdrawal, tracked-head departure with a
+  fixed playspace origin, deliberate return, cooldown, both hands, loss/recovery,
+  bounded trails and actual camera rendering/occlusion at 1, 4, 30 and 10000 m.
+- Android social check: PASS, 41 assertions / 320 frames. Windows: PASS,
+  41 / 319. Real ClientSim PlayerObject creation, initial ownership/reference
+  remapping, palettes and departure; typed synthetic snapshot injection plus
+  SDK codec/JSON roundtrip checks both hands, interpolation, revision/teleport,
+  malformed/stale/reordered data, late arrival, timeout, recovery, put-away and
+  request cadence. The final pedestal-only head-position change was followed
+  by fresh personal checks and builds; social behavior did not change.
+- An ownership-steal probe found ClientSim 3.10.5 permits SetOwner on PlayerObjects,
+  unlike the documented VRChat client contract. Immutability is NOT counted as
+  verified by the simulator. No SDK was patched. A test-harness object-valued
+  setter also erased Udon heap type metadata; injection now preserves actual
+  scalar/vector types. These simulator/test limitations were not patched into
+  production hand behavior.
+- Both normal SDK exports pass compressed/uncompressed upload-size gates and
+  bundle catalog checks. Processed scenes have 299 GameObjects, 924 components,
+  17 unsynced Udon programs plus one manual per-player stream; every program has
+  bytecode, no VRCEnablePersistence and no missing/project MonoBehaviours.
+  Android restored as the final editor target. Architecture/collision unchanged;
+  previous route/geometry evidence remains applicable, not rerun gratuitously.
+- Android: 590128 bytes, SHA256
+  E5D014AB60B6789A20E5AA7542843805CF5430B32F54092F4063ED576CA730BD.
+- Windows: 628683 bytes, SHA256
+  4F315CE14DDC71141875D66049B8AA580F76281B845FC9E9B32CE5819139DCE8.
+- Curated evidence: heavy Reference/SocialBird/20260928. Camera PNGs are target
+  editor renders, not headset frames. 1000 km remains optional unresolved work.
+
+Actual Quest deployment:
+
+The Android bundle was pushed over authorized wireless ADB as
+BirdCoastalWorld_SocialBird02.vrcw in VRChat TestWorlds. Device SHA256 matched.
+VRChat was cold-launched with the normal localWorldPath/watchWorlds string
+extras; the old worlds remain for rollback. A complete CRC-checked 4128x2208
+stereo capture shows the coastal arrival world and cyan pedestal light rendering.
+The captured per-process logs (PIDs 23060 and 23205) contain zero matched Udon
+exception/halt lines, not a claim that every possible device issue is absent.
+Private evidence is in Validation/CoastalWorld/DeviceSocialBird02, including
+metadata, launch response, battery reading, client log and headset.png. Battery
+was 54%, AC powered, Weak Charger=false, temperature 41 C. Plugged-in stay-awake
+and the previously authorized proximity override were reapplied; no PIN or
+boundary changes. The host ADB transport disappeared during editor runs and
+reconnected successfully after they finished.
+
+No physical acquisition was performed during this unattended device check;
+new debounce feel, active remote cursors, actual multi-client transport/ownership,
+wire-byte rate and multi-visitor Quest cost remain separate acceptance steps.
+Use the headset routinely in subsequent cycles under Dana's new authorization.
+Do not mistake single-process snapshot tests for social acceptance. Next bounded
+work can test normal two-client options and investigate mid-range radial noise,
+then validated clicks/beacons and the prioritized repairs. Preserve the accepted
+near path and visual inflation. Do not let hardware/account gates or optional
+metashape research stall independent progress.

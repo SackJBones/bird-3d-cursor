@@ -12,15 +12,22 @@ The coastal scene uses an ordinary nested `Personal Bird station.prefab`, under
 `06 Experience anchors`. The six architectural prefabs remain intact. The
 station's touch light is above the existing arrival plinth. Touch it with either
 palm for 0.12 seconds, or use VRChat's normal Interact action. Both hands receive
-their own cursor. Interact again at the pedestal puts Bird away. After putting
-it away, withdraw the hand before touching again to avoid immediate reacquisition.
+their own cursor. Collecting Bird disarms put-away until the player's body leaves
+the 2.2 m vicinity. Return within 1.1 m and touch the light again (or use Interact)
+to put it away. Vicinity uses the tracked head's horizontal position, including
+physical room-scale walking with a fixed playspace origin. Merely withdrawing a hand or repeatedly clicking does not undo
+acquisition. After putting it away, withdraw the hand and wait a second before
+reacquisition. The label says to return here to put it away.
 
-This is local per visitor: all station/input/presentation programs are unsynced,
-and use `Networking.LocalPlayer`. Another visitor cannot consume the light or
-take ownership of someone's cursor. **Other people do not yet see your cursors.**
-There is no account inventory grant or persistence across visits in this MVP.
-Synchronized social presentation is the next integration layer, preferably a
-per-player object rather than a scarce shared pool.
+Acquisition and input are local per visitor and use `Networking.LocalPlayer`.
+Another visitor cannot consume the light or take ownership of someone's cursor.
+An optional [social presentation layer](SOCIAL-BIRD.md) now adds a per-player
+snapshot stream and observer cursors/trails with contrasting player color pairs.
+Its compiled-Udon/ClientSim verification is separate from the still-required
+real two-client acceptance. Social Bird 02 now replaces Personal Bird 01 on the
+Quest; its transfer hash and actual world rendering are verified. Physical
+debounce feel and real multiplayer acceptance remain separate. There is no
+account inventory grant or persistence across visits in this MVP.
 
 `BirdAvatarHandInput`, `BirdSphereFit`, `BirdCursorState`,
 `BirdSphereCenterFilter` and `BirdRangeAdaptiveFilter` are the same runtime
@@ -69,9 +76,11 @@ establish physical feel, headset performance or click fidelity.
 
 ## Next layers, in order
 
-1. Headset acceptance of the pedestal and the inherited Lab 14 hand behavior.
-2. Social visibility with per-player lifecycle, bandwidth limits and late joins.
-3. Validated clicks and point-through UI, retaining deliberate acquisition rules.
+1. Dana accepted Personal Bird 01 and its working volume; verify the new pedestal
+   debounce in a subsequent headset build.
+2. Real two-client acceptance of social visibility, lifecycle, bandwidth and late joins.
+3. Mid-range stability investigation and validated clicks/point-through UI,
+   retaining deliberate acquisition rules and accepted visual inflation.
 4. Versioned, reusable creator packages; portable embodiments as described in
    [BIRD-PORTABILITY.md](BIRD-PORTABILITY.md).
 

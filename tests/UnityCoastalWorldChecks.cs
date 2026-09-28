@@ -31,6 +31,7 @@ public class UnityCoastalWorldChecks : IProcessSceneWithReport
     public static void ReviseR05(){try{BirdCoastalWorldAuthoring.ApplyR05();Finish("coastal-r05",true,"Applied scoped R05 prefab revision.");}catch(Exception e){Finish("coastal-r05",false,e.ToString());}}
     public static void RefineR05(){try{BirdCoastalWorldAuthoring.RefineR05();Finish("coastal-r05-refine",true,"Applied independent-review doorway and sightline refinement.");}catch(Exception e){Finish("coastal-r05-refine",false,e.ToString());}}
     public static void AddBird(){try{BirdPersonalStationAuthoring.AddToCoastalWorld();Finish("coastal-bird-author",true,"Added independent local Bird station prefab; architecture preserved.");}catch(Exception e){Finish("coastal-bird-author",false,e.ToString());}}
+    public static async void AddSocial(){try{await BirdSocialPresentationAuthoring.AddToCoastalWorld();Finish("coastal-social-author",true,"Added optional per-player Bird presentation to the existing prefab.");}catch(Exception e){Finish("coastal-social-author",false,e.ToString());}}
     public static void Check()
     {
         try
@@ -191,15 +192,20 @@ public class UnityCoastalWorldChecks : IProcessSceneWithReport
         Require(all.All(c=>c!=null),"No missing components after SDK processing");
         Require(!all.OfType<MonoBehaviour>().Any(c=>c.GetType().Assembly.GetName().Name.StartsWith("Assembly-CSharp")),"No project MonoBehaviours in exported world");
         var programs=all.OfType<VRC.Udon.UdonBehaviour>().ToArray();
-        Require(programs.Length==13,"Personal station and two complete Bird pipelines survive SDK processing");
+        Require(programs.Length==18,"Personal station, two complete local pipelines and five social presentation programs survive SDK processing");
+        var templates=all.OfType<VRCPlayerObject>().ToArray();
+        Require(templates.Length==1,"One per-player presentation template");
+        Require(!all.OfType<VRCEnablePersistence>().Any(),"Transient cursor streams are not persisted");
+        Require(programs.Count(p=>p.SyncMethod==VRC.SDKBase.Networking.SyncType.Manual)==1,"One manual snapshot stream per player");
         foreach(var vm in programs)
         {
             var program=new SerializedObject(vm).FindProperty("serializedProgramAsset");
             Require(program!=null&&program.objectReferenceValue!=null,"Exported Udon bytecode reference exists");
-            Require(vm.SyncMethod==VRC.SDKBase.Networking.SyncType.None,"Personal Bird remains unsynced per visitor");
+            Require(vm.SyncMethod==VRC.SDKBase.Networking.SyncType.None ||
+                (vm.SyncMethod==VRC.SDKBase.Networking.SyncType.Manual && vm.gameObject==templates[0].gameObject),"Only the player-object bridge is networked");
         }
         Require(all.OfType<VRCSceneDescriptor>().Count()==1&&all.OfType<PipelineManager>().Count()==1,"Descriptor and pipeline retained");processed++;
-        inventory=all.OfType<Transform>().Count()+" GameObjects, "+all.Length+" components, "+programs.Length+" unsynced Udon programs, no missing/project scripts";
+        inventory=all.OfType<Transform>().Count()+" GameObjects, "+all.Length+" components, 17 unsynced Udon programs + one manual per-player stream, no persistence or missing/project scripts";
     }
     static void Require(bool condition,string message){if(!condition)throw new Exception(message);}
     static void Finish(string stem,bool pass,string message,bool exit=true)

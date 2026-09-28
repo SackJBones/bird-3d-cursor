@@ -4,11 +4,18 @@
 
 The verbatim initial request is [user-request.txt](user-request.txt). Keep Bird free, easy to try, expressive, and easy to integrate. The adoption journey is: see someone using Bird, visit Bird World, immediately try it, keep using it socially, then optionally become a developer. Do not silently reduce this to a conventional ray pointer.
 
-Work every two hours in substantial passes, approximately 45–60 minutes of active work per pass, finishing coherent checkpoints and their verification. Dana explicitly requested longer cycles on 2026-09-26. This is a pacing guideline, not a guaranteed usage cap. Commit and push meaningful work each pass; never force-push. Stop inventing work when the acceptance criteria are met. Report completion once. Record blocked gates honestly and continue independent work without repeatedly reporting unchanged blockers.
+Work every two hours in substantial passes, approximately 30–60 minutes of active work per pass, finishing coherent checkpoints and their verification. Dana confirmed this bounded cycle rhythm on 2026-09-28. This is a pacing guideline, not a guaranteed usage cap. Commit and push meaningful work each pass; never force-push. Stop inventing work when the acceptance criteria are met. Report completion once. Record blocked gates honestly and continue independent work without repeatedly reporting unchanged blockers.
 
 Use `feature/vrchat-modernization` in both repositories. All maintained package code belongs in `SackJBones/bird-3d-cursor`; full projects, large scenes and assets belong in `SackJBones/bird-3d-cursor-projects`. Pin dependencies to reproducible revisions. Create eventual review PRs; do not merge unfinished work. Later engine integrations branch off this feature branch, with separate large demo repositories where necessary.
 
 ## Current objective: get Bird from the pedestal, 2026-09-28 UTC
+
+Dana has now tried Personal Bird 01 successfully. The working volume and visual
+inflation feel right. The new [world and interaction plan](WORLD-NEXT-STEPS-20260928.md)
+preserves their complete follow-up: prioritize social visibility/player colors,
+debounce acquisition, investigate mid-range stability, validate clicks and build
+teleport beacons, then repair/detail the coast, pond, gardens, sky and fish.
+Organic metashape shells are an optional reach goal around the existing complex.
 
 Dana has tried the coastal world and now prioritizes acquiring a personal Bird
 from its small pedestal and pointing immediately. Everyone can get one; there

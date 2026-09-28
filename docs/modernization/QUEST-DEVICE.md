@@ -1,11 +1,19 @@
 # Quest development power settings
 
-Current world, 2026-09-28 UTC: Dana requested the coastal world if runnable.
-Coastal R05 is now transferred/hash-verified over Wi-Fi and visibly rendering in
-Quest VRChat. It is left open for exploration; Lab 14 remains installed but is
-not selected. This is an architecture-only preview, with Bird interaction still
-in the lab. See latest CHECKPOINT and private heavy
-`Validation/CoastalWorld/DeviceR05` evidence. Preserve the current user session.
+Current world, 2026-09-28 UTC: **Social Bird 02** is transferred/hash-verified and
+visibly rendering in actual Quest VRChat. It contains personal Bird, debounced
+pedestal acquisition and the optional social presentation layer. The previous
+Personal Bird 01 was accepted by Dana; its near feel and visual inflation remain
+unchanged. See the latest CHECKPOINT and private heavy
+`Validation/CoastalWorld/DeviceSocialBird02` evidence. This unattended check
+establishes loading/rendering, not physical debounce feel or multiplayer success.
+
+Dana explicitly dedicates this headset to development and asks for extensive use
+throughout the effort, including real VRChat validation. **The loaded build may
+be replaced at any time without asking again.** This supersedes all earlier
+instructions to preserve a particular session. Use it routinely for meaningful
+checks; an unavailable device must not block independent development. At this
+deployment it reported 54% battery, AC power, no weak charger and 41 degrees C.
 
 ## Wireless ADB and wall power, 2026-09-28 UTC
 
@@ -42,7 +50,8 @@ without another USB handshake. The exact host-process cause was not established.
 Do not mistake loss of the host transport list for loss of the headset's TCP mode.
 When USB and Wi-Fi both appear, they can represent the same physical Quest; avoid
 unqualified commands that fail with multiple-device ambiguity. Keep hardware
-optional for independent work and preserve Lab 14 while awaiting feel feedback.
+optional for independent work. Earlier session-preservation requests are
+superseded by the standing authorization above.
 
 This follows Android's documented
 [ADB-over-Wi-Fi workflow](https://developer.android.com/tools/adb#wireless).
