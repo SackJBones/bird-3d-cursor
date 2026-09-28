@@ -56,6 +56,11 @@ public class UnityCoastalWalkChecks : MonoBehaviour
         var routes=JsonUtility.FromJson<Routes>(File.ReadAllText(Folder+"/walk-routes.json"));
         if(routes.routes.Length!=7)throw new Exception("Expected all seven complete navigation routes");
         var allRoutes=new List<Route>(routes.routes);
+        if(GameObject.Find("04 Lower water and hidden lounge/Curved pond promenade")!=null)
+        {
+            if(!File.Exists(Folder+"/pond-walk-routes.json"))throw new Exception("Run the pond check before walking the revised pond.");
+            allRoutes.AddRange(JsonUtility.FromJson<Routes>(File.ReadAllText(Folder+"/pond-walk-routes.json")).routes);
+        }
         if(GameObject.Find("03 Supported coastal terraces/Closed conversation pit steps")!=null)
         {
             Func<float,float,float,Vector3> pit=(radius,angle,y)=>new Vector3(-2+radius*Mathf.Cos(angle*Mathf.Deg2Rad),y,26+radius*Mathf.Sin(angle*Mathf.Deg2Rad));
@@ -100,6 +105,18 @@ public class UnityCoastalWalkChecks : MonoBehaviour
                 if(error>.35f)throw new Exception(route.name+" finished at wrong level, endpoint error="+error);
                 rows.Add(route.name+(direction==0?" outward":" return")+","+(frames-before)+","+error.ToString("F4",System.Globalization.CultureInfo.InvariantCulture)+",complete");
                 File.WriteAllLines(Folder+"/walkthrough.csv",rows);
+            }
+        }
+        if(GameObject.Find("04 Lower water and hidden lounge/Curved pond promenade")!=null)
+        {
+            // Real controller pushes against both new boundaries, using both SDK player layers.
+            foreach(int layer in new[]{9,10})foreach(int direction in new[]{-1,1})
+            {
+                controller.enabled=false;gameObject.layer=layer;transform.position=new Vector3(23.65f,-1.97f,50);controller.enabled=true;Physics.SyncTransforms();
+                for(int i=0;i<55;i++){controller.Move(new Vector3(direction*.08f,-.04f,0));yield return null;}
+                if(transform.position.y < -2.1f || (direction<0 ? transform.position.x<22.0f||transform.position.x>22.7f : transform.position.x>25.3f||transform.position.x<24.7f))
+                    throw new Exception("New pond/sea guard failed player containment on layer "+layer+" at "+transform.position);
+                rows.Add("Pond guard layer "+layer+" direction "+direction+",55,0,contained");
             }
         }
     }

@@ -2282,3 +2282,91 @@ world whenever useful. Preserve accepted control and companion hand colors.
 No hands/second client must not stall independent work. Same-chat heartbeat,
 inherited permissions, every two hours with 30-60 minute coherent cycles; notify
 meaningful progress/failure/required action, stay quiet when unchanged.
+
+## 2026-09-28 Pond01 — curved basin and extended waterside circuit
+
+Completed at 2026-09-28 23:23 UTC. Heavy commit 1f38b63c0556dc20da206b4bf78cadd16a23a511; curated evidence
+`Reference/WorldBuildingReviews/20260928-Pond01` (21 images, results/exits,
+walkthroughs, preservation and sanitized device observations). Read
+`COASTAL-POND.md`. This is one bounded world-layout pass, not completion of the
+garden, schooling fish or overall aesthetic target.
+
+The water and both banks now curve around the lower terrace. The outer path
+returns to the old promenade around rounded ends; the broad inland terrace and
+stair landing remain open. An ordinary nested prefab and seven saved meshes
+(9,938 triangles including invisible boundaries and underside) use existing
+materials. An editor-only profile supplies the centerline/widths/levels;
+explicit updates preserve GUIDs and prefab transforms and recook live colliders.
+The walk is 3.3 m wide (about 3.2 m clear), water 0.6 m below. Original rectangular
+pieces remain inactive scene overrides. Sixteen old still fish were moved into
+the new basin; these are NOT boids. No new runtime scripts, lights or streams.
+Existing stairs, rooms, beacon positions and Bird runtime/presentation stay put.
+Preserve accepted near feel, range/filtering, inflation and companion hand colors.
+
+First tight curvature self-intersected and was rejected before scene mutation.
+The wider fair sweep passed. Final terrace edges follow the actual round caps,
+closing initial crescent cracks; rail tails no longer crowd inspection footing.
+The slab underside is closed. The old high-lookout floor-occlusion render is
+retained as a control, not a sightline pass. Corrected high-beacon stance and
+west-join views are included. Both final platform image sets contain nine views.
+
+Both platforms pass 319 collider support/standing samples, water separation,
+rail policy, retained landing/inspection support, lighting checks and captures.
+Compiled beacon tests: Android 341 assertions/193 frames; Windows 343/192, with
+all 27 upper-return stance/height cases. Both normal-frame walking runs pass all
+18 routes outward AND back in 17,774 frames, including the full pond circuit.
+Both SDK player layers also withstand pushes into both new boundaries. Android
+full scene check passes seven destination routes, 338 wing-clearance samples,
+pit/repair assertions, 29 captures and editability. Scene has 48,182 instance
+triangles and 16 materials. These are geometry/compiled tests, not actual
+client locomotion, physical hand acceptance or multi-client verification.
+
+The older editability fixture regenerated five original meshes and cleared their
+later-authored UV2. Asset diffs caught this after first exports; those payloads
+were NOT deployed. Exact baseline assets were restored, matching the inputs of
+the saved bake. The fixture now preserves/asserts complete mesh bytes including
+UV2 and refreshes collider cooking. Final Android scene check passes; the five
+mesh diffs are empty. Preserved existing assets: 266 vs bfbb5df. Baked lighting
+has two non-directional maps, 219 probes, 177 receivers and 141 UV-overlap
+warnings. The older combined Windows scene/capture shutdown issue remains
+separate; focused checks, walker and normal exporter pass with exit 0.
+
+Final normal SDK exports, compressed/uncompressed size gates, processed-scene
+audits and catalog checks pass, exit 0:
+- Android: 1,839,264 bytes; SHA256 136E114FDFF52D109ED8506C92FC03D33775931677511AC2A6F022AC0AB69D30.
+- Windows: 2050586 bytes; SHA256=D52621BC5B34DBDD2F28A8FBAD3078C4B6A0B7183CB6253F884D71AEE46F50E1.
+- Android inspection: 1,836,669 bytes; SHA256 AFE704C814E5F013BB2C356BEC2F1973AB407516FE53C935DD76715FB5285B24.
+373 objects / 1,142 components / 28 None programs and one manual per-player
+stream, no persistence/missing/project scripts. Inspection changes only initial
+spawn temporarily with floor/clearance checks; exact original scene restoration
+is verified. Android target restored after Windows. No online upload, SDK/client
+patch, validation bypass or account changes.
+
+Quest final inspection and production transfers both matched their source
+hashes. First inspection capture was black; one read-only retry had an invalid
+PNG, then capture recovered. Inspected 23:13 UTC stereo shows the new terrace,
+rail and water edge against the cliff; the fixed tilted headset view does NOT
+show the entire curve. 23:14 UTC production capture shows normal arrival with
+Bird pedestal and beacon. That production build is LEFT RUNNING. Existing
+fallback/error avatar visuals remain; Bird not acquired. Battery 75%, AC,
+weak charger false, 38 C. Six stationary inspection samples: 72–73 FPS/72 target,
+zero tear/stale, app 2.43–2.50 ms. No matched Udon error lines in captured logs,
+not a claim of globally clean logs. Raw device logs/screens remain ignored and
+private. Saved avatar click AND teleport gates remain OFF pending physical
+validation; active Bird cost and real multiplayer remain unverified.
+
+Independent critic accepts the bounded pond layout and Windows/Android parity
+in views 02/05/09. Full-world scores remain 6.5 aesthetics / 8 navigability /
+7 hangout suitability / 6.5 overall; >=8 each is still unmet. Near-concentric U
+and empty deck need purposeful bank-width variation, stopping bay and sparse
+planting, not arbitrary curve noise. Seaward overhang needs convincing support;
+repetitive/blocky rail shading, exposed west rail end/bright join seam and old
+doubled beacon text remain. Later bounded social fish should respond only to
+local/remote logical Bird points in the actual water volume.
+
+Next choose one 30–60 minute functional or world pass. Continue extensive real
+Quest testing under Dana's replace-anytime authorization. No hands/second client
+must not stall independent work. Keep same-chat inherited permissions and every
+two hours; notify meaningful changes, completion, failure or required action,
+stay quiet when unchanged. Do not replay one-time pond/world/lighting migrations
+over authored assets. Keep both repositories committed and pushed without force.

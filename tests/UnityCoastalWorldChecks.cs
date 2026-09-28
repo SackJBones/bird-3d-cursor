@@ -144,6 +144,15 @@ public partial class UnityCoastalWorldChecks : IProcessSceneWithReport
         var profile=AssetDatabase.LoadAssetAtPath<BirdCoastalWorldProfile>(path);string saved=EditorJsonUtility.ToJson(profile);
         string meshPath=BirdCoastalWorldAuthoring.Folder+"/Meshes/Circular threshold.asset";
         var mesh=AssetDatabase.LoadAssetAtPath<Mesh>(meshPath);string guid=AssetDatabase.AssetPathToGUID(meshPath);
+        // Geometry regeneration deliberately replaces mesh channels. Preserve the
+        // complete pre-test assets, including later authored UV2/lightmap data.
+        var originals=new Dictionary<string,byte[]>();
+        string backupFolder=Folder+"/profile-check-mesh-backup";Directory.CreateDirectory(backupFolder);
+        foreach(string name in new[]{"Arrival vault","Circular threshold","Branching support","Upper inhabited slab","Lookout slab"})
+        {
+            string assetPath=BirdCoastalWorldAuthoring.Folder+"/Meshes/"+name+".asset";
+            originals.Add(assetPath,File.ReadAllBytes(assetPath));File.WriteAllBytes(backupFolder+"/"+name+".asset",originals[assetPath]);
+        }
         var original=mesh.vertices;var poses=UnityEngine.Object.FindObjectsOfType<Transform>().ToDictionary(t=>t,t=>t.localToWorldMatrix);
         var sentinel=new GameObject("Authored child preservation check");sentinel.transform.SetParent(GameObject.Find("01 Arrival cavern").transform,false);sentinel.transform.localPosition=new Vector3(1,2,3);
         try
@@ -156,9 +165,21 @@ public partial class UnityCoastalWorldChecks : IProcessSceneWithReport
             try{BirdCoastalWorldAuthoring.UpdateProfileMeshes();}catch(InvalidOperationException){rejected=true;}
             Require(rejected&&mesh.vertices.SequenceEqual(valid),"Invalid dimensions fail before mutating geometry");
         }
-        finally{EditorJsonUtility.FromJsonOverwrite(saved,profile);BirdCoastalWorldAuthoring.UpdateProfileMeshes();UnityEngine.Object.DestroyImmediate(sentinel);}
+        finally
+        {
+            EditorJsonUtility.FromJsonOverwrite(saved,profile);EditorUtility.SetDirty(profile);AssetDatabase.SaveAssets();
+            foreach(var pair in originals){File.WriteAllBytes(pair.Key,pair.Value);AssetDatabase.ImportAsset(pair.Key,ImportAssetOptions.ForceUpdate);}
+            foreach(var collider in UnityEngine.Object.FindObjectsOfType<MeshCollider>())
+            {
+                var shared=collider.sharedMesh;if(shared==null||!originals.ContainsKey(AssetDatabase.GetAssetPath(shared)))continue;
+                collider.sharedMesh=null;collider.sharedMesh=shared;
+            }
+            Physics.SyncTransforms();UnityEngine.Object.DestroyImmediate(sentinel);
+        }
+        mesh=AssetDatabase.LoadAssetAtPath<Mesh>(meshPath);
         Require(mesh.vertices.SequenceEqual(original),"Restored profile exactly restores mesh vertices");
-        File.WriteAllText(Folder+"/editability.txt","PASS: scoped profile updates change geometry, preserve mesh GUID/reference identity, all scene transforms and authored additions, reject invalid dimensions before mutation, and restore original vertices exactly. Open-scene mesh collider cooking refreshed. Changes are not claimed to reflow circulation automatically.");
+        Require(originals.All(pair=>File.ReadAllBytes(pair.Key).SequenceEqual(pair.Value)),"Editability fixture restores complete original mesh bytes including UV2");
+        File.WriteAllText(Folder+"/editability.txt","PASS: scoped profile updates change geometry, preserve mesh GUID/reference identity, all scene transforms and authored additions, reject invalid dimensions before mutation, and restore complete original mesh bytes including UV2. Open-scene mesh collider cooking refreshed. Changes are not claimed to reflow circulation automatically.");
     }
     static void Capture(string name,Vector3 eye,Vector3 look,float fov)
     {
@@ -197,7 +218,9 @@ public partial class UnityCoastalWorldChecks : IProcessSceneWithReport
                 Vector3 p=new Vector3(15,-1.97f,47);Physics.SyncTransforms();
                 Require(Physics.Raycast(p+Vector3.up,Vector3.down,out var floor,2,(1<<0)|(1<<2)|(1<<11),QueryTriggerInteraction.Ignore)&&floor.normal.y>.95f,"Inspection spawn has floor");
                 Require(!Physics.CheckCapsule(p+Vector3.up*.3f,p+Vector3.up*1.6f,.25f,(1<<0)|(1<<2)|(1<<11),QueryTriggerInteraction.Ignore),"Inspection spawn standing clearance");
-                var spawn=UnityEngine.Object.FindObjectOfType<VRCSceneDescriptor>().spawns[0];spawn.position=p;spawn.rotation=Quaternion.LookRotation(new Vector3(115,0,173));
+                var spawn=UnityEngine.Object.FindObjectOfType<VRCSceneDescriptor>().spawns[0];spawn.position=p;
+                var inspectionDirection=GameObject.Find("04 Lower water and hidden lounge/Curved pond promenade")!=null?new Vector3(-9,0,15):new Vector3(115,0,173);
+                spawn.rotation=Quaternion.LookRotation(inspectionDirection);
                 EditorSceneManager.MarkSceneDirty(scene);EditorSceneManager.SaveScene(scene);inspectionScene=File.ReadAllBytes(BirdCoastalWorldAuthoring.ScenePath);
             }
             UdonSharp.Compiler.UdonSharpCompilerV1.CompileSync();
