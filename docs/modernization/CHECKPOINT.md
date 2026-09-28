@@ -1334,3 +1334,34 @@ a tiny inexpensive sheen. WORLD-DESIGN.md records this ahead of further blockout
 work, including evaluation of actual rendered interiors rather than just albedo.
 No Bird math, lab scene, headset APK, online world or unfinished architectural
 assets were changed in this retest.
+## 2026-09-28 UTC — Automatic Lab 13 deployed on request
+
+Dana requests removing SET LEFT / SET RIGHT completely so Bird works immediately
+on arrival, and authorizes any useful automatic hand estimation. The maintained
+Lab 13 already implements that contract, with geometric distal endpoints usable
+from the first valid bone sample and passive per-finger local-axis learning.
+No special startup pose or button is required. Optional REFINE/AUTO corrections
+remain; accepted PALM/ADAPTIVE, sphere-center aim and range law are unchanged.
+
+Deployed the existing normally validated Android artifact (273127 bytes,
+SHA256 07DA7B94BAD4BB0C43FC62473ADEDEF18272DDD5052AA420D8B8241DE11BB68F)
+to the Quest TestWorlds directory as BirdTrackingLab13_Automatic.vrcw. Device
+hash matches. Relaunched the local world with the installed SDK's Android intent
+contract; a fresh stereo screenshot visibly confirms Lab 13, automatic-start
+instructions and 16/16 avatar bones for both hands. Zero matched Udon exceptions
+in the captured 3000-line process-log slice. All 82 maintained/generated runtime
+source/meta files match. Existing both-target compiled-Udon checks (120201
+assertions / 997 normal frames) and SDK exports remain the validation evidence;
+no redundant rebuild or math change was needed for deployment.
+
+Lab 13 now replaces Lab 12 on the Quest; this supersedes all earlier build-only
+statements. Startup/active scene rendering is confirmed, but physical fingertip
+accuracy, feel and unvalidated clicks remain separate. Private deployment JSON,
+bundle and stereo captures are in heavy Validation/TrackingLab/DeviceLab13.
+The user's authorized USB stay-awake/proximity settings remain active. Leave
+this scene available for testing. No online upload or standalone APK change.
+
+Continue the main VRChat world/UI plan while awaiting feedback; preserve the
+unfinished coastal blockout and its critic findings. Bright neutral white,
+mostly matte architecture with at most a cheap subtle sheen is now in
+WORLD-DESIGN.md. No architectural prerequisite should delay Bird input work.

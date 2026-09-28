@@ -34,4 +34,15 @@ bundle using the Android activity and `localWorldPath`/`watchWorlds` extras
 found in the installed unmodified VRChat SDK. Its 2026-09-28 UTC live stereo
 capture is kept privately under heavy-repository
 `Validation/TrackingLab/DeviceLab12/LiveRetest`; the Lab 12 title and tracked
-hand markers are visible. Lab 13 remains build-only. No online upload occurred.
+hand markers are visible. No online upload occurred.
+
+Dana subsequently requested automatic startup with no SET actions. Lab 13 is
+now the active Quest test world, replacing Lab 12. Its validated Android bundle
+is 273127 bytes, SHA256
+`07DA7B94BAD4BB0C43FC62473ADEDEF18272DDD5052AA420D8B8241DE11BB68F`,
+stored in the same app's TestWorlds directory as
+`BirdTrackingLab13_Automatic.vrcw`. A fresh stereo capture confirms the Lab 13
+title and automatic-start instructions. Both hands report 16/16 avatar bones.
+Private evidence is in `Validation/TrackingLab/DeviceLab13`. Geometric estimates
+are available before passive learning; REFINE/AUTO are optional corrections.
+Physical feel remains unconfirmed; do not mistake scene rendering for that check.

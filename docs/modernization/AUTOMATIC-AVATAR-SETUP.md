@@ -3,7 +3,8 @@
 Bird starts from valid avatar bones without SET LEFT / SET RIGHT. ADAPTIVE
 smoothing, PALM origin and Lab 12's sphere-center aiming policy are unchanged.
 This removes a required setup action; it does not turn avatar bones into measured
-physical fingertips. Headset feel remains unverified for this revision.
+physical fingertips. Lab 13 is now deployed and visibly running on the Quest;
+physical estimation accuracy and feel remain for Dana to assess.
 
 ## Endpoint adapter
 
@@ -66,5 +67,11 @@ tracking loss and physical feel still need in-client testing.
 Use `Invoke-UnityTrackingLab.ps1 -AddAutomaticSetup -Check -CheckBird` once to
 update an older authored lab. Normal `-Platform Both -Check -CheckBird` checks
 and builds the saved scene through the unmodified SDK; it does not launch a
-client. This cycle leaves Lab 12 installed on Quest. See CHECKPOINT.md for exact
-build records and deployment state.
+client. On 2026-09-28 UTC, the existing validated Lab 13 Android artifact was
+transferred to Quest, its device SHA256 matched, and the client was restarted
+with the SDK's localWorldPath test-world intent. A fresh stereo capture shows
+the Lab 13 title, automatic-start instructions and both hands' 16/16 avatar-bone
+availability. No input source or runtime code was changed during deployment.
+The source/generated comparison still matches all 82 runtime source/meta files.
+See CHECKPOINT.md for exact build records and deployment state. Optional REFINE
+is not needed to make Bird run; no hand-opening pose is required at startup.
