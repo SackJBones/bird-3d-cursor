@@ -38,6 +38,12 @@ critic's remaining design findings; do not repeat the rejected filter retune.
 
 ## Ordered work and proposed approach
 
+The beacon targeting preview is described in `TELEPORT-BEACONS.md`. It provides
+five editable destinations and a travel implementation behind an explicit gate;
+saved-world clicking remains disabled. The newest checkpoint distinguishes
+compiled fixtures, actual device loading and the outstanding physical click
+validation. Shared cosmetic hover is also separate from this local preview.
+
 1. **Social Bird and reliable acquisition.** Independent per-player snapshot
    streams, visible cursors/trails, lifecycle/late-join handling and distinct
    player palettes. Keep network interpolation out of the owner's control path.

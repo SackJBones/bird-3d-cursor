@@ -17,6 +17,12 @@ debounce acquisition, investigate mid-range stability, validate clicks and build
 teleport beacons, then repair/detail the coast, pond, gardens, sky and fish.
 Organic metashape shells are an optional reach goal around the existing complex.
 
+The first [teleport beacon preview](TELEPORT-BEACONS.md) adds editable rings,
+finite point-through targeting and a separately gated local travel policy.
+Read the newest checkpoint for tested builds and actual Quest state. Finger
+clicks remain disabled pending physical validation; a synthetic test press is
+not that acceptance. Preserve the accepted near feel and visual inflation.
+
 The [mid-range assessment](MID-RANGE-ASSESSMENT.md) rejects simply moving the
 center filter's full-effect distance closer: modest stationary benefit comes
 with extra delay and worse range contraction on turns. Keep accepted defaults.

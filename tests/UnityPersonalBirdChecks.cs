@@ -138,6 +138,13 @@ public class UnityPersonalBirdChecks : MonoBehaviour
                 Require(Get<bool>(cursor,"poseValid")&&view.core.enabled,"Live point after automatic input");
                 Require(Get<int>(VM(input),"sampledFrame")==Time.frameCount,"Post-IK same-frame input");
                 Require(!Get<bool>(cursor,"clicksAllowed"),"Unvalidated avatar clicks remain disabled");
+                var adapter=FindObjectsOfType<BirdAvatarUiInput>().SingleOrDefault(a=>a.input==input);
+                if(adapter!=null)
+                {
+                    Require(Get<int>(VM(adapter),"submittedFrame")==Time.frameCount,"Beacon input is submitted after IK in the same frame");
+                    Require(Get<bool>(VM(adapter.pointer),"tracked")&&Vector3.Distance(Get<Vector3>(VM(adapter.pointer),"position"),Get<Vector3>(cursor,"position"))<.00001f,"Beacon receives the logical Bird point");
+                    Require(!Get<bool>(VM(adapter.pointer),"pressed"),"Beacon adapter preserves click gate");
+                }
                 Require(Get<int>(VM(view),"trailCount")<=32,"Trail budget bounded");
             }
         }

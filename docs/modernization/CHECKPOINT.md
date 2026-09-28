@@ -1978,3 +1978,69 @@ Keep clicks disabled until validated. Follow WORLD-NEXT-STEPS-20260928.md for
 later coast/pond/lighting and optional organic shells, retaining critic review.
 Do not repeat the rejected mid-range retune or alter accepted near feel/sizing.
 Maintain the same-chat two-hour cadence and quiet-on-unchanged notification policy.
+
+
+## 2026-09-28 15:14 UTC - Beacon targeting preview, actual Quest delivery
+
+Added five conventional editable vertical torus beacons in a separate saved
+travel-network prefab. BirdTeleportBeacon owns geometry/landing/presentation;
+BirdTeleportRouter owns finite point-through targeting and gated local travel;
+existing after-IK avatar adapters feed dedicated logical pointers. No Bird
+range, filtering, near behavior, visual sizing or companion palettes changed.
+Architecture/collision assets are unchanged. See TELEPORT-BEACONS.md.
+
+The saved scene is a targeting preview: avatar clicks and allowTeleport remain
+OFF. Compiled explicit presses test the travel action, not physical finger
+fidelity. Releasing on the same fresh target then pressing is required; loss,
+stale samples, identity/binding changes, UI consumption, put-away and permission
+changes cancel arming. Solid geometry occludes targets. Nine support samples,
+standing headroom/capsule checks and a final action-boundary recheck protect
+landings. Both hands share one-trip arbitration and cooldown. Facing is preserved
+and velocity/history cleared through normal local-player TeleportTo.
+
+Development validation caught and fixed a temporary authoring-copy duplicate,
+an arrival landing on threshold steps and obstructed high-lookout targeting.
+The authoring command now awaits normal SDK program initialization and destroys
+its temporary root before saving. Do not rerun it over the saved world.
+Android and Windows focused beacon checks each pass 70 assertions / 100 frames,
+exit 0. All five authored landings pass; lower walkway palm-height rays reach
+upper/high rings. Android saved-world Bird integration passes 550 assertions /
+298 frames, including same-frame logical pointer binding and preserved Lab 14
+settings. Eight maintained/generated source files match byte-for-byte.
+
+Normal SDK exports, scene audits, catalog and both size gates pass, exit 0:
+- Android: 669552 bytes; SHA256 2731C6F032CDD458081A3D2EBA4913E55878E7219716DE858CC3E0C0871476C9.
+- Windows: 707738 bytes; SHA256 009C554C2FB8C4FE02684372BC7C29E67D00D076A7C0E04D65FA085BD4369932.
+Both have 340 GameObjects / 1021 components / 27 unsynced programs plus one
+manual per-player social stream, no persistence or missing/project scripts.
+Android restored with SDK setup exit 0. Older Windows combined coastal scene/
+capture shutdown defect remains unresolved; this focused success is separate.
+Walking routes were not rerun because architecture/collision assets did not change.
+
+Quest deployment used the normal local-world path and matched the Android hash.
+Inspected actual stereo captures at 15:07 and 15:10 UTC show the new arrival ring
+separately beside the pedestal in VRChat. The preview stays loaded. No matched
+Udon runtime error lines in recent device logs; platform startup warnings are
+not a clean-log guarantee. Battery 74%, AC powered, weak charger false, 37 C.
+Last 60 idle-arrival VrApi samples: 72-73 FPS at 72 target, mean App 3.5745 ms.
+Bird was not acquired in that observation; this is not active targeting,
+physical clicking/comfort, all-world or multiplayer performance acceptance.
+Raw evidence is private ignored Validation/CoastalWorld/DeviceBeacons01-20260928-*.
+Curated results/renders/sanitized observation are in heavy commit bfe66075a283dc3709455ec65291d15309caabff,
+Reference/TeleportBeacons/20260928. No online upload was performed.
+
+Independent critic accepts the bounded preview after revision. Addition-only
+scores: 6.5 aesthetics / 5.5 discoverability / 7 hangout / 6 preview usability;
+full-world R06 scores stay 6 / 8 / 6.5 / 6.5 (target 8 each remains unmet).
+The downward water target is partly rail-obscured at the raised-hand near-edge
+stance and invisible inboard. Do not call ordinary click travel ready. Later
+shift its target laterally for a full visible outline while keeping its landing
+safe; preserve architecture/guards. Shared cosmetic hover remains a separate layer.
+
+Next bounded cycle may prepare a click-depth diagnostic without enabling
+locomotion, improve the return beacon sightline, or begin the planned economical
+coast/pond/sky work with independent critic review. Actual hand-motion or second-
+client gaps must stay explicit and must not stall independent development.
+Preserve accepted near feel/inflation and do not repeat the rejected mid-range
+filter retune. Continue routine headset use under Dana's replace-anytime
+permission, the same-chat two-hour cadence and quiet-on-unchanged policy.
