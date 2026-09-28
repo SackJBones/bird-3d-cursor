@@ -2195,3 +2195,90 @@ Next favor one coherent coast/pond/garden/sky or supported functional pass;
 keep accepted near feel, inflation, companion palettes, and geometry/presentation
 separation. Unavailable real hands or a second client must not stall independent
 work. Keep the same-chat two-hour heartbeat and 30–60 minute cycle rhythm.
+
+
+## 2026-09-28 — Vista01: daylight, sea and distant coasts
+
+Completed one bounded coast/sky pass. Conventional nested prefab, three mesh
+assets (864 triangles), editable cross-section profile, vertex-color material
+and simple daylight gradient sky preserve the authored complex and Bird.
+No new colliders, lights, Udon programs or network streams. The old finite sea
+renderer is hidden by scene override; its object stays. Both new landforms are
+behind the existing island/headland, and the broad replacement sea stays within
+the existing 10 km view. Logical Bird range is unchanged. Accepted near feel,
+range/filtering, visual inflation and complementary hand palettes are untouched.
+See COASTAL-VISTA.md for normal editing and explicit mesh updates. Do not repeat
+the one-time AddVista/RefineVista migrations over the final saved scene.
+
+The first candidate was rejected by the independent critic: procedural sky
+looked dark, terrain snowy, far layer obscure. Revised gradient sky, corrected
+sRGB-to-linear vertex colors and far-coast placement were accepted for retention.
+A genuine inverted tip triangle found by the mesh check was fixed by retaining
+ordered longitudinal cross sections. Test-harness fixes moved source geometry
+checks before static batching and reference-camera checks before ClientSim
+removes that camera. Final normal Play Mode vista checks pass on Android and
+Windows with eight captures each and exit 0. Windows focused lighting also
+passes with eight normal renders and 180 mapped receivers. Rebaked lighting
+retains two non-directional maps, 219 probes and no realtime lights; reflection
+capture follows the new sky. 139 UV-overlap warnings remain.
+
+Normal SDK export, compressed/uncompressed size gates, processed-scene audit
+and bundle catalog/hash checks all pass, exit 0:
+- Android: 1,586,930 bytes; SHA256 89FE7C52615E06E25FBE9D8615420695BBDD2EED892E324095C49BDAD8F3AFA4.
+- Windows: 1,828,941 bytes; SHA256 9CA620F4C3F82ED76F24C65A18D862A1CDE6072673765549AF0EB52E2ED1D974.
+Both: 365 objects / 1,114 components / 28 None programs plus one manual
+per-player stream, no persistence/missing/project scripts. Android target and
+normal SDK settings restored, exit 0. No online upload or SDK/client patch.
+257 existing assets and nine original scene transforms match baseline a4e6277;
+no walking collision changed, so previous 17 route traversals were not repeated.
+The older Windows combined scene/navigation/capture shutdown defect remains
+separate from these successful focused checks.
+
+Actual dedicated Quest validation includes the water overlook, using a separate
+normal SDK inspection bundle with only the initial spawn temporarily moved.
+Floor and standing clearance are checked, and original scene bytes restored.
+First export E3FF2DD71E23AF7AA8C85F7EFD2FBC26120F8102C15F06953875CE8870EC2F22
+(1,586,842 bytes) passed SDK validation but triggered the restoration guard
+because the SDK reordered DynamicMaterials. Exact-diff inspection established
+only that permutation plus our spawn edits, then original bytes were restored.
+The guard now allows only same-membership list permutation and refuses all other
+concurrent edits. Rerun passes exit 0 with exact source restoration, hash
+83632B3EF6185520AF86CB685373DBDBB64AE5101B6F455BC3A35CD0DA0B5C93 (1,587,176 bytes).
+The E3 first payload was the one actually viewed on the Quest; do not substitute
+the rerun hash for device evidence. Normal production and inspection bundles
+are separate. No hand spoofing, locomotion actions or gate changes were needed.
+
+E3 device transfer hash matched. Initial capture hit ADB transport loss during
+Unity lifecycle; read-only retry recovered. Inspected 21:02:36 UTC stereo view
+shows actual VRChat overlook, new daylight sky, open sea and middle/far coasts.
+Production Android 89FE payload was then transferred/hash verified and launched;
+inspected 21:04:12 UTC stereo view shows normal arrival with the new landscape.
+That normal production build is left running. A client Public-instance toast
+is not an online upload. Battery 75%, AC, weak charger false, 38 C. Six recent
+stationary-overlook samples: 72-73 FPS/72 target, zero tear/stale, app 1.82-1.88 ms.
+No matched Udon error lines, not globally clean logs. Existing fallback/error
+avatar hands remain; Bird was not acquired. Physical gestures, comfort, active
+Bird cost and real multiplayer remain unverified. Saved avatar clicks and
+teleport gates remain OFF. Raw device logs/screens stay ignored/private.
+
+Independent full-world scores: 6.5 aesthetics / 8 navigability / 7 hangout /
+6.5 overall; target >=8 each unmet. Daylight and distance hierarchy improve,
+seated vista is more inviting, arrival still leads with architecture/pickup.
+Final Windows arrival/overlook/seated images match Android (editor parity only,
+not PC-client acceptance). Near land remains blunt, far silhouettes too clean,
+sea/horizon austere; favor unequal shoulders and shoreline indentations before
+decorative density. Existing cliff planes/stacked disks remain broader limits.
+View 08 is floor occlusion, not beacon sightline proof; view 06 catches an old
+side/back doubled or mirrored beacon label for later UI polish.
+
+Heavy commit bfbb5dfb1cbc043702ac09903630f8799c268317 contains editable assets and
+Reference/WorldBuildingReviews/20260928-Vista01: 19 images, final results/exits,
+geometry/inspection restoration evidence and sanitized device observations.
+All scenery/shaders are original; no third-party art or attribution dependency.
+Next choose one bounded curved pond/outer bank/winding path, restrained planting,
+coast-shape refinement or supported functional verification pass; bounded social
+fish remain downstream. Continue extensive real Quest use and replace the loaded
+world whenever useful. Preserve accepted control and companion hand colors.
+No hands/second client must not stall independent work. Same-chat heartbeat,
+inherited permissions, every two hours with 30-60 minute coherent cycles; notify
+meaningful progress/failure/required action, stay quiet when unchanged.

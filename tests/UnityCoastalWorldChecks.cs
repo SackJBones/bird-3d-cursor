@@ -26,6 +26,11 @@ public partial class UnityCoastalWorldChecks : IProcessSceneWithReport
     static bool audit;
     static int processed;
     static string inventory;
+    static bool vistaInspection;
+    public static void BuildVistaInspection(){vistaInspection=true;Build();}
+    public static void AddVista(){try{BirdCoastalVistaAuthoring.Add();Finish("coastal-vista-author",true,"Added editable coastal vista and sky; architecture and Bird unchanged.");}catch(Exception e){Finish("coastal-vista-author",false,e.ToString());}}
+    public static void UpdateVistaMeshes(){try{BirdCoastalVistaAuthoring.UpdateMeshes();Finish("coastal-vista-meshes",true,"Updated only three vista profile meshes, preserving asset identities and prefab transforms.");}catch(Exception e){Finish("coastal-vista-meshes",false,e.ToString());}}
+    public static void RefineVista(){try{BirdCoastalVistaAuthoring.RefineDaylight();Finish("coastal-vista-refine",true,"Refined sky and far-coast placement; saved palette colors now use explicit linear vertex channels.");}catch(Exception e){Finish("coastal-vista-refine",false,e.ToString());}}
     public static void PrepareLighting(){try{BirdCoastalLightingAuthoring.Prepare();EditorApplication.Exit(0);}catch(Exception e){Finish("coastal-lighting-prepare",false,e.ToString());}}
     public static void RefineLighting(){try{BirdCoastalLightingAuthoring.Refine();EditorApplication.Exit(0);}catch(Exception e){Finish("coastal-lighting-refine",false,e.ToString());}}
     public static void SmoothLightingJoins(){try{BirdCoastalLightingAuthoring.SmoothJoins();EditorApplication.Exit(0);}catch(Exception e){Finish("coastal-lighting-joins",false,e.ToString());}}
@@ -158,7 +163,7 @@ public partial class UnityCoastalWorldChecks : IProcessSceneWithReport
     static void Capture(string name,Vector3 eye,Vector3 look,float fov)
     {
         var go=new GameObject("Validation camera");var cam=go.AddComponent<Camera>();cam.transform.position=eye;cam.transform.LookAt(look);cam.fieldOfView=fov;
-        cam.nearClipPlane=.03f;cam.farClipPlane=10000;cam.clearFlags=CameraClearFlags.SolidColor;cam.backgroundColor=new Color(.48f,.68f,.78f);
+        cam.nearClipPlane=.03f;cam.farClipPlane=10000;cam.clearFlags=RenderSettings.skybox!=null?CameraClearFlags.Skybox:CameraClearFlags.SolidColor;cam.backgroundColor=new Color(.48f,.68f,.78f);
         Render(cam,Folder+"/"+name+".png");UnityEngine.Object.DestroyImmediate(go);
     }
     static void CapturePlan(List<Vector3[]> paths)
@@ -177,25 +182,65 @@ public partial class UnityCoastalWorldChecks : IProcessSceneWithReport
     public static async void Build()
     {
         VRCSdkControlPanel panel=null;bool had=EditorPrefs.HasKey("VRC.SDKBase_StripAllShaders"),old=EditorPrefs.GetBool("VRC.SDKBase_StripAllShaders");
+        byte[] originalScene=null,inspectionScene=null;
+        string resultStem=vistaInspection?"coastal-vista-inspection-build":"coastal-build";
         try
         {
             Directory.CreateDirectory(Folder);var scene=EditorSceneManager.OpenScene(BirdCoastalWorldAuthoring.ScenePath);
+            if(vistaInspection)
+            {
+                Require(EditorUserBuildSettings.activeBuildTarget==BuildTarget.Android,"Vista headset inspection is Android only");
+                originalScene=File.ReadAllBytes(BirdCoastalWorldAuthoring.ScenePath);
+                File.WriteAllBytes(Folder+"/vista-inspection-source-backup.unity",originalScene);
+                // A normal, separately named SDK export with only its initial spawn moved.
+                // Validate a supported standing location before the ordinary SDK validation.
+                Vector3 p=new Vector3(15,-1.97f,47);Physics.SyncTransforms();
+                Require(Physics.Raycast(p+Vector3.up,Vector3.down,out var floor,2,(1<<0)|(1<<2)|(1<<11),QueryTriggerInteraction.Ignore)&&floor.normal.y>.95f,"Inspection spawn has floor");
+                Require(!Physics.CheckCapsule(p+Vector3.up*.3f,p+Vector3.up*1.6f,.25f,(1<<0)|(1<<2)|(1<<11),QueryTriggerInteraction.Ignore),"Inspection spawn standing clearance");
+                var spawn=UnityEngine.Object.FindObjectOfType<VRCSceneDescriptor>().spawns[0];spawn.position=p;spawn.rotation=Quaternion.LookRotation(new Vector3(115,0,173));
+                EditorSceneManager.MarkSceneDirty(scene);EditorSceneManager.SaveScene(scene);inspectionScene=File.ReadAllBytes(BirdCoastalWorldAuthoring.ScenePath);
+            }
             UdonSharp.Compiler.UdonSharpCompilerV1.CompileSync();
             Require(!UdonSharp.UdonSharpProgramAsset.AnyUdonSharpScriptHasError(),"Udon compilation");
             audit=true;processed=0;var descriptor=UnityEngine.Object.FindObjectOfType<VRCSceneDescriptor>();
             panel=ScriptableObject.CreateInstance<VRCSdkControlPanel>();var builder=new VRCSdkControlPanelWorldBuilder();builder.RegisterBuilder(panel);
             Require(builder.IsValidBuilder(out string reason),reason);string errors="";builder.OnSdkBuildError+=(_,e)=>errors+=e+"\n";
             string source=await builder.Build();Require(string.IsNullOrEmpty(errors)&&File.Exists(source),"Normal SDK export failed: "+errors);Require(processed>0,"Processed scene audit did not execute");
-            bool mobile=EditorUserBuildSettings.activeBuildTarget==BuildTarget.Android;string platform=mobile?"Android":"Windows",dest=Folder+"/BirdCoastalWorld_"+platform+".vrcw";File.Copy(source,dest,true);
+            bool mobile=EditorUserBuildSettings.activeBuildTarget==BuildTarget.Android;string platform=mobile?"Android":"Windows",dest=Folder+"/BirdCoastalWorld_"+(vistaInspection?"VistaInspection_":"")+platform+".vrcw";File.Copy(source,dest,true);
             Require(!ValidationEditorHelpers.CheckIfAssetBundleFileTooLarge(ContentType.World,dest,out int size,mobile),"Compressed upload-size gate");
             Require(!ValidationEditorHelpers.CheckIfUncompressedAssetBundleFileTooLarge(ContentType.World,out int unpacked,mobile),"Uncompressed upload-size gate");
             var bundle=AssetBundle.LoadFromFile(dest);Require(bundle!=null,"Bundle catalog opens");var catalog=bundle.GetAllScenePaths();bundle.Unload(true);Require(catalog.Length==1&&catalog[0].Equals(BirdCoastalWorldAuthoring.ScenePath,StringComparison.OrdinalIgnoreCase),"Scene catalog identity");
             string hash;using(var sha=SHA256.Create())hash=BitConverter.ToString(sha.ComputeHash(File.ReadAllBytes(dest))).Replace("-","");
             string result="Normal SDK "+platform+" build and upload-size gates; "+new FileInfo(dest).Length+" bytes; SHA256="+hash+"; "+inventory+"; catalog verified. No launch or upload.";
-            File.WriteAllText(Folder+"/build-"+platform+".txt",result);Finish("coastal-build",true,result,false);
+            File.WriteAllText(Folder+"/build-"+(vistaInspection?"VistaInspection-":"")+platform+".txt",result);Finish(resultStem,true,result,false);
         }
-        catch(Exception e){Finish("coastal-build",false,e.ToString(),false);}
-        finally{audit=false;if(had)EditorPrefs.SetBool("VRC.SDKBase_StripAllShaders",old);else EditorPrefs.DeleteKey("VRC.SDKBase_StripAllShaders");if(panel!=null)UnityEngine.Object.DestroyImmediate(panel);EditorApplication.Exit(File.ReadAllText("coastal-build-result.txt").StartsWith("PASS:")?0:1);}
+        catch(Exception e){Finish(resultStem,false,e.ToString(),false);}
+        finally
+        {
+            audit=false;
+            if(originalScene!=null&&inspectionScene!=null)
+            {
+                if(InspectionSceneEquivalent(File.ReadAllBytes(BirdCoastalWorldAuthoring.ScenePath),inspectionScene))
+                {
+                    File.WriteAllBytes(BirdCoastalWorldAuthoring.ScenePath,originalScene);AssetDatabase.ImportAsset(BirdCoastalWorldAuthoring.ScenePath,ImportAssetOptions.ForceUpdate);
+                    EditorSceneManager.OpenScene(BirdCoastalWorldAuthoring.ScenePath);
+                    if(!File.ReadAllBytes(BirdCoastalWorldAuthoring.ScenePath).SequenceEqual(originalScene))Finish(resultStem,false,"Inspection source restoration did not retain exact scene bytes.",false);
+                }
+                else Finish(resultStem,false,"Scene changed outside the inspection export; original backup retained, refusing to overwrite concurrent changes.",false);
+            }
+            if(had)EditorPrefs.SetBool("VRC.SDKBase_StripAllShaders",old);else EditorPrefs.DeleteKey("VRC.SDKBase_StripAllShaders");if(panel!=null)UnityEngine.Object.DestroyImmediate(panel);
+            EditorApplication.Exit(File.ReadAllText(resultStem+"-result.txt").StartsWith("PASS:")?0:1);
+        }
+    }
+    static bool InspectionSceneEquivalent(byte[] a,byte[] b)
+    {
+        // The normal SDK rewrites the descriptor's unordered DynamicMaterials list.
+        // Accept only that permutation; membership and all other scene bytes must match.
+        Func<byte[],string> canonical=bytes=>System.Text.RegularExpressions.Regex.Replace(
+            System.Text.Encoding.UTF8.GetString(bytes).Replace("\r\n","\n"),
+            @"(?m)^  DynamicMaterials:\n(?:  - [^\n]*\n)*",
+            match=>"  DynamicMaterials:\n"+string.Join("\n",match.Value.Split('\n').Skip(1).Where(line=>line.Length>0).OrderBy(line=>line,StringComparer.Ordinal))+"\n");
+        return canonical(a)==canonical(b);
     }
     public void OnProcessScene(Scene scene,BuildReport report)
     {

@@ -48,7 +48,7 @@ public class UnityLightingChecks:MonoBehaviour
     static Color32[] Capture(string folder,string name,Vector3 eye,Vector3 target,float fov)
     {
         var camera=new GameObject("Lighting evidence camera").AddComponent<Camera>();camera.enabled=false;camera.transform.position=eye;camera.transform.LookAt(target);
-        camera.fieldOfView=fov;camera.nearClipPlane=.03f;camera.farClipPlane=10000;camera.clearFlags=CameraClearFlags.SolidColor;camera.backgroundColor=new Color(.48f,.68f,.78f);camera.cullingMask=~((1<<18)|(1<<19));
+        camera.fieldOfView=fov;camera.nearClipPlane=.03f;camera.farClipPlane=10000;camera.clearFlags=RenderSettings.skybox!=null?CameraClearFlags.Skybox:CameraClearFlags.SolidColor;camera.backgroundColor=new Color(.48f,.68f,.78f);camera.cullingMask=~((1<<18)|(1<<19));
         var texture=new RenderTexture(1200,750,24){antiAliasing=4};camera.targetTexture=texture;var image=new Texture2D(1200,750,TextureFormat.RGB24,false);
         try{camera.Render();RenderTexture.active=texture;image.ReadPixels(new Rect(0,0,1200,750),0,0);image.Apply();File.WriteAllBytes(folder+"/"+name+".png",image.EncodeToPNG());return image.GetPixels32();}
         finally{RenderTexture.active=null;camera.targetTexture=null;texture.Release();DestroyImmediate(texture);DestroyImmediate(image);DestroyImmediate(camera.gameObject);}

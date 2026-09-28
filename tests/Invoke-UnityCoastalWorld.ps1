@@ -2,9 +2,10 @@ param(
  [Parameter(Mandatory=$true)][string]$UnityEditor,
  [Parameter(Mandatory=$true)][string]$ProjectPath,
  [ValidateSet('Android','Windows','Both')][string]$Platform='Android',
- [switch]$Create,[switch]$ReviseR05,[switch]$RefineR05,[switch]$RepairR06,[switch]$RefineRockR06,[switch]$AddBird,[switch]$AddSocial,[switch]$AddBeacons,[switch]$AddPractice,[switch]$PrepareLighting,[switch]$RefineLighting,[switch]$SmoothLightingJoins,[switch]$BakeLighting,[switch]$CheckLighting,[switch]$CheckBird,[switch]$CheckSocial,[switch]$CheckBeacons,[switch]$Check,[switch]$Walk,[switch]$Build
+ [switch]$Create,[switch]$ReviseR05,[switch]$RefineR05,[switch]$RepairR06,[switch]$RefineRockR06,[switch]$AddBird,[switch]$AddSocial,[switch]$AddBeacons,[switch]$AddPractice,[switch]$PrepareLighting,[switch]$RefineLighting,[switch]$SmoothLightingJoins,[switch]$AddVista,[switch]$RefineVista,[switch]$UpdateVistaMeshes,[switch]$CheckVista,[switch]$BakeLighting,[switch]$CheckLighting,[switch]$CheckBird,[switch]$CheckSocial,[switch]$CheckBeacons,[switch]$Check,[switch]$Walk,[switch]$Build,[switch]$BuildVistaInspection
 )
 $ErrorActionPreference='Stop'
+if($BuildVistaInspection -and $Platform -ne 'Android'){throw '-BuildVistaInspection requires -Platform Android.'}
 if($ReviseR05 -and $RefineR05){throw '-ReviseR05 already includes the refinement; use -RefineR05 only for the first-pass R05 assets.'}
 $project=(Resolve-Path -LiteralPath $ProjectPath).Path
 $repo=Split-Path $PSScriptRoot -Parent
@@ -21,9 +22,11 @@ Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityPersonalBirdChecks.cs') -D
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnitySocialBirdChecks.cs') -Destination $runtime
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityBeaconChecks.cs') -Destination $runtime
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityLightingChecks.cs') -Destination $runtime
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityVistaChecks.cs') -Destination $runtime
 Get-ChildItem -LiteralPath (Join-Path $repo 'Integrations/VRChat') -File | Where-Object { $_.Name -match '\.cs(\.meta)?$' } | ForEach-Object { Copy-Item -LiteralPath $_.FullName -Destination (Join-Path $runtime $_.Name) }
 $presentation=Join-Path $project 'Assets/BirdGenerated/Presentation'
 New-Item -ItemType Directory -Force $presentation | Out-Null
+Get-ChildItem -LiteralPath (Join-Path $repo 'Integrations/VRChat/Presentation') -File | ForEach-Object { Copy-Item -LiteralPath $_.FullName -Destination (Join-Path $presentation $_.Name) }
 foreach($name in @('BirdLogicalDepth.shader','BirdLogicalDepth.shader.meta')) { Copy-Item -LiteralPath (Join-Path $repo ('Unity/BirdPlugin/Runtime/Presentation/'+$name)) -Destination $presentation }
 function Invoke-Coastal([string]$Method,[string]$Stem,[string]$Target) {
  $result=Join-Path $project ($Stem+'-result.txt');$log=Join-Path $project ($Stem+'.log')
@@ -56,7 +59,11 @@ foreach($target in $targets){
  if($PrepareLighting){Invoke-Coastal 'UnityCoastalWorldChecks.PrepareLighting' 'coastal-lighting-prepare' $target;$PrepareLighting=$false}
  if($RefineLighting){Invoke-Coastal 'UnityCoastalWorldChecks.RefineLighting' 'coastal-lighting-refine' $target;$RefineLighting=$false}
  if($SmoothLightingJoins){Invoke-Coastal 'UnityCoastalWorldChecks.SmoothLightingJoins' 'coastal-lighting-joins' $target;$SmoothLightingJoins=$false}
+ if($AddVista){Invoke-Coastal 'UnityCoastalWorldChecks.AddVista' 'coastal-vista-author' $target;$AddVista=$false}
+ if($RefineVista){Invoke-Coastal 'UnityCoastalWorldChecks.RefineVista' 'coastal-vista-refine' $target;$RefineVista=$false}
  if($BakeLighting){Invoke-Coastal 'UnityCoastalWorldChecks.BakeLighting' 'coastal-lighting-bake' $target;$BakeLighting=$false}
+ if($UpdateVistaMeshes){Invoke-Coastal 'UnityCoastalWorldChecks.UpdateVistaMeshes' 'coastal-vista-meshes' $target;$UpdateVistaMeshes=$false}
+ if($CheckVista){Invoke-Coastal 'UnityVistaChecks.Run' 'coastal-vista-check' $target}
  if($CheckLighting){Invoke-Coastal 'UnityLightingChecks.Run' 'coastal-lighting-check' $target}
  if($CheckBird){Invoke-Coastal 'UnityPersonalBirdChecks.Run' 'coastal-bird-check' $target}
  if($CheckSocial){Invoke-Coastal 'UnitySocialBirdChecks.Run' 'coastal-social-check' $target}
@@ -70,4 +77,5 @@ foreach($target in $targets){
   Copy-Item -LiteralPath (Join-Path $evidence 'walkthrough.csv') -Destination $targetEvidence
  }
  if($Build){Invoke-Coastal 'UnityCoastalWorldChecks.Build' 'coastal-build' $target}
+ if($BuildVistaInspection){Invoke-Coastal 'UnityCoastalWorldChecks.BuildVistaInspection' 'coastal-vista-inspection-build' $target}
 }
