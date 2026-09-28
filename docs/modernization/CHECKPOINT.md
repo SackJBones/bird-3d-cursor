@@ -1307,3 +1307,30 @@ Lab 12's physical pointing feel and Lab 13 automatic-tip fidelity remain pending
 Offer Lab 13 when Dana is available; continue useful VRChat UI/world development
 without waiting on hardware. The recurring task retains this task, its active
 two-hour schedule and latest source prompt, now prioritizing that next work.
+
+## 2026-09-28 UTC — Lab 12 live headset retest and white architecture note
+
+Dana requested the exact Lab 12 while wearing the Quest and authorized disabling
+sleep through ADB. The existing SDK-exported device bundle was hash-checked and
+archived locally (270827 bytes, SHA256
+56DF58AE27ED2DC95219F4CF7C40349AEE1B5F6CEC58A3EBCABC1442CAC46FD5).
+VRChat was relaunched with the installed SDK's localWorldPath/watchWorlds Android
+intent. A fresh stereo capture shows the Lab 12 title and live tracked hand
+markers. This supersedes the earlier asleep/no-render evidence for Lab 12;
+physical feel still awaits Dana's response. Lab 13 was not substituted and
+remains build-only. Lab 12 still requires SET LEFT / SET RIGHT once.
+
+USB stay-awake is now enabled (mStayOn=true; global setting 0 -> 15), and Meta's
+proximity override is active. Persistent disable_autosleep was attempted without
+a PIN and rejected, so it remains false. Screen timeout 24h and secure sleep
+setting -1 were unchanged; boundary and dialog settings remain untouched. See
+QUEST-DEVICE.md for exact commands, verification, scope and reversal. Reapply the
+proximity override after reboot when useful for authorized work; hardware must
+still never block development. Private evidence is in heavy Validation/TrackingLab/
+DeviceLab12/LiveRetest; its deployment record now reflects actual rendering.
+
+Dana also requests full bright white, basically matte architecture with at most
+a tiny inexpensive sheen. WORLD-DESIGN.md records this ahead of further blockout
+work, including evaluation of actual rendered interiors rather than just albedo.
+No Bird math, lab scene, headset APK, online world or unfinished architectural
+assets were changed in this retest.

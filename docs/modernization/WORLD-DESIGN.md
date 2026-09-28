@@ -62,6 +62,13 @@ Bird's range meaningful.
 
 ## Form and atmosphere
 
+Dana's latest material direction (2026-09-27): the architecture should read as
+full, bright white, basically matte, with at most a tiny sheen if inexpensive
+on Quest. Prefer neutral white over ivory, cream or beige. Preserve enough
+lighting and shading to read the curved forms; do not interpret this as a
+requirement for emissive/unlit surfaces or costly real-time reflections.
+Judge the rendered result as well as the material swatch, including interiors.
+
 The site is a long, slightly curving coastal ridge, not an isolated mountain
 peak. The white complex is the distinctive curved architectural presence;
 avoid repeating the same architectural language in unrelated distant buildings.

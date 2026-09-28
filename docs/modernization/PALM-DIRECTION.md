@@ -48,11 +48,14 @@ synthetic comparisons. The original 114 cursor/filter and 5549 hand-limit
 regressions also pass with the optional policy off.
 
 The Lab 12 Android artifact is hash-verified in the Quest VRChat TestWorlds
-directory and the SDK requested its launch. The headset was asleep and returned
-an empty compositor capture, even after a normal wake key, so Lab 12 rendering
-and physical feel are pending. Lab 11's earlier actual stereo capture must not
-be reused as evidence of Lab 12 rendering. This does not block editor/platform
-validation or the next automatic-setup work.
+directory. Its first SDK launch occurred while the headset was asleep. On
+2026-09-28 UTC, Dana requested this exact revision while wearing the headset;
+the existing 270827-byte bundle was rechecked against SHA256
+`56DF58AE27ED2DC95219F4CF7C40349AEE1B5F6CEC58A3EBCABC1442CAC46FD5`
+and relaunched with the SDK's Android localWorldPath intent. A fresh stereo
+capture confirms the Lab 12 title and live hand markers. Physical feel remains
+for Dana to assess. Lab 13 automatic setup is built but was not substituted for
+the requested Lab 12, which still requires SET LEFT / SET RIGHT once.
 
 ## Earlier comparisons and evidence
 
