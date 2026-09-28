@@ -11,7 +11,7 @@ using VRC.SDK3.Components;
 
 // Explicit creation never overwrites a scene. Mesh updates preserve prefab/scene
 // transforms, added artwork and overrides. Each spatial region is an ordinary prefab.
-public static class BirdCoastalWorldAuthoring
+public static partial class BirdCoastalWorldAuthoring
 {
     public const string ScenePath="Assets/BirdWorld/Scenes/BirdCoastalWorld.unity";
     public const string Folder="Assets/BirdWorld/CoastalWorld";
@@ -362,7 +362,7 @@ public static class BirdCoastalWorldAuthoring
         if(smooth){var normals=m.normals;var sums=new Dictionary<Vector3,Vector3>();for(int i=0;i<vertices.Count;i++){if(!sums.ContainsKey(vertices[i]))sums[vertices[i]]=Vector3.zero;sums[vertices[i]]+=normals[i];}for(int i=0;i<vertices.Count;i++)normals[i]=sums[vertices[i]].normalized;m.normals=normals;}
         m.RecalculateBounds();return m;
     }
-    static Mesh Portal(float halfWidth,float height,float radius,float cy,int n,float crownSpring=-1,float crownHeight=0)
+    static Mesh Portal(float halfWidth,float height,float radius,float cy,int n,float crownSpring=-1,float crownHeight=0,bool includeRim=true)
     {
         ResetMesh();
         for(int i=0;i<n;i++)
@@ -372,7 +372,7 @@ public static class BirdCoastalWorldAuthoring
             float rv=PortalOuterRadius(v,halfWidth,height,cy,crownSpring,crownHeight);
             Vector3 ia=c+u*radius,ib=c+v*radius,oa=c+u*Mathf.Max(radius,ru),ob=c+v*Mathf.Max(radius,rv);
             Quad(ia,ib,ob,oa);Quad(oa+Vector3.forward*.4f,ob+Vector3.forward*.4f,ib+Vector3.forward*.4f,ia+Vector3.forward*.4f);
-            Quad(ia,ia+Vector3.forward*.4f,ib+Vector3.forward*.4f,ib);
+            if(includeRim)Quad(ia,ia+Vector3.forward*.4f,ib+Vector3.forward*.4f,ib);
         }return FinishMesh();
     }
     static float PortalOuterRadius(Vector3 d,float halfWidth,float height,float cy,float spring,float crown)

@@ -1,5 +1,47 @@
 # Quest development power settings
 
+## Wireless ADB and wall power, 2026-09-28 UTC
+
+The Quest ran out of battery on computer USB power. A power/data adapter attempt
+did not expose an ADB device; Windows had an unidentified USB descriptor failure,
+which did not establish the failing device's identity. Reconnecting directly
+restored authorized USB ADB. Battery service reported 17%, `Weak Charger=true`,
+and a 5 V / 0.9 A charging limit (4.5 W).
+
+Wireless ADB was enabled through the authorized USB connection using
+`adb -s <USB serial> tcpip 5555`, then connected with
+`adb connect <headset Wi-Fi address>:5555`. Explicitly addressed Wi-Fi shell
+commands continued working after USB removal. Lab 14's existing device bundle
+SHA256 still matched its validated artifact; no app was reinstalled/restarted.
+The device's current LAN address is saved only in local ignored device evidence,
+not assumed permanent. A DHCP/address change requires rediscovery; a reboot may
+require briefly reconnecting USB to enable TCP ADB again.
+
+After Dana moved it to a wall charger, battery service reported AC power,
+charging status, `Weak Charger=false`, and a 9 V / 3 A maximum charging limit
+(27 W ceiling, **not measured instantaneous draw**). At 06:44 UTC its charge
+rose from the observed 14% low to 16% while awake and reachable over Wi-Fi.
+It subsequently reached 23%; no VRChat process was running during that check.
+This demonstrates awake-idle recovery, not an indefinite/full-VRChat-load
+power guarantee. The proximity override had reset during the power loss and was
+reapplied under Dana's standing authorization. Plugged-in stay-awake remains 15,
+covering AC as well as USB; `mStayOn=true` and `mWakefulness=Awake` were verified
+on wall power. Persistent `disable_autosleep` remains false.
+
+For future device work, reconnect with `adb connect` if a Unity/ADB lifecycle
+leaves the Wi-Fi transport absent, then use `adb -s <address>:5555` explicitly.
+This happened during local editor runs; the headset still accepted reconnection
+without another USB handshake. The exact host-process cause was not established.
+Do not mistake loss of the host transport list for loss of the headset's TCP mode.
+When USB and Wi-Fi both appear, they can represent the same physical Quest; avoid
+unqualified commands that fail with multiple-device ambiguity. Keep hardware
+optional for independent work and preserve Lab 14 while awaiting feel feedback.
+
+This follows Android's documented
+[ADB-over-Wi-Fi workflow](https://developer.android.com/tools/adb#wireless).
+
+## Earlier sleep and lab history
+
 Dana explicitly authorizes disabling headset sleep through ADB (2026-09-27
 local time). The connected Quest 3 accepted these development settings:
 

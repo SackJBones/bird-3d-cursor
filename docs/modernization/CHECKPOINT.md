@@ -1533,3 +1533,92 @@ readability. Continue independent critique across cycles. Bound any shutdown
 triage (isolate render/nav/edit stages) so it does not maroon the world work.
 No headset or new recording is needed for those improvements. Preserve Lab 14
 and the accepted nearby Bird behavior while awaiting physical feedback.
+
+## 2026-09-28 UTC — R05 circular passages, tide-room outlook, wireless Quest power
+
+This cycle preserved the authored coastal scene and made scoped changes to five
+existing region prefabs through the R05 editor migration. Arrival-wing flat beams
+became continuous circular bores; the cliff facade now owns its single opening,
+with the redundant inner portal disabled and the intrusive floor strip shortened.
+Vertex fill was reduced without changing the white materials. The tide room has
+L-shaped seating, relocated artwork, a distinct coast-facing frame and a guarded
+approach; its experience anchor was relocated with it. Independent first-pass
+critique prompted a second revision matching portal/bore tessellation and turning
+the tide room 25 degrees coastward, shifting it cliffward, and widening its landing
+2 cm below the timber floor. The original scene was not regenerated; shared mesh
+identities, unrelated children and scene overrides remain conventional editable
+Unity assets. Both migration stages reject reapplication; do not run them on the
+current checked-in revision. See COASTAL-WORLD.md.
+
+Independent critic reviewed all four approved references/conversation and all
+20 final captures. R05 ratings: aesthetics 6/10, navigability 8/10, hangout 6.5/10,
+overall VRChat quality 6.5/10. The overall target remains unmet; prior exact
+R01/R02/R04 scores are preserved. Main stacked observation-disk massing, cliff/
+island depth, broad gray undersides, cliff-lounge stair views and repetitive
+furniture remain open. The bright dotted throat joins are removed, but a tiny
+cyan enclosure slit remains high in view 18. A distant rear-wall/vault height
+mismatch is a hypothesis, not an established/fixed cause. Next cycle should
+address that small enclosure issue and then prioritize inhabited asymmetrical
+curved massing/support and broad coastal depth, preserving safe circulation.
+See COASTAL-WORLD-REVIEW-R05.md. Durable evidence: heavy repository
+Reference/WorldBuildingReviews/20260928-R05 (20 views and concise records).
+
+Final verification, all reported processes exit zero:
+- Android scene/navigation/edit-preservation check, twenty captures and 338
+  standing-capsule clearance/floor samples across the two wing passages pass.
+  Seven NavMesh destinations are complete. Inventory: 223 mesh instances,
+  30028 instance triangles, ten shared materials and 123 active colliders.
+- Windows and Android actual CharacterController walks traverse all seven routes
+  outward and back in 12516 normal frames each. Fourteen legs, max endpoint
+  error .0879 m; CSVs match exactly. No jump, corner/turnaround teleport or
+  collision bypass. This remains a single 1.75 m standing geometry probe, not
+  native client, varied-avatar, multiplayer or headset comfort acceptance.
+- Normal unmodified SDK Android export: 486011 bytes, SHA256
+  312779CE69959E2EE9464D6966CC17B2DCF750367B36418386030C9F2B53349B.
+- Normal unmodified SDK Windows export: 523683 bytes, SHA256
+  FAA9063A66A9E04C7EE66A8A46ADB77D8E3B2B731AA2DD193CBB04E5AD1DBBBD.
+- Both exports pass compressed/uncompressed upload-size gates, catalog identity
+  and processed-scene audits: 263 GameObjects, 843 components, one descriptor
+  and pipeline, no missing components or project MonoBehaviours. No launch or
+  online upload. No full platform-render/layout/Udon parity claim is made.
+- 446 current Asset GUIDs, including generated sources, are unique.
+
+The prior Windows combined scene/capture/editability shutdown failure remains
+unresolved and was not retried this cycle. Independent Windows walk/export
+passes do not establish that combined check passes. The runner still requires
+written PASS and exit zero. No SDK gate was patched/ignored. Bird runtime/math,
+Lab 14's saved scene and the deployed bundle were not retuned/redeployed. This
+architecture remains a separate world with reserved Bird/UI/Hanoi/mandala anchors,
+not functioning demonstrations or a finished publication.
+
+During the cycle Dana reported the Quest had drained on computer USB and asked
+about a power/data adapter, then wireless ADB with wall power. The adapter attempt
+showed no ADB device and an unidentified USB descriptor failure. Direct USB then
+restored authorization; battery service showed 17%, weak charger, 5 V/.9 A limit.
+Enabled TCP ADB over that authorized USB connection, connected through Wi-Fi and
+verified shell commands plus the existing Lab 14 file hash after physical USB
+removal. Current endpoint/serial are retained only in local ignored
+Validation/QuestWireless-20260928/connection.txt. Host editor/ADB lifecycle could
+remove the Wi-Fi transport, but adb connect restored it without USB; its precise
+host-process cause was not investigated. Use an explicit -s address when both
+transports represent the same Quest. The address is not guaranteed permanent.
+
+After Dana switched to a wall charger, battery service reported AC power,
+charging, no weak-charger flag and 9 V/3 A maximum charging limits (27 W ceiling,
+not actual measured draw). Battery recovered from 14% to 16%, then 23%, awake
+and reachable over Wi-Fi. VRChat was not running during the 23% check, so this
+is awake-idle recovery, not a sustained full-VRChat-load guarantee. The proximity
+override had reset on power loss and was reapplied under standing authorization;
+stay-on setting 15 covers AC/USB, with Awake and mStayOn=true confirmed. Persistent
+disable_autosleep remains false. No app was launched/restarted for this check;
+Lab 14 remains installed with its previously validated hash, awaiting feel
+feedback. See QUEST-DEVICE.md. Hardware must still never block independent work.
+
+R05 reporting clarification: the runner totals 12516 normal Update calls; the
+CSV route-leg intervals sum to 12515 frames, plus the final completion call.
+The critic independently checked the CSV sum. Both numbers are retained with
+that distinction. Final successful Android check and both walk/build logs have
+no matched C# compiler errors, Udon exceptions, inactive-controller warnings or
+BuildFinishedResultFailure messages. SDK-only DynamicMaterials list ordering
+noise was verified as semantically identical and restored; the authored scene
+file remains unchanged. Editor setup is restored to Android with exit zero.

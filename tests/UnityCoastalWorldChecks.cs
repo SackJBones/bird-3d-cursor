@@ -28,6 +28,8 @@ public class UnityCoastalWorldChecks : IProcessSceneWithReport
     static string inventory;
     public int callbackOrder=>int.MaxValue;
     public static void Author(){try{BirdCoastalWorldAuthoring.Create();Finish("coastal-author",true,"Created separate authored coastal world, six editable region prefabs and saved profile meshes.");}catch(Exception e){Finish("coastal-author",false,e.ToString());}}
+    public static void ReviseR05(){try{BirdCoastalWorldAuthoring.ApplyR05();Finish("coastal-r05",true,"Applied scoped R05 prefab revision.");}catch(Exception e){Finish("coastal-r05",false,e.ToString());}}
+    public static void RefineR05(){try{BirdCoastalWorldAuthoring.RefineR05();Finish("coastal-r05-refine",true,"Applied independent-review doorway and sightline refinement.");}catch(Exception e){Finish("coastal-r05-refine",false,e.ToString());}}
     public static void Check()
     {
         try
@@ -41,6 +43,7 @@ public class UnityCoastalWorldChecks : IProcessSceneWithReport
             Require(Physics.Raycast(spawn+Vector3.up,Vector3.down,out var hit,2),"Spawn has supporting floor");
             Require(hit.normal.y>.9f,"Spawn floor is flat");
             Require(!Physics.CheckCapsule(spawn+Vector3.up*.35f,spawn+Vector3.up*1.55f,.25f),"Spawn standing capsule is clear");
+            CheckWingPassages();
             var sources=new List<NavMeshBuildSource>();
             foreach(var c in UnityEngine.Object.FindObjectsOfType<Collider>())
             {
@@ -89,11 +92,30 @@ public class UnityCoastalWorldChecks : IProcessSceneWithReport
             Capture("13-left-wing-looking-out",new Vector3(-23,1.65f,1),new Vector3(-13,2,1),90);
             Capture("14-right-wing-looking-out",new Vector3(23,1.65f,1),new Vector3(13,2,1),90);
             Capture("15-arrival-rear-wall",new Vector3(0,1.65f,-8),new Vector3(0,5,-18),90);
+            Capture("16-tide-room-seated-coast",new Vector3(-22.082f,-.9f,37.773f),new Vector3(-9.404f,-.9f,64.962f),85);
+            Capture("17-tide-room-approach",new Vector3(-14.3f,-.35f,44.2f),new Vector3(-20.5f,-.4f,38.8f),85);
+            Capture("18-left-passage-lateral",new Vector3(-17.8f,1.65f,2),new Vector3(-13,2,1),90);
+            Capture("19-right-passage-lateral",new Vector3(17.8f,1.65f,0),new Vector3(13,2,1),90);
+            Capture("20-upper-floor",new Vector3(2,14.65f,23),new Vector3(-15,15,22),85);
             Require(failed==0,"Navigation routes incomplete; inspect routes.csv (captures retained)");
             CheckEditableProfile();
-            Finish("coastal-check",true,"Saved authored scene: safe spawn, six prefab regions, all seven destination routes complete for standing capsule; scoped mesh edit preservation and fifteen captures. "+tris+" instance triangles / "+materials+" materials. Not physical headset, multiplayer or measured device performance.");
+            Finish("coastal-check",true,"Saved authored scene: safe spawn, six prefab regions, all seven destination routes complete for standing capsule; scoped mesh edit preservation and twenty captures. "+tris+" instance triangles / "+materials+" materials. Not physical headset, multiplayer or measured device performance.");
         }
         catch(Exception e){Finish("coastal-check",false,e.ToString());}
+    }
+    static void CheckWingPassages()
+    {
+        // Check both traversal directions and lateral room-to-throat movement,
+        // rather than judging a circular opening only from its center image.
+        int samples=0;
+        foreach(int s in new[]{-1,1})for(int x=0;x<=12;x++)for(int z=0;z<=12;z++)
+        {
+            var foot=new Vector3(s*(14.5f+x*.25f),.03f,-.5f+z*.25f);
+            Require(!Physics.CheckCapsule(foot+Vector3.up*.25f,foot+Vector3.up*1.5f,.25f),"Wing passage standing clearance at "+foot);
+            Require(Physics.Raycast(foot+Vector3.up*.1f,Vector3.down,out var floor,.3f)&&floor.normal.y>.9f,"Continuous wing passage floor at "+foot);
+            samples++;
+        }
+        File.WriteAllText(Folder+"/passage-clearance.txt","PASS: "+samples+" standing capsule samples across both wing passages (3 m longitudinal by 3 m lateral, .25 m spacing), radius .25 m / height 1.75 m, with continuous flat supporting floor. This is sampled geometric clearance, not a varied-avatar comfort test.");
     }
     static void CheckEditableProfile()
     {

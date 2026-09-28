@@ -49,6 +49,41 @@ The current stair and deck geometry is deliberately simple. The mesh tools are
 scoped helpers rather than an architectural constraint solver. Presentation and
 circulation should continue to evolve through small, reviewable authored edits.
 
+### R05 scoped revision
+
+The checked-in prefabs include the R05 doorway/tide-room revision. Arrival wings
+now connect through circular bores with a shared radius and center height; the
+flat ceiling beams and protruding floor strips are gone. The cliff shoulder owns
+one opening, with the redundant inner portal retained but disabled. The tide
+room faces along the coast, has L-shaped seating, and opens onto a short guarded
+turn off the lower promenade. Its destination anchor moves with this revision.
+Room vertex fill is reduced; white material values remain unchanged.
+
+Independent review prompted a second local adjustment: matching portal/throat
+tessellation and one continuous bore through both wall thicknesses removed the
+bright dotted joins. The tide room turns 25 degrees coastward and shifts slightly
+cliffward, opening its primary seated view onto water with a cliff edge to the
+left. A wider guarded landing sits 2 cm below the timber floor. The old camera
+12 is retained for comparison and no longer follows the rotated room's outward
+axis; camera 16 is the current seated outlook and 17 shows approach/return.
+
+`Bird / Coastal world / Apply R05 doorway and tide room revision once` is a
+one-time migration for the earlier authored blockout, also exposed as
+`-ReviseR05` by the runner. **Do not apply it to the current checked-in scene.**
+It rejects an existing revision marker and reserved mesh assets, resolves all
+target objects before mutations, and saves five existing prefab assets without
+recreating the scene or replacing unrelated children. Existing scene overrides
+remain overrides. The migration is scoped, not a general merge/transaction tool;
+use version control before applying it to another edited copy. A newly created
+baseline world can be revised with this explicit step. Future edits can use the
+ordinary prefab objects and saved meshes directly.
+
+The migration includes the independent-review refinement. `-RefineR05` exists
+only to advance the reviewed first-pass R05 assets; both stages reject their
+own completion markers. Do not combine `-ReviseR05` and `-RefineR05` or run either
+against the finished checked-in revision. R05's two stages were executed and
+checked separately during development.
+
 ## Reproduce checks and SDK exports
 
 Use the maintained Unity 2022.3.22f1 project restored through the existing pinned
@@ -72,8 +107,11 @@ only for the same unchanged scene/collision geometry.
 
 The scene check verifies spawn clearance, six prefab regions, all seven complete
 NavMesh routes for a 1.75 m by 0.5 m standing capsule, and profile edit
-preservation. Fifteen views include room interiors looking back toward their
-entrances and a circulation plan with roofs explicitly hidden. The separate
+preservation. Twenty views include room interiors looking back toward their
+entrances, a seated tide-room view, lateral passages, an upper-floor view and a
+circulation plan with roofs explicitly hidden. A sampled standing-capsule grid
+checks longitudinal and lateral clearance and supporting floors across both
+arrival-wing passages. The separate
 Play Mode check uses real `CharacterController.Move` on normal frames against
 saved colliders, walking each route out and back without a turnaround teleport.
 It temporarily disables ClientSim's idle player driver/controller to isolate

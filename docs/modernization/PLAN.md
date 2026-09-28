@@ -89,6 +89,7 @@ Editability for iteration takes precedence over matching a reference rendering.
 
 - [x] Read the supplied conversation, inspect all four preferred images and preserve references with provenance.
 - [x] Develop an initial editable spatial blockout and evaluate visitor flow before detailed artwork; six ordinary prefab regions and seven social routes are authored separately from the tracking lab. See COASTAL-WORLD.md. This is a layout checkpoint, not design or headset acceptance.
+- [x] R05: refine circular passages and tide-room social/outlook framing through independent critique; both platform walks/SDK exports pass. Final review: aesthetics 6, navigation 8, hangout 6.5, overall 6.5. See COASTAL-WORLD-REVIEW-R05.md; larger massing/landscape and a small enclosure slit remain open.
 - [ ] During world building, use Dana's requested independent critic agent and iterate across cycles toward high numerical scores for aesthetics, navigability, hangout suitability and overall VRChat quality. Follow the evidence-based rubric in WORLD-DESIGN.md.
 - Free asset/package acquisition is authorized when useful. Check license compatibility and retain source, author, license and required credits; see WORLD-DESIGN.md.
 
