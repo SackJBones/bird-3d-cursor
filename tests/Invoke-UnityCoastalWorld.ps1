@@ -1,0 +1,47 @@
+param(
+ [Parameter(Mandatory=$true)][string]$UnityEditor,
+ [Parameter(Mandatory=$true)][string]$ProjectPath,
+ [ValidateSet('Android','Windows','Both')][string]$Platform='Android',
+ [switch]$Create,[switch]$Check,[switch]$Walk,[switch]$Build
+)
+$ErrorActionPreference='Stop'
+$project=(Resolve-Path -LiteralPath $ProjectPath).Path
+$repo=Split-Path $PSScriptRoot -Parent
+$editor=Join-Path $project 'Assets/BirdGenerated/Editor'
+New-Item -ItemType Directory -Force $editor | Out-Null
+Get-ChildItem -LiteralPath (Join-Path $repo 'Integrations/VRChat/Editor') -File | ForEach-Object { Copy-Item -LiteralPath $_.FullName -Destination (Join-Path $editor $_.Name) }
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityCoastalWorldChecks.cs') -Destination $editor
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityWorldBundleChecks.cs') -Destination $editor
+$runtime=Join-Path $project 'Assets/BirdGenerated/Runtime'
+New-Item -ItemType Directory -Force $runtime | Out-Null
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityCoastalWalkChecks.cs') -Destination $runtime
+function Invoke-Coastal([string]$Method,[string]$Stem,[string]$Target) {
+ $result=Join-Path $project ($Stem+'-result.txt');$log=Join-Path $project ($Stem+'.log')
+ Set-Content -LiteralPath $result -Value 'PENDING'
+ $process=Start-Process -FilePath $UnityEditor -ArgumentList @('-batchmode','-buildTarget',$Target,'-projectPath',('"'+$project+'"'),'-executeMethod',$Method,'-logFile',('"'+$log+'"')) -WindowStyle Hidden -PassThru
+ $null=$process.Handle
+ if(!$process.WaitForExit(600000)){$process.Kill();throw "Unity coastal step timed out: $log"}
+ $exitCode=$process.ExitCode
+ $summary=Get-Content -Raw -LiteralPath $result;Write-Output $summary
+ Copy-Item -LiteralPath $result -Destination (Join-Path $project ($Stem+'-'+$Target+'-result.txt'))
+ Copy-Item -LiteralPath $log -Destination (Join-Path $project ($Stem+'-'+$Target+'.log'))
+ Set-Content -LiteralPath (Join-Path $project ($Stem+'-'+$Target+'-exit.txt')) -Value ([string]$exitCode)
+ if($exitCode -ne 0 -or !$summary.StartsWith('PASS:')){throw "Unity coastal step failed (exit code '$exitCode'): $log"}
+}
+$targets=if($Platform -eq 'Both'){@('StandaloneWindows64','Android')}elseif($Platform -eq 'Windows'){@('StandaloneWindows64')}else{@('Android')}
+foreach($target in $targets){
+ $evidence=Join-Path (Split-Path $project -Parent) 'Validation/CoastalWorld'
+ $targetEvidence=Join-Path $evidence $target
+ New-Item -ItemType Directory -Force $targetEvidence | Out-Null
+ Invoke-Coastal 'UnityWorldSdkSetup.Run' 'world-sdk-setup' $target
+ if($Create){Invoke-Coastal 'UnityCoastalWorldChecks.Author' 'coastal-author' $target;$Create=$false}
+ if($Check){
+  Invoke-Coastal 'UnityCoastalWorldChecks.Check' 'coastal-check' $target
+  Get-ChildItem -LiteralPath $evidence -File | Where-Object { $_.Extension -eq '.png' -or $_.Name -in @('routes.csv','walk-routes.json','geometry-budget.txt','editability.txt') -or $_.Name -like 'route-*.txt' } | Copy-Item -Destination $targetEvidence
+ }
+ if($Walk){
+  Invoke-Coastal 'UnityCoastalWalkChecks.Run' 'coastal-walk' $target
+  Copy-Item -LiteralPath (Join-Path $evidence 'walkthrough.csv') -Destination $targetEvidence
+ }
+ if($Build){Invoke-Coastal 'UnityCoastalWorldChecks.Build' 'coastal-build' $target}
+}

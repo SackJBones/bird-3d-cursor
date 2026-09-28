@@ -1449,3 +1449,87 @@ Thus the preceding statement "Final check/build logs have no C# compiler ...
 errors" is too broad: the CHECK logs are clear, but the Android BUILD log retains
 this automatically recovered initial compile error. No cache deletion, SDK patch
 or validation bypass was used. Preserve this qualification with the evidence.
+## 2026-09-28 UTC — Editable coastal R04 checkpoint, separate from Lab 14
+
+Resumed the unfinished coastal architectural work with Dana's requested
+independent critic. Preserved R03 evidence and our untracked draft assets via
+scoped reversible moves into ignored Validation/CoastalWorld/R03, then authored
+R04. No Bird math, tracking-lab scene, headset launch/sleep state or standalone
+app changes were made. Lab 14 remains the deployed comparison awaiting feel
+feedback; its known center-filter tradeoffs remain as recorded above.
+
+The heavy repository now has a separate BirdCoastalWorld scene, six ordinary
+region prefabs, saved meshes/materials and a small editor profile. R04 cuts the
+upper slab back from the arrival circle, adds inexpensive unshadowed vertex
+room fill and a gallery backdrop, and supplies fifteen forward/reverse views.
+The architecture is neutral white, mostly matte. All new blockout geometry and
+materials are self-authored; no third-party asset package was downloaded. Bird,
+Hanoi, UI and mandala have location anchors, not working connections in this
+scene. The tracking lab is still the working input experience.
+
+Authoring refuses to overwrite an existing scene/prefab. Five shared profile
+meshes can be updated without replacing GUIDs/references, transforms or authored
+additions. Tests change actual geometry, reject invalid dimensions before
+mutation and restore original vertices. Mesh updates now use public Mesh channel
+assignments rather than generic serialized copying. Floors, stairs, rails and
+separate experience anchors do not automatically reflow; this limitation is
+explicit in the profile Inspector and COASTAL-WORLD.md.
+
+Independent critic scores, judging the intended world rather than awarding a
+blockout-completion score:
+- R01: aesthetics 3.5, navigation 5, hangout 5, overall 4 (out of 10).
+- R02: 4.5 / 6.5 / 5 / 5. R03 was an unscored intermediate.
+- R04: 5.5 / 7.5 / 6 / 6. The proposed 8/10 target is NOT reached.
+See COASTAL-WORLD-REVIEW.md for preserved findings and exact evidence limits.
+All fifteen reviewed renders and concise records are tracked under heavy
+Reference/WorldBuildingReviews/20260928-R04. The critic also checked the final
+Android arrival/exterior/gallery renders for material consistency; no claim of
+pixel identity or full renderer parity is made.
+
+Final verification:
+- Android scene check exits 0: safe spawn, six prefab regions, all seven NavMesh
+  routes for a 1.75 m by .5 m standing capsule, scoped edit preservation and
+  fifteen renders. Scene inventory: 219 mesh instances, 29520 instance triangles,
+  ten shared materials and 122 colliders (not measured draw calls/device cost).
+- Both editor targets' actual CharacterController.Move tests exit 0 after
+  traversing all seven routes outward AND back: 12542 normal frames each,
+  fourteen legs, maximum endpoint error .0806 m. No jump, collision bypass or
+  teleport at turnaround. CSVs match exactly. ClientSim's idle player driver and
+  controller are disabled during the geometry probe; this is not native VRChat
+  locomotion, varied-avatar, multiplayer or physical comfort validation.
+- Normal unmodified SDK Windows export exits 0: 509398 bytes, SHA256
+  DEFC2F671355D45CC18B6A17636B1C0B763E4E530EA3A18F11660240E87E449B.
+- Normal unmodified SDK Android export exits 0: 476166 bytes, SHA256
+  2553667864BE8FAE6B21146266201C9ED2A02410471558C128B683AA5482AA98.
+- Both exports pass compressed/uncompressed upload-size gates, catalog identity
+  and processed-scene audits: 256 objects, 826 components, one descriptor and
+  pipeline, zero missing components or project MonoBehaviours. No online upload
+  or client launch. Counts/catalog are checked; full lab-style layout/Udon
+  parity instrumentation is not claimed for this static architectural scene.
+- Final successful build/walk/Android-check logs have no matched C# compiler,
+  Udon exception, disabled-controller or internal BuildFinishedResultFailure
+  messages. All 439 current Asset GUIDs, including generated files, are unique.
+  Editor target and normal project settings are restored to Android. Lab 14's
+  saved scene and runtime code remain unchanged.
+
+Important unresolved validation failure: the Windows combined scene/capture/
+editability check repeatedly completes its assertions and writes PASS, then
+Unity 2022.3.22f1 crashes during shutdown with process exit -1073741819
+(0xC0000005). The native fault RVA resolves with installed symbols to
+JobQueue::WaitForJobGroupID +0x6; root cause is not established. Six failed
+attempts are preserved locally under Validation/CoastalWorld/R04. Deferred exit,
+explicit scene/unused-asset cleanup, normal update settling and public mesh
+channel updates did not remove the failure. Ineffective teardown workarounds
+were removed. The runner still requires PASS AND exit 0 and saves explicit exit
+codes even for failures. Windows walk/export were run independently against the
+same saved geometry and passed; they do not turn that failed check into a pass.
+Do not call the full Windows check suite clean or patch SDK gates to hide this.
+
+Next cycles: finish circular connector junctions from both directions; turn the
+main stacked-disk silhouette into an asymmetrical inhabited curved mass flowing
+from its support; give the hidden/cliff lounges calmer water views and distinct
+spatial arrangements; improve broad coastal terrain depth and soft white form
+readability. Continue independent critique across cycles. Bound any shutdown
+triage (isolate render/nav/edit stages) so it does not maroon the world work.
+No headset or new recording is needed for those improvements. Preserve Lab 14
+and the accepted nearby Bird behavior while awaiting physical feedback.
