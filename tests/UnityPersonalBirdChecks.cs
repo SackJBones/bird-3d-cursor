@@ -149,6 +149,26 @@ public class UnityPersonalBirdChecks : MonoBehaviour
             }
         }
         Require(views.All(v=>v.trailRenderer.enabled&&v.trailMesh.sharedMesh!=null),"Both live trails built by Udon");
+        var practice=FindObjectOfType<BirdClickPractice>();
+        if(practice!=null)
+        {
+            Vector3 previous=Networking.LocalPlayer.GetPosition();
+            Vector3 foot=practice.transform.position-practice.transform.forward*2.3f;foot.y=0;
+            Networking.LocalPlayer.TeleportTo(foot,Quaternion.identity);
+            for(int i=0;i<8;i++)
+            {
+                SetHands(100-i,Quaternion.identity,Vector3.zero);yield return null;
+                Require(Get<bool>(VM(practice),"observing")&&Get<int>(VM(practice),"sampledFrame")==Time.frameCount,"Practice observes fresh real adapter output after IK");
+                for(int h=0;h<2;h++)
+                {
+                    var c=VM(practice.inputs[h].cursor);
+                    Require(Get<bool>(c,"clickAvailable")&&Get<bool[]>(VM(practice),"fresh")[h],"Valid live click geometry is available despite action gate");
+                    Require(Mathf.Abs(Get<float[]>(VM(practice),"depth")[h]-Get<float>(c,"clickDepth"))<.000001f,"Practice reads actual geometric click depth");
+                    Require(!Get<bool>(c,"clicksAllowed")&&!Get<bool>(c,"selected"),"Live practice leaves action permission and selection off");
+                }
+            }
+            Networking.LocalPlayer.TeleportTo(previous,Quaternion.identity);yield return null;
+        }
         positions.Keys.ToList().ForEach(k=>positions[k]=Vector3.zero); yield return null;
         Require(views.All(v=>!v.core.enabled&&!v.trailRenderer.enabled&&Get<int>(VM(v),"trailCount")==0),"Loss clears points and trail immediately");
         SetHands(100,Quaternion.identity,Vector3.zero); yield return null;

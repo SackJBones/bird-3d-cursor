@@ -50,6 +50,7 @@ public class UnityCoastalWalkChecks : MonoBehaviour
         // independently of player/player collision (not a multiplayer test).
         foreach(var c in FindObjectsOfType<CharacterController>())
         {var driver=c.GetComponentInParent<VRC.SDK3.ClientSim.ClientSimPlayerController>();if(driver!=null)driver.enabled=false;c.enabled=false;}
+        gameObject.layer=10; // Exercise the SDK local-player collision policy.
         controller=gameObject.AddComponent<CharacterController>();controller.height=1.75f;controller.radius=.25f;
         controller.center=Vector3.up*.875f;controller.stepOffset=.24f;controller.slopeLimit=40;controller.skinWidth=.025f;controller.minMoveDistance=0;
         var routes=JsonUtility.FromJson<Routes>(File.ReadAllText(Folder+"/walk-routes.json"));

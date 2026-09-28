@@ -59,6 +59,8 @@ public class BirdCursorState : UdonSharpBehaviour
     [HideInInspector] public bool down;
     [HideInInspector] public bool up;
     [HideInInspector] public float clickDepth;
+    // Diagnostic availability is independent of permission to trigger actions.
+    [HideInInspector] public bool clickAvailable;
     private bool filterReady;
     private BirdRangeAdaptiveFilter boundAdaptive;
     private BirdSphereSpaceFilter boundSphere;
@@ -227,6 +229,7 @@ public class BirdCursorState : UdonSharpBehaviour
             }
         }
         clickDepth = depth;
+        clickAvailable = clickUsable;
         position = candidate;
         rawPosition = raw;
         variance = nextVariance;
@@ -369,6 +372,7 @@ public class BirdCursorState : UdonSharpBehaviour
     private void Reject()
     {
         poseValid = false;
+        clickAvailable = false;
         filterReady = false;
         if(boundAdaptive!=null) boundAdaptive.Cancel();
         if(boundSphere!=null) boundSphere.Cancel();

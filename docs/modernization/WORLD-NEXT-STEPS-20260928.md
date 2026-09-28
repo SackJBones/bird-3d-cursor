@@ -111,6 +111,22 @@ both change. Adjust ordering when a real defect or feedback justifies it. Do not
 expand this into one oversized implementation or let optional modeling research
 block the useful interaction/world pipeline.
 
+## Interaction validation aid
+
+The separate [finger-tap practice display](CLICK-PRACTICE.md) reads existing
+click geometry with all action gates off. It prepares physical near/far and
+near-fist click feedback without holding independent coast/pond/sky work.
+See the newest CHECKPOINT for completed tests and the actual Quest build.
+
+## Cross-platform lighting follow-up
+
+Beacons02 review exposed a Windows cavern-lighting weakness: hard sun shadows
+flatten the white interior; the all-camera-layers control is equally flat, while
+a temporary no-sun-shadow render restores contours. Actual Quest arrival stays
+bright. Address economical interior fill/baked lighting in a bounded future
+pass, retaining authored geometry and standard SDK quality settings. Keep the
+normal and diagnostic platform captures distinct; see TELEPORT-BEACONS.md.
+
 ## Verbatim request
 
 > absolutely awesome. it feels like magic. in coming cycles, please "debounce" the obtainment of the bird so you have to physically leave the vicinity of the pedestal before returning there will disable it, just have the text reference returning here; it's currently too easy to end up in a random state of bird-enabled-vs-disabled and disabling bird is not a major activity here. please patch holes in the conversation pit, add some coast details and some faraway land to look at (use free assets that match this aesthetic if that's helpful), add plants, add a skybox, make the outer edge of the pond/fish area curved as well as the water pool itself, also curved, and have it extend around bit more of the complex, so the path that runs along it currently is continued in a winding way; add fish to the pond and make them boids that will make groups come toward any bird in the water; please make sure the cavern embedded in the cliff face where you spawn is indeed inside the rock at least to outside appearances, and I think since this is going so well the best way to do that is just to adjust the location/geometry of the cliff face rather than try to change the complex; add vertical-donut-shaped teleportation beacons you can select and use at a distance with the bird, they should highlight/visibly activate whenever someone "rolls over" them (that is, points-through them with their bird) and clicking them with the bird (using the pointer finger) should cause the player to jump next to the beacon (I'm excited for fun sightlines within the architecture that let you jump levels by getting in the right spot). please try to make the mid-range of motion more usable--right now the working volume is perfect, the mid-range is too touchy and it's very hard to get the bird to move in a controlled way that doesn't violently punch in and out when it's about a room or two's distance away (the range where the bird inflates visually is perfect though, please don't touch that), and investigate metaballs/metashapes (ovoids and cones seem very useful for this) plus marching cubes plus decimation plus baked lighting as a reach goal--the idea with those would be to add aesthetic organic-looking shells over the good work you've already done or will have done by that point, not to redesign the architecture. please note these down along with any plans you might have as to how to do them, and just do the normal cycle rhythm, adjusting plans as needed, don't bite off more than will be feasible in a half hour to an hour's work (which is, for you, probably 1-3 days' work for a person) at a time every 2 hours, I just want to make sure you know my vision so you don't run out of things to do. (very good point making sure other people can see your birds and trails. also probably colors should not always be the same for everyone, or we risk confusion. if there are other mechanistic or infrastructural things like that to address, do please continue prioritizing those & get functionality where it needs to be before indulging the more whimsical aspects of the above.) thanks so much for your work on this; I'm going to bed, see you in maybe a lot of cycles.

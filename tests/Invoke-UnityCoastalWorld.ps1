@@ -2,7 +2,7 @@ param(
  [Parameter(Mandatory=$true)][string]$UnityEditor,
  [Parameter(Mandatory=$true)][string]$ProjectPath,
  [ValidateSet('Android','Windows','Both')][string]$Platform='Android',
- [switch]$Create,[switch]$ReviseR05,[switch]$RefineR05,[switch]$RepairR06,[switch]$RefineRockR06,[switch]$AddBird,[switch]$AddSocial,[switch]$AddBeacons,[switch]$CheckBird,[switch]$CheckSocial,[switch]$CheckBeacons,[switch]$Check,[switch]$Walk,[switch]$Build
+ [switch]$Create,[switch]$ReviseR05,[switch]$RefineR05,[switch]$RepairR06,[switch]$RefineRockR06,[switch]$AddBird,[switch]$AddSocial,[switch]$AddBeacons,[switch]$AddPractice,[switch]$CheckBird,[switch]$CheckSocial,[switch]$CheckBeacons,[switch]$Check,[switch]$Walk,[switch]$Build
 )
 $ErrorActionPreference='Stop'
 if($ReviseR05 -and $RefineR05){throw '-ReviseR05 already includes the refinement; use -RefineR05 only for the first-pass R05 assets.'}
@@ -51,6 +51,7 @@ foreach($target in $targets){
  if($AddBird){Invoke-Coastal 'UnityCoastalWorldChecks.AddBird' 'coastal-bird-author' $target;$AddBird=$false}
  if($AddSocial){Invoke-Coastal 'UnityCoastalWorldChecks.AddSocial' 'coastal-social-author' $target;$AddSocial=$false}
  if($AddBeacons){Invoke-Coastal 'UnityCoastalWorldChecks.AddBeacons' 'coastal-beacons-author' $target;$AddBeacons=$false}
+ if($AddPractice){Invoke-Coastal 'UnityCoastalWorldChecks.AddPractice' 'coastal-practice-author' $target;$AddPractice=$false}
  if($CheckBird){Invoke-Coastal 'UnityPersonalBirdChecks.Run' 'coastal-bird-check' $target}
  if($CheckSocial){Invoke-Coastal 'UnitySocialBirdChecks.Run' 'coastal-social-check' $target}
  if($CheckBeacons){Invoke-Coastal 'UnityBeaconChecks.Run' 'coastal-beacons-check' $target}

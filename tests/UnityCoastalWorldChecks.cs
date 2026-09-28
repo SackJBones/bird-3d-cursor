@@ -33,6 +33,7 @@ public partial class UnityCoastalWorldChecks : IProcessSceneWithReport
     public static void AddBird(){try{BirdPersonalStationAuthoring.AddToCoastalWorld();Finish("coastal-bird-author",true,"Added independent local Bird station prefab; architecture preserved.");}catch(Exception e){Finish("coastal-bird-author",false,e.ToString());}}
     public static async void AddSocial(){try{await BirdSocialPresentationAuthoring.AddToCoastalWorld();Finish("coastal-social-author",true,"Added optional per-player Bird presentation to the existing prefab.");}catch(Exception e){Finish("coastal-social-author",false,e.ToString());}}
     public static async void AddBeacons(){try{await BirdTeleportAuthoring.Add();Finish("coastal-beacons-author",true,"Saved five editable vertical beacons and local targeting; teleport permission remains off.");}catch(Exception e){Finish("coastal-beacons-author",false,e.ToString());}}
+    public static async void AddPractice(){try{await BirdWorldInteractionAuthoring.Add();Finish("coastal-practice-author",true,"Separated pointing from walking guards and added read-only click practice.");}catch(Exception e){Finish("coastal-practice-author",false,e.ToString());}}
     public static void Check()
     {
         try
@@ -201,7 +202,9 @@ public partial class UnityCoastalWorldChecks : IProcessSceneWithReport
         var programs=all.OfType<VRC.Udon.UdonBehaviour>().ToArray();
         int beaconCount=all.OfType<Transform>().Count(t=>t.name.StartsWith("Beacon / "));
         Require(beaconCount==0||beaconCount==5,"Travel network has exactly five authored destinations when present");
-        int expected=beaconCount==0?18:28;
+        int practiceCount=all.OfType<Transform>().Count(t=>t.name=="Finger tap practice");
+        Require(practiceCount==0||practiceCount==1,"At most one read-only practice panel");
+        int expected=(beaconCount==0?18:28)+practiceCount;
         Require(programs.Length==expected,"Personal/social pipelines and any complete travel network survive SDK processing");
         var templates=all.OfType<VRCPlayerObject>().ToArray();
         Require(templates.Length==1,"One per-player presentation template");

@@ -8,8 +8,10 @@ public class BirdTeleportBeacon : UdonSharpBehaviour
     [Tooltip("The circular target lies in this object's local XY plane.")]
     public float targetRadius = .82f;
     public Transform landing;
-    [Tooltip("Solid world geometry; exclude players. Triggers are always ignored.")]
-    public LayerMask solidLayers = (1 << 0) | (1 << 11);
+    [Tooltip("Pointing occlusion: real walls, floors and visible rail bars. Excludes invisible walking fences.")]
+    public LayerMask occlusionLayers = (1 << 0) | (1 << 11) | (1 << 17);
+    [Tooltip("Physical support and landing clearance, including invisible walking fences. Exclude players and triggers.")]
+    public LayerMask solidLayers = (1 << 0) | (1 << 2) | (1 << 11);
     public float clearanceRadius = .32f;
     public Renderer ring;
     public Color idleColor = new Color(.12f, .55f, .62f);
@@ -44,10 +46,10 @@ public class BirdTeleportBeacon : UdonSharpBehaviour
         hitPoint = transform.TransformPoint(new Vector3(local.x, local.y, 0));
         Vector3 delta = hitPoint - origin;
         float distance = delta.magnitude;
-        if (!Finite(distance) || distance < .001f || solidLayers.value == 0) return false;
+        if (!Finite(distance) || distance < .001f || occlusionLayers.value == 0) return false;
         // A palm inside a wall must not exploit Raycast's inside-origin behavior.
-        if (Physics.CheckSphere(origin, .005f, solidLayers, QueryTriggerInteraction.Ignore)) return false;
-        if (Physics.Raycast(origin, delta / distance, Mathf.Max(0, distance - .01f), solidLayers, QueryTriggerInteraction.Ignore)) return false;
+        if (Physics.CheckSphere(origin, .005f, occlusionLayers, QueryTriggerInteraction.Ignore)) return false;
+        if (Physics.Raycast(origin, delta / distance, Mathf.Max(0, distance - .01f), occlusionLayers, QueryTriggerInteraction.Ignore)) return false;
         hitDistance = distance;
         return true;
     }

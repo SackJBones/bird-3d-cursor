@@ -2044,3 +2044,86 @@ client gaps must stay explicit and must not stall independent development.
 Preserve accepted near feel/inflation and do not repeat the rejected mid-range
 filter retune. Continue routine headset use under Dana's replace-anytime
 permission, the same-chat two-hour cadence and quiet-on-unchanged policy.
+
+
+## 2026-09-28 17:10 UTC - Beacons02 rail gaps, finger practice and Quest validation
+
+Completed one bounded cycle begun 16:27 UTC. Added a separate editable finger-tap
+practice prefab and corrected Bird occlusion at the 28 invisible guard fences.
+Physical fences retain enabled solid shapes/transforms on layer 2; exact visible
+rail meshes gain MeshColliders on layer 17. Pointing uses 0/11/17; landing support
+and clearance use 0/2/11. The SDK collision matrix stays standard. Visible bars,
+real slabs/walls/rock still occlude. Existing architecture transforms, original
+collider documents and all mesh/material/light assets remain unchanged.
+
+BirdClickPractice reads same-frame post-IK clickDepth and the new read-only
+clickAvailable output, independently of click permission. The existing 7/5 mm
+law, geometry, filters, range and inflation are unchanged. It keeps companion
+hand colors, requires release on entry/recovery/history gaps and counts each
+fresh press once. It cannot change Bird positions, pointer input, permissions
+or player state. Both avatar clicks and allowTeleport remain OFF. See
+CLICK-PRACTICE.md and TELEPORT-BEACONS.md; do not rerun one-time authoring over
+saved edited assets.
+
+Final focused compiled-Udon checks pass with exit 0: Android 347 assertions /
+194 frames; Windows 349 / 195. Count variation is normal-frame visual waits.
+Includes 27 supported, clear ordinary-palm return positions (1.1/1.25/1.4 m
+above a 0.2 m by 0.2 m lookout stance neighborhood), an inboard slab-blocked
+negative, actual guard containment on both SDK player layers, finite target
+geometry, landing safety, practice lifecycle/hysteresis/read-only behavior
+and explicit runtime-only local teleport fixtures. No physical click claim.
+
+Actual synthetic SDK-bone adapter integration passes 606 assertions on each
+platform (306 Android / 307 Windows frames), matching saved Lab 14 settings.
+Both platforms traverse all 17 saved-collider routes out and back in 14059
+normal frames with a CharacterController on the local-player layer. No collision
+bypass or teleport between route corners. Eight changed maintained/generated
+source files match byte-for-byte. Development checks corrected static-batching
+reference comparison, a trail assertion placed after a test teleport, and a
+review camera that included ClientSim's mirror-only avatar; private failure
+records retained. These are not claims of first-attempt success.
+
+Both normal SDK exports, size gates, bytecode/scene/catalog audits pass, exit 0:
+- Android: 711021 bytes; SHA256 E067C0D7C46E99D4081CC916A4C7AEF4E44E23F473E41DEF2B5D07DFCFA8EF60.
+- Windows: 755041 bytes; SHA256 0D11394E08B7D3987D6FC0F1AC17A39F6D4F4C58DFFF955E54984B6DA2C17429.
+Both contain 356 objects / 1095 components / 28 unsynced programs plus one manual
+per-player social stream, no persistence or missing/project scripts. Android
+restored and final focused checks pass. The older Windows combined coastal
+scene/capture native shutdown defect is still unresolved; focused checks differ.
+
+Actual Quest deployment is hash-verified and visibly rendering Beacons02.
+The first two captures showed Meta system/store UI despite a running process.
+A normal warm am start -W with the same SDK localWorldPath/watchWorlds extras
+restored the activity; no client, account, boundary or tracking changes. One
+capture failed during a Unity/ADB lifecycle and a read-only retry recovered.
+Inspected stereo captures at 16:58 and 17:08 UTC show the bright arrival, pedestal,
+beacon and new practice panel at right. Bird was not acquired during these
+unattended observations; real gestures, comfort, active performance and multiplayer
+remain unverified. Latest battery 74%, AC, weak charger false, 39 C. No matched
+Udon exception lines in recent capture, not an all-logs-clean guarantee.
+Raw logs/screens/addresses stay in ignored Validation/CoastalWorld/DeviceBeacons02-20260928-*.
+No online upload. This build is left running; replace-anytime authorization applies.
+
+Independent critic accepts the bounded return improvement and read-only panel.
+The complete water ring is recognizable through a supported railing opening;
+idle contrast remains weak. Practice-only scores 6.5 aesthetics / 7.5 readability /
+7 secondary placement / 7 diagnostic presentation. Full-world remains 6 / 8 /
+6.5 / 6.5, target 8 each unmet. Later small UI polish: PRESSED, singular 1 tap,
+release threshold/band and larger footer; no click-law changes implied.
+
+Critic also exposed a real Windows lighting weakness: VRC High / sun Hard /
+shadows All flattens the cavern contours. All-camera-layers control is equally
+flat; temporarily disabling sun shadows restores the white forms. Android VRC
+Mobile disables shadows and retains expected bright forms, confirmed on Quest.
+Diagnostic controls are not saved-world lighting changes. Windows visual quality
+is NOT accepted on the strength of functional tests. Plan a bounded economical
+cross-platform fill/baked-lighting pass with critic and Quest checks, alongside
+remaining coast/pond/sky work. Do not stall on unavailable physical hands or
+second-client login. Keep accepted near feel, inflation and paired palettes;
+do not repeat the rejected mid-range filter retune.
+
+Heavy commit 8d918b01b2bde63dbb7b8ed6c7d035f64a46d0d4 includes editable assets,
+20 separate platform renders/diagnostic controls and curated evidence under
+Reference/TeleportBeacons/20260928-Beacons02. Same-chat heartbeat remains every
+two hours with inherited permissions, 30-60 minute coherent passes and meaningful-
+change-only notifications. Continue routine dedicated-headset use.

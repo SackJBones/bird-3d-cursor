@@ -27,8 +27,8 @@ asset initialization before serializing new Udon behaviours.
 ## Targeting and activation
 
 The finite segment from the palm to the **logical** Bird point must cross the
-target disk. Shorter points cannot target a beacon behind them. Solid Default
-and Environment geometry occludes the segment; triggers and players do not.
+target disk. Shorter points cannot target a beacon behind them. Solid Default,
+Environment and visible rail geometry occludes the segment; triggers and players do not.
 A palm inside a solid collider is rejected. Closest intersected beacon wins;
 earlier UI consumption wins over travel. This is an explicit point-through UI
 policy, separate from the inside-to-outside contact policy of spherical scrolling.
@@ -70,12 +70,15 @@ The saved permission remains off; test permission changes are runtime-only.
 Actual Quest loading/rendering, synthetic activation tests, physical finger
 clicking and multi-client behavior are distinct evidence. See the latest
 CHECKPOINT for completed results and device state. `BirdCursorState.clickDepth`
-is available even while clicks are disabled; a later bounded diagnostic can
-measure its response without enabling locomotion. Validate physical near-fist
+is available even while clicks are disabled; the separate [finger-tap practice
+display](CLICK-PRACTICE.md) measures its response without enabling locomotion. Validate physical near-fist
 through distant clicks before enabling the saved travel gate. Do not hold up
 independent coast/pond/sky work for unavailable hand motion.
 
 ## Independent presentation review, 2026-09-28
+
+The following is the historical Beacons01 review; Beacons02 evidence and its
+new review are recorded below and in the latest CHECKPOINT.
 
 The first pass was not accepted: arrival overlapped the pickup sculpture,
 upper rings were tiny arcs behind slab/rail silhouettes, and the downward water
@@ -108,3 +111,51 @@ and visibly running in Quest VRChat in inspected 15:07 and 15:10 UTC captures.
 These device observations establish rendering, not real hand targeting/clicks.
 See CHECKPOINT and heavy `Reference/TeleportBeacons/20260928` for hashes and
 curated evidence; raw device data stays private.
+
+## Beacons02: rail gaps and finger practice
+
+The invisible continuous walking fences now use layer 2; their enabled solid
+colliders, shapes and transforms remain intact. The visible rail meshes have
+matching MeshColliders on layer 17. Pointing uses Default/Environment/Walkthrough
+(0/11/17), so a visible bar occludes while its open gap is usable. Landing support
+and standing clearance use Default/IgnoreRaycast/Environment (0/2/11), retaining
+invisible fences as physical obstacles. Real walls, slabs and rock remain solid
+for both policies. The standard SDK collision matrix is unchanged.
+
+This deliberately uses separate masks: layer 2 does not automatically disappear
+from VRChat interaction, and layer 17 does not collide with players. See the
+[official SDK layer policy](https://creators.vrchat.com/worlds/layers/). Both local
+and remote player collision settings are checked; uploaded scenes use SDK policy.
+
+A separate editable world-space UI prefab offers read-only finger-tap practice.
+See [CLICK-PRACTICE.md](CLICK-PRACTICE.md). Neither saved avatar click permission
+nor teleport permission is enabled. The ordinary-palm return neighborhood,
+physical guard containment, fresh diagnostic data and practice lifecycle are
+covered by the updated compiled-Udon and walking checks. Consult the latest
+CHECKPOINT for actual completed results, rather than treating test definitions
+as evidence that they passed.
+
+The independent critic accepts the bounded return-view improvement: the full
+ring is recognizable through the lookout railing opening and clearly belongs
+to the water terrace; the inboard view remains honestly slab-blocked. The idle
+ring is still small and low contrast against the water/distant railing. A later
+contrast refinement is warranted; large labels are not the distance solution.
+The 27 sampled ordinary-palm positions establish a usable geometric region,
+not physical comfort. Full-world scores remain unchanged.
+
+### Cross-platform lighting finding
+
+The critic caught an unexpectedly flat/dark Windows arrival render. A focused
+control retains all camera layers and produces the same flat view; temporarily
+disabling the sun's shadows restores white arch, column and stair contours.
+Windows uses VRC High / shadows All / sun Hard / Forward with flat ambient 0.45.
+This is a Windows lighting limitation, not evidence that the new first-person
+camera layer mask removed architecture. No diagnostic lighting changes are saved.
+Actual Quest rendering retains the bright arrival and shows the new side panel.
+
+Keep platform render evidence separate. Images 09/10 are diagnostic controls,
+not screenshots of a revised shipped lighting design. Plan a bounded economical
+cross-platform interior-lighting pass, with independent review and Quest cost
+checks. Functional SDK/test passes do not establish Windows presentation quality.
+The older Windows combined coastal scene/capture shutdown issue remains separate
+and unresolved; focused beacon checks pass.
