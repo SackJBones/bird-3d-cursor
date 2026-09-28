@@ -3,8 +3,11 @@
 Bird starts from valid avatar bones without SET LEFT / SET RIGHT. ADAPTIVE
 smoothing, PALM origin and Lab 12's sphere-center aiming policy are unchanged.
 This removes a required setup action; it does not turn avatar bones into measured
-physical fingertips. Lab 13 is now deployed and visibly running on the Quest;
-physical estimation accuracy and feel remain for Dana to assess.
+physical fingertips. Lab 13's deployment and rendering were verified on Quest;
+the subsequent Lab 14 retains this automatic setup with extra center filtering.
+physical estimation accuracy remains distinct from subjective feel. Dana now
+reports that nearby motion feels just right, while distant motion is too noisy;
+see CENTER-KALMAN-LAB.md for the subsequent bounded filtering experiment.
 
 ## Endpoint adapter
 

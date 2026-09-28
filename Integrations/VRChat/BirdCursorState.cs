@@ -15,6 +15,10 @@ public class BirdCursorState : UdonSharpBehaviour
     public BirdRangeAdaptiveFilter adaptiveFilter;
     [Tooltip("Optional sphere-vector experiment. Assign at most one filter policy per cursor.")]
     public BirdSphereSpaceFilter sphereFilter;
+    [Tooltip("Optional Vector3 Kalman stage on the fitted center, before hand limits and the range polynomial. May precede either output policy.")]
+    public BirdSphereCenterFilter centerFilter;
+    [HideInInspector] public Vector3 filteredSphereCenter;
+    [HideInInspector] public bool centerFiltered;
     [HideInInspector] public float sampleDeltaTime=1f/72;
     [HideInInspector] public int historyRevision;
     public bool clicksAllowed = true;
@@ -58,6 +62,9 @@ public class BirdCursorState : UdonSharpBehaviour
     private bool filterReady;
     private BirdRangeAdaptiveFilter boundAdaptive;
     private BirdSphereSpaceFilter boundSphere;
+    private BirdSphereCenterFilter boundCenter;
+    private int boundCenterRevision;
+    private Vector3 geometryOffset;
     private int boundSphereRevision;
     private float boundSphereMultiplier;
     private int boundPolicyRevision;
@@ -70,6 +77,12 @@ public class BirdCursorState : UdonSharpBehaviour
     {
         down = up = false;
         BirdRangeAdaptiveFilter policy=smoothing?adaptiveFilter:null;
+        BirdSphereCenterFilter centerPolicy=smoothing?centerFilter:null;
+        if(boundCenter!=centerPolicy)
+        {
+            Cancel(); boundCenter=centerPolicy;
+            if(boundCenter!=null) boundCenter.Cancel();
+        }
         if(boundAdaptive!=policy)
         {
             Cancel(); boundAdaptive=policy;
@@ -86,6 +99,8 @@ public class BirdCursorState : UdonSharpBehaviour
         fitter.points = points;
         fitter.Fit();
         Vector3 pointing = fitter.center - handRoot;
+        geometryOffset=pointing;
+        filteredSphereCenter=fitter.center; centerFiltered=false;
         flatWeight = fistWeight = limitWeight = insideOutWeight = 0;
         if (useHandLimits)
         {
@@ -106,6 +121,47 @@ public class BirdCursorState : UdonSharpBehaviour
         Vector3 candidate = distance > 0 ? handRoot + pointing / distance * range : handRoot;
         if (!FiniteVector(candidate)) { Reject(); return; }
         Vector3 raw = candidate;
+        if(centerPolicy!=null)
+        {
+            if(fitter.fitValid)
+            {
+                centerPolicy.sampleVector=geometryOffset*rangeDistanceMultiplier;
+                centerPolicy.sampleRange=range;
+                centerPolicy.sampleDeltaTime=sampleDeltaTime;
+                centerPolicy.Step();
+                if(!centerPolicy.valid) { Reject(); return; }
+                if(centerPolicy.influence>0)
+                {
+                    geometryOffset=centerPolicy.vector/rangeDistanceMultiplier;
+                    filteredSphereCenter=handRoot+geometryOffset; centerFiltered=true;
+                    Vector3 rawRangeInput=rangeInput;
+                    if(useHandLimits)
+                    {
+                        if(!HandLimits()) { Reject(); return; }
+                        pointing=rangeInput;
+                    }
+                    else pointing=geometryOffset;
+                    // Keep the original diagnostic input and raw point available.
+                    rangeInput=rawRangeInput;
+                    distance=pointing.magnitude;
+                    mappedDistance=distance*rangeDistanceMultiplier;
+                    near=mappedDistance/.02f; far=mappedDistance/.03f;
+                    range=(near+near*near+far*far*far*far*far*far)*.02f;
+                    candidate=distance>0?handRoot+pointing/distance*range:handRoot;
+                    if(!Finite(mappedDistance) || !FiniteVector(candidate)) { Reject(); return; }
+                }
+            }
+            // An undefined sphere has no center to average. Preserve the existing
+            // singular continuation, discarding center history once on loss.
+            else if(centerPolicy.valid) centerPolicy.Cancel();
+            if(boundCenterRevision!=centerPolicy.historyRevision)
+            {
+                AdvanceHistory(); boundCenterRevision=centerPolicy.historyRevision;
+                filterReady=false;
+                if(policy!=null) policy.Cancel();
+                if(spherePolicy!=null) spherePolicy.Cancel();
+            }
+        }
         float nextVariance = 1;
         if(smoothing && sphereFilter!=null)
         {
@@ -129,7 +185,7 @@ public class BirdCursorState : UdonSharpBehaviour
         }
         else if(smoothing && adaptiveFilter!=null)
         {
-            adaptiveFilter.sampleRoot=handRoot; adaptiveFilter.samplePosition=raw;
+            adaptiveFilter.sampleRoot=handRoot; adaptiveFilter.samplePosition=candidate;
             adaptiveFilter.sampleNoise=270f*mappedDistance*mappedDistance*mappedDistance;
             adaptiveFilter.sampleDeltaTime=sampleDeltaTime; adaptiveFilter.sampleFist=fistWeight>=1;
             adaptiveFilter.Step();
@@ -253,7 +309,7 @@ public class BirdCursorState : UdonSharpBehaviour
         limitWeight = 1 - legacyWeight;
         // Blend before the original polynomial: blending billion-meter outputs
         // directly would pull even a tiny blend weight out of the working volume.
-        Vector3 legacy = fitter.fitValid ? fitter.center-handRoot : Vector3.zero;
+        Vector3 legacy = fitter.fitValid ? geometryOffset : Vector3.zero;
         rangeInput = (legacy*legacyWeight + fallback*(1-legacyWeight)) * (1-fistWeight);
         if(useSphereDirection)
         {
@@ -316,6 +372,8 @@ public class BirdCursorState : UdonSharpBehaviour
         filterReady = false;
         if(boundAdaptive!=null) boundAdaptive.Cancel();
         if(boundSphere!=null) boundSphere.Cancel();
+        if(boundCenter!=null) boundCenter.Cancel();
+        centerFiltered=false;
         up = selected;
         selected = false;
         if (cursorVisual != null) cursorVisual.gameObject.SetActive(false);

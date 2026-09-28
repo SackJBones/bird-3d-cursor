@@ -14,6 +14,7 @@ param(
     [switch]$AddRootControl,
     [switch]$RefineSphereDirection,
     [switch]$AddAutomaticSetup,
+    [switch]$AddCenterKalman,
     [switch]$Check,
     [switch]$CheckBird,
     [switch]$SkipBuild,
@@ -37,6 +38,8 @@ Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnitySphereFilterLabChecks.cs')
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityPalmDirectionLabChecks.cs') -Destination $runtime
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityCenterDirectionLabChecks.cs') -Destination $runtime
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityAutomaticHandLabChecks.cs') -Destination $runtime
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityCenterKalmanLabChecks.cs') -Destination $runtime
+Copy-Item -LiteralPath (Join-Path $repo 'Unity/BirdPlugin/Runtime/Scripts/KalmanFilterVector3.cs') -Destination $runtime
 foreach($helper in @('UnityTrackingLab.cs','UnityTrackingLabBird.cs','UnityTrackingLabUi.cs','UnityTrackingLabBuildAudit.cs','UnityWorldBundleChecks.cs')) { Copy-Item -LiteralPath (Join-Path $PSScriptRoot $helper) -Destination $editor }
 $presentation=Join-Path $project 'Assets/BirdGenerated/Presentation'
 New-Item -ItemType Directory -Force $presentation | Out-Null
@@ -75,10 +78,17 @@ foreach($target in $targets) {
         if($AddRootControl) { Invoke-LabUnity 'UnityTrackingLabBird.AddRootControl' 'lab-root-author' $target }
         if($RefineSphereDirection) { Invoke-LabUnity 'UnityTrackingLabBird.RefineSphereDirection' 'lab-center-direction-author' $target }
         if($AddAutomaticSetup) { Invoke-LabUnity 'UnityTrackingLabBird.AddAutomaticSetup' 'lab-auto-setup-author' $target }
+        if($AddCenterKalman) { Invoke-LabUnity 'UnityTrackingLabBird.AddCenterKalman' 'lab-center-kalman-author' $target }
         $author=$false
     }
     if($Check) { Invoke-LabUnity 'UnityTrackingLabChecks.Run' 'lab-check' $target }
-    if($CheckBird) { Invoke-LabUnity 'UnityAvatarHandLabChecks.Run' 'lab-hand-check' $target }
+    if($CheckBird) {
+        Invoke-LabUnity 'UnityAvatarHandLabChecks.Run' 'lab-hand-check' $target
+        $centerMetrics=Join-Path $project '../Validation/TrackingLab/center-kalman.csv'
+        if(Test-Path -LiteralPath $centerMetrics) {
+            Copy-Item -LiteralPath $centerMetrics -Destination (Join-Path $project ('../Validation/TrackingLab/center-kalman-'+$target+'.csv'))
+        }
+    }
     if(!$SkipBuild) {
         if($Launch) { Invoke-LabUnity 'UnityTrackingLab.BuildAndTestCurrent' 'lab-build' $target }
         else { Invoke-LabUnity 'UnityTrackingLab.BuildCurrent' 'lab-build' $target }

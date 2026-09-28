@@ -29,13 +29,21 @@ Dana prioritizes a normal Android Build and Test world inside VRChat, even befor
 - [x] Physically compare corrected palm geometry and ray origin through Labs 09/10. Dana sees the fitted geometry, says PALM feels much better and the behavior is familiar; ADAPTIVE also seems good. This is not broad acceptance of SPHERE, fingertip fidelity or clicks.
 - [x] Physically compare Lab 11 far-only knuckle-axis correction: Dana approves the 45-degree vector but rejects general far locking because it removes finger-pose steering.
 - [x] Validate Lab 12 sphere-center aim at every range with only behind-palm/singular correction; save ADAPTIVE/PALM and remove their comparison buttons. Both SDK exports pass; Android transferred/hash-verified, physical feel pending.
-- [x] Remove mandatory SET LEFT / SET RIGHT through automatic avatar fingertip estimation; retain explicit calibration as optional REFINE and cover startup, bone axes, avatar swaps and history cancellation. See AUTOMATIC-AVATAR-SETUP.md; Lab 13 is build-only.
-- [ ] Physically compare Lab 13 automatic fingertips and Lab 12 sphere-directed aim when Dana is available; preserve optional correction and do not block independent VRChat work on headset access.
+- [x] Remove mandatory SET LEFT / SET RIGHT through automatic avatar fingertip estimation; retain explicit calibration as optional REFINE and cover startup, bone axes, avatar swaps and history cancellation. Lab 13 is deployed; see AUTOMATIC-AVATAR-SETUP.md.
+- [x] Obtain Lab 13 physical feedback: nearby motion feels just right, distant motion remains too noisy. This is not broad acceptance of endpoint accuracy or clicks.
+- [ ] Physically compare the new Lab 14 sphere-center Vector3 Kalman stage with Lab 13, preserving the accepted near behavior and downstream adaptive filter. See CENTER-KALMAN-LAB.md and latest CHECKPOINT for build/deployment state.
 - [ ] Later publish the same scene privately using normal account eligibility, metadata and SDK upload. Add PC under the same blueprint ID for PC guests.
 
 See [TRACKING-LAB.md](TRACKING-LAB.md) for reproduction and the publication path. This takes precedence over further feature expansion below.
 
 ## Latest VRChat feel feedback, 2026-09-27 UTC
+
+Latest report (2026-09-28 UTC): automatic Lab 13 feels right nearby but is too
+noisy at distance as fingers approach a plane. Dana proposes an additional
+sphere-center filter before the current pipeline, preferring the original
+Vector3 Kalman family. This is new evidence warranting a bounded filter change;
+do not replace the accepted near behavior or reintroduce mandatory setup. See
+[CENTER-KALMAN-LAB.md](CENTER-KALMAN-LAB.md). Earlier feedback below is history.
 
 Newest direction report: palm-up opening sends Bird sideways in RAW on both hands.
 Lab 09 tests a wrist/knuckle palm normal, zero authored tilt and a visible marker

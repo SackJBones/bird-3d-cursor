@@ -86,6 +86,11 @@ public partial class UnityAvatarHandLabChecks : MonoBehaviour
         {
             Require(Get<bool>(inputs[side],"automaticSetup") && !Get<bool>(inputs[side],"calibrated") && Get<bool>(inputs[side],"tipsReady") && Get<bool>(cursors[side],"poseValid"),"Real ClientSim avatar starts Bird without SET");
             Require(Get<LineRenderer>(geometry[side],"birdRay").enabled && Get<Renderer>(views[side],"core").enabled,"Automatic startup renders ordinary point and geometry");
+            centerPolicies[side]=Get<UdonBehaviour>(cursors[side],"centerFilter");
+            Require(centerPolicies[side]!=null,"Saved center Kalman is assigned to each hand");
+            // Preserve every historical comparator's independent regression.
+            // The new complete chain is exercised separately below.
+            cursors[side].SetProgramVariable("centerFilter",null);
             inputs[side].SetProgramVariable("automaticSetup",false);
         }
         yield return null;
@@ -287,6 +292,7 @@ public partial class UnityAvatarHandLabChecks : MonoBehaviour
         var centerDirection=CenterDirectionScenarios(); while(centerDirection.MoveNext()) yield return null;
         var ui=UiScenarios(); while(ui.MoveNext()) yield return null;
         var automatic=AutomaticSetupScenarios(); while(automatic.MoveNext()) yield return null;
+        var centerKalman=CenterKalmanScenarios(); while(centerKalman.MoveNext()) yield return null;
         Restore();
     }
     void CalibrateControls(bool expect=true)

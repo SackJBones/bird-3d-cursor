@@ -14,7 +14,7 @@ public static class UnityTrackingLabBird
     const string Folder="Assets/BirdWorld/TrackingLab/";
     static void EnsurePrograms()
     {
-        foreach(string name in new[]{"BirdAvatarHandInput","BirdLabHandControl","BirdLabPointView","BirdLabPointTarget","BirdLabFilterControl","BirdLabGeometryView","BirdRangeAdaptiveFilter","BirdSphereSpaceFilter","BirdLabRootControl"})
+        foreach(string name in new[]{"BirdAvatarHandInput","BirdLabHandControl","BirdLabPointView","BirdLabPointTarget","BirdLabFilterControl","BirdLabGeometryView","BirdRangeAdaptiveFilter","BirdSphereSpaceFilter","BirdSphereCenterFilter","BirdLabRootControl"})
         {
             string path="Assets/BirdWorld/Programs/"+name+".asset";
             var source=AssetDatabase.LoadAssetAtPath<MonoScript>("Assets/BirdGenerated/Runtime/"+name+".cs");
@@ -282,6 +282,33 @@ public static class UnityTrackingLabBird
             UnityTrackingLab.Finish("lab-auto-setup-author",true,"Automatic fingertip startup; per-finger passive axis learning; optional REFINE/AUTO controls; accepted geometry/filter defaults retained.");
         }
         catch(Exception e) { UnityTrackingLab.Finish("lab-auto-setup-author",false,e.ToString()); }
+    }
+    public static void AddCenterKalman()
+    {
+        try
+        {
+            EnsurePrograms(); var scene=EditorSceneManager.OpenScene(UnityTrackingLab.ScenePath);
+            var inputs=UnityEngine.Object.FindObjectsOfType<BirdAvatarHandInput>(true);
+            if(inputs.Length!=2 || UnityEngine.Object.FindObjectsOfType<BirdSphereCenterFilter>(true).Length!=0)
+                throw new Exception("Require two existing hands and no authored center filters; refusing to overwrite");
+            foreach(var input in inputs)
+            {
+                var go=new GameObject((input.rightHand?"Right":"Left")+" sphere center Kalman");
+                go.transform.SetParent(input.cursor.transform,false);
+                var filter=go.AddUdonSharpComponent<BirdSphereCenterFilter>();
+                input.cursor.centerFilter=filter;
+                UdonSharpEditorUtility.CopyProxyToUdon(filter);
+                UdonSharpEditorUtility.CopyProxyToUdon(input.cursor);
+            }
+            foreach(var text in UnityEngine.Object.FindObjectsOfType<Text>(true))
+            {
+                if(text.transform.parent.name=="Welcome") text.text="BIRD / TRACKING LAB 14\nSphere-center Kalman + automatic fingertips";
+                if(text.transform.parent.name=="Directions") text.text="Bird starts automatically. Palm origin and adaptive smoothing remain on.\nExtra center Kalman smoothing blends in beyond the working volume.\nGold shows the RAW sphere / fit ray; cyan / pink show the filtered Bird.\nOptional REFINE corrects fingertips. AUTO restores automatic estimates.";
+            }
+            EditorSceneManager.SaveScene(scene); AssetDatabase.SaveAssets();
+            UnityTrackingLab.Finish("lab-center-kalman-author",true,"Added per-hand Vector3 center Kalman before limits/range and existing adaptive output; automatic setup retained.");
+        }
+        catch(Exception e) { UnityTrackingLab.Finish("lab-center-kalman-author",false,e.ToString()); }
     }
     static void FaceCalibrationConsole()
     {

@@ -1365,3 +1365,87 @@ Continue the main VRChat world/UI plan while awaiting feedback; preserve the
 unfinished coastal blockout and its critic findings. Bright neutral white,
 mostly matte architecture with at most a cheap subtle sheen is now in
 WORLD-DESIGN.md. No architectural prerequisite should delay Bird input work.
+## 2026-09-28 UTC — Lab 14 sphere-center Kalman, built and deployed
+
+Dana reports Lab 13 nearby motion feels just right, but distant movement is
+squirrely, especially as the fingers approach a plane. Implemented the requested
+additional Vector3 Kalman stage on the fitted center BEFORE hand limits and
+the original range polynomial, followed by the existing ADAPTIVE output policy.
+It uses the original scalar-covariance recurrence with explicit center-space
+Q=1e-6 / R=9e-6 at 72 Hz, time-scaled. State is avatar-normalized center-minus-
+current-palm in world axes, with no Euler coordinates or wrist transport.
+
+To protect the accepted close behavior, extra influence is zero through 4 m of
+raw incoming reach and blends smoothly to full at 20 m. Nearby-only output is
+bit-identical to Lab 13. Returning near immediately reseeds center history;
+full-fist return remains exact. Raw fit/radius/confidence, rangeInput and
+rawPosition remain diagnostic truth; gold shows the raw fit. The new
+filteredSphereCenter is separate. PALM/ADAPTIVE, automatic startup, optional
+REFINE/AUTO, original polynomial and disabled avatar clicks are retained.
+Singular centers are not averaged; existing continuation stays in charge and
+center history clears on fit loss. Settings/source changes clear downstream
+filter and contact history. The standalone app and unfinished coastal assets
+were not changed.
+
+Both editor targets pass 146378 compiled-Udon assertions over 1768 normal
+frames, plus the saved-scene 34-marker/cadence/render suite. The actual original
+Kalman class agrees within 1.71e-8 normalized metres; complete-chain SE(3)/mirror
+relative error is at most 2.71e-6. At 72 Hz, controlled far-center noise RMS
+falls 45-56% versus ADAPTIVE alone; a 90-degree turn reaches 90% in 125 ms versus
+111 ms. Partial-blend middle range improves less: 12% at 72 Hz, 4% at 120 Hz.
+Bone-space noise through the actual adapter/fitter also improves, but the nearly
+flat fixture has 69/144 singular samples and only about 16% lower RMS. The
+fixture is synthetic, not recorded hand tracking. See CENTER-KALMAN-LAB.md and
+both maintained measurement CSVs for conditions and precise limitations.
+
+Known material tradeoff: a sudden 90-degree turn can temporarily reduce far
+range to roughly 12-15% of its target as the Cartesian center average cuts the
+chord and the polynomial magnifies that contraction. This is an explicit trial
+of Dana's requested Vector3 approach, NOT a claim that distant feel is solved.
+Physical assessment should include this effect and remaining near-flat jitter.
+Initial test failures exposed overly strict noise/latency expectations within
+the intentionally partial mid-range blend; the final checks compare to the old
+chain and require far improvement plus no partial-blend noise regression. No
+filter parameters were changed to conceal those measurements.
+
+Normal unmodified SDK exports and compressed/uncompressed size gates pass:
+- Android: 280263 bytes; SHA256 E0D0F737748F4176A6599F6698C0F6A3A244E6F8470CC75A14668022A3263BC4.
+- Windows: 313868 bytes; SHA256 FFEBBDDD4225BEB799F7834EE7DBE53FC2BDE0005D0C7A55EB484698660248D3.
+- Runtime-source SHA256: 1B4E6AF96D3B858B4138AA03C8C014B9FFEF39BA971033575B10877C0BDECC4A.
+- Layout SHA256: 88800AF94BE5203775AAD1E620EF787B9FCF0216713AF8EB3EC8539A570DE93A.
+
+Platform comparison passes source/version, processed scene/layout, colliders,
+spawns, component inventory, all 48 Udon bindings and network IDs; artifact
+hashes match. Processed scene: 269 objects / 753 components, zero missing
+scripts or project MonoBehaviours. All 84 maintained/generated runtime source/
+meta files match. All 1062 prior authored scene blocks survive, with unchanged
+Transform/RectTransform poses and parents; eight new blocks are the two center
+policies. All 439 current Asset GUIDs are unique (includes unfinished coastal
+assets). Project settings are clean and editor target restored to Android.
+Final check/build logs have no C# compiler or Udon execution errors. Both SDK
+export logs retain the previously qualified internal Unity bundle Failure line;
+normal SDK success/gates and artifact/scene audits pass without patching SDK.
+
+Quest transfer of that exact Android artifact was hash-verified, then the
+installed VRChat activity was launched with the existing SDK test-world intent
+contract. A fresh stereo capture visibly confirms Lab 14, automatic startup
+instructions and both hands 16/16 avatar bones. Zero matched Udon exceptions
+in the captured 3000-line startup slice. No physical feel/performance claim.
+Private evidence: heavy Validation/TrackingLab/DeviceLab14. The prior Lab 13
+bundle remains available for rollback. USB stay-awake remains active; no online
+world upload or standalone APK change.
+
+Keep Lab 14 available for feedback. Preserve the accepted nearby behavior and
+automatic startup; do not let further speculative tuning displace the broader
+VRChat world/UI plan. Resume the unfinished coastal blockout/critic work in
+upcoming cycles while hardware/feel feedback is unavailable.
+Build-log qualification: the final audit found two CS0246 lines in Android's
+first cached player-assembly compile: its stale graph initially omitted the new
+BirdSphereCenterFilter source. Unity requested its automatic additional Tundra
+run, rebuilt the graph successfully, and completed the normal SDK export. Both
+new center programs are in the processed Android program inventory, both-target
+compiled-Udon checks passed, platform parity passed, and Lab 14 rendered on Quest.
+Thus the preceding statement "Final check/build logs have no C# compiler ...
+errors" is too broad: the CHECK logs are clear, but the Android BUILD log retains
+this automatically recovered initial compile error. No cache deletion, SDK patch
+or validation bypass was used. Preserve this qualification with the evidence.

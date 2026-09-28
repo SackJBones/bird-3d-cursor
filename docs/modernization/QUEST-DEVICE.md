@@ -37,7 +37,7 @@ capture is kept privately under heavy-repository
 hand markers are visible. No online upload occurred.
 
 Dana subsequently requested automatic startup with no SET actions. Lab 13 is
-now the active Quest test world, replacing Lab 12. Its validated Android bundle
+was deployed as the next Quest test world, replacing Lab 12. Its validated Android bundle
 is 273127 bytes, SHA256
 `07DA7B94BAD4BB0C43FC62473ADEDEF18272DDD5052AA420D8B8241DE11BB68F`,
 stored in the same app's TestWorlds directory as
@@ -46,3 +46,12 @@ title and automatic-start instructions. Both hands report 16/16 avatar bones.
 Private evidence is in `Validation/TrackingLab/DeviceLab13`. Geometric estimates
 are available before passive learning; REFINE/AUTO are optional corrections.
 Physical feel remains unconfirmed; do not mistake scene rendering for that check.
+
+Latest device checkpoint, 2026-09-28 UTC: Lab 14 now replaces Lab 13 on Quest.
+The additional sphere-center Kalman trial retains automatic startup and the
+accepted nearby path. Android artifact: 280263 bytes, SHA256
+E0D0F737748F4176A6599F6698C0F6A3A244E6F8470CC75A14668022A3263BC4.
+Device file: BirdTrackingLab14_CenterKalman.vrcw in the same TestWorlds directory.
+Transfer hash and actual Lab 14 stereo rendering are verified; both hands show
+16/16 avatar bones. Physical feel is pending. Prior Lab 13 remains for rollback.
+See CENTER-KALMAN-LAB.md for the large-turn range-contraction tradeoff.
