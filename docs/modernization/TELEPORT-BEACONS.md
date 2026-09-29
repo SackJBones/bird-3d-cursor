@@ -8,6 +8,9 @@ off. Do not present this as completed physical click-to-travel acceptance.
 
 ## Components and intent
 
+The later [label repair](BEACON-LABELS.md) fixes mirrored text bleed-through with
+outward-facing world-space text and restrained contrast. Targeting is unchanged.
+
 `BirdTeleportBeacon` owns a circular local-XY target, an ordinary landing
 Transform, clearance settings and renderer colors. `BirdTeleportRouter` owns
 local targeting, fresh release/press contact, arbitration and locomotion.

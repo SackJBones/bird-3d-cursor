@@ -237,6 +237,8 @@ public partial class UnityCoastalWorldChecks : IProcessSceneWithReport
                     Physics.SyncTransforms();
                 }
                 if(railInspection)p=new Vector3(-13.5f,-1.97f,44.2f);
+                bool labelInspection=AssetDatabase.LoadAssetAtPath<Material>(BirdBeaconLabelAuthoring.MaterialPath)!=null;
+                if(labelInspection)p=new Vector3(23.5f,-1.97f,49);
                 Require(Physics.Raycast(p+Vector3.up,Vector3.down,out var floor,2,(1<<0)|(1<<2)|(1<<11),QueryTriggerInteraction.Ignore)&&floor.normal.y>.95f,"Inspection spawn has floor");
                 Require(!Physics.CheckCapsule(p+Vector3.up*.3f,p+Vector3.up*1.6f,.25f,(1<<0)|(1<<2)|(1<<11),QueryTriggerInteraction.Ignore),"Inspection spawn standing clearance");
                 var spawn=UnityEngine.Object.FindObjectOfType<VRCSceneDescriptor>().spawns[0];spawn.position=p;
@@ -245,6 +247,7 @@ public partial class UnityCoastalWorldChecks : IProcessSceneWithReport
                 if(gardenInspection)inspectionDirection=Vector3.forward;
                 if(supportInspection)inspectionDirection=new Vector3(-18,0,-38);
                 if(railInspection)inspectionDirection=new Vector3(7.5f,0,6.8f);
+                if(labelInspection)inspectionDirection=Vector3.forward;
                 spawn.rotation=Quaternion.LookRotation(inspectionDirection);
                 EditorSceneManager.MarkSceneDirty(scene);EditorSceneManager.SaveScene(scene);inspectionScene=File.ReadAllBytes(BirdCoastalWorldAuthoring.ScenePath);
             }

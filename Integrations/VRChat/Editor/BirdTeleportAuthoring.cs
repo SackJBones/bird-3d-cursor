@@ -106,11 +106,12 @@ public static class BirdTeleportAuthoring
         var canvas = new GameObject(back ? "Back label" : "Front label", typeof(Canvas)).GetComponent<Canvas>();
         canvas.renderMode = RenderMode.WorldSpace; canvas.transform.SetParent(parent, false);
         canvas.transform.localPosition = new Vector3(0,-1.12f,back ? .025f : -.025f);
-        canvas.transform.localRotation = Quaternion.Euler(0,back ? 0 : 180,0); canvas.transform.localScale = Vector3.one * .001f;
+        canvas.transform.localScale = Vector3.one * .001f;
         var label = new GameObject("Destination", typeof(RectTransform)).AddComponent<Text>(); label.transform.SetParent(canvas.transform, false);
         label.rectTransform.sizeDelta = new Vector2(2400,380); label.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         label.fontSize = 100; label.alignment = TextAnchor.MiddleCenter; label.color = new Color(.06f,.33f,.38f); label.raycastTarget = false;
         label.text = title + "\nPoint through to highlight"; label.fontSize = 76;
+        BirdBeaconLabelAuthoring.Configure(canvas, back);
     }
     static Mesh Torus()
     {

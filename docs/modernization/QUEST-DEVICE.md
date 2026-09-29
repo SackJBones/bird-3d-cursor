@@ -1,5 +1,19 @@
 # Quest development power settings
 
+Latest device state, **2026-09-29 09:02 UTC**: Label01 production is installed
+and SHA256 verified, but **not confirmed loaded or running**. Quest shows Meta's
+"Finding position in room" / room-too-dim tracking dialog; no VRChat process
+remained after the normal production launch. This supersedes older live-world
+statements below. Earlier entirely black captures exposed this dialog after an
+ordinary sleep/wake cycle and warm app focus. Root and independent critic
+inspected the stereo evidence. Do not bypass tracking/boundary or infer success
+from transferred files/process presence. Retry when physical room tracking
+recovers; independent world development can continue. See newest CHECKPOINT and
+heavy `Reference/WorldBuildingReviews/20260929-Label01` for sanitized evidence.
+The latest battery check was 77%, AC powered, weak charger false, 41 C.
+
+Earlier device history follows.
+
 Current installed test world, 2026-09-28 UTC: **Social Bird 02** is transferred/
 hash-verified and previously visibly rendered in actual Quest VRChat. At the
 10:41 UTC recheck, its fresh cold launch was blocked by Quest's **“Finding

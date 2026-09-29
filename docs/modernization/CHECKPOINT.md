@@ -2678,3 +2678,65 @@ and replace loaded builds whenever useful under Dana's authorization. Missing
 hands/second client must not stall independent work. Continue coherent 30-60 minute
 passes every 2 hours in this chat, inherited permissions, meaningful-change-only
 notifications. Preserve CHECKPOINT legacy bytes; recurring prompt remains UTF-8.
+
+
+## Label01 - outward, readable beacon labels (2026-09-29, device checked 09:02 UTC)
+
+Heavy assets/evidence commit 0324f4222a8fe955ef20d205bbd8effaf8ea6fb2; review/evidence at
+Reference/WorldBuildingReviews/20260929-Label01. Read BEACON-LABELS.md.
+Ten original canvases now face outward; one saved original world UI shader/material
+culls back faces, respects scene depth and has Unity stereo/instancing support.
+Near-white text plus ordinary uGUI Outline improves contrast without changing
+font, size, placement, wording, target rings/radii, landings or permissions.
+The one-time migration is guarded; do NOT replay FixBeaconLabels over authored
+assets. Thereafter edit ordinary prefab components/material in the Inspector.
+No new GameObjects, colliders, lights, network streams or custom runtime scripts.
+Ten extra components are ordinary UI Outlines. Accepted Bird fitting, range,
+filters, inflation, acquisition and complementary hand pairs are unchanged.
+
+Both Android and Windows pass nine actual rendered front/rear/oblique face
+comparisons, opaque-blocker occlusion, ten label checks and seven context views.
+Compiled Udon beacon regression: 341 assertions each, 193 Android / 192 Windows
+frames, explicit fixtures rather than physical input. Final shader Android rerun
+and Windows include instancing variants. No bake/full walker repeated: saved
+lighting, geometry, colliders and source scene are unchanged. Earlier bake's
+140 UV-overlap warnings remain unresolved; no new lighting success claimed.
+Normal SDK production/inspection exports, both size gates, processed audits and
+catalogs all exit 0: 427 objects / 1,311 components / 29 unsynced Udon programs
+plus one manual per-player stream. No missing/project scripts or persistence.
+Android 1,931,571 bytes: 322E628C44E0360826311427B9C60452929072D666C74957E41911CD6A59DDFE.
+Windows 2,155,378 bytes: D6D122AAABADE7EAA4F2C64106EDD1E976A658420E869704068164FD19CD927E.
+Inspection 1,934,770 bytes: 50FD76153205B4107685DE5AADEFE5E5703C031D281C8F9B613D0DDE0D4E1145.
+Inspection starts on the existing east pond walk; no temporary footing. Exact
+source restoration verified, then SDK DynamicMaterials-only permutation proved
+against initial clean scene before restoring order. Android target restored.
+Initial pre-instancing Android exports superseded and never deployed.
+
+QUEST: Actual label/stereo acceptance is BLOCKED, not passed. At 08:35 prior
+Rail01 was absent and capture black. Baseline and Label01 inspection cold launches
+produced black captures despite running processes; follow-ups and proximity
+reapplication remained black. Ordinary sleep/wake plus warm app focus exposed
+Meta Finding position in room / room too dim to track at 09:01. Root and critic
+inspected both eyes. This establishes the present tracking blocker, not every
+earlier black capture's cause. No boundary/tracking bypass or reboot attempted.
+Normal Label01 production is transferred with matching hash; 09:02 launch hit
+the same dialog and no VRChat process remained (helper correctly exited 1).
+It is INSTALLED, NOT CONFIRMED LOADED/RUNNING. Retry normal launch once tracking
+recovers, and separately inspect labels in the inspection bundle. Battery 77%,
+AC, weak charger false, 41 C. Zero matched Udon-error lines does not mean clean
+client logs. No performance claim from black/blocked captures. Private raw logs
+and stereo media remain ignored; curated reports are sanitized.
+
+Independent review retains the editor fix and Android/Windows parity. Full-world
+scores unchanged: 6.5 aesthetics / 8 navigation / 7 hangout / 6.5 overall, >=8 each
+unmet. Next bounded design pass: high-lookout foreground rail joins, using proven
+continuous sweep while preserving dimensions, post rhythm, player boundary,
+visible-bar occlusion and supported return sightline. Do not redesign architecture.
+Physical reading comfort, hand gestures, client locomotion and multiplayer remain
+unverified. Avatar click AND teleport gates remain OFF pending physical acceptance.
+No upload, account change, SDK/client patch or bypass. Use dedicated Quest
+extensively and replace content any time under Dana's authorization. Missing
+hands/room tracking/second client must not stall independent development.
+Continue one coherent 30-60 minute pass every two hours in this chat with inherited
+permissions and meaningful-change-only notifications. Preserve historical
+CHECKPOINT bytes; recurring prompt remains UTF-8.
