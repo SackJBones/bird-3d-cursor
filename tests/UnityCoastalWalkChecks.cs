@@ -61,6 +61,11 @@ public class UnityCoastalWalkChecks : MonoBehaviour
             if(!File.Exists(Folder+"/pond-walk-routes.json"))throw new Exception("Run the pond check before walking the revised pond.");
             allRoutes.AddRange(JsonUtility.FromJson<Routes>(File.ReadAllText(Folder+"/pond-walk-routes.json")).routes);
         }
+        if(GameObject.Find("04 Lower water and hidden lounge/Pond garden corner")!=null)
+        {
+            if(!File.Exists(Folder+"/garden-walk-routes.json"))throw new Exception("Run the garden check before walking its approaches.");
+            allRoutes.AddRange(JsonUtility.FromJson<Routes>(File.ReadAllText(Folder+"/garden-walk-routes.json")).routes);
+        }
         if(GameObject.Find("03 Supported coastal terraces/Closed conversation pit steps")!=null)
         {
             Func<float,float,float,Vector3> pit=(radius,angle,y)=>new Vector3(-2+radius*Mathf.Cos(angle*Mathf.Deg2Rad),y,26+radius*Mathf.Sin(angle*Mathf.Deg2Rad));

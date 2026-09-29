@@ -217,11 +217,14 @@ public partial class UnityCoastalWorldChecks : IProcessSceneWithReport
                 // Validate a supported standing location before the ordinary SDK validation.
                 bool fishInspection=UnityEngine.Object.FindObjectOfType<BirdPondSchool>()!=null;
                 Vector3 p=fishInspection?new Vector3(23.5f,-1.97f,53):new Vector3(15,-1.97f,47);Physics.SyncTransforms();
+                bool gardenInspection=GameObject.Find("04 Lower water and hidden lounge/Pond garden corner")!=null;
+                if(gardenInspection)p=new Vector3(5.1f,-1.97f,54);
                 Require(Physics.Raycast(p+Vector3.up,Vector3.down,out var floor,2,(1<<0)|(1<<2)|(1<<11),QueryTriggerInteraction.Ignore)&&floor.normal.y>.95f,"Inspection spawn has floor");
                 Require(!Physics.CheckCapsule(p+Vector3.up*.3f,p+Vector3.up*1.6f,.25f,(1<<0)|(1<<2)|(1<<11),QueryTriggerInteraction.Ignore),"Inspection spawn standing clearance");
                 var spawn=UnityEngine.Object.FindObjectOfType<VRCSceneDescriptor>().spawns[0];spawn.position=p;
                 var inspectionDirection=GameObject.Find("04 Lower water and hidden lounge/Curved pond promenade")!=null?new Vector3(-9,0,15):new Vector3(115,0,173);
                 if(fishInspection)inspectionDirection=new Vector3(-5,0,1);
+                if(gardenInspection)inspectionDirection=Vector3.forward;
                 spawn.rotation=Quaternion.LookRotation(inspectionDirection);
                 EditorSceneManager.MarkSceneDirty(scene);EditorSceneManager.SaveScene(scene);inspectionScene=File.ReadAllBytes(BirdCoastalWorldAuthoring.ScenePath);
             }

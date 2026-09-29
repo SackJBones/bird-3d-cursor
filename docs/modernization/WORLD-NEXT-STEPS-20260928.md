@@ -14,7 +14,19 @@ Record actual device evidence; distinguish unattended checks from physical feel
 and from real multi-client tests. An unavailable headset still must not block
 independent development.
 
-## Progress through R06
+## Latest world additions
+
+Lighting01, Vista01, Pond01 and Fish01 add baked architectural lighting, daylight
+sky/coast, a curved pond circuit and bounded Bird-responsive cosmetic shoals.
+Garden01 adds a small editable seating/planting corner on the inland terrace;
+see `COASTAL-GARDEN.md` and the newest checkpoint for its completed validation.
+The independent critic's full-world target remains unmet. Favor one bounded
+support/cliff/rail refinement next, or physical interaction/social acceptance
+when the necessary hands/clients are available. Do not repeat one-time authoring
+migrations over the saved world. Retain the accepted Bird control and visual
+sizing, and keep unvalidated click/teleport actions disabled.
+
+## Earlier progress through R06
 
 Social streams, contrasting hand pairs and body-departure acquisition debounce
 are implemented and have synthetic coverage; actual multi-client acceptance

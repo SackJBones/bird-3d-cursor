@@ -2469,3 +2469,79 @@ branches at the start of the next cycle, then verify clean/synced state.
 Do not alter network settings or credentials. This additional documentation
 commit records the pending sync. The validated Quest production world remains
 running and the same-chat heartbeat prompt is updated.
+
+
+## 2026-09-29 Garden01 - pond-side conversation corner
+
+Validated through 03:20 UTC. Heavy commit c545252c6ba7547424ed346b14109187c93cae85; curated evidence
+`Reference/WorldBuildingReviews/20260929-Garden01` has 24 images, platform
+results, build identities, review and sanitized device observations. Read
+`COASTAL-GARDEN.md`. The preceding Fish01 DNS/push issue is resolved: both
+ordinary non-force pushes succeeded at the start of this cycle.
+
+Two unequal angled seats and three unequal planting groups occupy the broad
+inland pond terrace. The ordinary CoastalGarden nested prefab has seven original
+saved meshes, two new opaque materials, 2,040 instance triangles, 21 renderers
+and nine static colliders/lightmap receivers. White bases, warm 45 cm seat tops,
+low backs and restrained folded leaves remain Inspector-editable. These are
+seating geometry only, no VRCStation action. No runtime script, network stream,
+realtime light or third-party art. Existing pond, fish, architecture, Bird feel,
+range/filtering, inflation and complementary hand colors remain unchanged.
+
+Critic refinement moved the short seat and its planter inward 1 m. Both approaches
+remain clear. The one-time AddGarden/RefineGarden commands guard against
+regenerating later edits; do not replay them over the saved scene. The critic
+retains the closer group and Windows/Android visual parity. Whole-world scores
+stay 6.5 aesthetics / 8 navigation / 7 hangout / 6.5 overall, target 8 each unmet.
+Seated water is a partially bank-obscured band, not uninterrupted fish watching.
+The old high view 06 was floor-occluded; final 06 is explicitly free-camera seaward
+overview. Next favor one broad tapered underside/support transition at the
+landward pond-terrace join, keeping walking surface, basin and routes fixed.
+
+Both platform focused checks pass 3,024 supported furniture vertices, 223 approach
+samples at three heights, 35 seated-water sightlines, finite meshes/opaque
+materials/UV2/budget and seven renders. First sightline fixture erroneously
+included invisible player fences as visual occluders; corrected to actual
+walls/slabs/visible rails while retaining the fence in every body/walk check.
+Android normal-frame CharacterController traversal passes 20 routes outward and
+back in 19,206 frames plus four guard push cases. First wider candidate passed
+19,236 frames. Windows gets focused support/clearance; no repeated full walker
+this cycle. Unchanged pond passed 319 samples before seating refinement.
+Both lighting checks pass 176 receivers/eight renders. Rebake: two non-directional
+maps, 219 probes, 140 UV-overlap object warnings including nine furniture receivers.
+The older combined Windows scene/capture native shutdown defect remains separate;
+focused checks and exporters exit 0. Handwritten whitespace checks pass; Unity's
+own blank YAML values are preserved.
+
+Normal SDK exports/size gates/processed-scene audits/catalogs pass:
+- Android 1,896,690 bytes, SHA256 CAF09D44A1C9A45E5B4D02D69CEE8F6418E5F07B6E9C4DBB0A37364640E61B75.
+- Windows 2,113,617 bytes, SHA256 ABBC4AADD915223998E990D70A6C761410FA8DD3D498DA2FA0656B5390B34A05.
+- Android inspection 1,897,240 bytes, SHA256 DAB2009ED4AEA3AC7BF07703BB7D61B4C551A8E17848F5FC7BE37BB5B7632E0C.
+Each 426 objects / 1,297 components / 29 unsynced programs plus one manual per-player
+stream; no persistence/missing/project scripts. Garden inspection changes only
+supported initial spawn (5.1,-1.97,54), looking +Z, then exactly restores source.
+Windows later permuted only DynamicMaterials. Verified unchanged membership
+and all other scene bytes before restoring original source bytes. Android target
+and final captures are restored; exact restoration evidence is curated.
+
+Actual Quest VRChat inspection 03:15 UTC visibly renders both seats in stereo;
+fixed tilted view excludes planting, which has separate editor evidence. Initial
+capture was Connecting. Two later logcat reads and separate screenshot attempts
+lost ADB transport. Using Unity bundled ADB 32.0.0 recovered full capture; previous
+ADB was 31.0.2. Cause not established. Prefer the Unity bundled executable during
+concurrent editor work; do not change network settings/accounts to compensate.
+Normal production Garden01 visibly loaded at arrival 03:17 UTC, pedestal/beacon
+visible, device hash matching, LEFT RUNNING. Battery 76%, AC, weak charger false, 40 C.
+Stationary inspection samples 72-73 FPS / 72 target, App 2.11-2.29 ms, zero tear with some
+Stale=1 reports. Not active Bird/crowded-world cost. Successful captures show
+zero matched Udon-error lines, not globally clean logs. Existing fallback/error
+avatar remains; Bird not acquired. Raw logs/screens stay private/ignored.
+No online upload, SDK/client modification, validation bypass or account change.
+
+Avatar clicks AND teleport actions remain OFF pending physical validation.
+Seating comfort, actual client walking, physical gestures and real multiplayer
+remain unverified. Unavailable hands/second client must not stall useful work.
+Use the dedicated Quest extensively and replace its loaded build whenever useful
+under Dana's authorization. Keep one coherent 30-60 min pass every 2 hours in this
+same chat with inherited permissions and meaningful-change-only notifications.
+Preserve legacy CHECKPOINT bytes when appending; RECURRING-PROMPT is UTF-8.

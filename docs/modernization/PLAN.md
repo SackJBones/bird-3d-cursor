@@ -36,7 +36,9 @@ results. The [curved pond workflow](COASTAL-POND.md) adds the next editable basi
 and winding promenade layer; check its latest validation before changing joins.
 The [pond shoals](POND-FISH.md) add a separate cosmetic response to local and
 remote logical points in the water. Check their latest validation/device status;
-planting remains a separate bounded pass.
+the [pond garden corner](COASTAL-GARDEN.md) adds a separate editable planting and
+seating layer. Check its newest platform, navigation and device evidence before
+changing the furniture layout.
 
 The [mid-range assessment](MID-RANGE-ASSESSMENT.md) rejects simply moving the
 center filter's full-effect distance closer: modest stationary benefit comes

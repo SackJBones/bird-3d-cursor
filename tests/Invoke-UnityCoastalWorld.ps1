@@ -2,7 +2,7 @@ param(
  [Parameter(Mandatory=$true)][string]$UnityEditor,
  [Parameter(Mandatory=$true)][string]$ProjectPath,
  [ValidateSet('Android','Windows','Both')][string]$Platform='Android',
- [switch]$Create,[switch]$ReviseR05,[switch]$RefineR05,[switch]$RepairR06,[switch]$RefineRockR06,[switch]$AddBird,[switch]$AddSocial,[switch]$AddBeacons,[switch]$AddPractice,[switch]$PrepareLighting,[switch]$RefineLighting,[switch]$SmoothLightingJoins,[switch]$AddVista,[switch]$RefineVista,[switch]$UpdateVistaMeshes,[switch]$CheckVista,[switch]$AddPond,[switch]$UpdatePondMeshes,[switch]$CheckPond,[switch]$AddFish,[switch]$CheckFish,[switch]$BakeLighting,[switch]$CheckLighting,[switch]$CheckBird,[switch]$CheckSocial,[switch]$CheckBeacons,[switch]$Check,[switch]$Walk,[switch]$Build,[switch]$BuildVistaInspection
+ [switch]$Create,[switch]$ReviseR05,[switch]$RefineR05,[switch]$RepairR06,[switch]$RefineRockR06,[switch]$AddBird,[switch]$AddSocial,[switch]$AddBeacons,[switch]$AddPractice,[switch]$PrepareLighting,[switch]$RefineLighting,[switch]$SmoothLightingJoins,[switch]$AddVista,[switch]$RefineVista,[switch]$UpdateVistaMeshes,[switch]$CheckVista,[switch]$AddPond,[switch]$UpdatePondMeshes,[switch]$CheckPond,[switch]$AddFish,[switch]$CheckFish,[switch]$AddGarden,[switch]$RefineGarden,[switch]$CheckGarden,[switch]$BakeLighting,[switch]$CheckLighting,[switch]$CheckBird,[switch]$CheckSocial,[switch]$CheckBeacons,[switch]$Check,[switch]$Walk,[switch]$Build,[switch]$BuildVistaInspection
 )
 $ErrorActionPreference='Stop'
 if($BuildVistaInspection -and $Platform -ne 'Android'){throw '-BuildVistaInspection requires -Platform Android.'}
@@ -15,6 +15,7 @@ Get-ChildItem -LiteralPath (Join-Path $repo 'Integrations/VRChat/Editor') -File 
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityCoastalWorldChecks.cs') -Destination $editor
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityCoastalRepairChecks.cs') -Destination $editor
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityPondChecks.cs') -Destination $editor
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityGardenChecks.cs') -Destination $editor
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityWorldBundleChecks.cs') -Destination $editor
 $runtime=Join-Path $project 'Assets/BirdGenerated/Runtime'
 New-Item -ItemType Directory -Force $runtime | Out-Null
@@ -64,11 +65,14 @@ foreach($target in $targets){
  if($AddVista){Invoke-Coastal 'UnityCoastalWorldChecks.AddVista' 'coastal-vista-author' $target;$AddVista=$false}
  if($RefineVista){Invoke-Coastal 'UnityCoastalWorldChecks.RefineVista' 'coastal-vista-refine' $target;$RefineVista=$false}
  if($AddPond){Invoke-Coastal 'UnityCoastalWorldChecks.AddPond' 'coastal-pond-author' $target;$AddPond=$false}
+ if($RefineGarden){Invoke-Coastal 'UnityCoastalWorldChecks.RefineGarden' 'coastal-garden-refine' $target;$RefineGarden=$false}
+ if($AddGarden){Invoke-Coastal 'UnityCoastalWorldChecks.AddGarden' 'coastal-garden-author' $target;$AddGarden=$false}
  if($AddFish){Invoke-Coastal 'UnityCoastalWorldChecks.AddFish' 'coastal-fish-author' $target;$AddFish=$false}
  if($UpdatePondMeshes){Invoke-Coastal 'UnityCoastalWorldChecks.UpdatePondMeshes' 'coastal-pond-meshes' $target;$UpdatePondMeshes=$false}
  if($BakeLighting){Invoke-Coastal 'UnityCoastalWorldChecks.BakeLighting' 'coastal-lighting-bake' $target;$BakeLighting=$false}
  if($UpdateVistaMeshes){Invoke-Coastal 'UnityCoastalWorldChecks.UpdateVistaMeshes' 'coastal-vista-meshes' $target;$UpdateVistaMeshes=$false}
  if($CheckVista){Invoke-Coastal 'UnityVistaChecks.Run' 'coastal-vista-check' $target}
+ if($CheckGarden){Invoke-Coastal 'UnityCoastalWorldChecks.CheckGarden' 'coastal-garden-check' $target}
  if($CheckPond){Invoke-Coastal 'UnityCoastalWorldChecks.CheckPond' 'coastal-pond-check' $target}
  if($CheckFish){Invoke-Coastal 'UnityPondFishChecks.Run' 'coastal-fish-check' $target}
  if($CheckLighting){Invoke-Coastal 'UnityLightingChecks.Run' 'coastal-lighting-check' $target}
