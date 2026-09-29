@@ -2545,3 +2545,72 @@ Use the dedicated Quest extensively and replace its loaded build whenever useful
 under Dana's authorization. Keep one coherent 30-60 min pass every 2 hours in this
 same chat with inherited permissions and meaningful-change-only notifications.
 Preserve legacy CHECKPOINT bytes when appending; RECURRING-PROMPT is UTF-8.
+
+
+## 2026-09-29 05:16 UTC — Support01 retained and running on Quest
+
+Heavy assets/evidence commit: 0493cc192d4bd235c29b3c7e3962c3a407072dd9.
+Read COASTAL-SUPPORT.md and heavy Reference/WorldBuildingReviews/20260929-Support01.
+This bounded pass adds one editable seven-section curved bracket below the
+western pond terrace: one renderer/collider, 2,400 triangles, existing plaster,
+no runtime scripts, lights or network stream. Do not replay AddSupport or
+SealPondBed over authored assets; explicit mesh update preserves GUID/prefab edits.
+
+The independent critic rejected Candidate01's blade and confirmed Candidate02's
+broader shape was suitable for a bake. A stricter actual-bed clearance check
+caught the first intrusion. Even after that passed, a visible pale strip exposed
+a separate old defect: basin sides stopped at -2.68 m but the fish bed was -3.15 m.
+The one-time repair lowers only 963 original wall-bottom vertices to -3.17 m,
+retaining all other vertices and indices. The profile records bed depth; fresh
+pond/school authoring uses it. Candidate03 and final baked views close the gap.
+
+Both platforms pass support checks (3,600 closed oriented edges, 101 actual-slab
+attachment vertices, 101 buried-root vertices, 179 sampled basin exclusions),
+319 pond standing/floor samples and 194 new near-bed horizontal side-closure
+rays, garden support/clearance/sightlines (3,024/223/35), and lighting checks with
+177 receivers. Bake: two maps, 219 probes, 142 UV-overlap warnings. Full walker
+not rerun: walking vertices/routes/upper guards unchanged; additions are below
+occupied floor. The earlier combined Windows scene/capture shutdown defect is
+separate from these passing focused checks. Exact inspection restoration verified;
+Windows SDK changed only DynamicMaterials order, membership/other bytes checked
+before restoring exact source. Android target restored.
+
+Normal SDK exports, size gates, audits/catalogs exit 0 on both platforms.
+Production has 427 objects/1,301 components, 29 unsynced Udon programs and one
+manual per-player stream. Android 1,972,269 bytes, SHA256
+7D329E9C7DFBDC8E84DDE338262BA3DEE91857E411F48E74D90663DF1B712BC1.
+Windows 2,189,249 bytes, SHA256
+16926D53B102707723CF6BC01375243C633D5BCA192A1F37935EADF867EACDD6.
+Separate inspection Android 1,972,925 bytes, SHA256
+7BD94421BE5F00B7A85E76C54A728498E5D8B9E2A5E4161CAA60A59879D94BEC.
+Inspection adds one temporary ordinary solid footing and initial external spawn,
+NOT a production visitor route. Its source restoration is exact.
+
+Quest: inspection visibly rendered both eyes with support/slab/cliff at 05:14 UTC.
+Initial captures showed Connecting; log read and truncated screenshot/fallback
+lost ADB transport; ordinary cold relaunch and later read-only capture with Unity
+idle recovered. Cause unestablished. Prefer Unity bundled ADB 32.0.0; avoid
+capture/editor-lifecycle overlap as a precaution, not a causal claim. Temporary
+failed-capture file cleaned up. Production hash-verified, visibly at normal
+arrival at 05:16 UTC and LEFT RUNNING. Battery 77%, AC, weak charger false, 40 C.
+Six stationary inspection samples: 72-73 FPS/72 target, App 3.02-3.11 ms, one
+Tear=1 and one Stale=1. Not active-Bird/crowded-world performance. Successful
+observations have zero matched Udon-error lines, not globally clean logs.
+Existing fallback/error avatar remains. Raw device media/logs stay private.
+
+Critic retains bracket/repair and Windows/Android parity. Whole-world scores
+remain 6.5 aesthetics / 8 navigation / 7 hangout / 6.5 overall; >=8 each unmet.
+Cliff junction still applied-looking; slab joint shading uneven; submerged wall
+adds a brighter depth band. Next bounded recommendation: pond rail alternating
+segment shading and exposed terminal ends, preserving dimensions, player safety
+containment and Bird sightlines. Do not expand/rebuild the architecture.
+
+Accepted Bird near feel, range, filters, inflation and complementary player hand
+pairs unchanged. Avatar click AND teleport gates stay OFF pending real physical
+acceptance; physical comfort, client walking and multiplayer remain unverified.
+No upload, account/SDK/client patch or validation bypass. Missing hands/second
+client must not stall independent work. Use the dedicated Quest extensively and
+replace its loaded build any time under Dana's authorization. Continue coherent
+30-60 minute cycles every two hours in this chat with inherited permissions;
+notify only meaningful changes, completion, failure or required action. Preserve
+CHECKPOINT legacy bytes when appending; recurring prompt stays UTF-8.

@@ -8,6 +8,9 @@ Work every two hours in substantial passes, approximately 30–60 minutes of act
 
 Use `feature/vrchat-modernization` in both repositories. All maintained package code belongs in `SackJBones/bird-3d-cursor`; full projects, large scenes and assets belong in `SackJBones/bird-3d-cursor-projects`. Pin dependencies to reproducible revisions. Create eventual review PRs; do not merge unfinished work. Later engine integrations branch off this feature branch, with separate large demo repositories where necessary.
 
+The latest underside prototype is described in [Pond terrace support](COASTAL-SUPPORT.md).
+Read the newest checkpoint for retained geometry and actual build/device evidence.
+
 ## Current objective: get Bird from the pedestal, 2026-09-28 UTC
 
 Dana has now tried Personal Bird 01 successfully. The working volume and visual

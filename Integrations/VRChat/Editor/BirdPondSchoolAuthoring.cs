@@ -45,7 +45,7 @@ public static class BirdPondSchoolAuthoring
         {
             var school=root.AddUdonSharpComponent<BirdPondSchool>();school.fish=new Transform[24];
             BirdCoastalPondAuthoring.Sample(profile,out var line,out _);
-            school.waterSurface=profile.floorHeight-profile.waterDepth;school.waterHalfWidth=profile.waterHalfWidth;
+            school.waterDepth=profile.basinDepthBelowWater;school.waterSurface=profile.floorHeight-profile.waterDepth;school.waterHalfWidth=profile.waterHalfWidth;
             school.centerline=line.Select(p=>new Vector3(p.x,school.waterSurface,p.y)).ToArray();
             for(int i=0;i<24;i++)
             {

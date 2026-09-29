@@ -20,8 +20,10 @@ Lighting01, Vista01, Pond01 and Fish01 add baked architectural lighting, dayligh
 sky/coast, a curved pond circuit and bounded Bird-responsive cosmetic shoals.
 Garden01 adds a small editable seating/planting corner on the inland terrace;
 see `COASTAL-GARDEN.md` and the newest checkpoint for its completed validation.
+Support01 adds one editable curved terrace bracket and seals the submerged
+pond-wall gap; see `COASTAL-SUPPORT.md` for retained limitations and evidence.
 The independent critic's full-world target remains unmet. Favor one bounded
-support/cliff/rail refinement next, or physical interaction/social acceptance
+pond rail shading/terminal-end refinement next, or physical interaction/social acceptance
 when the necessary hands/clients are available. Do not repeat one-time authoring
 migrations over the saved world. Retain the accepted Bird control and visual
 sizing, and keep unvalidated click/teleport actions disabled.

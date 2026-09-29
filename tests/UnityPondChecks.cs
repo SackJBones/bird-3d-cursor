@@ -33,6 +33,21 @@ public partial class UnityCoastalWorldChecks
                 Require(Physics.Raycast(q+Vector3.up*.1f,Vector3.down,out var hit,.25f,solid,QueryTriggerInteraction.Ignore)&&hit.normal.y>.98f,"Pond path has floor: "+q);
                 Require(!Physics.CheckCapsule(q+Vector3.up*.3f,q+Vector3.up*1.6f,.25f,solid,QueryTriggerInteraction.Ignore),"Pond path standing clearance: "+q);samples++;
             };
+            var school=UnityEngine.Object.FindObjectOfType<BirdPondSchool>(true);
+            int sealedSides=0;
+            if(school!=null)
+            {
+                Require(Mathf.Abs(school.waterDepth-p.basinDepthBelowWater)<.001f,"Saved school and pond profile bed depth agree");
+                var fascia=root.transform.Find("Basin and fascia").GetComponent<MeshCollider>();
+                // Near-bed horizontal rays catch submerged side gaps that vertical
+                // floor/support probes cannot see (the pre-Support01 wall was short).
+                for(int i=0;i<centers.Count;i++)foreach(float side in new[]{-1f,1f})
+                {
+                    var q=new Vector3(centers[i].x,school.waterSurface-school.waterDepth+.02f,centers[i].y);
+                    var direction=new Vector3(normals[i].x,0,normals[i].y)*side;
+                    Require(fascia.Raycast(new Ray(q,direction),out var h,p.waterHalfWidth+.2f),"Basin side closes to actual bed: "+q);sealedSides++;
+                }
+            }
             var loop=new List<Vector3>();
             for(int i=0;i<centers.Count;i++)
             {
@@ -66,7 +81,7 @@ public partial class UnityCoastalWorldChecks
             PondCapture(folder,"08-overlook-inspection",new Vector3(15,-.35f,47),new Vector3(130,15,220),78);
             PondCapture(folder,"09-west-promenade-join",new Vector3(-13.5f,-.35f,44.2f),new Vector3(-8,-1.9f,49),85);
             File.WriteAllText(folder+"/inventory.txt",samples+" supporting-floor/standing-clearance samples; "+triangles+" pond triangles; water not covered by floor; exact rail proxies; full loop route written. Normal quality="+QualitySettings.names[QualitySettings.GetQualityLevel()]+". Not client locomotion or physical acceptance.");
-            Finish("coastal-pond-check",true,samples+" pond floor/standing samples; no slab over water; beacon/inspection support; rail policy; "+triangles+" triangles and nine actual renders. Full normal-frame walk remains separate.");
+            Finish("coastal-pond-check",true,samples+" pond floor/standing samples; "+sealedSides+" submerged side-closure rays; no slab over water; beacon/inspection support; rail policy; "+triangles+" triangles and nine actual renders. Full normal-frame walk remains separate.");
         }
         catch(Exception e){Finish("coastal-pond-check",false,e.ToString());}
     }

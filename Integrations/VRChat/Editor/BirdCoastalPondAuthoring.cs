@@ -96,7 +96,7 @@ public static class BirdCoastalPondAuthoring
         inland.AddRange(startJoin.Take(startJoin.Count-1));
         Polygon(inland,profile.floorHeight);meshes.Add("Continuous walk and terrace",Finish());
         Reset();Ribbon(-profile.waterHalfWidth,profile.waterHalfWidth,profile.floorHeight-profile.waterDepth);Caps(0,profile.waterHalfWidth,profile.floorHeight-profile.waterDepth);meshes.Add("Curved water",Finish());
-        Reset();Wall(waterLoop,profile.floorHeight-profile.waterDepth-.08f,profile.floorHeight);Wall(outerLoop,profile.floorHeight-.5f,profile.floorHeight);
+        Reset();Wall(waterLoop,profile.floorHeight-profile.waterDepth-profile.basinDepthBelowWater-.02f,profile.floorHeight);Wall(outerLoop,profile.floorHeight-.5f,profile.floorHeight);
         // Close the terrace underneath as well, so its sea-facing slab has thickness.
         var floorMesh=meshes["Continuous walk and terrace"];var floorVertices=floorMesh.vertices;var floorIndices=floorMesh.triangles;
         for(int i=0;i<floorIndices.Length;i+=3)Tri(floorVertices[floorIndices[i]]-Vector3.up*.5f,floorVertices[floorIndices[i+2]]-Vector3.up*.5f,floorVertices[floorIndices[i+1]]-Vector3.up*.5f);
@@ -133,7 +133,7 @@ public static class BirdCoastalPondAuthoring
     }
     public static void Sample(BirdCoastalPondProfile p,out List<Vector2> points,out List<Vector2> normals)
     {
-        if(p.centerline==null||p.centerline.Length<4||p.samplesPerSpan<6||p.samplesPerSpan>24||p.waterHalfWidth<1||p.walkWidth<3||p.waterDepth<.2f||!Finite(new Vector3(p.waterHalfWidth,p.walkWidth,p.floorHeight+p.waterDepth))||p.centerline.Any(v=>!Finite(new Vector3(v.x,0,v.y))))throw new Exception("Invalid pond profile.");
+        if(p.centerline==null||p.centerline.Length<4||p.samplesPerSpan<6||p.samplesPerSpan>24||p.waterHalfWidth<1||p.walkWidth<3||p.waterDepth<.2f||p.basinDepthBelowWater<.1f||!Finite(new Vector3(p.basinDepthBelowWater,0,0))||!Finite(new Vector3(p.waterHalfWidth,p.walkWidth,p.floorHeight+p.waterDepth))||p.centerline.Any(v=>!Finite(new Vector3(v.x,0,v.y))))throw new Exception("Invalid pond profile.");
         points=new List<Vector2>();normals=new List<Vector2>();var c=p.centerline;
         for(int i=0;i<c.Length-1;i++)for(int j=0;j<p.samplesPerSpan;j++)
         {

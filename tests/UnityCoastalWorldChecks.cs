@@ -213,18 +213,34 @@ public partial class UnityCoastalWorldChecks : IProcessSceneWithReport
                 Require(EditorUserBuildSettings.activeBuildTarget==BuildTarget.Android,"Vista headset inspection is Android only");
                 originalScene=File.ReadAllBytes(BirdCoastalWorldAuthoring.ScenePath);
                 File.WriteAllBytes(Folder+"/vista-inspection-source-backup.unity",originalScene);
-                // A normal, separately named SDK export with only its initial spawn moved.
+                // A normal, separately named SDK inspection export with a moved spawn.
+                // Support inspection also adds a temporary ordinary solid footing.
                 // Validate a supported standing location before the ordinary SDK validation.
                 bool fishInspection=UnityEngine.Object.FindObjectOfType<BirdPondSchool>()!=null;
                 Vector3 p=fishInspection?new Vector3(23.5f,-1.97f,53):new Vector3(15,-1.97f,47);Physics.SyncTransforms();
                 bool gardenInspection=GameObject.Find("04 Lower water and hidden lounge/Pond garden corner")!=null;
                 if(gardenInspection)p=new Vector3(5.1f,-1.97f,54);
+                bool supportInspection=GameObject.Find("04 Lower water and hidden lounge/Pond terrace support")!=null;
+                if(supportInspection)
+                {
+                    // Separate normal-SDK inspection only: a temporary supported
+                    // external stance exposes the underside on the real Quest.
+                    // It is not part of the production world or a visitor route.
+                    p=new Vector3(4,-12.62f,88);
+                    var footing=GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    footing.name="Temporary support inspection footing";
+                    footing.transform.position=new Vector3(4,-12.775f,88);
+                    footing.transform.localScale=new Vector3(4,.25f,4);
+                    footing.GetComponent<Renderer>().sharedMaterial=AssetDatabase.LoadAssetAtPath<Material>(BirdCoastalWorldAuthoring.Folder+"/Materials/Plaster.mat");
+                    Physics.SyncTransforms();
+                }
                 Require(Physics.Raycast(p+Vector3.up,Vector3.down,out var floor,2,(1<<0)|(1<<2)|(1<<11),QueryTriggerInteraction.Ignore)&&floor.normal.y>.95f,"Inspection spawn has floor");
                 Require(!Physics.CheckCapsule(p+Vector3.up*.3f,p+Vector3.up*1.6f,.25f,(1<<0)|(1<<2)|(1<<11),QueryTriggerInteraction.Ignore),"Inspection spawn standing clearance");
                 var spawn=UnityEngine.Object.FindObjectOfType<VRCSceneDescriptor>().spawns[0];spawn.position=p;
                 var inspectionDirection=GameObject.Find("04 Lower water and hidden lounge/Curved pond promenade")!=null?new Vector3(-9,0,15):new Vector3(115,0,173);
                 if(fishInspection)inspectionDirection=new Vector3(-5,0,1);
                 if(gardenInspection)inspectionDirection=Vector3.forward;
+                if(supportInspection)inspectionDirection=new Vector3(-18,0,-38);
                 spawn.rotation=Quaternion.LookRotation(inspectionDirection);
                 EditorSceneManager.MarkSceneDirty(scene);EditorSceneManager.SaveScene(scene);inspectionScene=File.ReadAllBytes(BirdCoastalWorldAuthoring.ScenePath);
             }
