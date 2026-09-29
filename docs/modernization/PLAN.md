@@ -10,6 +10,7 @@ Use `feature/vrchat-modernization` in both repositories. All maintained package 
 
 The latest underside prototype is described in [Pond terrace support](COASTAL-SUPPORT.md).
 Read the newest checkpoint for retained geometry and actual build/device evidence.
+The focused [pond rail finish](COASTAL-RAILS.md) follows that support pass.
 
 ## Current objective: get Bird from the pedestal, 2026-09-28 UTC
 

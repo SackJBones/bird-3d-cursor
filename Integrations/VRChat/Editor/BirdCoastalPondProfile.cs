@@ -19,6 +19,7 @@ public class BirdCoastalPondProfile : ScriptableObject
     [Min(1)] public float waterHalfWidth = 2;
     [Min(3)] public float walkWidth = 3.3f;
     [Range(6,24)] public int samplesPerSpan = 12;
+    [HideInInspector] public int railRevision;
     public float floorHeight = -2;
     public float waterDepth = .6f;
     [Tooltip("Depth of the submerged bed below the water; must match the pond school.")]

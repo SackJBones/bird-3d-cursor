@@ -73,7 +73,7 @@ public static class BirdCoastalPondAuthoring
         var go=new GameObject(name,typeof(MeshFilter),typeof(MeshRenderer));go.transform.SetParent(parent,false);go.layer=layer;
         var mesh=AssetDatabase.LoadAssetAtPath<Mesh>(Folder+"/"+name+".asset");go.GetComponent<MeshFilter>().sharedMesh=mesh;
         var r=go.GetComponent<MeshRenderer>();r.sharedMaterial=material;r.enabled=visible;r.receiveGI=ReceiveGI.Lightmaps;
-        r.scaleInLightmap=name.Contains("rail")?.3f:.6f;
+        r.scaleInLightmap=name.Contains("rail")?4f:.6f;
         if(collision)go.AddComponent<MeshCollider>().sharedMesh=mesh;
         GameObjectUtility.SetStaticEditorFlags(go,StaticEditorFlags.BatchingStatic|(visible?StaticEditorFlags.ContributeGI:0));
     }
@@ -104,14 +104,7 @@ public static class BirdCoastalPondAuthoring
         foreach(bool pond in new[]{true,false})
         {
             string name=pond?"Pond rail":"Coast rail";var segments=GuardSegments(pond);
-            Reset();float distance=0;
-            foreach(var segment in segments)
-            {
-                Vector3 a=V(segment[0],profile.floorHeight),b=V(segment[1],profile.floorHeight),d=b-a;
-                Box((a+b)*.5f+Vector3.up*1.05f,new Vector3(.10f,.10f,d.magnitude+.012f),Quaternion.LookRotation(d));
-                distance+=d.magnitude;if(distance>=1.8f){Box(a+Vector3.up*.53f,new Vector3(.055f,1.06f,.055f),Quaternion.identity);distance=0;}
-            }
-            meshes.Add(name,Finish());Reset();
+            meshes.Add(name,BirdCoastalRailMesh.Build(segments,profile.floorHeight));Reset();
             foreach(var segment in segments){Vector3 a=V(segment[0],profile.floorHeight),b=V(segment[1],profile.floorHeight);Quad(a,b,b+Vector3.up*1.1f,a+Vector3.up*1.1f);Quad(b,a,a+Vector3.up*1.1f,b+Vector3.up*1.1f);}
             meshes.Add(name+" safety boundary",Finish());
         }
@@ -122,6 +115,7 @@ public static class BirdCoastalPondAuthoring
             if(!pair.Key.EndsWith(" safety boundary"))Unwrapping.GenerateSecondaryUVSet(m);
         }
         foreach(var pair in meshes)Save(pair.Key,pair.Value);
+        profile.railRevision=1;EditorUtility.SetDirty(profile);
         // Refresh cooking in an open authoring scene after an explicit mesh edit.
         foreach(var collider in UnityEngine.Object.FindObjectsOfType<MeshCollider>(true))
         {
@@ -130,6 +124,47 @@ public static class BirdCoastalPondAuthoring
             collider.sharedMesh=null;collider.sharedMesh=mesh;
         }
         Physics.SyncTransforms();AssetDatabase.SaveAssets();
+    }
+    public static List<Vector2[]> RailSegments(BirdCoastalPondProfile p,bool pond)
+    {
+        profile=p;Sample(p,out center,out right);outer=p.waterHalfWidth+p.walkWidth;
+        waterLoop=Loop(p.waterHalfWidth);outerLoop=Loop(outer);return GuardSegments(pond);
+    }
+    [MenuItem("Bird/Coastal world/Update pond rail meshes only")]
+    public static void UpdateRailMeshes()
+    {
+        var p=AssetDatabase.LoadAssetAtPath<BirdCoastalPondProfile>(ProfilePath);
+        if(p==null)throw new Exception("Author the pond first.");
+        var meshes=new Dictionary<string,Mesh>();
+        foreach(bool pond in new[]{true,false})
+        {
+            var mesh=BirdCoastalRailMesh.Build(RailSegments(p,pond),p.floorHeight);
+            UnwrapParam.SetDefaults(out var parameters);parameters.packMargin*=4;
+            Unwrapping.GenerateSecondaryUVSet(mesh,parameters);meshes.Add(pond?"Pond rail":"Coast rail",mesh);
+        }
+        foreach(var pair in meshes)Save(pair.Key,pair.Value);
+        foreach(var collider in UnityEngine.Object.FindObjectsOfType<MeshCollider>(true))
+        {
+            string path=AssetDatabase.GetAssetPath(collider.sharedMesh);
+            if(path!=Folder+"/Pond rail.asset"&&path!=Folder+"/Coast rail.asset")continue;
+            var saved=collider.sharedMesh;collider.sharedMesh=null;collider.sharedMesh=saved;
+        }
+        Physics.SyncTransforms();
+        p.railRevision=1;EditorUtility.SetDirty(p);AssetDatabase.SaveAssets();
+    }
+    [MenuItem("Bird/Coastal world/Finish original pond rails once")]
+    public static void FinishRails()
+    {
+        var p=AssetDatabase.LoadAssetAtPath<BirdCoastalPondProfile>(ProfilePath);
+        if(p.railRevision!=0)throw new Exception("Original rail finish already replaced; edit the saved meshes/profile and explicitly update or rebake.");
+        UpdateRailMeshes();var root=PrefabUtility.LoadPrefabContents(PrefabPath);
+        try
+        {
+            foreach(string name in new[]{"Pond rail","Coast rail"})root.transform.Find(name).GetComponent<MeshRenderer>().scaleInLightmap=4;
+            PrefabUtility.SaveAsPrefabAsset(root,PrefabPath);
+        }
+        finally{PrefabUtility.UnloadPrefabContents(root);}
+        AssetDatabase.SaveAssets();
     }
     public static void Sample(BirdCoastalPondProfile p,out List<Vector2> points,out List<Vector2> normals)
     {

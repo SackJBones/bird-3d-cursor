@@ -2614,3 +2614,67 @@ replace its loaded build any time under Dana's authorization. Continue coherent
 30-60 minute cycles every two hours in this chat with inherited permissions;
 notify only meaningful changes, completion, failure or required action. Preserve
 CHECKPOINT legacy bytes when appending; recurring prompt stays UTF-8.
+
+
+## 2026-09-29 Rail01 - continuous pond rails, validated through 07:09 UTC
+
+Heavy assets/evidence commit: 7226a7165ca21433f31f37f61286e0ee59cfa6c7.
+See COASTAL-RAILS.md and heavy Reference/WorldBuildingReviews/20260929-Rail01.
+Two saved rail meshes now use continuous 0.10 m square sweeps with smooth
+longitudinal face normals and crisp section corners; plain caps and slim posts
+finish two exposed ends. Existing paths, height and old post locations remain.
+No new runtime scripts, lights, materials or network streams. Existing plaster
+renderers request more lightmap space (scale 0.3 to 4), without global changes.
+Explicit editor mesh update retains asset GUIDs and prefab Inspector overrides.
+Never replay FinishRails or other one-time migrations over authored assets.
+
+Finish verified byte-identical floor, water, fascia and both player-guard meshes.
+Both platforms pass 3,828 triangles / 5,742 closed oriented edges / 349 top-path
+rays / 86 posts / 347 point-through spans / two finished ends, with exact visible
+colliders on layer 17 and separate unchanged player guards on layer 2. Pond:
+319 floor/standing and 194 submerged side rays. Garden: 3,024 supported vertices,
+223 approach samples at three heights, 35 sightlines. Compiled beacon regression:
+343 Android / 345 Windows assertions over 194 frames each. Explicit fixtures,
+not physical finger acceptance. Full normal-frame walker not repeated this pass.
+Bake: two maps, 219 probes, 177 receivers, 140 UV-overlap warnings (previous 142).
+Neither changed rail appears in the new warning list; remaining warnings persist.
+
+Normal SDK Android/Windows production and separate Android promenade inspection
+exports, compressed/uncompressed gates, processed audits and catalogs all exit 0.
+427 objects, 1,301 components, 29 unsynced programs plus one manual player stream.
+Android 1,930,471 bytes, CC510FE3D8B1E4F3E88E62BCF6AF0EDF71AD8153A67A9287DE1BFCE43BBC03FA.
+Windows 2,154,490 bytes, CAD8C0AC36815515B707CEDDD30E8AC56070757D267F112871CCC018CD8C6CDA.
+Inspection 1,932,906 bytes, C4E07524ED72CAA831EEE7D8B6800B2AA90C936815D7B135998CDFD52D55E8DC.
+Inspection starts on the existing western promenade, with NO temporary platform.
+Exact inspection restoration verified. SDK DynamicMaterials permutations checked
+against backup and initial clean scene before original scene order restored;
+no production scene churn remains. Android target restored. Earlier combined
+Windows scene/capture native shutdown defect is separate; this pass exits0.
+
+Quest initial launch and first follow-up showed Connecting. One ordinary cold
+relaunch then visibly rendered the continuous rail, terminal, water and fish in
+both eyes during the 07:06 observation. Root and independent critic inspected it.
+Fixed headset tilt/existing fallback avatar limit coverage. Six stationary log
+samples: 72-73 FPS, App 2.09-2.47 ms, Tear/Stale 0; not active/crowded performance.
+Production was hash-verified and visibly at normal arrival during 07:08, inspected
+at 07:09, and LEFT RUNNING. Battery 77%, AC, weak charger false, 40 C. Captures report
+zero matched Udon-error lines, not globally clean logs. Raw device media/logs
+remain ignored/private; curated evidence includes failed and successful attempts.
+
+Critic retains rail intervention and Windows/Android parity plus bounded Quest
+view. Full-world scores unchanged: 6.5 aesthetics / 8 navigation / 7 hangout / 6.5
+overall; >=8 each unmet. Existing upper-lookout joints are outside this pass.
+Next bounded pass: fix doubled/mirrored overlapping beacon labels (seen from
+actual east approach in Before and final renders), with correct front/back
+visibility and contrast. Preserve target interaction and architecture. Do not
+expand scope to a redesign. Other cliff/support shading and social comfort work
+remain on roadmap.
+
+Accepted Bird near feel, range, filters, inflation and complementary player hand
+pairs unchanged. Avatar click AND teleport gates remain OFF pending physical
+acceptance; physical gestures, comfort, client walking and multiplayer unverified.
+No upload, account/SDK/client patch or bypass. Use dedicated Quest extensively
+and replace loaded builds whenever useful under Dana's authorization. Missing
+hands/second client must not stall independent work. Continue coherent 30-60 minute
+passes every 2 hours in this chat, inherited permissions, meaningful-change-only
+notifications. Preserve CHECKPOINT legacy bytes; recurring prompt remains UTF-8.

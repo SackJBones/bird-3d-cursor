@@ -221,7 +221,9 @@ public partial class UnityCoastalWorldChecks : IProcessSceneWithReport
                 bool gardenInspection=GameObject.Find("04 Lower water and hidden lounge/Pond garden corner")!=null;
                 if(gardenInspection)p=new Vector3(5.1f,-1.97f,54);
                 bool supportInspection=GameObject.Find("04 Lower water and hidden lounge/Pond terrace support")!=null;
-                if(supportInspection)
+                var pondProfile=AssetDatabase.LoadAssetAtPath<BirdCoastalPondProfile>(BirdCoastalPondAuthoring.ProfilePath);
+                bool railInspection=pondProfile!=null&&pondProfile.railRevision>=1;
+                if(supportInspection&&!railInspection)
                 {
                     // Separate normal-SDK inspection only: a temporary supported
                     // external stance exposes the underside on the real Quest.
@@ -234,6 +236,7 @@ public partial class UnityCoastalWorldChecks : IProcessSceneWithReport
                     footing.GetComponent<Renderer>().sharedMaterial=AssetDatabase.LoadAssetAtPath<Material>(BirdCoastalWorldAuthoring.Folder+"/Materials/Plaster.mat");
                     Physics.SyncTransforms();
                 }
+                if(railInspection)p=new Vector3(-13.5f,-1.97f,44.2f);
                 Require(Physics.Raycast(p+Vector3.up,Vector3.down,out var floor,2,(1<<0)|(1<<2)|(1<<11),QueryTriggerInteraction.Ignore)&&floor.normal.y>.95f,"Inspection spawn has floor");
                 Require(!Physics.CheckCapsule(p+Vector3.up*.3f,p+Vector3.up*1.6f,.25f,(1<<0)|(1<<2)|(1<<11),QueryTriggerInteraction.Ignore),"Inspection spawn standing clearance");
                 var spawn=UnityEngine.Object.FindObjectOfType<VRCSceneDescriptor>().spawns[0];spawn.position=p;
@@ -241,6 +244,7 @@ public partial class UnityCoastalWorldChecks : IProcessSceneWithReport
                 if(fishInspection)inspectionDirection=new Vector3(-5,0,1);
                 if(gardenInspection)inspectionDirection=Vector3.forward;
                 if(supportInspection)inspectionDirection=new Vector3(-18,0,-38);
+                if(railInspection)inspectionDirection=new Vector3(7.5f,0,6.8f);
                 spawn.rotation=Quaternion.LookRotation(inspectionDirection);
                 EditorSceneManager.MarkSceneDirty(scene);EditorSceneManager.SaveScene(scene);inspectionScene=File.ReadAllBytes(BirdCoastalWorldAuthoring.ScenePath);
             }
