@@ -215,11 +215,13 @@ public partial class UnityCoastalWorldChecks : IProcessSceneWithReport
                 File.WriteAllBytes(Folder+"/vista-inspection-source-backup.unity",originalScene);
                 // A normal, separately named SDK export with only its initial spawn moved.
                 // Validate a supported standing location before the ordinary SDK validation.
-                Vector3 p=new Vector3(15,-1.97f,47);Physics.SyncTransforms();
+                bool fishInspection=UnityEngine.Object.FindObjectOfType<BirdPondSchool>()!=null;
+                Vector3 p=fishInspection?new Vector3(23.5f,-1.97f,53):new Vector3(15,-1.97f,47);Physics.SyncTransforms();
                 Require(Physics.Raycast(p+Vector3.up,Vector3.down,out var floor,2,(1<<0)|(1<<2)|(1<<11),QueryTriggerInteraction.Ignore)&&floor.normal.y>.95f,"Inspection spawn has floor");
                 Require(!Physics.CheckCapsule(p+Vector3.up*.3f,p+Vector3.up*1.6f,.25f,(1<<0)|(1<<2)|(1<<11),QueryTriggerInteraction.Ignore),"Inspection spawn standing clearance");
                 var spawn=UnityEngine.Object.FindObjectOfType<VRCSceneDescriptor>().spawns[0];spawn.position=p;
                 var inspectionDirection=GameObject.Find("04 Lower water and hidden lounge/Curved pond promenade")!=null?new Vector3(-9,0,15):new Vector3(115,0,173);
+                if(fishInspection)inspectionDirection=new Vector3(-5,0,1);
                 spawn.rotation=Quaternion.LookRotation(inspectionDirection);
                 EditorSceneManager.MarkSceneDirty(scene);EditorSceneManager.SaveScene(scene);inspectionScene=File.ReadAllBytes(BirdCoastalWorldAuthoring.ScenePath);
             }
@@ -276,7 +278,9 @@ public partial class UnityCoastalWorldChecks : IProcessSceneWithReport
         Require(beaconCount==0||beaconCount==5,"Travel network has exactly five authored destinations when present");
         int practiceCount=all.OfType<Transform>().Count(t=>t.name=="Finger tap practice");
         Require(practiceCount==0||practiceCount==1,"At most one read-only practice panel");
-        int expected=(beaconCount==0?18:28)+practiceCount;
+        int fishCount=all.OfType<Transform>().Count(t=>t.name=="Pond shoals");
+        Require(fishCount<=1,"At most one bounded cosmetic pond school");
+        int expected=(beaconCount==0?18:28)+practiceCount+fishCount;
         Require(programs.Length==expected,"Personal/social pipelines and any complete travel network survive SDK processing");
         var templates=all.OfType<VRCPlayerObject>().ToArray();
         Require(templates.Length==1,"One per-player presentation template");

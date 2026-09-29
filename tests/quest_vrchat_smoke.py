@@ -13,6 +13,7 @@ import re
 import struct
 import subprocess
 import time
+import uuid
 import zlib
 
 
@@ -125,8 +126,27 @@ def main():
         save("client.log", logs)
         report["matched_udon_error_lines"] = len(re.findall(
             r"(?im)^.*(?:UdonBehaviour.*exception|Udon runtime exception|An exception occurred during Udon execution|UdonBehaviour.*halted).*$", logs))
-        data = adb("exec-out", "screencap", "-p", binary=True)
-        report["png_dimensions"] = png_dimensions(data)
+        try:
+            data = adb("exec-out", "screencap", "-p", binary=True)
+            report["png_dimensions"] = png_dimensions(data)
+        except (ValueError, subprocess.CalledProcessError, subprocess.TimeoutExpired) as error:
+            # Some Wi-Fi exec-out captures end early despite a successful ADB
+            # exit. Retry once through an on-device file, preserving the failed
+            # observation and requiring the same complete PNG/CRC validation.
+            report["direct_capture_error"] = str(error)
+            temporary = "/data/local/tmp/bird-capture-" + uuid.uuid4().hex + ".png"
+            retry = args.out / "file-capture.png"
+            try:
+                adb("shell", "screencap", "-p", temporary)
+                save("capture-transfer.txt", adb("pull", temporary, str(retry)))
+                data = retry.read_bytes()
+                report["png_dimensions"] = png_dimensions(data)
+                report["capture_transport"] = "on-device file fallback"
+            finally:
+                try:
+                    adb("shell", "rm", "-f", temporary)
+                except Exception as cleanup_error:
+                    report["capture_cleanup_error"] = str(cleanup_error)
         (args.out / "headset.png").write_bytes(data)
         report["png_integrity_verified"] = True
         report["evidence_capture_complete"] = True

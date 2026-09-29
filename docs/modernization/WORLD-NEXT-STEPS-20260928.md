@@ -155,6 +155,25 @@ Rail shading, the abrupt west rail end/join and the unsupported-looking seaward
 overhang remain visible follow-ups. Physical clicks and multiplayer still need
 their own acceptance and must not block independent work.
 
+## Fish01 progress (2026-09-29)
+
+Four six-fish cosmetic shoals now replace the still diamond fish. They patrol
+the curved channel and gather around submerged local or remote logical Bird
+points, releasing on withdrawal or invalid/expired tracking. Each client runs
+its own bounded cosmetic simulation; no new synchronization stream is added.
+See [POND-FISH.md](POND-FISH.md), the newest checkpoint and curated Fish01 review
+for compiled tests, platform exports, actual Quest checks and remaining limits.
+The independent critic accepts the revised loose gathering, while retaining
+the 6.5 / 8 / 7 / 6.5 full-world scores. A first overlapping wreath was rejected.
+The shaders, fish mesh and materials are original editable assets.
+
+Next favor restrained planting and a useful stopping bay, including convincing
+support and refinement of the exposed west rail join. Preserve the accepted
+Bird geometry/dynamics, visual inflation and companion hand colors. Physical
+Bird attraction, pointer-finger clicks, real multiplayer and occupied-world
+Quest cost still require their own evidence. Do not hold independent world work
+for missing hands or a second client.
+
 ## Verbatim request
 
 > absolutely awesome. it feels like magic. in coming cycles, please "debounce" the obtainment of the bird so you have to physically leave the vicinity of the pedestal before returning there will disable it, just have the text reference returning here; it's currently too easy to end up in a random state of bird-enabled-vs-disabled and disabling bird is not a major activity here. please patch holes in the conversation pit, add some coast details and some faraway land to look at (use free assets that match this aesthetic if that's helpful), add plants, add a skybox, make the outer edge of the pond/fish area curved as well as the water pool itself, also curved, and have it extend around bit more of the complex, so the path that runs along it currently is continued in a winding way; add fish to the pond and make them boids that will make groups come toward any bird in the water; please make sure the cavern embedded in the cliff face where you spawn is indeed inside the rock at least to outside appearances, and I think since this is going so well the best way to do that is just to adjust the location/geometry of the cliff face rather than try to change the complex; add vertical-donut-shaped teleportation beacons you can select and use at a distance with the bird, they should highlight/visibly activate whenever someone "rolls over" them (that is, points-through them with their bird) and clicking them with the bird (using the pointer finger) should cause the player to jump next to the beacon (I'm excited for fun sightlines within the architecture that let you jump levels by getting in the right spot). please try to make the mid-range of motion more usable--right now the working volume is perfect, the mid-range is too touchy and it's very hard to get the bird to move in a controlled way that doesn't violently punch in and out when it's about a room or two's distance away (the range where the bird inflates visually is perfect though, please don't touch that), and investigate metaballs/metashapes (ovoids and cones seem very useful for this) plus marching cubes plus decimation plus baked lighting as a reach goal--the idea with those would be to add aesthetic organic-looking shells over the good work you've already done or will have done by that point, not to redesign the architecture. please note these down along with any plans you might have as to how to do them, and just do the normal cycle rhythm, adjusting plans as needed, don't bite off more than will be feasible in a half hour to an hour's work (which is, for you, probably 1-3 days' work for a person) at a time every 2 hours, I just want to make sure you know my vision so you don't run out of things to do. (very good point making sure other people can see your birds and trails. also probably colors should not always be the same for everyone, or we risk confusion. if there are other mechanistic or infrastructural things like that to address, do please continue prioritizing those & get functionality where it needs to be before indulging the more whimsical aspects of the above.) thanks so much for your work on this; I'm going to bed, see you in maybe a lot of cycles.

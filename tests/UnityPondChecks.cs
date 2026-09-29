@@ -9,6 +9,11 @@ using UnityEngine;
 
 public partial class UnityCoastalWorldChecks
 {
+    public static async void AddFish()
+    {
+        try{await BirdPondSchoolAuthoring.Add();Finish("coastal-fish-author",true,"Authored 24 cosmetic fish, shallow water/bed and one unsynced school with scene-local Bird binding.");}
+        catch(Exception e){Finish("coastal-fish-author",false,e.ToString());}
+    }
     public static void AddPond(){try{BirdCoastalPondAuthoring.Add();Finish("coastal-pond-author",true,"Authored curved basin and continuous winding promenade; existing stairs, rooms, beacons and Bird unchanged.");}catch(Exception e){Finish("coastal-pond-author",false,e.ToString());}}
     public static void UpdatePondMeshes(){try{BirdCoastalPondAuthoring.UpdateMeshes();Finish("coastal-pond-meshes",true,"Updated seven named pond meshes while retaining asset identities and authored prefab transforms.");}catch(Exception e){Finish("coastal-pond-meshes",false,e.ToString());}}
     public static void CheckPond()

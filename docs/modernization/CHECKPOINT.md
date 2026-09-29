@@ -2370,3 +2370,92 @@ must not stall independent work. Keep same-chat inherited permissions and every
 two hours; notify meaningful changes, completion, failure or required action,
 stay quiet when unchanged. Do not replay one-time pond/world/lighting migrations
 over authored assets. Keep both repositories committed and pushed without force.
+
+
+## 2026-09-29 Fish01 - Bird-responsive pond shoals
+
+Completed 2026-09-29 01:20 UTC. Heavy commit 37076d61dd8870cb305560ed50445c256c5a6ca5; curated evidence
+`Reference/PondFishReviews/20260929-Fish01` includes 28 images, final result/exit
+files, rejected Candidate01, timings, build hashes and sanitized device facts.
+Read `POND-FISH.md`. This is one bounded cosmetic fish pass, not completion of
+physical interaction, real multiplayer or the overall aesthetic target.
+
+Four six-fish shoals replace the sixteen still diamonds. Original 88-triangle
+fish, three pigment materials, shallow translucent water and an opaque bed are
+ordinary editable saved assets in PondSchool. One unsynced Udon simulates at
+10 Hz with frame interpolation, bounded speed/acceleration and no catch-up
+burst. It pauses beyond 100 m. Groups patrol the curved channel and approach
+valid submerged logical local/remote Bird points. Remote accepted rawPosition
+is used so observer interpolation cannot manufacture water contact. Dry land,
+above/below water, nonfinite, distant, expired, put-away and departed sources
+are ignored. Discovery uses supported spawned PlayerObjects, refreshed every
+two seconds and on joins/departures. No new stream or authoritative fish state;
+each client has cosmetic trajectories. Four groups need not service every
+simultaneous Bird. No new colliders/lights, no third-party art. The fish and bed
+add 2,352 triangles; focused pond geometry is 12,290. Existing architecture,
+Bird fitting/range/filtering, inflation, acquisition and hand colors unchanged.
+
+The first visual candidate formed an overlapping wreath. Critic review prompted
+cross-shoal separation, unequal wandering and depth variation; the revision is
+retained. Windows 03/04 match Android, and supported close view 06 is included.
+Remaining underwater depth cues are subtle, some silhouettes overlap, and an
+angular basin-color boundary shows in close view. Full-world critic scores stay
+6.5 aesthetics / 8 navigation / 7 hangout / 6.5 overall; >=8 each remains unmet.
+Rail occlusion/join shading, unsupported-looking seaward slab and restrained
+planting/stopping bays remain useful next passes. Static images do not establish
+perceived smoothness, physical Bird feel or real multiplayer.
+
+Both platform compiled-Udon fish checks pass 25,246 assertions / 297 frames,
+including two local targets, containment/speed, noisy-target retention, actual
+SDK-created remote clones with synthetic packets, stale data/silence/put-away,
+four remote visitors/eight submerged hands, departure, normal-frame interpolation
+and disable/re-enable. Approach mean distance: 7.253 -> 0.753 m. 100 synchronous
+eight-stimulus editor steps: Android 796.31 ms, Windows 845.92 ms; NOT Quest cost.
+220-step timings include assertions/yields (1237.76 / 1241.22 ms). Earlier fixture
+failures were manually advanced state vs unpublished renderer state and an erased
+Udon array-type mismatch; tests corrected, not deployed runtime fixes. The final
+four-visitor/close-camera extension changed only test code after Android export.
+Social regression: 41 assertions, Android318/Windows320 frames. Lighting: both
+167 receivers/eight renders. Android pond:319 support/clearance samples/nine
+renders. Existing 18-route walker not repeated because collision unchanged.
+Rebake: two non-directional maps,219 probes,131 UV-overlap warnings remain.
+Older combined Windows scene/capture shutdown defect remains unresolved and
+separate; focused checks and normal exporters pass exit0.
+
+Normal SDK exports, size gates, processed-scene audits and catalogs pass:
+- Android:1,848,959 bytes; SHA256 C8F5D0562CCD70027CAA3C3B6580E2A81180E675576055D1A1B663CACB967279.
+- Windows:2,065,940 bytes; SHA256 82294771847F5EB14121276B55A3E719B377CDEE44A6DACDB53C967B0D300778.
+- Android inspection:1,849,719 bytes; SHA256 9D702843531FA1DBE5AAB5A2C13E2C5EAB27CF8F32C009EC75513C8E2DF21502.
+399 objects/1,219 components/29 unsynced programs plus one manual per-player
+stream; no persistence/missing/project scripts. Android target restored.
+Inspection changes only initial supported/headroom-checked spawn near water;
+exact original scene restoration verified. Windows export subsequently permuted
+only DynamicMaterials. Verified identical membership/all other scene content,
+then restored original bytes after Android recheck. Unity-generated prefab blank
+YAML values retain Unity's trailing spaces; no handwritten whitespace issues.
+
+Actual Quest inspection at01:02 UTC shows fish in both eyes;01:06 capture has
+none in the fixed view, and01:15 shows a shoal farther around the pond. These
+sparse observations do not prove motion smoothness. Stationary inspection
+samples72-73FPS/72 target,zero tear/stale,App2.45-2.70ms; not active Bird or
+crowded-world performance. Wi-Fi direct screenshots intermittently failed PNG
+integrity/transport; helper now retries once through an on-device file, still
+validating PNG CRCs. One fault-injected fallback failed its Wi-Fi pull; later
+fault injection successfully exercised actual device file capture/pull/cleanup.
+Production transfer hash matches. First normal-arrival launch stuck Connecting
+through two checks; one normal cold relaunch recovered. Inspected01:19 stereo
+shows normal arrival,pedestal,beacon. Production BirdCoastalWorld_Fish01 is LEFT
+RUNNING. Battery76%,AC,weakchargerfalse,38C,no matched Udon errors (not globally
+clean logs). Existing fallback/error avatar remains. Raw device logs/screens
+stay private/ignored. No online upload, client patch or account changes.
+
+Avatar click AND teleport gates remain OFF pending physical validation. Actual
+submerged-hand attraction, click feel and real multiplayer remain unverified.
+Continue extensive Quest tests and replace its loaded build whenever useful,
+under Dana's explicit authorization. No hands/second client must not stall
+independent work. Next favor one restrained planting/stopping-bay/support/rail
+pass or supported functional validation, preserving accepted control and paired
+hand colors. Keep same-chat inherited permissions, every two hours, one coherent
+30-60 minute cycle, meaningful-change-only notification. Do not rerun one-time
+authoring migrations. CHECKPOINT has legacy mixed-encoding history: preserve
+historical bytes when appending; RECURRING-PROMPT is UTF-8.

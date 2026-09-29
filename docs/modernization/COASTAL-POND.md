@@ -80,3 +80,9 @@ without restoring their later-authored UV2 channels. This cycle caught that
 side effect in the asset diff, restored the exact baseline assets, and changed
 the fixture to restore and assert complete mesh bytes and refresh collider
 cooking. Intermediate exports made before restoration were never deployed.
+
+Fish01 later replaces the still diamonds with [Bird-responsive shoals](POND-FISH.md)
+and shallow translucent water over an opaque bed. Its inspection spawn is closer
+to the pond, with the same floor/headroom and exact-restoration checks. See the
+newest checkpoint for its rebake and current platform/device results; the Pond01
+counts above describe that earlier layout pass.

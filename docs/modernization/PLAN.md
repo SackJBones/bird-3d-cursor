@@ -34,7 +34,9 @@ setting, and use the ordinary SDK overlook inspection export for actual Quest
 views when unattended. Check the latest checkpoint for review and deployment
 results. The [curved pond workflow](COASTAL-POND.md) adds the next editable basin
 and winding promenade layer; check its latest validation before changing joins.
-Planting and responsive schooling fish remain separate bounded passes.
+The [pond shoals](POND-FISH.md) add a separate cosmetic response to local and
+remote logical points in the water. Check their latest validation/device status;
+planting remains a separate bounded pass.
 
 The [mid-range assessment](MID-RANGE-ASSESSMENT.md) rejects simply moving the
 center filter's full-effect distance closer: modest stationary benefit comes
