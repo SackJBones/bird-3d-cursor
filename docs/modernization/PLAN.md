@@ -11,6 +11,8 @@ Use `feature/vrchat-modernization` in both repositories. All maintained package 
 The latest underside prototype is described in [Pond terrace support](COASTAL-SUPPORT.md).
 Read the newest checkpoint for retained geometry and actual build/device evidence.
 The focused [pond rail finish](COASTAL-RAILS.md) follows that support pass.
+The [high-lookout rail finish](COASTAL-LOOKOUT-RAIL.md) carries its continuous
+square section around the existing lookout, preserving player guards and pointing.
 The [beacon label repair](BEACON-LABELS.md) makes the preview text readable from
 either side while retaining ring targeting and the existing architecture.
 

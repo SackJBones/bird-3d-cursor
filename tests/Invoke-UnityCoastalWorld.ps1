@@ -2,7 +2,7 @@ param(
  [Parameter(Mandatory=$true)][string]$UnityEditor,
  [Parameter(Mandatory=$true)][string]$ProjectPath,
  [ValidateSet('Android','Windows','Both')][string]$Platform='Android',
- [switch]$Create,[switch]$ReviseR05,[switch]$RefineR05,[switch]$RepairR06,[switch]$RefineRockR06,[switch]$AddBird,[switch]$AddSocial,[switch]$AddBeacons,[switch]$AddPractice,[switch]$PrepareLighting,[switch]$RefineLighting,[switch]$SmoothLightingJoins,[switch]$AddVista,[switch]$RefineVista,[switch]$UpdateVistaMeshes,[switch]$CheckVista,[switch]$AddPond,[switch]$UpdatePondMeshes,[switch]$CheckPond,[switch]$AddFish,[switch]$CheckFish,[switch]$AddGarden,[switch]$RefineGarden,[switch]$CheckGarden,[switch]$FixBeaconLabels,[switch]$CheckBeaconLabels,[switch]$FinishRails,[switch]$CheckRails,[switch]$SealPondBed,[switch]$AddSupport,[switch]$UpdateSupport,[switch]$CheckSupport,[switch]$BakeLighting,[switch]$CheckLighting,[switch]$CheckBird,[switch]$CheckSocial,[switch]$CheckBeacons,[switch]$Check,[switch]$Walk,[switch]$Build,[switch]$BuildVistaInspection
+ [switch]$Create,[switch]$ReviseR05,[switch]$RefineR05,[switch]$RepairR06,[switch]$RefineRockR06,[switch]$AddBird,[switch]$AddSocial,[switch]$AddBeacons,[switch]$AddPractice,[switch]$PrepareLighting,[switch]$RefineLighting,[switch]$SmoothLightingJoins,[switch]$AddVista,[switch]$RefineVista,[switch]$UpdateVistaMeshes,[switch]$CheckVista,[switch]$AddPond,[switch]$UpdatePondMeshes,[switch]$CheckPond,[switch]$AddFish,[switch]$CheckFish,[switch]$AddGarden,[switch]$RefineGarden,[switch]$CheckGarden,[switch]$FinishLookoutRail,[switch]$CheckLookoutRail,[switch]$FixBeaconLabels,[switch]$CheckBeaconLabels,[switch]$FinishRails,[switch]$CheckRails,[switch]$SealPondBed,[switch]$AddSupport,[switch]$UpdateSupport,[switch]$CheckSupport,[switch]$BakeLighting,[switch]$CheckLighting,[switch]$CheckBird,[switch]$CheckSocial,[switch]$CheckBeacons,[switch]$Check,[switch]$Walk,[switch]$Build,[switch]$BuildVistaInspection
 )
 $ErrorActionPreference='Stop'
 if($BuildVistaInspection -and $Platform -ne 'Android'){throw '-BuildVistaInspection requires -Platform Android.'}
@@ -18,6 +18,7 @@ Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityPondChecks.cs') -Destinati
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityGardenChecks.cs') -Destination $editor
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnitySupportChecks.cs') -Destination $editor
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityRailChecks.cs') -Destination $editor
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityLookoutRailChecks.cs') -Destination $editor
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityBeaconLabelChecks.cs') -Destination $editor
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'UnityWorldBundleChecks.cs') -Destination $editor
 $runtime=Join-Path $project 'Assets/BirdGenerated/Runtime'
@@ -74,6 +75,7 @@ foreach($target in $targets){
  if($UpdatePondMeshes){Invoke-Coastal 'UnityCoastalWorldChecks.UpdatePondMeshes' 'coastal-pond-meshes' $target;$UpdatePondMeshes=$false}
  if($FixBeaconLabels){Invoke-Coastal 'UnityCoastalWorldChecks.FixBeaconLabels' 'coastal-labels-fix' $target;$FixBeaconLabels=$false}
  if($CheckBeaconLabels){Invoke-Coastal 'UnityCoastalWorldChecks.CheckBeaconLabels' 'coastal-labels-check' $target}
+ if($FinishLookoutRail){Invoke-Coastal 'UnityCoastalWorldChecks.FinishLookoutRail' 'coastal-lookout-rail-finish' $target;$FinishLookoutRail=$false}
  if($FinishRails){Invoke-Coastal 'UnityCoastalWorldChecks.FinishRails' 'coastal-rails-finish' $target;$FinishRails=$false}
  if($SealPondBed){Invoke-Coastal 'UnityCoastalWorldChecks.SealPondBed' 'coastal-pond-bed-seal' $target;$SealPondBed=$false}
  if($AddSupport){Invoke-Coastal 'UnityCoastalWorldChecks.AddSupport' 'coastal-support-author' $target;$AddSupport=$false}
@@ -81,6 +83,7 @@ foreach($target in $targets){
  if($BakeLighting){Invoke-Coastal 'UnityCoastalWorldChecks.BakeLighting' 'coastal-lighting-bake' $target;$BakeLighting=$false}
  if($UpdateVistaMeshes){Invoke-Coastal 'UnityCoastalWorldChecks.UpdateVistaMeshes' 'coastal-vista-meshes' $target;$UpdateVistaMeshes=$false}
  if($CheckVista){Invoke-Coastal 'UnityVistaChecks.Run' 'coastal-vista-check' $target}
+ if($CheckLookoutRail){Invoke-Coastal 'UnityCoastalWorldChecks.CheckLookoutRail' 'coastal-lookout-rail-check' $target}
  if($CheckRails){Invoke-Coastal 'UnityCoastalWorldChecks.CheckRails' 'coastal-rails-check' $target}
  if($CheckSupport){Invoke-Coastal 'UnityCoastalWorldChecks.CheckSupport' 'coastal-support-check' $target}
  if($CheckGarden){Invoke-Coastal 'UnityCoastalWorldChecks.CheckGarden' 'coastal-garden-check' $target}

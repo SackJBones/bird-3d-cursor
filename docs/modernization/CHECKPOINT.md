@@ -2740,3 +2740,71 @@ hands/room tracking/second client must not stall independent development.
 Continue one coherent 30-60 minute pass every two hours in this chat with inherited
 permissions and meaningful-change-only notifications. Preserve historical
 CHECKPOINT bytes; recurring prompt remains UTF-8.
+
+## LookoutRail01 - continuous high-lookout rail (2026-09-29, device inspected 11:09 UTC)
+
+Heavy assets/evidence commit 33ed24798dc81e8a8d96fef59e20b94a1bb45ab9;
+Reference/WorldBuildingReviews/20260929-LookoutRail01. Read COASTAL-LOOKOUT-RAIL.md.
+One closed square sweep replaces 48 abutting top-rail boxes, retaining original
+0.13 m section, 1.05 m center height, all 48 posts/path positions, mesh GUID,
+placement and exact visible pointing proxy. 960 triangles versus 1,152 before.
+Separate player-boundary, walking slab and accepted pond-rail asset bytes remain
+unchanged. Only this renderer's lightmap override becomes 4 from 0.35; saved
+scene has no other change. Explicit later mesh updates preserve authored lighting.
+Never replay FinishLookoutRail or prior one-time migrations over authored work.
+No new renderer/material/runtime/light/network stream. Accepted Bird near feel,
+sphere/range/filtering/inflation, acquisition and complementary hand pairs remain.
+
+Both platforms pass 1,440 closed oriented edges, 192 top-path seam samples,
+48 posts/clear spans, original height/width/placement, UV2/unit normals and proxy
+checks. Existing pond checks plus exact default-builder geometry parity pass.
+Compiled Udon beacon checks pass 345 assertions each over 230 Android / 229
+Windows normal frames, including new lookout guard pushes on both player layers
+and the existing supported 27-palm return neighborhood. These use explicit
+fixtures, not physical finger input. No full walker repeated: routes/slab/guard
+unchanged. Bake: two maps, 219 probes, 137 UV-overlap warning objects; changed
+lookout rail absent from that list. Other warnings and lower-rim/roof mottling
+remain. Both platforms check 177 receivers/eight lighting views plus seven
+matched rail views. Views 04 and 06 are free diagnostic cameras.
+
+Normal SDK production/inspection exports, size gates, audits/catalogs exit 0:
+427 objects / 1,311 components / 29 unsynced Udon programs plus one manual
+per-player stream, no missing/project scripts or persistence.
+Android 1,943,004 bytes: A083ACCFB2F33A79168F17CBC513CF95DF2509C1A93581946DEE6C0358C6D4B5.
+Windows 2,167,221 bytes: D9F85B7D90D8D81FDEA18DDA22D05561C43CB63E2028999FE284D63FEC504AF6.
+Inspection 1,943,072 bytes: 8A190E5F63C36F168B2E02144380F56BDA6BBBD3CCDAB239C889333151C12032.
+Inspection uses existing high-lookout floor near the supported return stance,
+no temporary platform. Exact source restoration and both SDK DynamicMaterials
+permutations verified; exact post-bake order restored. Android target restored.
+
+QUEST: Initial 10:36 Meta dim-room tracking failure recovered by the 11:01 normal
+production launch/follow-up; actual world arrival rendered. Inspection renders
+at 11:05 and 11:06 in both eyes, root and critic inspected. Continuous visible
+foreground rail, square top/side faces and connected posts; no former gaps in
+that section. Fixed tilt and fallback avatar limit coverage; no whole-loop,
+motion, physical sightline, comfort or multiplayer acceptance. Late stationary
+samples: 72-73 FPS / 72 target, App 1.59-1.67 ms, tear/stale zero; not active or
+crowded-world performance. Zero matched Udon errors is not globally clean logs.
+The already installed Label01 inspection was separately hash-checked and
+normally relaunched: at 11:07 both reviewers see Water garden / Point through
+to highlight once, correctly oriented/readable in both eyes. This closes missing
+actual-client appearance for one approach only, not backface/occlusion/comfort.
+Latest LookoutRail01 production restored/hash-verified at 11:08; root inspected
+actual stereo normal arrival at 11:09 and LEFT IT RUNNING. Battery 77%, AC,
+weak charger false, 40 C. No boundary/tracking bypass, reboot, account change,
+client/SDK patch or online upload. Private raw media/logs remain ignored.
+
+Independent critic retains Android, Windows and bounded Quest appearance;
+whole-world 6.5 aesthetics / 8 navigation / 7 hangout / 6.5 overall, >=8 each
+still unmet. Next bounded pass: ONE near-cliff shoulder prototype with a few
+broad asymmetric rock planes, outside existing room/cavern clearance/routes;
+preserve enclosure/collision. Compare ordinary lookout/pond plus exterior,
+retain only if improved. Avoid repetitive rock noise or broad redesign.
+Physical hand/comfort/client walking/multiplayer remain unverified; avatar
+click AND teleport gates stay OFF pending physical acceptance. Missing hands,
+room tracking or a second client must not stall independent work. Continue
+extensive dedicated Quest validation/replacement under Dana's authorization,
+one coherent 30-60 minute cycle every two hours in this chat with inherited
+permissions and meaningful-change-only notifications. Preserve historical
+CHECKPOINT bytes and UTF-8 recurring prompt. Both repos are committed before
+normal non-force pushes; verify upstream synchronization at cycle completion.

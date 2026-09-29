@@ -136,6 +136,9 @@ public class UnityBeaconChecks : MonoBehaviour
             controller.enabled=false;guardProbe.layer=layer;guardProbe.transform.position=new Vector3(15.8f,1.05f,20);controller.enabled=true;Physics.SyncTransforms();
             for(int i=0;i<18;i++){controller.Move(new Vector3(.1f,-.02f,0));yield return null;}
             Require(guardProbe.transform.position.x<16.9f&&guardProbe.transform.position.x>16.4f,"Actual coast guard retains player containment on layer "+layer);
+            controller.enabled=false;guardProbe.transform.position=new Vector3(15.3f,21.05f,31);controller.enabled=true;Physics.SyncTransforms();
+            for(int i=0;i<18;i++){controller.Move(new Vector3(.1f,-.02f,0));yield return null;}
+            Require(guardProbe.transform.position.x<15.85f&&guardProbe.transform.position.x>15.6f,"Actual lookout guard retains player containment on layer "+layer);
         }
         DestroyImmediate(guardProbe);
         var clickChecks=PracticeScenarios(); while(clickChecks.MoveNext())yield return clickChecks.Current;

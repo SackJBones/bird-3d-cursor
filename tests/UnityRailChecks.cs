@@ -43,6 +43,14 @@ public partial class UnityCoastalWorldChecks
                 Require(renderer.sharedMaterial.name=="Plaster"&&renderer.scaleInLightmap==4,"Original matte material with focused bake density");
                 edges+=CheckClosedR06(mesh);triangles+=mesh.triangles.Length/3;
                 var segments=BirdCoastalPondAuthoring.RailSegments(p,pond);var locations=BirdCoastalRailMesh.Posts(segments);
+                // The configurable sweep must retain the already accepted pond output.
+                var generated=BirdCoastalRailMesh.Build(segments,p.floorHeight);
+                try
+                {
+                    var a=generated.vertices;var b=mesh.vertices;
+                    Require(generated.triangles.Select(i=>a[i]).SequenceEqual(mesh.triangles.Select(i=>b[i])),"Default sweep preserves saved pond triangle geometry");
+                }
+                finally{UnityEngine.Object.DestroyImmediate(generated);}
                 foreach(var segment in segments)
                 {
                     var mid=(segment[0]+segment[1])*.5f;var q=new Vector3(mid.x,p.floorHeight+1.2f,mid.y);

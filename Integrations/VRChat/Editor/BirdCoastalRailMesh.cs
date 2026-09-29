@@ -29,7 +29,11 @@ public static class BirdCoastalRailMesh
         return posts;
     }
     public static Mesh Build(List<Vector2[]> segments,float floor)
+    { return Build(segments,Posts(segments),floor,1.05f,.10f,.055f,1.06f); }
+
+    public static Mesh Build(List<Vector2[]> segments,List<Vector2> posts,float floor,float topCenter,float sectionWidth,float postWidth,float postHeight)
     {
+        if(sectionWidth<=0||postWidth<=0||postHeight<=0)throw new ArgumentException("Rail dimensions must be positive.");
         var v=new List<Vector3>();var normals=new List<Vector3>();var t=new List<int>();
         Action<Vector3,Vector3,Vector3,Vector3> quad=(a,b,c,d)=>{
             int k=v.Count;v.AddRange(new[]{a,b,c,d});var n=Vector3.Cross(b-a,c-a).normalized;
@@ -49,8 +53,9 @@ public static class BirdCoastalRailMesh
                 float denominator=Vector2.Dot(m,b);if(denominator<.8f)throw new Exception("Rail bend is too sharp for bounded square miter");
                 miters[i]=new Vector3(m.x,0,m.y)/denominator;
             }
-            Vector2[] section={new Vector2(-.05f,-.05f),new Vector2(-.05f,.05f),new Vector2(.05f,.05f),new Vector2(.05f,-.05f)};
-            Func<int,int,Vector3> corner=(i,j)=>new Vector3(points[i].x,floor+1.05f,points[i].y)+miters[i]*section[j].x+Vector3.up*section[j].y;
+            float half=sectionWidth*.5f;
+            Vector2[] section={new Vector2(-half,-half),new Vector2(-half,half),new Vector2(half,half),new Vector2(half,-half)};
+            Func<int,int,Vector3> corner=(i,j)=>new Vector3(points[i].x,floor+topCenter,points[i].y)+miters[i]*section[j].x+Vector3.up*section[j].y;
             for(int face=0;face<4;face++)
             {
                 int start=v.Count;int rings=closed?n+1:n;
@@ -67,9 +72,9 @@ public static class BirdCoastalRailMesh
                 quad(corner(n-1,3),corner(n-1,2),corner(n-1,1),corner(n-1,0));
             }
         }
-        foreach(var p in Posts(segments))
+        foreach(var p in posts)
         {
-            var c=new Vector3(p.x,floor+.53f,p.y);var size=new Vector3(.055f,1.06f,.055f);var box=new Vector3[8];
+            var c=new Vector3(p.x,floor+postHeight*.5f,p.y);var size=new Vector3(postWidth,postHeight,postWidth);var box=new Vector3[8];
             for(int i=0;i<8;i++)box[i]=c+Vector3.Scale(size*.5f,new Vector3((i&1)==0?-1:1,(i&2)==0?-1:1,(i&4)==0?-1:1));
             foreach(var f in new[]{new[]{0,2,3,1},new[]{4,5,7,6},new[]{0,4,6,2},new[]{1,3,7,5},new[]{2,6,7,3},new[]{0,1,5,4}})quad(box[f[0]],box[f[1]],box[f[2]],box[f[3]]);
         }

@@ -37,8 +37,9 @@ oblique/edge-on views, high return and arrival. Views 02-05 are free diagnostic
 cameras, not claimed supported visitor stances. Compiled beacon behavior checks
 and normal SDK exports remain separate from physical headset comfort.
 
-The separate normal SDK Android inspection now starts on the existing east pond
-walk facing the water beacon. Its source restoration is guarded; leave the Quest
-on the normal production arrival after inspection. See the latest checkpoint
+Label01's separate normal SDK Android inspection starts on the existing east
+pond walk facing the water beacon. Later inspections may use a different stance;
+consult the newest checkpoint. Source restoration is guarded; leave the Quest
+on normal production arrival after inspection. See the latest checkpoint
 and heavy `Reference/WorldBuildingReviews/20260929-Label01` for actual results,
 independent critique and device evidence. Raw device data remains private.

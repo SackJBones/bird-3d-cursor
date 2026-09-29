@@ -1,5 +1,19 @@
 # Quest development power settings
 
+Latest device state, **2026-09-29, inspected 11:09 UTC**: latest LookoutRail01
+production is hash-verified, visibly rendering normal arrival in actual Quest
+VRChat, and **left running**. Earlier dim-room failure recovered by a normal
+launch. Root and critic also inspected the lookout rail in both eyes and the
+prior Label01 water-garden label from its dedicated inspection stance. Production
+was restored afterward. Fixed tilt/fallback avatar remain; no physical hand,
+comfort, client walking or multiplayer acceptance. Avatar click AND teleport
+gates stay off. Battery 77%, AC, no weak-charger flag, 40 C. No boundary/tracking
+bypass or account change. See newest CHECKPOINT and heavy
+`Reference/WorldBuildingReviews/20260929-LookoutRail01` for sanitized results.
+Raw device media/logs stay private. This supersedes the blocked state below.
+
+Earlier device history follows.
+
 Latest device state, **2026-09-29 09:02 UTC**: Label01 production is installed
 and SHA256 verified, but **not confirmed loaded or running**. Quest shows Meta's
 "Finding position in room" / room-too-dim tracking dialog; no VRChat process
